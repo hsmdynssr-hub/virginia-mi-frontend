@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>تسجيل الدخول | Management Intelligence</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+
+  <main class="mi-login-page">
+    <section class="mi-login-shell">
+
+      <div class="mi-login-info">
+        <div class="mi-brand">
+          <div class="mi-logo">
+            <span class="mi-logo-bars"></span>
+          </div>
+
+          <div>
+            <h1>Odoo Virginia Management</h1>
+            <p>Intelligence Agent</p>
+          </div>
+        </div>
+
+        <div class="mi-hero-text">
+          <span class="mi-badge">منصة ذكاء الإدارة</span>
+
+          <h2>
+            حوّل بياناتك إلى
+            <strong>قرارات أفضل</strong>
+          </h2>
+
+          <p>
+            منصة ذكية لتحليل تقارير الإدارة وربطها ببيانات Odoo Virginia ,
+            تساعد الإدارة على متابعة المخزون والمبيعات والمشتريات والإنتاج
+            من خلال تقارير تنفيذية واضحة.
+          </p>
+        </div>
+
+        <div class="mi-benefits">
+          <div class="mi-benefit">
+            <span>📊</span>
+            <div>
+              <h3>تجميع التقارير في مكان واحد</h3>
+              <p>كل التقارير المهمة من مختلف الإدارات في واجهة واحدة.</p>
+            </div>
+          </div>
+
+          <div class="mi-benefit">
+            <span>⚡</span>
+            <div>
+              <h3>تحليل أسرع لاتخاذ القرار</h3>
+              <p>مؤشرات واضحة تساعد الإدارة على الفهم السريع.</p>
+            </div>
+          </div>
+
+          <div class="mi-benefit">
+            <span>🏭</span>
+            <div>
+              <h3>رؤية أوضح للتشغيل</h3>
+              <p>متابعة المخزون، الإنتاج، المبيعات، والمشتريات بدقة.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mi-mini-dashboard">
+          <div>
+            <small>التقارير النشطة</small>
+            <strong>2,450+</strong>
+          </div>
+          <div>
+            <small>دقة البيانات</small>
+            <strong>99.8%</strong>
+          </div>
+          <div>
+            <small>الوقت الموفّر</small>
+            <strong>1,250+</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="mi-login-panel">
+        <div class="mi-login-card">
+          <div class="mi-card-logo">
+            <div class="mi-logo small">
+              <span class="mi-logo-bars"></span>
+            </div>
+          </div>
+
+          <h2>تسجيل الدخول</h2>
+          <h2>Odoo Virginia Management</h2>
+          <p class="mi-login-subtitle">
+            سجّل دخولك للوصول إلى التقارير والتحليلات
+          </p>
+
+          <div class="mi-field">
+            <label for="username">اسم المستخدم</label>
+            <div class="mi-input-wrap">
+              <input id="username" autocomplete="username" placeholder="أدخل اسم المستخدم" />
+              <span>👤</span>
+            </div>
+          </div>
+
+          <div class="mi-field">
+            <label for="password">كلمة المرور</label>
+            <div class="mi-input-wrap">
+              <input id="password" type="password" autocomplete="current-password" placeholder="أدخل كلمة المرور" />
+              <span>🔒</span>
+            </div>
+          </div>
+
+          <div class="mi-login-options">
+            <label>
+              <input type="checkbox" checked />
+              تذكرني
+            </label>
+          </div>
+
+          <button id="loginBtn" class="mi-login-btn" onclick="login()">
+            دخول
+          </button>
+
+          <div id="loginMessage" class="mi-login-message"></div>
+
+          <div class="mi-secure-note">
+            🔐تسجيل الدخول آمن لمستخدمى فيرجينيا 
+                   Odoo agent ai - Virginia
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <footer class="mi-login-footer">
+      يدعم الإدارة التنفيذية في المتابعة واتخاذ القرار
+    </footer>
+  </main>
+
+  <script src="../js/api.js"></script>
+
+  <script>
+    async function login() {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const loginMessage = document.getElementById("loginMessage");
+      const loginBtn = document.getElementById("loginBtn");
+
+      loginMessage.innerHTML = "";
+
+      if (!username || !password) {
+        loginMessage.innerHTML = "من فضلك أدخل اسم المستخدم وكلمة المرور";
+        return;
+      }
+
+      try {
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = "جاري الدخول...";
+
+        const response = await apiPost("/auth/login", {
+          username,
+          password
+        });
+
+        if (!response.success) {
+          loginMessage.innerHTML = "بيانات الدخول غير صحيحة";
+          return;
+        }
+
+        localStorage.setItem("token", response.token);
+        localStorage.setItem("user", JSON.stringify(response.user));
+
+        window.location.href = "../dashboard/index.html";
+      } catch (error) {
+        console.error(error);
+        loginMessage.innerHTML = "حدث خطأ أثناء تسجيل الدخول";
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = "دخول";
+      }
+    }
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        login();
+      }
+    });
+  </script>
+
+</body>
+</html>

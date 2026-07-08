@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Customer RFM</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+
+  <script>
+    renderLayout("RFM Segmentation", "تقسيم العملاء حسب حداثة الشراء والتكرار والقيمة", "customer-rfm", `<div id="reportArea"></div>`);
+
+    async function loadReport() {
+      try {
+        showLoading();
+
+        const report = await apiGet("/customer/rfm", getFilters());
+        const data = report.data || {};
+        const summary = data.summary || {};
+        const rows = data.customers || [];
+        const insights = data.insights || [];
+        const segmentCounts = summary.segmentCounts || {};
+
+        document.getElementById("reportArea").innerHTML = `
+          ${renderKpis([
+            kpiCard("عدد العملاء", summary.customersCount, "عدد العملاء داخل RFM."),
+            kpiCard("Champions", segmentCounts.CHAMPION || 0, "أفضل العملاء: حديثون ومتكررون وعالي القيمة."),
+            kpiCard("At Risk", segmentCounts.AT_RISK_HIGH_VALUE || 0, "عملاء عالي القيمة لكن لم يشتروا حديثًا."),
+            kpiCard("Lost/Sleeping", segmentCounts.LOST_OR_SLEEPING || 0, "عملاء ضعيفو النشاط.")
+          ])}
+
+          ${renderPanel("التحليل", `
+            <div class="analysis-box">
+              ${insights.map((item) => `<p>${item}</p>`).join("")}
+            </div>
+          `)}
+
+          ${renderPanel("جدول RFM", renderTable(
+            [
+              { key: "customerName", label: "العميل", hint: "اسم العميل." },
+              { key: "channelType", label: "القناة", hint: "نوع قناة العميل." },
+              { key: "totalOrdersCount", label: "عدد الطلبات", hint: "تكرار الشراء." },
+              { key: "totalAmount", label: "القيمة", hint: "إجمالي مشتريات العميل." },
+              { key: "recencyDays", label: "منذ آخر شراء", hint: "عدد الأيام منذ آخر عملية شراء." },
+              { key: "recencyScore", label: "R", hint: "Recency Score." },
+              { key: "frequencyScore", label: "F", hint: "Frequency Score." },
+              { key: "monetaryScore", label: "M", hint: "Monetary Score." },
+              { key: "rfmScore", label: "RFM", hint: "النتيجة المركبة." },
+              { key: "segment", label: "Segment", hint: "تصنيف العميل." }
+            ],
+            rows
+          ))}
+        `;
+      } catch (error) {
+        showError(error);
+      }
+    }
+
+    document.getElementById("loadBtn").addEventListener("click", loadReport);
+    document.getElementById("companySelect").addEventListener("change", loadReport);
+    loadReport();
+  </script>
+</body>
+</html>

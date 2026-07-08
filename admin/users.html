@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>إدارة المستخدمين</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+<script src="../js/api.js"></script>
+<script src="../js/layout.js"></script>
+
+<script>
+renderLayout(
+  "إدارة المستخدمين",
+  "إنشاء مستخدم وربطه بأكثر من دور",
+  "admin-users",
+  `
+    <div class="admin-users-hero">
+      <div>
+        <h3>مركز التحكم في المستخدمين</h3>
+        <p>يمكن ربط المستخدم بأكثر من دور: مخازن + مشتريات + POS.</p>
+      </div>
+      <div class="admin-user-stats">
+        <div><strong id="totalUsers">0</strong><span>مستخدم</span></div>
+        <div><strong id="activeUsers">0</strong><span>نشط</span></div>
+        <div><strong id="disabledUsers">0</strong><span>موقوف</span></div>
+      </div>
+    </div>
+
+    <div class="panel admin-form-panel">
+      <h3 id="formTitle">إضافة مستخدم جديد</h3>
+
+      <div class="user-form-grid">
+        <input id="userId" type="hidden" />
+        <input id="username" placeholder="اسم المستخدم" />
+        <input id="fullName" placeholder="الاسم الكامل" />
+        <input id="password" type="password" placeholder="كلمة المرور" />
+
+        <button class="primary-btn" onclick="saveUser()">حفظ المستخدم</button>
+        <button class="export-btn" onclick="resetForm()">تفريغ</button>
+      </div>
+
+      <div class="roles-box">
+        <h4>الأدوار المسموحة</h4>
+        <div id="rolesCheckboxes" class="roles-checkbox-grid"></div>
+      </div>
+      <div class="roles-box">
+        <h4>الشركات المسموحة</h4>
+        <p class="muted-text">اختر الشركات التي يستطيع المستخدم رؤية بياناتها.</p>
+        <div id="companiesCheckboxes" class="roles-checkbox-grid"></div>
+       </div>
+       <div class="roles-box">
+       <h4>فروع POS المسموحة</h4>
+       <p class="muted-text">اختر المعارض / الفروع التي يستطيع المستخدم رؤيتها داخل تقارير POS.</p>
+       <div id="posBranchesCheckboxes" class="roles-checkbox-grid"></div>
+       </div>
+      </div>
+
+    <div class="panel">
+      <h3>قائمة المستخدمين</h3>
+      <div id="usersCards" class="users-card-grid"></div>
+    </div>
+  `
+);
+
+let roles = [];
+let users = [];
+let companyCatalog = [];
+let posBranchCatalogByCompany = {};
+
+
+async function loadRoles() {
+  const response = await apiGet("/roles");
+  roles = response.data || [];
+
+  document.getElementById("rolesCheckboxes").innerHTML = roles.map(role => `
+    <label class="permission-item">
+      <input type="checkbox" class="role-check" value="${role.id}">
+      ${role.name}
+    </label>
+  `).join("");
+}
+
+async function loadUsers() {
+  const response = await apiGet("/users");
+  users = response.data || [];
+
+  document.getElementById("totalUsers").innerText = users.length;
+  document.getElementById("activeUsers").innerText = users.filter(u => u.is_active).length;
+  document.getElementById("disabledUsers").innerText = users.filter(u => !u.is_active).length;
+
+  renderUsers();
+}
+
+function renderUsers() {
+  document.getElementById("usersCards").innerHTML = users.map(user => `
+    <div class="user-card ${user.is_active ? "" : "disabled-user"}">
+      <div class="user-avatar">${(user.full_name || user.username || "?").slice(0, 1).toUpperCase()}</div>
+
+      <div class="user-info">
+        <h4>${user.full_name || "-"}</h4>
+        <p>@${user.username}</p>
+        <span class="role-chip">${user.role_name || "متعدد الأدوار"}</span>
+        <span class="status-chip ${user.is_active ? "active" : "inactive"}">
+          ${user.is_active ? "نشط" : "موقوف"}
+        </span>
+      </div>
+
+      <div class="user-actions">
+        <button onclick="editUser(${user.id})">تعديل</button>
+        <button onclick="changePassword(${user.id})">كلمة المرور</button>
+        <button onclick="toggleUser(${user.id}, ${user.is_active})">
+          ${user.is_active ? "تعطيل" : "تفعيل"}
+        </button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function getSelectedRoleIds() {
+  return Array.from(document.querySelectorAll(".role-check:checked"))
+    .map(input => Number(input.value));
+}
+
+function setSelectedRoleIds(roleIds = []) {
+  document.querySelectorAll(".role-check").forEach(input => {
+    input.checked = roleIds.includes(Number(input.value));
+  });
+}
+
+async function loadCompanyCatalog() {
+  const response = await apiGet("/company-access/catalog");
+
+  companyCatalog = response.data || [];
+
+  document.getElementById("companiesCheckboxes").innerHTML =
+    companyCatalog.map(company => `
+      <label class="permission-item">
+        <input type="checkbox" class="company-check" value="${company.companyId}">
+        ${company.companyName}
+      </label>
+    `).join("");
+}
+
+function getSelectedCompanyIds() {
+  return Array.from(document.querySelectorAll(".company-check:checked"))
+    .map(input => Number(input.value));
+}
+
+function setSelectedCompanyIds(companyIds = []) {
+  document.querySelectorAll(".company-check").forEach(input => {
+    input.checked = companyIds.includes(Number(input.value));
+  });
+}
+
+async function saveUser() {
+  const id = document.getElementById("userId").value;
+  const username = document.getElementById("username").value.trim();
+  const fullName = document.getElementById("fullName").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  const roleIds = getSelectedRoleIds();
+  const companyIds = getSelectedCompanyIds();
+  const selectedBranchesByCompany = getSelectedPosBranchesByCompany();
+
+  if (!id && (!username || !password)) {
+    alert("اسم المستخدم وكلمة المرور مطلوبين");
+    return;
+  }
+
+  if (!roleIds.length) {
+    alert("اختر دور واحد على الأقل");
+    return;
+  }
+
+  if (!companyIds.length) {
+    alert("اختر شركة واحدة على الأقل");
+    return;
+  }
+
+  let userId = Number(id);
+
+  if (id) {
+    const updateResponse = await apiPatch(`/users/${id}`, {
+      fullName,
+      role: "user"
+    });
+
+    if (!updateResponse.success) {
+      alert(updateResponse.message || "فشل تعديل المستخدم");
+      return;
+    }
+  } else {
+    const createResponse = await apiPost("/users", {
+      username,
+      fullName,
+      password,
+      role: "user"
+    });
+
+    if (!createResponse.success) {
+      alert(createResponse.message || "فشل إنشاء المستخدم");
+      return;
+    }
+
+    userId = Number(createResponse.data.id);
+  }
+
+  const rolesResponse = await apiPut(`/users/${userId}/roles`, {
+    roleIds
+  });
+
+  if (!rolesResponse.success) {
+    alert(rolesResponse.message || "فشل حفظ أدوار المستخدم");
+    return;
+  }
+
+  const companiesResponse = await apiPut(`/company-access/users/${userId}`, {
+    companyIds
+  });
+
+  if (!companiesResponse.success) {
+    alert(companiesResponse.message || "فشل حفظ شركات المستخدم");
+    return;
+  }
+  for (const company of companyCatalog) {
+  const companyId = Number(company.companyId);
+
+  const branches =
+    selectedBranchesByCompany[companyId] || [];
+
+  const branchResponse = await apiPut(
+    `/pos-branch-access/users/${userId}`,
+    {
+      companyId,
+      branches
+    }
+  );
+
+  if (!branchResponse.success) {
+    alert(branchResponse.message || `فشل حفظ فروع POS لشركة ${company.companyName}`);
+    return;
+  }
+}
+
+  alert("تم حفظ المستخدم والصلاحيات والشركات بنجاح");
+
+  resetForm();
+  await loadUsers();
+}
+async function loadPosBranchCatalog() {
+  posBranchCatalogByCompany = {};
+
+  for (const company of companyCatalog) {
+    const response = await apiGet("/pos-branch-access/catalog", {
+      companyId: company.companyId
+    });
+
+    posBranchCatalogByCompany[company.companyId] = response.data || [];
+  }
+
+  renderPosBranchCheckboxes();
+}
+
+function renderPosBranchCheckboxes() {
+  const container = document.getElementById("posBranchesCheckboxes");
+  if (!container) return;
+
+  container.innerHTML = companyCatalog.map(company => {
+    const branches = posBranchCatalogByCompany[company.companyId] || [];
+
+    if (!branches.length) {
+      return `
+        <div class="permission-group-block">
+          <h5>${company.companyName}</h5>
+          <p class="muted-text">لا توجد فروع POS لهذه الشركة</p>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="permission-group-block">
+        <h5>${company.companyName}</h5>
+
+        ${branches.map(branch => `
+          <label class="permission-item">
+            <input
+              type="checkbox"
+              class="pos-branch-check"
+              data-company-id="${company.companyId}"
+              value="${branch.branchCode}"
+            >
+            ${branch.branchName}
+          </label>
+        `).join("")}
+      </div>
+    `;
+  }).join("");
+}
+
+function findBranchInCatalog(companyId, branchCode) {
+  const branches = posBranchCatalogByCompany[companyId] || [];
+
+  return branches.find(branch =>
+    String(branch.branchCode) === String(branchCode)
+  );
+}
+
+function getSelectedPosBranchesByCompany() {
+  const result = {};
+
+  document.querySelectorAll(".pos-branch-check:checked").forEach(input => {
+    const companyId = Number(input.dataset.companyId);
+    const branchCode = input.value;
+
+    const branch = findBranchInCatalog(companyId, branchCode);
+
+    if (!branch) return;
+
+    if (!result[companyId]) {
+      result[companyId] = [];
+    }
+
+    result[companyId].push({
+      branchCode: branch.branchCode,
+      branchName: branch.branchName,
+      sourceLocationId: branch.sourceLocationId
+    });
+  });
+
+  return result;
+}
+
+function setSelectedPosBranches(rows = []) {
+  document.querySelectorAll(".pos-branch-check").forEach(input => {
+    const companyId = Number(input.dataset.companyId);
+
+    input.checked = rows.some(row =>
+      Number(row.companyId) === companyId &&
+      String(row.branchCode) === String(input.value)
+    );
+  });
+}
+
+function clearSelectedPosBranches() {
+  document.querySelectorAll(".pos-branch-check").forEach(input => {
+    input.checked = false;
+  });
+}
+
+
+async function editUser(id) {
+  const user = users.find(u => u.id === id);
+  if (!user) return;
+
+  document.getElementById("formTitle").innerText = "تعديل المستخدم";
+  document.getElementById("userId").value = user.id;
+  document.getElementById("username").value = user.username;
+  document.getElementById("username").disabled = true;
+  document.getElementById("fullName").value = user.full_name || "";
+  document.getElementById("password").value = "";
+  document.getElementById("password").placeholder = "اتركها فارغة";
+
+  const response = await apiGet(`/users/${id}/roles`);
+  setSelectedRoleIds(response.data || []);
+  const companyResponse = await apiGet(`/company-access/users/${id}`);
+setSelectedCompanyIds(
+  (companyResponse.data || []).map(item => Number(item.companyId))
+);
+const branchResponse = await apiGet(`/pos-branch-access/users/${id}`);
+
+setSelectedPosBranches(branchResponse.data || []);
+}
+
+async function changePassword(id) {
+  const password = prompt("اكتب كلمة المرور الجديدة:");
+  if (!password) return;
+
+  await apiPatch(`/users/${id}/password`, { password });
+  alert("تم تغيير كلمة المرور");
+}
+
+async function toggleUser(id, isActive) {
+  await apiPatch(`/users/${id}`, {
+    isActive: !isActive
+  });
+
+  await loadUsers();
+}
+
+function resetForm() {
+  document.getElementById("formTitle").innerText = "إضافة مستخدم جديد";
+  document.getElementById("userId").value = "";
+  document.getElementById("username").value = "";
+  document.getElementById("username").disabled = false;
+  document.getElementById("fullName").value = "";
+  document.getElementById("password").value = "";
+  document.getElementById("password").placeholder = "كلمة المرور";
+  setSelectedRoleIds([]);
+  setSelectedCompanyIds([]);
+  clearSelectedPosBranches();
+}
+
+async function init() {
+  await loadRoles();
+  await loadCompanyCatalog();
+  await loadPosBranchCatalog();
+  await loadUsers();
+}
+
+init();
+</script>
+</body>
+</html>

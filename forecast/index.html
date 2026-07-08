@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Forecast Reports</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+
+  <script>
+    renderLayout(
+      "تقارير التارجت / Forecast",
+      "كل أدوات التارجت والتخطيط والإنجاز في مكان واحد",
+      "forecast",
+      `
+        <div class="reports-grid">
+          <a class="report-card" href="./products.html">
+            <span class="page-pill">Products</span>
+            <h3>منتجات التارجت</h3>
+            <p>
+              عرض المنتجات المتاحة للتارجت والتخطيط ومراجعة بيانات المنتجات
+              قبل بناء التوقعات.
+            </p>
+          </a>
+
+          <a class="report-card" href="./targets.html">
+            <span class="page-pill">Target Setup</span>
+            <h3>إدارة التارجت</h3>
+            <p>
+              تحميل قالب Excel، رفع التارجت، اختيار المخازن، وتحديد طريقة خصم
+              رصيد المنتج التام والخامات.
+            </p>
+          </a>
+
+          <a class="report-card" href="./target-report.html">
+            <span class="page-pill">Target Report</span>
+            <h3>تقرير التارجت</h3>
+            <p>
+              تحليل التارجت بعد رفعه: الاحتياجات، العجز، المخزون، الخامات،
+              والتوصيات الإدارية.
+            </p>
+          </a>
+        </div>
+      `
+    );
+  </script>
+</body>
+</html>

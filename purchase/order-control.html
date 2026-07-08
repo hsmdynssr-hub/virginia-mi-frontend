@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Purchase Order Control</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+
+  <script src="../js/core/formatters.js"></script>
+  <script src="../js/core/report-widgets.js"></script>
+  <script src="../js/core/report-page.js"></script>
+
+  <script>
+    createReportPage({
+      title: "متابعة أوامر الشراء",
+      subtitle: "الأوامر تحت الاعتماد، المتأخرة، وآخر تعديل",
+      activePage: "purchase-order-control",
+      endpoint: "/purchase/order-control",
+
+      extraFiltersHtml: `
+        <div class="panel">
+          <h3>إعدادات التقرير</h3>
+          <div class="filters">
+            <input id="approvalDelayDays" type="number" value="2" placeholder="تأخير الاعتماد بالأيام" />
+          </div>
+        </div>
+      `,
+
+      getExtraParams() {
+        return {
+          approvalDelayDays: document.getElementById("approvalDelayDays").value || 2
+        };
+      },
+
+      bindExtraEvents(loadReport) {
+        document.getElementById("approvalDelayDays").addEventListener("change", loadReport);
+      },
+
+      kpis: [
+        {
+          label: "إجمالي الأوامر",
+          hint: "عدد أوامر الشراء في الفترة.",
+          value: (s) => s.totalOrders
+        },
+        {
+          label: "تحت الاعتماد",
+          hint: "أوامر شراء Draft.",
+          value: (s) => s.draftOrdersCount
+        },
+        {
+          label: "متأخر في الاعتماد",
+          hint: "أوامر لم تعتمد وتجاوزت حد التأخير.",
+          value: (s) => s.delayedApprovalOrdersCount
+        },
+        {
+          label: "قيمة المتأخر",
+          hint: "إجمالي قيمة أوامر الشراء المتأخرة في الاعتماد.",
+          value: (s) => formatMoney(s.delayedApprovalValue)
+        }
+      ],
+
+      tables: [
+        {
+          title: "الأوامر المتأخرة في الاعتماد",
+          rows: (data) => data.delayedApprovalOrders || [],
+          columns: [
+            { key: "name", label: "أمر الشراء" },
+            { key: "vendorName", label: "المورد" },
+            { key: "buyerName", label: "المسؤول" },
+            { key: "state", label: "الحالة", format: (v) => stateBadge(v) },
+            { key: "amountTotal", label: "القيمة", format: (v) => formatMoney(v) },
+            { key: "dateOrder", label: "تاريخ الأمر", format: (v) => formatDate(v) },
+            { key: "approvalDelayDays", label: "أيام التأخير" },
+            { key: "writeUserName", label: "آخر تعديل بواسطة" },
+            { key: "writeDate", label: "تاريخ آخر تعديل", format: (v) => formatDate(v) }
+          ]
+        },
+        {
+          title: "كل أوامر الشراء",
+          rows: (data) => data.orders || [],
+          columns: [
+            { key: "name", label: "أمر الشراء" },
+            { key: "vendorName", label: "المورد" },
+            { key: "buyerName", label: "المسؤول" },
+            { key: "state", label: "الحالة", format: (v) => stateBadge(v) },
+            { key: "amountTotal", label: "القيمة", format: (v) => formatMoney(v) },
+            { key: "dateOrder", label: "تاريخ الأمر", format: (v) => formatDate(v) },
+            { key: "dateApprove", label: "تاريخ الاعتماد", format: (v) => formatDate(v) },
+            { key: "approvalDelayDays", label: "أيام الاعتماد" }
+          ],
+          limit: 300
+        }
+      ]
+    });
+  </script>
+</body>
+</html>

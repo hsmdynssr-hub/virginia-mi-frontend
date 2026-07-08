@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Executive Dashboard</title>
+  <link rel="stylesheet" href="../css/style.css" />
+
+  <style>
+    .dashboard-hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: 28px;
+      padding: 34px 36px;
+      margin-bottom: 26px;
+      color: #ffffff;
+      background:
+        radial-gradient(circle at top left, rgba(20, 184, 166, 0.35), transparent 34%),
+        linear-gradient(135deg, #082f49 0%, #0f172a 58%, #111827 100%);
+      box-shadow: 0 22px 50px rgba(15, 23, 42, 0.18);
+    }
+
+    .dashboard-hero::after {
+      content: "";
+      position: absolute;
+      inset-inline-start: -70px;
+      top: -80px;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: rgba(59, 130, 246, 0.25);
+    }
+
+    .dashboard-hero-inner {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .dashboard-eyebrow {
+      display: inline-flex;
+      width: fit-content;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+
+    .dashboard-hero h2 {
+      margin: 0 0 10px;
+      font-size: 32px;
+      line-height: 1.25;
+      letter-spacing: -0.5px;
+    }
+
+    .dashboard-hero p {
+      margin: 0;
+      max-width: 760px;
+      color: rgba(255, 255, 255, 0.82);
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .dashboard-stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(120px, 1fr));
+      gap: 12px;
+    }
+
+    .dashboard-stat {
+      border-radius: 20px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(10px);
+    }
+
+    .dashboard-stat span {
+      display: block;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .dashboard-stat strong {
+      display: block;
+      color: #ffffff;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .dashboard-section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 18px 0;
+    }
+
+    .dashboard-section-title h3 {
+      margin: 0;
+      font-size: 20px;
+      color: #0f172a;
+    }
+
+    .dashboard-section-title p {
+      margin: 0;
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .dashboard-modules-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(260px, 1fr));
+      gap: 18px;
+    }
+
+    .dashboard-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 315px;
+      padding: 22px;
+      border-radius: 26px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.92));
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.13);
+      border-color: rgba(37, 99, 235, 0.28);
+    }
+
+    .dashboard-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .dashboard-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      font-size: 26px;
+      background: #eff6ff;
+      box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.08);
+    }
+
+    .dashboard-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 76px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: #ecfeff;
+      color: #0f766e;
+      font-size: 12px;
+      font-weight: 900;
+      border: 1px solid rgba(20, 184, 166, 0.16);
+    }
+
+    .dashboard-card h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      color: #0f172a;
+    }
+
+    .dashboard-card p {
+      margin: 0 0 18px;
+      min-height: 54px;
+      color: #64748b;
+      line-height: 1.7;
+      font-size: 13px;
+    }
+
+    .dashboard-module-main-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: fit-content;
+      margin-bottom: 14px;
+      padding: 9px 13px;
+      border-radius: 12px;
+      background: #0f172a;
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .dashboard-report-links {
+      display: grid;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .dashboard-report-links a,
+    .dashboard-report-links .disabled-report {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 13px;
+      background: #f1f5f9;
+      color: #0f172a;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 850;
+      transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+    }
+
+    .dashboard-report-links a::before {
+      content: "↗";
+      color: #2563eb;
+      font-weight: 900;
+    }
+
+    .dashboard-report-links a:hover {
+      background: linear-gradient(135deg, #2563eb, #0f766e);
+      color: #ffffff;
+      transform: translateX(-2px);
+    }
+
+    .dashboard-report-links a:hover::before {
+      color: #ffffff;
+    }
+
+    .dashboard-report-links .disabled-report {
+      opacity: 0.58;
+      cursor: not-allowed;
+    }
+
+    .dashboard-report-links .disabled-report::before {
+      content: "⏳";
+    }
+
+    @media (max-width: 1200px) {
+      .dashboard-modules-grid {
+        grid-template-columns: repeat(2, minmax(260px, 1fr));
+      }
+
+      .dashboard-hero-inner {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .dashboard-modules-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-hero {
+        padding: 24px;
+      }
+
+      .dashboard-hero h2 {
+        font-size: 24px;
+      }
+
+      .dashboard-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+
+  <script>
+    const DASHBOARD_MODULES = [
+      {
+        title: "ذكاء الفروع",
+        icon: "🏬",
+        description: "مبيعات الفروع، المخزون، الجرد اللحظي، واحتياجات إعادة الطلب.",
+        indexPage: "branches",
+        indexHref: "../branches/index.html",
+        reports: [
+          {
+            page: "branches-sales",
+            title: "مبيعات الفروع",
+            href: "../branches/sales.html"
+          },
+          {
+            page: "branches-stock",
+            title: "مخزون الفروع",
+            href: "../branches/stock.html"
+          },
+          {
+            page: "branches-inventory-count",
+            title: "جرد الفرع اللحظي",
+            href: "../branches/inventory-count.html"
+          },
+          {
+            page: "branches-replenishment",
+            title: "احتياجات الفروع وإعادة الطلب",
+            href: "../branches/replenishment.html"
+          },
+          {
+            page: "branches-comparison",
+            title: "مقارنة الفروع",
+            href: "../branches/comparison.html",
+            disabled: true
+          }
+        ]
+      },
+
+      {
+        title: "نقاط البيع",
+        icon: "🧾",
+        description: "نقاط البيع، الكاشير، المعارض، ساعات الذروة،.",
+        indexPage: "pos",
+        indexHref: "../pos/index.html",
+        reports: [
+          {
+            page: "pos-summary",
+            title: "ملخص نقاط البيع",
+            href: "../pos/summary.html"
+          },
+          {
+            page: "pos-branch-sales",
+            title: "تحليل أداء المعارض",
+            href: "../pos/branch-sales.html"
+          },
+          {
+            page: "pos-cashiers",
+            title: "تحليل الكاشيرات",
+            href: "../pos/cashiers.html"
+          },
+          {
+            page: "pos-peak-hours",
+            title: "تحليل ساعات البيع",
+            href: "../pos/peak-hours.html"
+          }
+        ]
+      },
+
+      {
+        title: "العملاء",
+        icon: "👥",
+        description: "أرقام عملاء نقاط البيع، خدمة العملاء، رسائل التقييم، ومتابعة العملاء غير الراضين.",
+        indexPage: "customer",
+        indexHref: "../customer/index.html",
+        reports: [
+          {
+            page: "customer-pos-phones",
+            title: "أرقام عملاء نقاط البيع",
+            href: "../customer/pos-phones.html"
+          },
+          {
+            page: "customer-service-pos-review",
+            title: "مراجعة خدمات نقاط البيع",
+            href: "../customer/service-pos-review.html"
+          }
+        ,
+          {
+            page: "customer-review-sms-queue",
+            title: "تشغيل رسائل تقييم العملاء",
+            href: "../customer/review-sms-queue.html"
+          },
+          {
+            page: "customer-review-followups",
+            title: "متابعة العملاء الغاضبين",
+            href: "../customer/review-followups.html"
+          },
+          {
+            page: "customer-review-sms-dashboard",
+            title: "لوحة إعدادات رسائل التقييم",
+            href: "../customer/review-sms-dashboard.html"
+          },
+          {
+            page: "customer-review-coupon",
+            title: "كوبون الشحن المجاني",
+            href: "../customer/review-coupon.html"
+          }]
+      },
+
+      {
+        title: "الإنتاج",
+        icon: "🏭",
+        description: "أوامر التصنيع، الإنتاجية، الإنجاز، وتكلفة أمر التصنيع.",
+        indexPage: "production",
+        indexHref: "../production/index.html",
+        reports: [
+          {
+            page: "production-daily",
+            title: "إنتاج يومي",
+            href: "../production/daily.html"
+          },
+          {
+            page: "production-report",
+            title: "إنتاج بالفترة",
+            href: "../production/report.html"
+          },
+          {
+            page: "production-mo-cost",
+            title: "تكلفة أمر التصنيع",
+            href: "../production/mo-cost.html"
+          }
+        ]
+      },
+
+      {
+        title: "المخزون",
+        icon: "🏬",
+        description: "الأرصدة، التغطية، الدوران، المخازن الوسيطة، وتحليل الحركة.",
+        indexPage: "inventory",
+        indexHref: "../inventory/index.html",
+        reports: [
+          {
+            page: "inventory-intermediate-control",
+            title: "رقابة المخازن الوسيطة",
+            href: "../inventory/intermediate-control.html"
+          },
+          {
+            page: "inventory-executive-summary",
+            title: "ملخص المخزون التنفيذي",
+            href: "../inventory/executive-summary.html"
+          },
+          {
+            page: "inventory-flow-control",
+            title: "تحكم حركة المخزون",
+            href: "../inventory/flow-control.html"
+          },
+          {
+            page: "inventory-movement-intelligence",
+            title: "تحليل حركة المخزون",
+            href: "../inventory/movement-intelligence.html"
+          }
+        ]
+      },
+
+      {
+        title: "المشتريات",
+        icon: "📦",
+        description: "أوامر الشراء، الموردين، الأسعار، التأخير، والأوامر المفتوحة.",
+        indexPage: "purchase",
+        indexHref: "../purchase/index.html",
+        reports: [
+          {
+            page: "purchase-daily",
+            title: "مشتريات يومي",
+            href: "../purchase/daily.html"
+          },
+          {
+            page: "purchase-report",
+            title: "مشتريات بالفترة",
+            href: "../purchase/report.html"
+          },
+          {
+            page: "purchase-price",
+            title: "تغير أسعار الشراء",
+            href: "../purchase/price-intelligence.html"
+          },
+          {
+            page: "purchase-order-control",
+            title: "متابعة أوامر الشراء",
+            href: "../purchase/order-control.html"
+          },
+          {
+            page: "purchase-supplier-performance",
+            title: "كفاءة الموردين",
+            href: "../purchase/supplier-performance.html"
+          },
+          {
+            page: "purchase-open-orders",
+            title: "أوامر شراء مفتوحة",
+            href: "../purchase/open-orders.html"
+          }
+        ]
+      },
+            {
+        title: "تخطيط الفوركاست",
+        icon: "📈",
+        description: "متابعة التارجت، المبيعات الفعلية، نسبة التحقق، والمتبقي حسب القناة والشهر.",
+        indexPage: "forecast-planning-achievement",
+        indexHref: "../forecast-planning/index.html",
+        reports: [
+          {
+            page: "forecast-planning-achievement",
+            title: "تحقق الفوركاست والمبيعات الفعلية",
+            href: "../forecast-planning/index.html"
+          }
+        ]
+      },
+
+      {
+        title: "التوقعات والتارجت",
+        icon: "🎯",
+        description: "منتجات التارجت، إدارة التارجت، وتحليل الاحتياجات.",
+        indexPage: "forecast",
+        indexHref: "../forecast/index.html",
+        reports: [
+          {
+            page: "forecast-products",
+            title: "منتجات التارجت",
+            href: "../forecast/products.html"
+          },
+          {
+            page: "forecast-targets",
+            title: "إدارة التارجت",
+            href: "../forecast/targets.html"
+          },
+          {
+            page: "forecast-target-report",
+            title: "تقرير التارجت",
+            href: "../forecast/target-report.html"
+          }
+        ]
+      },
+
+      {
+        title: "الإدارة",
+        icon: "⚙️",
+        description: "المستخدمين، الأدوار، والصلاحيات.",
+        indexPage: "admin-users",
+        indexHref: "../admin/users.html",
+        reports: [
+          {
+            page: "admin-users",
+            title: "إدارة المستخدمين",
+            href: "../admin/users.html"
+          },
+          {
+            page: "admin-roles",
+            title: "الأدوار والصلاحيات",
+            href: "../admin/roles.html"
+          }
+        ]
+      }
+    ];
+
+    function getAllowedReports(module) {
+      return module.reports.filter((report) => {
+        if (report.disabled) return hasPermission(report.page);
+        return hasPermission(report.page);
+      });
+    }
+
+    function countAllowedReports(modules) {
+      return modules.reduce((total, module) => {
+        return total + module.allowedReports.length;
+      }, 0);
+    }
+
+    function buildReportLinks(reports) {
+      if (!reports.length) {
+        return "";
+      }
+
+      return `
+        <div class="dashboard-report-links">
+          ${reports.map((report) => {
+            if (report.disabled) {
+              return `
+                <div class="disabled-report" title="الصفحة غير موجودة بعد">
+                  ${report.title}
+                </div>
+              `;
+            }
+
+            return `
+              <a href="${report.href}">
+                ${report.title}
+              </a>
+            `;
+          }).join("")}
+        </div>
+      `;
+    }
+
+    function buildDashboardModules() {
+      const allowedModules = DASHBOARD_MODULES
+        .map((module) => {
+          const allowedReports = getAllowedReports(module);
+
+          return {
+            ...module,
+            allowedReports
+          };
+        })
+        .filter((module) => module.allowedReports.length > 0);
+
+      if (!allowedModules.length) {
+        return {
+          html: `
+            <div class="permission-denied-card">
+              <div class="permission-orbit">
+                <div class="permission-icon">🔒📊</div>
+              </div>
+
+              <span class="permission-badge">No Reports</span>
+
+              <h2>لا توجد تقارير متاحة لحسابك</h2>
+
+              <p>
+                حسابك لا يملك صلاحية عرض أي تقرير حاليًا.
+                تواصل مع مسؤول النظام لإضافة الصلاحيات المناسبة.
+              </p>
+            </div>
+          `,
+          modulesCount: 0,
+          reportsCount: 0
+        };
+      }
+
+      return {
+        html: `
+          <div class="dashboard-section-title">
+            <div>
+              <h3>الأقسام التشغيلية</h3>
+              <p>كل قسم يحتوي على التقارير المتاحة حسب صلاحيات المستخدم.</p>
+            </div>
+          </div>
+
+          <div class="dashboard-modules-grid">
+            ${allowedModules.map((module) => {
+              return `
+                <div class="dashboard-card">
+                  <div class="dashboard-card-top">
+                    <div class="dashboard-icon">${module.icon}</div>
+                    <div class="dashboard-badge">
+                      ${module.allowedReports.length} تقارير
+                    </div>
+                  </div>
+
+                  <h3>${module.title}</h3>
+                  <p>${module.description}</p>
+
+                  <a class="dashboard-module-main-link" href="${module.indexHref}">
+                    فتح صفحة القسم
+                  </a>
+
+                  ${buildReportLinks(module.allowedReports)}
+                </div>
+              `;
+            }).join("")}
+          </div>
+        `,
+        modulesCount: allowedModules.length,
+        reportsCount: countAllowedReports(allowedModules)
+      };
+    }
+
+    const dashboard = buildDashboardModules();
+
+    renderLayout(
+      "لوحة الإدارة",
+      "التقارير المتاحة حسب صلاحيات المستخدم",
+      "dashboard",
+      `
+        <div class="dashboard-hero">
+          <div class="dashboard-hero-inner">
+            <div>
+              <span class="dashboard-eyebrow">Executive Intelligence</span>
+              <h2>Odoo Management Intelligence Agent</h2>
+              <p>
+                منصة ذكاء إداري فوق Odoo لعرض التقارير، التحليلات، المخاطر،
+                والتوصيات بصورة منظمة حسب كل إدارة.
+              </p>
+            </div>
+
+            <div class="dashboard-stats">
+              <div class="dashboard-stat">
+                <span>الأقسام المتاحة</span>
+                <strong>${dashboard.modulesCount}</strong>
+              </div>
+
+              <div class="dashboard-stat">
+                <span>التقارير المتاحة</span>
+                <strong>${dashboard.reportsCount}</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        ${dashboard.html}
+      `
+    );
+  </script>
+</body>
+</html>

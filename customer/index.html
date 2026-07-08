@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Customer Reports</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+
+  <script>
+    renderLayout(
+      "تقارير العملاء",
+      "كل تقارير العملاء وخدمة العملاء ورسائل التقييم وربط POS في مكان واحد",
+      "customer",
+      `
+        <div class="reports-grid">
+          <a class="report-card" href="./pos-phones.html">
+            <span class="page-pill">POS Phones</span>
+            <h3>أرقام عملاء نقاط البيع</h3>
+            <p>
+              عرض فواتير POS المرتبطة برقم العميل: إجمالي الفاتورة،
+              المرتجع، صافي الشراء، وتاريخ الشراء.
+            </p>
+          </a>
+
+          <a class="report-card" href="./service-pos-review.html">
+            <span class="page-pill">Customer Service</span>
+            <h3>مراجعة خدمات نقاط البيع</h3>
+            <p>
+              بحث برقم العميل أو رقم الفاتورة، عرض تفاصيل الشراء،
+              تسجيل ملاحظات خدمة العملاء، ومراجعة المدير.
+            </p>
+          </a>
+
+
+          <a class="report-card" href="./review-sms-queue.html">
+            <span class="page-pill">Review SMS</span>
+            <h3>تشغيل رسائل تقييم العملاء</h3>
+            <p>
+              اختيار فواتير POS الجاهزة للإرسال، التحكم في فترة الفواتير،
+              ومنع تكرار الإرسال لنفس رقم العميل في نفس اليوم.
+            </p>
+          </a>
+
+          <a class="report-card" href="./review-followups.html">
+            <span class="page-pill">Follow-ups</span>
+            <h3>متابعة العملاء الغاضبين</h3>
+            <p>
+              متابعة تقييمات 1 و 3، تغيير حالة المتابعة، مراجعة الأولويات،
+              وتجهيز التقرير التشغيلي لخدمة العملاء.
+            </p>
+          </a>
+
+          <a class="report-card" href="./review-sms-dashboard.html">
+            <span class="page-pill">Technical Control</span>
+            <h3>لوحة إعدادات رسائل التقييم</h3>
+            <p>
+              لوحة فنية للتحكم في حالة الإرسال، إعدادات الربط، الاختبار،
+              ومراجعة حالة مزود الرسائل.
+            </p>
+          </a>
+
+          <a class="report-card" href="./review-coupon.html">
+            <span class="page-pill">Coupon Preview</span>
+            <h3>كوبون الشحن المجاني</h3>
+            <p>
+              معاينة صفحة كوبون الشحن المجاني التي تظهر للعميل بعد التقييم
+              الإيجابي.
+            </p>
+          </a>
+
+          <a class="report-card" href="./vip.html">
+            <span class="page-pill">VIP</span>
+            <h3>VIP Customers</h3>
+            <p>
+              تحديد العملاء الأعلى قيمة، العملاء المتكررين، والعملاء المناسبين
+              لعروض خاصة أو متابعة مباشرة.
+            </p>
+          </a>
+
+          <a class="report-card" href="./migration.html">
+            <span class="page-pill">Migration</span>
+            <h3>Migration</h3>
+            <p>
+              تحليل انتقال العملاء بين قنوات البيع المختلفة مثل POS و Sales
+              لاكتشاف فرص النمو.
+            </p>
+          </a>
+
+          <a class="report-card" href="./rfm.html">
+            <span class="page-pill">RFM</span>
+            <h3>RFM Segmentation</h3>
+            <p>
+              تقسيم العملاء حسب الحداثة، التكرار، والقيمة لتحديد العملاء
+              النشطين والمعرضين للفقد.
+            </p>
+          </a>
+        </div>
+      `
+    );
+  </script>
+</body>
+</html>

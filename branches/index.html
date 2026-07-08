@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>ذكاء الفروع | Management Intelligence</title>
+
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+
+  <script>
+    renderLayout(
+      "ذكاء الفروع",
+      "كل تقارير الفروع والمخزون التشغيلي في مكان واحد",
+      "branches",
+      `
+        <div class="reports-grid">
+          <a class="report-card" href="./index.html">
+            <span class="page-pill">Overview</span>
+            <h3>نظرة عامة على الفروع</h3>
+            <p>
+              بوابة تقارير الفروع وربط نقاط البيع والمخازن ومتابعة الأداء العام.
+            </p>
+          </a>
+
+          <a class="report-card" href="./sales.html">
+            <span class="page-pill">Branch Sales</span>
+            <h3>مبيعات الفروع</h3>
+            <p>
+              تحليل مبيعات كل فرع، صافي البيع، المرتجعات، الخصومات،
+              ومتوسط قيمة الفاتورة.
+            </p>
+          </a>
+
+          <a class="report-card" href="./stock.html">
+            <span class="page-pill">Branch Stock</span>
+            <h3>مخزون الفروع</h3>
+            <p>
+              متابعة أرصدة المخزون داخل الفروع والمعارض وربطها بمصادر Odoo.
+            </p>
+          </a>
+
+          <a class="report-card" href="./inventory-count.html">
+            <span class="page-pill">Live Count</span>
+            <h3>جرد الفرع اللحظي</h3>
+            <p>
+              بدء جلسة جرد، مراجعة فروقات الجرد، وإغلاق الجلسة بعد المراجعة.
+            </p>
+          </a>
+
+          <a class="report-card" href="./replenishment.html">
+            <span class="page-pill">Replenishment</span>
+            <h3>احتياجات الفروع وإعادة الطلب</h3>
+            <p>
+              تحديد المنتجات المطلوب إعادة طلبها حسب الرصيد، الحركة، وحدود الأمان.
+            </p>
+          </a>
+
+          <div class="report-card" style="opacity: 0.65; cursor: not-allowed;">
+            <span class="page-pill">Coming Soon</span>
+            <h3>مقارنة الفروع</h3>
+            <p>
+              التقرير موجود في القائمة الجانبية لكن صفحة comparison.html غير موجودة بعد.
+              سيتم تفعيله بعد إنشاء التقرير.
+            </p>
+          </div>
+        </div>
+      `
+    );
+  </script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>كوبون فيرجينيا</title>
+  <link rel="stylesheet" href="./review-sms.css" />
+</head>
+
+<body data-page="coupon">
+  <main class="crsms-review-shell">
+    <section class="crsms-review-card crsms-coupon-card">
+      <div class="crsms-review-brand">Virginia Olive</div>
+
+      <section class="crsms-review-hero">
+        <h1>فيرجينيا دايمًا معاك 🎁</h1>
+        <p>شحن مجاني على طلبات الأونلاين من موقع فيرجينيا.</p>
+      </section>
+
+      <section class="crsms-coupon-box">
+        <span>كود الكوبون</span>
+        <strong id="couponCode">VIRGINIA-FREESHIP</strong>
+        <button type="button" id="copyCouponBtn">نسخ الكوبون</button>
+      </section>
+
+      <div id="copyCouponMessage" class="crsms-review-message crsms-success" hidden>
+        تم نسخ الكوبون ✅
+      </div>
+
+      <footer class="crsms-review-footer">
+        <span>الكوبون مخصص للشحن المجاني على طلبات الأونلاين</span>
+        <strong>فيرجينيا</strong>
+      </footer>
+    </section>
+  </main>
+
+  <script>
+    const copyBtn = document.getElementById("copyCouponBtn");
+    const couponCode = document.getElementById("couponCode");
+    const message = document.getElementById("copyCouponMessage");
+
+    copyBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(couponCode.textContent.trim());
+        message.hidden = false;
+      } catch (error) {
+        message.hidden = false;
+        message.textContent = "انسخ الكود يدويًا: " + couponCode.textContent.trim();
+      }
+    });
+  </script>
+</body>
+</html>

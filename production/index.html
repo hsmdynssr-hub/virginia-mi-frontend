@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Production Reports</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+
+  <script>
+    renderLayout(
+      "تقارير الإنتاج",
+      "كل تقارير الإنتاج والتصنيع في مكان واحد",
+      "production",
+      `
+        <div class="reports-grid">
+          <a class="report-card" href="./daily.html">
+            <span class="page-pill">Daily Production</span>
+            <h3>إنتاج يومي</h3>
+            <p>
+              متابعة أوامر التصنيع اليومية، عدد الأوامر، المنتج الفعلي،
+              المتبقي، ونسبة الإنجاز.
+            </p>
+          </a>
+
+          <a class="report-card" href="./report.html">
+            <span class="page-pill">Period Production</span>
+            <h3>إنتاج بالفترة</h3>
+            <p>
+              تحليل أوامر التصنيع من تاريخ إلى تاريخ مع ملخص المنتجات
+              وأوامر التصنيع المفتوحة والمكتملة.
+            </p>
+          </a>
+
+          <a class="report-card" href="./mo-cost.html">
+            <span class="page-pill">MO Cost</span>
+            <h3>تكلفة أمر التصنيع</h3>
+            <p>
+              تحليل تكلفة الوحدة الفعلية حسب valuation ومقارنتها بالأمر السابق
+              والشهر السابق مع مؤشرات الخطر.
+            </p>
+          </a>
+        </div>
+      `
+    );
+  </script>
+</body>
+</html>

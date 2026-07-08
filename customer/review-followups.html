@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>متابعة العملاء الغاضبين</title>
+
+  <link rel="stylesheet" href="./review-sms.css" />
+  <script src="./review-sms.js" defer></script>
+</head>
+
+<body data-page="followups">
+  <main class="crsms-page">
+    <section class="crsms-header">
+      <div>
+        <h1>متابعة العملاء الغاضبين</h1>
+        <p>
+          صفحة تشغيلية لخدمة العملاء لمتابعة تقييمات 1 و 3 فقط، تغيير حالة المتابعة، ومراجعة أسباب عدم الرضا.
+        </p>
+      </div>
+
+      <div class="crsms-mode-badge" id="modeBadge">جاهز للفحص</div>
+    </section>
+
+    <section class="crsms-panel crsms-queue-nav">
+      <div class="crsms-mini-actions">
+        <a class="crsms-nav-link" href="./review-sms-dashboard.html">الداشبورد الفني</a>
+        <a class="crsms-nav-link" href="./review-sms-queue.html">صفحة تشغيل الفواتير</a>
+      </div>
+      <span>هذه الصفحة للمتابعة فقط. لا ترسل SMS ولا تغيّر إعدادات الإرسال.</span>
+    </section>
+
+    <section class="crsms-panel">
+      <div class="crsms-section-title">
+        <h2>فلاتر المتابعة</h2>
+        <button type="button" class="crsms-secondary" data-followups-action="health">Health</button>
+      </div>
+
+      <div class="crsms-form-grid">
+        <div class="crsms-field crsms-span-2">
+          <label for="apiBase">API Base</label>
+          <input id="apiBase" type="text" value="http://localhost:5050/api/customer/review-sms" />
+        </div>
+
+        <div class="crsms-field">
+          <label for="adminKey">Admin Key</label>
+          <input id="adminKey" type="password" autocomplete="off" />
+        </div>
+
+        <div class="crsms-field">
+          <label for="companyId">Company ID</label>
+          <input id="companyId" type="number" placeholder="1 أو 2" />
+        </div>
+
+        <div class="crsms-field">
+          <label for="limit">Limit</label>
+          <input id="limit" type="number" value="50" min="1" max="500" />
+        </div>
+
+        <div class="crsms-field">
+          <label for="followupStatusFilter">حالة المتابعة</label>
+          <select id="followupStatusFilter">
+            <option value="">كل الحالات</option>
+            <option value="new">جديد</option>
+            <option value="in_progress">جاري المتابعة</option>
+            <option value="contacted">تم التواصل</option>
+            <option value="resolved">تم الحل</option>
+            <option value="closed">مغلق</option>
+          </select>
+        </div>
+
+        <div class="crsms-field">
+          <label for="priorityFilter">الأولوية</label>
+          <select id="priorityFilter">
+            <option value="">كل الأولويات</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+
+        <div class="crsms-field">
+          <label for="followupDateField">نوع التاريخ</label>
+          <select id="followupDateField">
+            <option value="created_at">تاريخ إنشاء المتابعة</option>
+            <option value="updated_at">آخر تحديث</option>
+            <option value="contacted_at">تاريخ التواصل</option>
+            <option value="resolved_at">تاريخ الحل</option>
+            <option value="closed_at">تاريخ الإغلاق</option>
+          </select>
+        </div>
+
+        <div class="crsms-field">
+          <label for="followupDatePreset">الفترة</label>
+          <select id="followupDatePreset">
+            <option value="custom">فترة مخصصة / كل الفترات</option>
+            <option value="today">اليوم</option>
+            <option value="yesterday">أمس</option>
+            <option value="last7">آخر 7 أيام</option>
+            <option value="thisMonth">هذا الشهر</option>
+          </select>
+        </div>
+
+        <div class="crsms-field">
+          <label for="followupDateFrom">من تاريخ</label>
+          <input id="followupDateFrom" type="date" />
+        </div>
+
+        <div class="crsms-field">
+          <label for="followupDateTo">إلى تاريخ</label>
+          <input id="followupDateTo" type="date" />
+        </div>
+      </div>
+
+      <div class="crsms-actions">
+        <button type="button" data-followups-action="followups">تحديث المتابعات</button>
+        <button type="button" class="crsms-secondary" data-followups-action="settings">تحميل الإعدادات</button>
+      </div>
+
+      <pre class="crsms-status" id="statusBox">جاهز. اضغط تحديث المتابعات.</pre>
+    </section>
+
+    <section class="crsms-stats">
+      <article class="crsms-stat-card"><span>Follow-ups</span><strong id="followupTotal">-</strong></article>
+      <article class="crsms-stat-card"><span>New</span><strong id="followupNew">-</strong></article>
+      <article class="crsms-stat-card"><span>In Progress</span><strong id="followupInProgress">-</strong></article>
+      <article class="crsms-stat-card"><span>Contacted</span><strong id="followupContacted">-</strong></article>
+      <article class="crsms-stat-card"><span>Resolved</span><strong id="followupResolved">-</strong></article>
+      <article class="crsms-stat-card"><span>High Priority</span><strong id="followupHigh">-</strong></article>
+    </section>
+
+    <section class="crsms-panel">
+      <div class="crsms-section-title">
+        <h2>قائمة العملاء الغاضبين / غير الراضين</h2>
+        <span class="crsms-hint">التقييمات هنا من 1 أو 3 فقط. استخدم الحالة لمتابعة الإجراء مع خدمة العملاء.</span>
+      </div>
+
+      <div class="crsms-table-wrap">
+        <table class="crsms-table crsms-followups-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>الأولوية</th>
+              <th>الحالة</th>
+              <th>التقييم</th>
+              <th>سبب عدم الرضا</th>
+              <th>ملاحظة العميل</th>
+              <th>الفرع</th>
+              <th>العميل</th>
+              <th>الموبايل</th>
+              <th>الفاتورة</th>
+              <th>القيمة</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="followupsBody">
+            <tr><td colspan="12">اضغط تحديث المتابعات.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

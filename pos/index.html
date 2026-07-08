@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>POS Reports</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+
+  <script>
+    renderLayout(
+      "تقارير POS",
+      "تقارير نقاط البيع والمعارض والكاشيرات وساعات البيع في مكان واحد",
+      "pos",
+      `
+        <div class="reports-grid">
+          <a class="report-card" href="./summary.html">
+            <span class="page-pill">POS Summary</span>
+            <h3>ملخص نقاط البيع</h3>
+            <p>
+              المبيعات، المرتجعات، صافي البيع، الهامش، عدد الفواتير،
+              ونسبة تسجيل العملاء.
+            </p>
+          </a>
+
+          <a class="report-card" href="./branch-sales.html">
+            <span class="page-pill">Branch Sales</span>
+            <h3>تحليل أداء المعارض</h3>
+            <p>
+              مقارنة أداء المعارض ونقاط البيع حسب المبيعات، المرتجعات،
+              الخصومات، وصافي الإيراد.
+            </p>
+          </a>
+
+          <a class="report-card" href="./cashiers.html">
+            <span class="page-pill">Cashiers</span>
+            <h3>تحليل الكاشيرات</h3>
+            <p>
+              أداء الكاشير، عدد الفواتير، متوسط الفاتورة، الهامش،
+              وتسجيل بيانات العملاء.
+            </p>
+          </a>
+
+          <a class="report-card" href="./peak-hours.html">
+            <span class="page-pill">Peak Hours</span>
+            <h3>تحليل ساعات البيع</h3>
+            <p>
+              معرفة أوقات الذروة، توزيع المبيعات بالساعة، وأفضل الفترات
+              للتشغيل والمتابعة.
+            </p>
+          </a>
+        </div>
+      `
+    );
+  </script>
+</body>
+</html>

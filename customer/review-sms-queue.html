@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>تشغيل فواتير تقييم العملاء SMS</title>
+
+  <link rel="stylesheet" href="./review-sms.css" />
+  <script src="./review-sms.js" defer></script>
+</head>
+
+<body data-page="queue">
+  <main class="crsms-page">
+    <section class="crsms-header">
+      <div>
+        <h1>تشغيل فواتير تقييم العملاء SMS</h1>
+        <p>
+          صفحة تشغيلية منفصلة للبحث عن فواتير Odoo غير المرسلة، اختيار الفواتير الجاهزة، ثم إرسال الرسائل للمحدد فقط.
+        </p>
+      </div>
+
+      <div class="crsms-mode-badge" id="modeBadge">
+        جاهز للفحص
+      </div>
+    </section>
+
+    <section class="crsms-panel crsms-queue-nav">
+      <a class="crsms-nav-link" href="./review-sms-dashboard.html">الداشبورد الفني</a>
+      <span>هذه الصفحة لا ترسل أي رسائل أثناء البحث. الإرسال يحدث فقط من زر إرسال المحدد وبشرط أن يكون تشغيل الإرسال مفعّلًا من الداشبورد.</span>
+    </section>
+
+    <section class="crsms-panel">
+      <div class="crsms-section-title">
+        <h2>بحث فواتير Odoo المرشحة للإرسال</h2>
+        <button type="button" class="crsms-secondary" data-queue-action="health">Health</button>
+      </div>
+
+      <div class="crsms-form-grid">
+        <div class="crsms-field crsms-span-2">
+          <label for="apiBase">API Base</label>
+          <input id="apiBase" type="text" value="http://localhost:5050/api/customer/review-sms" />
+        </div>
+
+        <div class="crsms-field">
+          <label for="adminKey">Admin Key</label>
+          <input id="adminKey" type="password" autocomplete="off" />
+        </div>
+
+        <div class="crsms-field">
+          <label for="companyId">Company ID</label>
+          <input id="companyId" type="number" placeholder="1 أو 2" />
+        </div>
+
+        <div class="crsms-field">
+          <label for="threshold">الحد الأدنى للفاتورة</label>
+          <input id="threshold" type="number" value="1000" />
+        </div>
+
+        <div class="crsms-field">
+          <label for="lookbackMinutes">فترة البحث بالدقائق</label>
+          <input id="lookbackMinutes" type="number" value="10080" />
+        </div>
+
+        <div class="crsms-field">
+          <label for="limit">عدد الفواتير المطلوب فحصها</label>
+          <input id="limit" type="number" value="20" min="1" max="500" />
+        </div>
+
+        <div class="crsms-field">
+          <label for="queueDatePreset">فترة الفواتير</label>
+          <select id="queueDatePreset">
+            <option value="custom">فترة مخصصة / حسب الدقائق</option>
+            <option value="today">اليوم</option>
+            <option value="yesterday">أمس</option>
+            <option value="last7">آخر 7 أيام</option>
+            <option value="thisMonth">هذا الشهر</option>
+          </select>
+        </div>
+
+        <div class="crsms-field">
+          <label for="queueDateFrom">من تاريخ الفاتورة</label>
+          <input id="queueDateFrom" type="date" />
+        </div>
+
+        <div class="crsms-field">
+          <label for="queueDateTo">إلى تاريخ الفاتورة</label>
+          <input id="queueDateTo" type="date" />
+        </div>
+
+        <div class="crsms-field crsms-span-2">
+          <label for="repeatPolicy">سياسة تكرار رقم العميل</label>
+          <select id="repeatPolicy">
+            <option value="same_day" selected>لا ترسل لنفس الرقم أكثر من مرة في نفس اليوم</option>
+            <option value="last_24h">لا ترسل لنفس الرقم أكثر من مرة خلال آخر 24 ساعة</option>
+            <option value="allow">السماح بإرسال أكثر من رسالة لنفس الرقم</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="crsms-actions">
+        <button type="button" data-queue-action="preview">بحث فقط بدون إرسال</button>
+        <button type="button" class="crsms-secondary" data-queue-action="select-ready">تحديد الجاهز</button>
+        <button type="button" class="crsms-secondary" data-queue-action="clear-selection">إلغاء التحديد</button>
+        <button type="button" class="crsms-secondary" data-queue-action="send-selected-dry-run">اختبار المحدد بدون SMS</button>
+        <button type="button" class="crsms-danger" data-queue-action="send-selected">إرسال للمحدد فقط</button>
+      </div>
+
+      <pre class="crsms-status" id="statusBox">جاهز. اضغط بحث فقط بدون إرسال.</pre>
+    </section>
+
+    <section class="crsms-stats crsms-queue-stats">
+      <article class="crsms-stat-card"><span>Found in Odoo</span><strong id="queueFound">-</strong></article>
+      <article class="crsms-stat-card"><span>Ready</span><strong id="queueReady">-</strong></article>
+      <article class="crsms-stat-card"><span>Duplicates</span><strong id="queueDuplicates">-</strong></article>
+      <article class="crsms-stat-card"><span>Repeated Phone</span><strong id="queueRepeated">-</strong></article>
+      <article class="crsms-stat-card"><span>No Valid Phone</span><strong id="queueNoPhone">-</strong></article>
+      <article class="crsms-stat-card"><span>Selected</span><strong id="queueSelected">0</strong></article>
+    </section>
+
+    <section class="crsms-panel">
+      <div class="crsms-section-title">
+        <h2>الفواتير المرشحة</h2>
+        <span class="crsms-hint">اختَر فقط الصفوف الجاهزة للإرسال. المكرر أو بدون رقم لن يكون قابلًا للاختيار.</span>
+      </div>
+
+      <div class="crsms-table-wrap">
+        <table class="crsms-table crsms-queue-table">
+          <thead>
+            <tr>
+              <th>اختيار</th>
+              <th>Odoo ID</th>
+              <th>الفاتورة</th>
+              <th>تاريخ الفاتورة</th>
+              <th>العميل</th>
+              <th>الموبايل</th>
+              <th>الفرع</th>
+              <th>القيمة</th>
+              <th>الحالة</th>
+              <th>تفسير الحالة</th>
+              <th>أرقام محتملة</th>
+              <th>آخر إرسال لنفس الرقم</th>
+            </tr>
+          </thead>
+          <tbody id="queueBody">
+            <tr><td colspan="12">اضغط بحث فقط بدون إرسال.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

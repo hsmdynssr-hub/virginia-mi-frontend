@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>تقييم تجربة الشراء</title>
+
+  <link rel="stylesheet" href="./review-sms.css" />
+  <script src="./review-sms.js" defer></script>
+</head>
+
+<body data-page="review">
+  <main class="crsms-review-shell">
+    <section class="crsms-review-card">
+      <div class="crsms-brand">Virginia Olive</div>
+
+      <div id="reviewLoading" class="crsms-review-message">
+        جاري تحميل بيانات التقييم...
+      </div>
+
+      <div id="reviewError" class="crsms-review-message crsms-error" hidden></div>
+
+      <div id="reviewContent" hidden>
+        <section class="crsms-review-hero">
+          <div class="crsms-hero-badge">الأولى عالميًا</div>
+
+          <div class="crsms-hero-copy">
+            <span>جودة عالمية من الطبيعة</span>
+            <strong>قيّم تجربة الشراء</strong>
+            <p id="reviewSubtitle">رأيك مهم لتحسين الخدمة داخل فروع فيرجينيا.</p>
+          </div>
+        </section>
+
+        <section class="crsms-review-info">
+          <div>
+            <span>الفرع</span>
+            <strong id="reviewBranch">-</strong>
+          </div>
+
+          <div>
+            <span>رقم الطلب</span>
+            <strong id="reviewOrder">-</strong>
+          </div>
+
+          <div>
+            <span>قيمة الفاتورة</span>
+            <strong id="reviewAmount">-</strong>
+          </div>
+        </section>
+
+        <div id="alreadyReviewedBox" class="crsms-review-message crsms-success" hidden>
+          تم تسجيل تقييمك بالفعل. شكراً لك.
+        </div>
+
+        <form id="reviewForm" class="crsms-review-form">
+          <div class="crsms-form-title">
+            <strong>تجربتك كانت إيه؟</strong>
+            <span>اختيارك يساعدنا نتابع الخدمة بشكل أسرع.</span>
+          </div>
+
+          <div class="crsms-reactions" id="starsBox" aria-label="اختيار التقييم">
+            <button type="button" data-rating="5">
+              <span>😍</span>
+              <strong>راضٍ جدًا</strong>
+            </button>
+
+            <button type="button" data-rating="3">
+              <span>😐</span>
+              <strong>محايد</strong>
+            </button>
+
+            <button type="button" data-rating="1">
+              <span>😡</span>
+              <strong>غير راضٍ</strong>
+            </button>
+          </div>
+
+          <div class="crsms-reason-box" id="reasonBox" hidden>
+            <label for="dissatisfactionReason">ما سبب عدم الرضا؟</label>
+
+            <select id="dissatisfactionReason">
+              <option value="">اختر السبب</option>
+              <option value="price_error">أخطاء في الأسعار أو الحساب</option>
+              <option value="crowding_disorganization">زحمة وعدم تنظيم</option>
+              <option value="sales_team">تعامل فريق المبيعات</option>
+              <option value="product_issue">مشكلة في جودة أو توافر المنتج</option>
+              <option value="waiting_time">انتظار طويل</option>
+              <option value="payment_issue">مشكلة في الدفع</option>
+              <option value="delivery_or_pickup">مشكلة في الاستلام أو التجهيز</option>
+              <option value="other">سبب آخر</option>
+            </select>
+          </div>
+
+          <textarea
+            id="reviewComment"
+            placeholder="اكتب ملاحظتك اختياريًا..."
+          ></textarea>
+
+          <button type="submit" id="submitReviewBtn" disabled>
+            إرسال التقييم
+          </button>
+        </form>
+
+        <div id="reviewSubmitMessage" class="crsms-review-message" hidden></div>
+
+        <footer class="crsms-review-footer">
+          <span>هذا الرابط مخصص لهذه الفاتورة فقط</span>
+          <strong>فيرجينيا</strong>
+        </footer>
+
+        <p class="crsms-review-footnote">
+          لن يتم نشر تقييمك. يستخدم داخليًا لتحسين جودة الخدمة.
+        </p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

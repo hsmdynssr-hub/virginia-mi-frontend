@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>POS Discounts</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+
+  <script>
+    renderLayout("خصومات POS", "تحليل الخصومات منفصلة عن المرتجعات والعروض", "pos-discounts", `<div id="reportArea"></div>`);
+
+    async function loadReport() {
+      try {
+        showLoading();
+        const report = await apiGet("/pos/discount-intelligence", getFilters());
+        const data = report.data || {};
+        const summary = data.summary || {};
+        const rows = data.byProduct || [];
+
+        document.getElementById("reportArea").innerHTML = `
+          ${renderKpis([
+            kpiCard("عدد السطور", summary.linesCount, "عدد سطور POS في الفترة."),
+            kpiCard("سطور عليها خصم", summary.discountedLinesCount, "عدد السطور التي تحتوي على خصم مباشر."),
+            kpiCard("قيمة الخصم", summary.discountValue, "إجمالي قيمة الخصومات المباشرة."),
+            kpiCard("نسبة الخصم", `${summary.discountPercent || 0}%`, "قيمة الخصم ÷ إجمالي البيع قبل الخصم.")
+          ])}
+
+          ${renderPanel("الخصومات حسب المنتج", renderTable(
+            [
+              { key: "productName", label: "المنتج", hint: "اسم المنتج." },
+              { key: "linesCount", label: "عدد السطور", hint: "عدد مرات ظهور المنتج." },
+              { key: "grossBeforeDiscount", label: "قبل الخصم", hint: "قيمة المنتج قبل الخصم." },
+              { key: "discountValue", label: "قيمة الخصم", hint: "إجمالي قيمة الخصم." },
+              { key: "discountPercent", label: "نسبة الخصم", hint: "نسبة الخصم من قيمة المنتج." }
+            ],
+            rows
+          ))}
+        `;
+      } catch (error) {
+        showError(error);
+      }
+    }
+
+    document.getElementById("loadBtn").addEventListener("click", loadReport);
+    document.getElementById("companySelect").addEventListener("change", loadReport);
+    loadReport();
+  </script>
+</body>
+</html>

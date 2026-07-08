@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Open Purchase Orders</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+
+  <script>
+    renderLayout(
+      "أوامر شراء مفتوحة",
+      "أوامر شراء معتمدة لكن لم يتم استلامها بالكامل",
+      "purchase-open-orders",
+      `<div id="reportArea"></div>`
+    );
+
+    function formatMoney(value) {
+      return Number(value || 0).toLocaleString("en-US", {
+        maximumFractionDigits: 2
+      });
+    }
+
+    async function loadReport() {
+      try {
+        showLoading();
+
+        const report = await apiGet("/purchase/open-orders", getFilters());
+
+        const data = report.data || {};
+        const summary = data.summary || {};
+        const openLines = data.openLines || [];
+        const delayedLines = data.delayedLines || [];
+        const byVendor = data.byVendor || [];
+        const insights = data.insights || [];
+        const recommendations = data.recommendations || [];
+
+        document.getElementById("reportArea").innerHTML = `
+          ${renderKpis([
+            kpiCard("أوامر مؤكدة", summary.confirmedOrdersCount, "أوامر Purchase/Done داخل الفترة."),
+            kpiCard("سطور مفتوحة", summary.openLinesCount, "سطور شراء لم تستلم بالكامل."),
+            kpiCard("سطور متأخرة", summary.delayedLinesCount, "سطور تجاوزت تاريخ التوريد المخطط."),
+            kpiCard("قيمة مفتوحة", formatMoney(summary.totalOpenValue), "قيمة الكميات المتبقية للاستلام.")
+          ])}
+
+          ${renderKpis([
+            kpiCard("الكمية المطلوبة", summary.totalOrderedQty, "إجمالي الكميات المطلوبة في السطور المفتوحة."),
+            kpiCard("الكمية المستلمة", summary.totalReceivedQty, "إجمالي الكمية المستلمة."),
+            kpiCard("الكمية المتبقية", summary.totalRemainingQty, "إجمالي الكمية التي لم تستلم بعد."),
+            kpiCard("نسبة الاستلام", `${summary.receivedPercent || 0}%`, "المستلم ÷ المطلوب.")
+          ])}
+
+          ${renderPanel("التحليل والتوصيات", `
+            <div class="analysis-box">
+              ${insights.map((i) => `<p>${i}</p>`).join("") || "<p>لا يوجد تحليل.</p>"}
+              ${recommendations.map((r) => `<p><b>توصية:</b> ${r}</p>`).join("")}
+            </div>
+          `)}
+
+          ${renderPanel("السطور المتأخرة", renderTable(
+            [
+              { key: "orderName", label: "أمر الشراء", hint: "رقم أمر الشراء." },
+              { key: "vendorName", label: "المورد", hint: "اسم المورد." },
+              { key: "productName", label: "الصنف", hint: "الصنف المطلوب." },
+              { key: "orderedQty", label: "المطلوب", hint: "الكمية المطلوبة." },
+              { key: "receivedQty", label: "المستلم", hint: "الكمية المستلمة." },
+              { key: "remainingToReceiveQty", label: "المتبقي", hint: "كمية لم تستلم بعد." },
+              { key: "datePlanned", label: "تاريخ التوريد", hint: "تاريخ التوريد المخطط." },
+              { key: "delayDays", label: "أيام التأخير", hint: "عدد أيام التأخير عن التاريخ المخطط." },
+              { key: "priceUnit", label: "سعر الوحدة", hint: "سعر شراء الوحدة." }
+            ],
+            delayedLines
+          ))}
+
+          ${renderPanel("الموردون حسب القيمة المفتوحة", renderTable(
+            [
+              { key: "vendorName", label: "المورد", hint: "اسم المورد." },
+              { key: "openLinesCount", label: "سطور مفتوحة", hint: "عدد السطور المفتوحة." },
+              { key: "delayedLinesCount", label: "سطور متأخرة", hint: "عدد السطور المتأخرة." },
+              { key: "remainingQty", label: "كمية متبقية", hint: "إجمالي الكمية المتبقية." },
+              { key: "openValue", label: "قيمة مفتوحة", hint: "قيمة الكمية المتبقية." },
+              { key: "maxDelayDays", label: "أقصى تأخير", hint: "أعلى عدد أيام تأخير." }
+            ],
+            byVendor
+          ))}
+
+          ${renderPanel("كل السطور المفتوحة", renderTable(
+            [
+              { key: "orderName", label: "أمر الشراء", hint: "رقم أمر الشراء." },
+              { key: "vendorName", label: "المورد", hint: "اسم المورد." },
+              { key: "productName", label: "الصنف", hint: "اسم الصنف." },
+              { key: "orderedQty", label: "المطلوب", hint: "كمية مطلوبة." },
+              { key: "receivedQty", label: "المستلم", hint: "كمية مستلمة." },
+              { key: "remainingToReceiveQty", label: "المتبقي", hint: "كمية متبقية للاستلام." },
+              { key: "receivedPercent", label: "استلام %", hint: "نسبة الاستلام." },
+              { key: "datePlanned", label: "تاريخ التوريد", hint: "تاريخ التوريد المخطط." },
+              { key: "delayDays", label: "تأخير", hint: "أيام التأخير." },
+              { key: "state", label: "الحالة", hint: "حالة أمر الشراء." }
+            ],
+            openLines.slice(0, 300)
+          ))}
+        `;
+      } catch (error) {
+        showError(error);
+      }
+    }
+
+    document.getElementById("loadBtn").addEventListener("click", loadReport);
+    document.getElementById("companySelect").addEventListener("change", loadReport);
+
+    loadReport();
+  </script>
+</body>
+</html>

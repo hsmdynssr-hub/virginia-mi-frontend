@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Forecast Products</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+
+  <script>
+    renderLayout(
+      "منتجات التارجت / Forecast",
+      "عرض المنتجات الجاهزة للاستخدام في تقارير التارجت والتصنيع",
+      "forecast-products",
+      `<div id="reportArea"></div>`
+    );
+
+    async function loadReport() {
+      try {
+        showLoading();
+
+        const report = await apiGet("/forecast/products", getFilters());
+
+        const data = report.data || report;
+        const products = data.products || data.items || data || [];
+
+        const rows = Array.isArray(products) ? products : [];
+
+        document.getElementById("reportArea").innerHTML = `
+          ${renderKpis([
+            kpiCard("عدد المنتجات", rows.length, "عدد المنتجات المتاحة للتارجت."),
+            kpiCard("الشركة", getFilters().companyId == 1 ? "فيرجينيا" : "كليوباترا", "الشركة المختارة."),
+            kpiCard("الفترة من", getFilters().dateFrom, "بداية الفترة."),
+            kpiCard("الفترة إلى", getFilters().dateTo, "نهاية الفترة.")
+          ])}
+
+          ${renderPanel("منتجات التارجت", renderTable(
+            [
+              { key: "id", label: "ID", hint: "رقم المنتج في Odoo." },
+              { key: "defaultCode", label: "الكود", hint: "كود المنتج الداخلي." },
+              { key: "name", label: "اسم المنتج", hint: "اسم المنتج." },
+              { key: "uomName", label: "الوحدة", hint: "وحدة القياس." },
+              { key: "qtyAvailable", label: "On Hand", hint: "الرصيد الحالي." },
+              { key: "standardPrice", label: "Cost", hint: "تكلفة الكارت." },
+              { key: "listPrice", label: "Sale Price", hint: "سعر البيع." }
+            ],
+            rows
+          ))}
+        `;
+      } catch (error) {
+        showError(error);
+      }
+    }
+
+    document.getElementById("loadBtn").addEventListener("click", loadReport);
+    document.getElementById("companySelect").addEventListener("change", loadReport);
+
+    loadReport();
+  </script>
+</body>
+</html>

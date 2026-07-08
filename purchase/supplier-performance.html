@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Supplier Performance</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+
+  <script>
+    renderLayout(
+      "كفاءة الموردين",
+      "تحليل أفضل الموردين حسب القيمة والاستلام والتأخير",
+      "purchase-supplier-performance",
+      `<div id="reportArea"></div>`
+    );
+
+    function formatMoney(value) {
+      return Number(value || 0).toLocaleString("en-US", {
+        maximumFractionDigits: 2
+      });
+    }
+
+    async function loadReport() {
+      try {
+        showLoading();
+
+        const report = await apiGet("/purchase/supplier-performance", getFilters());
+        const data = report.data || {};
+        const summary = data.summary || {};
+        const top20 = data.top20ByValue || [];
+        const delayed = data.delayedSuppliers || [];
+        const suppliers = data.suppliers || [];
+        const insights = data.insights || [];
+        const recommendations = data.recommendations || [];
+
+        document.getElementById("reportArea").innerHTML = `
+          ${renderKpis([
+            kpiCard("عدد الموردين", summary.suppliersCount, "عدد الموردين الذين لديهم أوامر شراء في الفترة."),
+            kpiCard("أوامر الشراء", summary.ordersCount, "إجمالي أوامر الشراء."),
+            kpiCard("سطور الشراء", summary.linesCount, "إجمالي سطور أوامر الشراء."),
+            kpiCard("موردين متأخرين", summary.delayedSuppliersCount, "عدد الموردين لديهم كميات متأخرة.")
+          ])}
+
+          ${renderPanel("التحليل والتوصيات", `
+            <div class="analysis-box">
+              ${insights.map((i) => `<p>${i}</p>`).join("") || "<p>لا يوجد تحليل.</p>"}
+              ${recommendations.map((r) => `<p><b>توصية:</b> ${r}</p>`).join("")}
+            </div>
+          `)}
+
+          ${renderPanel("أعلى 20 مورد حسب قيمة الشراء", renderTable(
+            [
+              { key: "vendorName", label: "المورد", hint: "اسم المورد." },
+              { key: "ordersCount", label: "الأوامر", hint: "عدد أوامر الشراء." },
+              { key: "totalAmount", label: "قيمة الشراء", hint: "إجمالي قيمة الشراء من المورد." },
+              { key: "orderedQty", label: "الكمية المطلوبة", hint: "إجمالي الكمية المطلوبة." },
+              { key: "receivedQty", label: "الكمية المستلمة", hint: "إجمالي الكمية المستلمة." },
+              { key: "remainingQty", label: "المتبقي", hint: "كمية لم تستلم بعد." },
+              { key: "receivedPercent", label: "نسبة الاستلام %", hint: "المستلم ÷ المطلوب." },
+              { key: "delayedLinesCount", label: "سطور متأخرة", hint: "عدد السطور المتأخرة في التوريد." },
+              { key: "maxDelayDays", label: "أقصى تأخير", hint: "أكبر عدد أيام تأخير." },
+              { key: "grade", label: "التقييم", hint: "A أفضل، D أضعف." }
+            ],
+            top20
+          ))}
+
+          ${renderPanel("الموردون المتأخرون", renderTable(
+            [
+              { key: "vendorName", label: "المورد", hint: "اسم المورد." },
+              { key: "ordersCount", label: "الأوامر", hint: "عدد أوامر الشراء." },
+              { key: "remainingQty", label: "المتبقي", hint: "كمية لم تستلم." },
+              { key: "delayedLinesCount", label: "سطور متأخرة", hint: "عدد سطور الشراء المتأخرة." },
+              { key: "maxDelayDays", label: "أقصى تأخير", hint: "أكبر مدة تأخير." },
+              { key: "receivedPercent", label: "استلام %", hint: "نسبة الاستلام." },
+              { key: "totalAmount", label: "قيمة الشراء", hint: "إجمالي الشراء." },
+              { key: "grade", label: "التقييم", hint: "تقييم المورد." }
+            ],
+            delayed
+          ))}
+
+          ${renderPanel("كل الموردين", renderTable(
+            [
+              { key: "vendorName", label: "المورد", hint: "اسم المورد." },
+              { key: "ordersCount", label: "الأوامر", hint: "عدد أوامر الشراء." },
+              { key: "totalAmount", label: "قيمة الشراء", hint: "إجمالي قيمة الشراء." },
+              { key: "receivedPercent", label: "استلام %", hint: "نسبة الاستلام." },
+              { key: "remainingQty", label: "المتبقي", hint: "كمية لم تستلم." },
+              { key: "delayedLinesCount", label: "تأخير", hint: "عدد السطور المتأخرة." },
+              { key: "lastPurchaseDate", label: "آخر شراء", hint: "آخر تاريخ شراء من المورد." },
+              { key: "grade", label: "Grade", hint: "تقييم المورد." }
+            ],
+            suppliers.slice(0, 200)
+          ))}
+        `;
+      } catch (error) {
+        showError(error);
+      }
+    }
+
+    document.getElementById("loadBtn").addEventListener("click", loadReport);
+    document.getElementById("companySelect").addEventListener("change", loadReport);
+
+    loadReport();
+  </script>
+</body>
+</html>

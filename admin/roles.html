@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>الأدوار والصلاحيات</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+
+<script src="../js/api.js"></script>
+<script src="../js/layout.js"></script>
+
+<script>
+
+renderLayout(
+  "الأدوار والصلاحيات",
+  "إدارة صلاحيات التقارير حسب الدور",
+  "admin-roles",
+  `
+    <div class="panel">
+
+      <div class="filters">
+
+        <select id="roleSelect"></select>
+
+        <button
+          class="primary-btn"
+          onclick="savePermissions()">
+
+          حفظ الصلاحيات
+
+        </button>
+
+      </div>
+
+    </div>
+
+    <div id="permissionsArea"></div>
+  `
+);
+
+let allPermissions = [];
+let currentPermissions = [];
+
+async function loadRoles() {
+
+  const response =
+    await apiGet("/roles");
+
+  const roles =
+    response.data || [];
+
+  document.getElementById("roleSelect").innerHTML =
+    roles.map(role => `
+      <option value="${role.id}">
+        ${role.name}
+      </option>
+    `).join("");
+
+  if (roles.length) {
+    await loadPermissions();
+  }
+}
+
+async function loadPermissions() {
+
+  const roleId =
+    document.getElementById("roleSelect").value;
+
+  const catalogResponse =
+    await apiGet("/roles/catalog");
+
+  allPermissions =
+    catalogResponse.data || [];
+
+  const roleResponse =
+    await apiGet(
+      `/roles/${roleId}/permissions`
+    );
+
+  currentPermissions =
+    roleResponse.data || [];
+
+  renderPermissions();
+}
+
+function renderPermissions() {
+
+  const modules = {};
+
+  allPermissions.forEach(permission => {
+
+    if (!modules[permission.module]) {
+      modules[permission.module] = [];
+    }
+
+    modules[permission.module].push(permission);
+
+  });
+
+  document.getElementById("permissionsArea").innerHTML =
+
+    Object.entries(modules)
+      .map(([moduleName, items]) => {
+
+        return `
+
+          <div class="panel">
+
+            <h3>${moduleName}</h3>
+
+            <div class="permissions-grid">
+
+              ${items.map(permission => `
+
+                <label class="permission-item">
+
+                  <input
+                    type="checkbox"
+                    value="${permission.code}"
+                    ${currentPermissions.includes(permission.code)
+                      ? "checked"
+                      : ""}>
+
+                  ${permission.label}
+
+                </label>
+
+              `).join("")}
+
+            </div>
+
+          </div>
+
+        `;
+
+      })
+      .join("");
+
+}
+
+async function savePermissions() {
+
+  const roleId =
+    document.getElementById("roleSelect").value;
+
+  const permissions =
+    Array.from(
+      document.querySelectorAll(
+        "#permissionsArea input:checked"
+      )
+    ).map(item => item.value);
+
+  const response =
+    await apiPut(
+      `/roles/${roleId}/permissions`,
+      {
+        permissions
+      }
+    );
+
+  if (response.success) {
+
+    alert("تم حفظ الصلاحيات بنجاح");
+
+  } else {
+
+    alert("حدث خطأ");
+
+  }
+}
+
+document
+  .getElementById("roleSelect")
+  .addEventListener(
+    "change",
+    loadPermissions
+  );
+
+loadRoles();
+
+</script>
+
+</body>
+</html>

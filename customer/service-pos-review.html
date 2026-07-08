@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>خدمة العملاء - مراجعة فواتير POS</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/report-ui.css" />
+</head>
+<body>
+  <main class="report-ui-page">
+    <section class="inventory-hero-card">
+      <div>
+        <span class="inventory-hero-kicker">Customer Service</span>
+        <h1>خدمة العملاء - مراجعة فواتير POS</h1>
+        <p>
+          بحث برقم العميل أو رقم فاتورة Odoo، عرض تفاصيل الشراء، تسجيل ملاحظات خدمة العملاء، ومراجعة المدير.
+        </p>
+      </div>
+
+      <div id="csUserState" class="inventory-hero-actions">
+        <span class="page-pill">الدخول الداخلي</span>
+      </div>
+    </section>
+
+    <section id="csMessage" class="error-box hidden"></section>
+
+    <section id="loginCard" class="report-card">
+      <div class="report-card-head">
+        <h2>تسجيل دخول خدمة العملاء الداخلي</h2>
+      </div>
+
+      <div class="report-filter-grid">
+        <label class="report-field">
+          اسم المستخدم الداخلي
+          <input id="loginUsername" class="report-input" type="text" autocomplete="username" placeholder="مثال: cs.agent1" />
+        </label>
+
+        <label class="report-field">
+          كلمة السر الداخلية
+          <input id="loginPassword" class="report-input" type="password" autocomplete="current-password" placeholder="••••••••" />
+        </label>
+      </div>
+
+      <div class="report-actions">
+        <button id="loginBtn" class="report-btn-primary" type="button">دخول</button>
+      </div>
+    </section>
+
+    <section id="workArea" class="hidden">
+      <section class="report-card">
+        <div class="report-card-head">
+          <h2>بحث الفواتير</h2>
+          <p>اختار الشركة، ثم ابحث برقم العميل أو رقم فاتورة Odoo.</p>
+        </div>
+
+        <div class="report-filter-grid">
+          <label class="report-field">
+            الشركة
+            <select id="companyId" class="report-select">
+              <option value="">اختر الشركة</option>
+              <option value="1">فيرجينيا</option>
+              <option value="2">كليوباترا</option>
+            </select>
+          </label>
+
+          <label class="report-field">
+            من تاريخ
+            <input id="dateFrom" class="report-input" type="date" />
+          </label>
+
+          <label class="report-field">
+            إلى تاريخ
+            <input id="dateTo" class="report-input" type="date" />
+          </label>
+
+          <label class="report-field">
+            رقم العميل
+            <input id="customerPhone" class="report-input" type="text" placeholder="اكتب رقم العميل" />
+          </label>
+
+          <label class="report-field">
+            رقم فاتورة Odoo
+            <input id="invoiceRef" class="report-input" type="text" placeholder="مثال: POS/2026/0001" />
+          </label>
+
+          <label class="report-field">
+            POS Config ID اختياري
+            <input id="configId" class="report-input" type="text" placeholder="اتركه فارغًا للكل" />
+          </label>
+        </div>
+
+        <div class="inventory-hero-actions">
+          <button id="searchBtn" class="run-btn" type="button">بحث</button>
+          <button id="clearBtn" class="export-btn" type="button">مسح</button>
+          <button id="logoutBtn" class="export-btn" type="button">خروج داخلي</button>
+        </div>
+
+        <p class="inventory-muted-text">
+          ملحوظة: البحث برقم الفاتورة يتجاهل التاريخ لتسهيل المراجعة المباشرة.
+        </p>
+      </section>
+
+      <section id="summaryCard" class="report-card hidden">
+        <div class="report-card-head">
+          <h2>ملخص النتيجة</h2>
+        </div>
+
+        <div class="inventory-kpi-grid">
+          <div class="inventory-kpi-card">
+            <span>عدد الفواتير</span>
+            <strong id="invoiceCount">0</strong>
+            <small>الفواتير المطابقة للبحث</small>
+          </div>
+
+          <div class="inventory-kpi-card">
+            <span>إجمالي الفواتير</span>
+            <strong id="totalAmount">0</strong>
+            <small>إجمالي قيمة الفواتير المطابقة</small>
+          </div>
+        </div>
+      </section>
+
+      <section id="results"></section>
+
+      <section id="reviewFollowupsPanel" class="report-card">
+        <div class="report-card-head">
+          <div>
+            <h2>متابعات تقييم العملاء</h2>
+            <p>
+              متابعة تقييمات العملاء المحايدة وغير الراضية الناتجة من روابط SMS. التحميل يتم بزر واضح فقط.
+            </p>
+          </div>
+        </div>
+
+        <div class="inventory-kpi-grid">
+          <div class="inventory-kpi-card">
+            <span>إجمالي المتابعات</span>
+            <strong id="reviewFollowupTotal">-</strong>
+            <small>كل الحالات حسب الشركة المختارة</small>
+          </div>
+
+          <div class="inventory-kpi-card">
+            <span>جديد</span>
+            <strong id="reviewFollowupNew">-</strong>
+            <small>يحتاج متابعة</small>
+          </div>
+
+          <div class="inventory-kpi-card">
+            <span>أولوية عالية</span>
+            <strong id="reviewFollowupHigh">-</strong>
+            <small>تقييم غير راضٍ</small>
+          </div>
+
+          <div class="inventory-kpi-card">
+            <span>تم الحل</span>
+            <strong id="reviewFollowupResolved">-</strong>
+            <small>حالات مغلقة تشغيليًا</small>
+          </div>
+        </div>
+
+        <div class="report-filter-grid">
+          <label class="report-field">
+            حالة المتابعة
+            <select id="reviewFollowupStatus" class="report-select">
+              <option value="all">كل الحالات</option>
+              <option value="new">جديد</option>
+              <option value="in_progress">جاري المتابعة</option>
+              <option value="contacted">تم التواصل</option>
+              <option value="resolved">تم الحل</option>
+              <option value="closed">مغلق</option>
+            </select>
+          </label>
+
+          <label class="report-field">
+            الأولوية
+            <select id="reviewFollowupPriority" class="report-select">
+              <option value="all">كل الأولويات</option>
+              <option value="high">عالية</option>
+              <option value="medium">متوسطة</option>
+              <option value="low">منخفضة</option>
+            </select>
+          </label>
+
+          <label class="report-field">
+            رقم العميل
+            <input id="reviewFollowupPhone" class="report-input" type="text" placeholder="اختياري" />
+          </label>
+
+          <label class="report-field">
+            رقم الفاتورة
+            <input id="reviewFollowupOrderRef" class="report-input" type="text" placeholder="اختياري" />
+          </label>
+        </div>
+
+        <div class="inventory-hero-actions">
+          <button id="loadReviewFollowupsBtn" class="run-btn" type="button">تحميل متابعات التقييم</button>
+          <button id="refreshReviewFollowupStatsBtn" class="export-btn" type="button">تحديث الأرقام فقط</button>
+        </div>
+
+        <p class="inventory-muted-text">
+          ملاحظة تشغيلية: الموظف يحدث الحالات حتى "تم التواصل". الحل والإغلاق للمدير أو الأدمن.
+        </p>
+
+        <div id="reviewFollowupsContent" class="report-section-gap"></div>
+      </section>
+
+      <section id="managerPanel" class="report-card hidden">
+        <div class="report-card-head">
+          <h2>متابعة المدير</h2>
+          <p>مراجعة ملاحظات خدمة العملاء وسجل الحركات وإدارة المستخدمين الداخليين.</p>
+        </div>
+
+        <div class="report-filter-grid">
+          <label class="report-field">
+            حالة الملاحظات
+            <select id="notesStatus" class="report-select">
+              <option value="submitted">بانتظار المراجعة</option>
+              <option value="draft">مسودة</option>
+              <option value="approved">تم التصديق</option>
+              <option value="returned">مرتجع للموظف</option>
+              <option value="closed">مغلق</option>
+              <option value="all">الكل</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="inventory-hero-actions">
+          <button id="loadNotesBtn" class="run-btn" type="button">تحميل الملاحظات</button>
+          <button id="loadActivityBtn" class="export-btn" type="button">سجل الحركات</button>
+        </div>
+
+        <div id="managerContent" class="report-section-gap"></div>
+      </section>
+    </section>
+  </main>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="./service-pos-review.js"></script>
+</body>
+</html>

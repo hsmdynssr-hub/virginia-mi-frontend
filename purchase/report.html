@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Purchase Report</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+
+  <script>
+    renderLayout("تقرير المشتريات بالفترة", "تحليل أوامر الشراء والموردين والخامات خلال فترة", "purchase-report", `<div id="reportArea"></div>`);
+
+    async function loadReport() {
+      try {
+        showLoading();
+
+        const report = await apiGet("/purchase/report", getFilters());
+        const data = report.data || {};
+        const summary = data.analysis?.executiveSummary || {};
+        const vendors = data.vendorSummary || [];
+        const products = data.productSummary || [];
+        const orders = data.orders || [];
+        const insights = data.analysis?.insights || [];
+
+        document.getElementById("reportArea").innerHTML = `
+          ${renderKpis([
+            kpiCard("أوامر الشراء", summary.totalOrders, "عدد أوامر الشراء في الفترة."),
+            kpiCard("غير مؤكد", (summary.draftOrdersCount || 0) + (summary.sentOrdersCount || 0), "أوامر لم يتم تأكيدها بعد."),
+            kpiCard("قيمة الشراء", summary.totalAmount, "إجمالي قيمة الشراء."),
+            kpiCard("نسبة الاستلام", `${summary.receivedPercent || 0}%`, "نسبة ما تم استلامه.")
+          ])}
+
+          ${renderPanel("التحليل", `
+            <div class="analysis-box">
+              ${insights.map((i) => `<p>${i}</p>`).join("") || "<p>لا يوجد تحليل.</p>"}
+            </div>
+          `)}
+
+          ${renderPanel("تحليل الموردين", renderTable(
+            [
+              { key: "vendorName", label: "المورد", hint: "اسم المورد." },
+              { key: "ordersCount", label: "الأوامر", hint: "عدد أوامر المورد." },
+              { key: "purchaseOrdersCount", label: "مؤكد", hint: "أوامر شراء مؤكدة." },
+              { key: "cancelledOrdersCount", label: "ملغي", hint: "أوامر شراء ملغية." },
+              { key: "totalAmount", label: "القيمة", hint: "إجمالي قيمة الشراء من المورد." }
+            ],
+            vendors
+          ))}
+
+          ${renderPanel("تحليل المنتجات", renderTable(
+            [
+              { key: "productName", label: "الصنف", hint: "اسم الصنف." },
+              { key: "orderedQty", label: "المطلوب", hint: "كمية مطلوبة." },
+              { key: "receivedQty", label: "المستلم", hint: "كمية مستلمة." },
+              { key: "remainingToReceiveQty", label: "المتبقي", hint: "كمية لم تستلم." },
+              { key: "averagePriceUnit", label: "متوسط السعر", hint: "متوسط سعر الشراء." },
+              { key: "totalAmount", label: "القيمة", hint: "إجمالي قيمة الصنف." }
+            ],
+            products
+          ))}
+
+          ${renderPanel("أوامر الشراء", renderTable(
+            [
+              { key: "name", label: "أمر الشراء", hint: "رقم أمر الشراء." },
+              { key: "vendorName", label: "المورد", hint: "اسم المورد." },
+              { key: "dateOrder", label: "التاريخ", hint: "تاريخ الأمر." },
+              { key: "state", label: "الحالة", hint: "حالة أمر الشراء." },
+              { key: "amountUntaxed", label: "قبل الضريبة", hint: "قيمة قبل الضريبة." },
+              { key: "amountTotal", label: "الإجمالي", hint: "إجمالي الأمر." }
+            ],
+            orders.slice(0, 200)
+          ))}
+        `;
+      } catch (error) {
+        showError(error);
+      }
+    }
+
+    document.getElementById("loadBtn").addEventListener("click", loadReport);
+    document.getElementById("companySelect").addEventListener("change", loadReport);
+    loadReport();
+  </script>
+</body>
+</html>

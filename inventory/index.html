@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Inventory Dashboard</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+
+  <script>
+    renderLayout(
+      "داشبورد المخزون",
+      "كل تقارير المخزون والمواقع وحركة المخازن في مكان واحد",
+      "inventory",
+      `
+        <div class="reports-grid">
+          <a class="report-card" href="./intermediate-control.html">
+            <span class="page-pill">Intermediate Control</span>
+            <h3>رقابة المخازن الوسيطة</h3>
+            <p>
+              متابعة حركة المخازن الوسيطة، الأرصدة، والتحويلات بين مراحل التخزين
+              لاكتشاف التعطيل أو التراكم.
+            </p>
+          </a>
+
+          <a class="report-card" href="./executive-summary.html">
+            <span class="page-pill">Executive Summary</span>
+            <h3>ملخص المخزون التنفيذي</h3>
+            <p>
+              قيمة المخزون، عدد الأصناف، التغطية، الدوران، والأصناف بطيئة الحركة
+              بصورة إدارية مختصرة.
+            </p>
+          </a>
+
+          <a class="report-card" href="./flow-control.html">
+            <span class="page-pill">Flow Control</span>
+            <h3>تحكم حركة المخزون</h3>
+            <p>
+              متابعة تدفق المخزون بين المواقع، نقاط الاختناق، وحالات الحركة
+              التي تحتاج تدخل إداري.
+            </p>
+          </a>
+
+          <a class="report-card" href="./movement-intelligence.html">
+            <span class="page-pill">Movement Intelligence</span>
+            <h3>تحليل حركة المخزون</h3>
+            <p>
+              تحليل حركات الدخول والخروج والتحويلات حسب الموقع والمنتج
+              لاكتشاف الأنماط غير الطبيعية.
+            </p>
+          </a>
+        </div>
+      `
+    );
+  </script>
+</body>
+</html>

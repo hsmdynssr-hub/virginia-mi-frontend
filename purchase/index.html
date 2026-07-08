@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Purchase Reports</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+
+  <script>
+    renderLayout(
+      "تقارير المشتريات",
+      "كل تقارير المشتريات والموردين وأوامر الشراء في مكان واحد",
+      "purchase",
+      `
+        <div class="reports-grid">
+          <a class="report-card" href="./daily.html">
+            <span class="page-pill">Daily Purchase</span>
+            <h3>مشتريات يومي</h3>
+            <p>
+              متابعة مشتريات اليوم وأوامر الشراء الحديثة بصورة تشغيلية مختصرة.
+            </p>
+          </a>
+
+          <a class="report-card" href="./report.html">
+            <span class="page-pill">Purchase Report</span>
+            <h3>مشتريات بالفترة</h3>
+            <p>
+              تقرير عام للمشتريات حسب الفترة: الموردين، المنتجات،
+              أوامر الشراء، والقيم.
+            </p>
+          </a>
+
+          <a class="report-card" href="./price-intelligence.html">
+            <span class="page-pill">Price Intelligence</span>
+            <h3>تغير أسعار الشراء</h3>
+            <p>
+              مقارنة آخر سعر شراء بالسعر السابق لاكتشاف الزيادات والانحرافات
+              في أسعار الموردين.
+            </p>
+          </a>
+
+          <a class="report-card" href="./order-control.html">
+            <span class="page-pill">Order Control</span>
+            <h3>متابعة أوامر الشراء</h3>
+            <p>
+              متابعة أوامر الشراء تحت الاعتماد، المتأخرة، المعتمدة،
+              وآخر تعديل على الأمر.
+            </p>
+          </a>
+
+          <a class="report-card" href="./supplier-performance.html">
+            <span class="page-pill">Supplier Performance</span>
+            <h3>كفاءة الموردين</h3>
+            <p>
+              تقييم الموردين حسب القيمة، الالتزام، الاستلام، والتأخير
+              لدعم قرارات الشراء.
+            </p>
+          </a>
+
+          <a class="report-card" href="./open-orders.html">
+            <span class="page-pill">Open Orders</span>
+            <h3>أوامر شراء مفتوحة</h3>
+            <p>
+              أوامر شراء معتمدة لم يتم استلامها بالكامل وتحتاج متابعة
+              مع المورد أو المخازن.
+            </p>
+          </a>
+        </div>
+      `
+    );
+  </script>
+</body>
+</html>

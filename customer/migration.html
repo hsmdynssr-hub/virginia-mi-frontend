@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Customer Migration</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+
+  <script>
+    renderLayout("تحول قنوات العملاء", "تحليل انتقال العملاء بين POS و Sales", "customer-migration", `<div id="reportArea"></div>`);
+
+    async function loadReport() {
+      try {
+        showLoading();
+
+        const report = await apiGet("/customer/migration", getFilters());
+        const data = report.data || {};
+        const summary = data.summary || {};
+        const rows = data.migrations || [];
+        const insights = data.insights || [];
+
+        document.getElementById("reportArea").innerHTML = `
+          ${renderKpis([
+            kpiCard("Hybrid Customers", summary.hybridCustomersCount, "عملاء اشتروا من POS و Sales."),
+            kpiCard("POS → Sales", summary.posToSaleCount, "عملاء بدأوا POS ثم ظهروا في Sales."),
+            kpiCard("Sales → POS", summary.saleToPosCount, "عملاء بدأوا Sales ثم ظهروا في POS."),
+            kpiCard("Total Records", rows.length, "عدد العملاء في التقرير.")
+          ])}
+
+          ${renderPanel("التحليل", `
+            <div class="analysis-box">
+              ${insights.map((item) => `<p>${item}</p>`).join("")}
+            </div>
+          `)}
+
+          ${renderPanel("جدول تحول القنوات", renderTable(
+            [
+              { key: "customerName", label: "العميل", hint: "اسم العميل." },
+              { key: "migrationType", label: "نوع التحول", hint: "POS_TO_SALE أو SALE_TO_POS." },
+              { key: "saleOrdersCount", label: "Sales Orders", hint: "عدد أوامر Sales." },
+              { key: "posOrdersCount", label: "POS Orders", hint: "عدد فواتير POS." },
+              { key: "saleAmount", label: "Sales Amount", hint: "قيمة Sales." },
+              { key: "posAmount", label: "POS Amount", hint: "قيمة POS." },
+              { key: "totalAmount", label: "Total", hint: "إجمالي العميل." },
+              { key: "lastSaleDate", label: "آخر Sales", hint: "آخر تاريخ شراء من Sales." },
+              { key: "lastPosDate", label: "آخر POS", hint: "آخر تاريخ شراء من POS." }
+            ],
+            rows
+          ))}
+        `;
+      } catch (error) {
+        showError(error);
+      }
+    }
+
+    document.getElementById("loadBtn").addEventListener("click", loadReport);
+    document.getElementById("companySelect").addEventListener("change", loadReport);
+    loadReport();
+  </script>
+</body>
+</html>
