@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   renderLayout(
     "تقرير مبيعات الفروع",
-    "مبيعات مجمعة لكل فرع بناءً على نقاط البيع المرتبطة به.",
+    "نفس منطق تحليل أداء المعارض: استرداد أموال، عروض وتعديلات سالبة، وصافي مبيعات موحد.",
     "branches-sales",
     buildBranchSalesContent()
   );
@@ -62,7 +62,7 @@ function buildBranchSalesContent() {
       <section class="report-card branch-sales-report-section">
         <div class="report-card-head">
           <h2>جدول مبيعات الفروع</h2>
-          <p>الأرقام مبنية على POS_CONFIG المرتبط بكل فرع.</p>
+          <p>الأرقام مبنية على نفس منطق تحليل أداء المعارض POS Branch Sales.</p>
         </div>
 
         <div id="branchSalesTableBox"></div>
@@ -216,13 +216,13 @@ function getSelectedCompanyId() {
   return document.getElementById("companySelect")?.value || "";
 }
 
-function getSelectedBranchId() {
+function getSelectedBranchCode() {
   return document.getElementById("branchFilter")?.value || "";
 }
 
 function validateBranchSalesContext() {
   const companyId = getSelectedCompanyId();
-  const branchId = getSelectedBranchId();
+  const branchCode = getSelectedBranchCode();
 
   if (!companyId) {
     return {
@@ -231,7 +231,7 @@ function validateBranchSalesContext() {
     };
   }
 
-  if (!branchId) {
+  if (!branchCode) {
     return {
       ok: false,
       message: "لازم تختار الفرع أو كل الفروع قبل تحميل التقرير."
@@ -248,7 +248,7 @@ function getBranchSalesFilters() {
     companyId: getSelectedCompanyId(),
     dateFrom: document.getElementById("dateFrom")?.value || "",
     dateTo: document.getElementById("dateTo")?.value || "",
-    branchId: getSelectedBranchId(),
+    branchCode: getSelectedBranchCode(),
     viewMode: document.getElementById("viewMode")?.value || "summary"
   };
 }
@@ -267,17 +267,51 @@ async function loadBranchOptions() {
   }
 
   try {
-    const response = await apiGet("/branches/overview", { companyId });
-    const branches = response.data?.branches || [];
+    /*
+      تقرير مبيعات الفروع يستخدم الآن نفس منطق POS Branch Sales،
+      لذلك لازم الفلتر يكون branchCode وليس branchId القديم.
+    */
+    const response =
+      await apiGet(
+        "/pos-branch-access/me",
+        {
+          companyId
+        }
+      );
+
+    const branches =
+      response.data ||
+      response.branches ||
+      [];
 
     select.innerHTML = `
       <option value="">اختر الفرع / النطاق</option>
       <option value="all">كل الفروع</option>
-      ${branches.map((branch) => `
-        <option value="${branch.branchId}">
-          ${ReportUI.escapeHtml(branch.branchNameAr || branch.branchName)}
-        </option>
-      `).join("")}
+      ${
+        branches
+          .map((branch) => {
+            const branchCode =
+              branch.branchCode ||
+              branch.branch_code ||
+              branch.code ||
+              "";
+
+            const branchName =
+              branch.branchName ||
+              branch.branch_name ||
+              branch.name ||
+              branchCode;
+
+            if (!branchCode) return "";
+
+            return `
+              <option value="${ReportUI.escapeHtml(branchCode)}">
+                ${ReportUI.escapeHtml(branchName)}
+              </option>
+            `;
+          })
+          .join("")
+      }
     `;
 
     const stillExists = Array.from(select.options).some(
@@ -288,7 +322,7 @@ async function loadBranchOptions() {
   } catch (error) {
     console.error(error);
 
-    select.innerHTML = `<option value="">تعذر تحميل الفروع</option>`;
+    select.innerHTML = `<option value="">تعذر تحميل فروع POS</option>`;
     select.value = "";
   }
 }
@@ -317,8 +351,8 @@ async function loadBranchSalesReport() {
       dateTo: filters.dateTo
     };
 
-    if (filters.branchId && filters.branchId !== "all") {
-      params.branchId = filters.branchId;
+    if (filters.branchCode && filters.branchCode !== "all") {
+      params.branchCode = filters.branchCode;
     }
 
     const response = await apiGet("/branches/sales", params);
@@ -355,27 +389,45 @@ function renderBranchSalesKpis(summary) {
     {
       title: "صافي المبيعات",
       value: ReportUI.money(summary.netSales),
-      hint: "بعد المرتجعات"
+      hint: "إجمالي المبيعات - استرداد الأموال - العروض والتعديلات السالبة"
     },
     {
-      title: "إجمالي البيع",
-      value: ReportUI.money(summary.totalSales),
-      hint: "أوامر البيع الموجبة"
+      title: "إجمالي المبيعات",
+      value: ReportUI.money(summary.grossSales || summary.totalSales),
+      hint: "سطور البيع الموجبة"
     },
     {
-      title: "المرتجعات",
-      value: ReportUI.money(summary.returnsAmount),
-      hint: "أوامر POS السالبة"
+      title: "المرتجعات / استرداد أموال",
+      value: ReportUI.money(summary.returnsAmount || summary.returnsValue),
+      hint: "استرداد أموال فقط، وليس كل سطر سالب"
+    },
+    {
+      title: "العروض والتعديلات السالبة",
+      value: ReportUI.money(
+        summary.negativeAdjustmentsAmount ||
+        summary.negativeAdjustmentsValue
+      ),
+      hint: "سطور سالبة داخل فواتير بيع عادية"
+    },
+    {
+      title: "إجمالي الخصومات",
+      value: ReportUI.money(summary.discountsAmount || summary.totalDiscountValue),
+      hint: "الخصومات اليدوية من سطور الفواتير"
     },
     {
       title: "عدد الفواتير",
-      value: ReportUI.number(summary.totalOrdersCount),
-      hint: "كل أوامر POS"
+      value: ReportUI.number(summary.totalOrdersCount || summary.ordersCount),
+      hint: "كل فواتير POS"
     },
     {
       title: "متوسط الفاتورة",
       value: ReportUI.money(summary.averageTicket),
-      hint: "إجمالي البيع / الفواتير"
+      hint: "صافي المبيعات ÷ عدد الفواتير"
+    },
+    {
+      title: "نسبة العروض والتعديلات",
+      value: ReportUI.percent(summary.negativeAdjustmentsRate),
+      hint: "العروض والتعديلات السالبة ÷ إجمالي المبيعات"
     },
     {
       title: "أفضل فرع",
@@ -411,21 +463,28 @@ function renderSummaryTable(rows) {
       },
       {
         key: "posSources",
-        label: "POS المرتبط",
+        label: "مصدر التجميع",
         width: "160px",
         format: renderPosSources
       },
       {
-        key: "totalSales",
-        label: "إجمالي البيع",
+        key: "grossSales",
+        label: "إجمالي المبيعات",
         width: "115px",
         className: "report-money",
         format: (value) => ReportUI.money(value)
       },
       {
         key: "returnsAmount",
-        label: "المرتجعات",
+        label: "المرتجعات / استرداد أموال",
         width: "115px",
+        className: "report-money",
+        format: (value) => ReportUI.money(value)
+      },
+      {
+        key: "negativeAdjustmentsAmount",
+        label: "العروض والتعديلات السالبة",
+        width: "155px",
         className: "report-money",
         format: (value) => ReportUI.money(value)
       },
@@ -450,11 +509,11 @@ function renderSummaryTable(rows) {
             value: ReportUI.money(row.averageTicket)
           },
           {
-            label: "مرتجع",
+            label: "استرداد",
             value: ReportUI.percent(row.returnRate)
           },
           {
-            label: "خصم",
+            label: "خصم يدوي",
             value: ReportUI.percent(row.discountRate)
           }
         ])
@@ -501,23 +560,28 @@ function renderDetailedTable(rows) {
       },
       {
         key: "posSources",
-        label: "POS",
+        label: "مصدر التجميع",
         width: "160px",
         format: renderPosSources
       },
       {
-        key: "totalSales",
-        label: "إجمالي البيع",
+        key: "grossSales",
+        label: "إجمالي المبيعات",
         format: (value) => ReportUI.money(value)
       },
       {
         key: "returnsAmount",
-        label: "المرتجعات",
+        label: "المرتجعات / استرداد أموال",
+        format: (value) => ReportUI.money(value)
+      },
+      {
+        key: "negativeAdjustmentsAmount",
+        label: "العروض والتعديلات السالبة",
         format: (value) => ReportUI.money(value)
       },
       {
         key: "discountsAmount",
-        label: "الخصومات",
+        label: "الخصومات اليدوية",
         format: (value) => ReportUI.money(value)
       },
       {
@@ -528,7 +592,7 @@ function renderDetailedTable(rows) {
       },
       {
         key: "totalOrdersCount",
-        label: "كل الفواتير",
+        label: "عدد الفواتير",
         format: (value) => ReportUI.number(value)
       },
       {
@@ -538,7 +602,7 @@ function renderDetailedTable(rows) {
       },
       {
         key: "refundOrdersCount",
-        label: "فواتير مرتجع",
+        label: "فواتير استرداد",
         format: (value) => ReportUI.number(value)
       },
       {
@@ -548,12 +612,17 @@ function renderDetailedTable(rows) {
       },
       {
         key: "returnRate",
-        label: "معدل المرتجع",
+        label: "نسبة استرداد الأموال",
+        format: (value) => ReportUI.percent(value)
+      },
+      {
+        key: "negativeAdjustmentsRate",
+        label: "نسبة العروض والتعديلات",
         format: (value) => ReportUI.percent(value)
       },
       {
         key: "discountRate",
-        label: "معدل الخصم",
+        label: "نسبة الخصم اليدوي",
         format: (value) => ReportUI.percent(value)
       },
       {

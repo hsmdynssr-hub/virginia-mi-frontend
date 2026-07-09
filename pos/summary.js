@@ -335,14 +335,19 @@ function renderPosSummaryKpis(summary) {
       hint: "المبيعات الموجبة فقط قبل المرتجعات"
     },
     {
-      title: "المرتجعات",
+      title: "المرتجعات / استرداد أموال",
       value: formatMoney(summary.returnsValue),
-      hint: "مرتجعات منفصلة عن الخصومات"
+      hint: "استرداد أموال فقط، وليس كل سطر سالب"
+    },
+    {
+      title: "العروض والتعديلات السالبة",
+      value: formatMoney(summary.negativeAdjustmentsValue),
+      hint: "سطور سالبة داخل فواتير البيع العادية مثل عروض أو كوبونات أو تسويات"
     },
     {
       title: "صافي المبيعات",
       value: formatMoney(summary.netSales),
-      hint: "إجمالي المبيعات - المرتجعات"
+      hint: "إجمالي المبيعات - المرتجعات - العروض والتعديلات السالبة"
     },
     {
       title: "متوسط الفاتورة",
@@ -362,7 +367,12 @@ function renderPosSummaryKpis(summary) {
     {
       title: "نسبة المرتجعات",
       value: formatPercent(summary.returnsPercent),
-      hint: "المرتجعات ÷ إجمالي المبيعات"
+      hint: "استرداد الأموال ÷ إجمالي المبيعات"
+    },
+    {
+      title: "نسبة العروض والتعديلات",
+      value: formatPercent(summary.negativeAdjustmentsPercent),
+      hint: "العروض والتعديلات السالبة ÷ إجمالي المبيعات"
     },
     {
       title: "إجمالي الهامش",
@@ -444,7 +454,8 @@ function renderBranches(rows) {
     ["المعرض", "branchName"],
     ["عدد الفواتير", "ordersCount", (v) => formatNumber(v, 0)],
     ["إجمالي المبيعات", "grossSales", formatMoney],
-    ["المرتجعات", "returnsValue", formatMoney],
+    ["المرتجعات / استرداد أموال", "returnsValue", formatMoney],
+    ["العروض والتعديلات السالبة", "negativeAdjustmentsValue", formatMoney],
     ["صافي المبيعات", "netSales", formatMoney],
     ["متوسط الفاتورة", "averageTicket", formatMoney],
     ["تسجيل العملاء", "customerCaptureRate", formatPercent]
@@ -456,7 +467,8 @@ function renderCashiers(rows) {
     ["الكاشير", "cashierName"],
     ["عدد الفواتير", "ordersCount", (v) => formatNumber(v, 0)],
     ["إجمالي المبيعات", "grossSales", formatMoney],
-    ["المرتجعات", "returnsValue", formatMoney],
+    ["المرتجعات / استرداد أموال", "returnsValue", formatMoney],
+    ["العروض والتعديلات السالبة", "negativeAdjustmentsValue", formatMoney],
     ["صافي المبيعات", "netSales", formatMoney],
     ["متوسط الفاتورة", "averageTicket", formatMoney],
     ["تسجيل العملاء", "customerCaptureRate", formatPercent]
@@ -468,7 +480,7 @@ function renderHours(rows) {
     ["الساعة", "hourLabel"],
     ["عدد الفواتير", "ordersCount", (v) => formatNumber(v, 0)],
     ["إجمالي المبيعات", "grossSales", formatMoney],
-    ["المرتجعات", "returnsValue", formatMoney],
+    ["المرتجعات / استرداد أموال", "returnsValue", formatMoney],
     ["صافي المبيعات", "netSales", formatMoney],
     ["متوسط الفاتورة", "averageTicket", formatMoney],
     ["فاصل الفواتير / دقيقة", "averageInvoiceGapMinutes", formatNullableNumber],

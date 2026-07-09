@@ -83,8 +83,8 @@
 
     "branches-sales": () => {
       return {
-        branchId:
-          document.getElementById("branchFilter")?.value || ""
+        branchCode:
+          document.getElementById("branchFilter")?.value || "all"
       };
     },
 

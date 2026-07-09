@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   renderLayout(
-    "تحليل أداء المعرض",
-    "مبيعات المعرض، المرتجعات، الخصومات، تسجيل العملاء، وأداء الكاشير.",
+    "تحليل أداء المعارض",
+    "مبيعات المعارض، استرداد الأموال، العروض والتعديلات السالبة، الخصومات، تسجيل العملاء، وأداء الكاشير.",
     "pos-branch-sales",
     buildBranchSalesContent()
   );
@@ -31,11 +31,6 @@ function buildBranchSalesContent() {
     <section class="inventory-report-card">
       <h2>ملخص المعارض</h2>
       <div id="branchesTable"></div>
-    </section>
-
-    <section class="inventory-report-card">
-      <h2>أداء نقاط البيع داخل المعرض</h2>
-      <div id="posConfigsTable"></div>
     </section>
 
     <section class="inventory-report-card">
@@ -414,7 +409,6 @@ function renderBranchSalesReport(data) {
 
   renderBranchSalesKpis(summary);
   renderBranches(data.branches || []);
-  renderPosConfigs(data.posConfigs || []);
   renderCashiers(data.cashiers || []);
   renderProducts(data.products || []);
   renderNotes(data.notes || []);
@@ -433,7 +427,7 @@ function renderBranchSalesKpis(summary) {
     {
       title: "صافي المبيعات",
       value: formatMoney(summary.netSales),
-      hint: "المبيعات بعد خصم المرتجعات"
+      hint: "إجمالي المبيعات - استرداد الأموال - العروض والتعديلات السالبة"
     },
     {
       title: "عدد الفواتير",
@@ -446,9 +440,19 @@ function renderBranchSalesKpis(summary) {
       hint: "صافي المبيعات ÷ عدد الفواتير"
     },
     {
-      title: "المرتجعات",
+      title: "المرتجعات / استرداد أموال",
       value: formatMoney(summary.returnsValue),
-      hint: "قيمة فواتير المرتجع"
+      hint: "استرداد أموال فقط، وليس كل سطر سالب"
+    },
+    {
+      title: "العروض والتعديلات السالبة",
+      value: formatMoney(summary.negativeAdjustmentsValue),
+      hint: "سطور سالبة داخل فواتير البيع العادية مثل عروض أو كوبونات أو تسويات"
+    },
+    {
+      title: "نسبة العروض والتعديلات",
+      value: formatPercent(calculatePercent(summary.negativeAdjustmentsValue, summary.grossSales)),
+      hint: "العروض والتعديلات السالبة ÷ إجمالي المبيعات"
     },
     {
       title: "إجمالي الخصم",
@@ -504,8 +508,12 @@ function renderBranches(rows) {
           render: (row) => formatMoney(row.grossSales)
         },
         {
-          label: "المرتجعات",
+          label: "المرتجعات / استرداد أموال",
           render: (row) => formatMoney(row.returnsValue)
+        },
+        {
+          label: "العروض والتعديلات السالبة",
+          render: (row) => formatMoney(row.negativeAdjustmentsValue)
         },
         {
           label: "صافي المبيعات",
@@ -588,8 +596,12 @@ function renderCashiers(rows) {
           render: (row) => formatMoney(row.grossSales)
         },
         {
-          label: "المرتجعات",
+          label: "المرتجعات / استرداد أموال",
           render: (row) => formatMoney(row.returnsValue)
+        },
+        {
+          label: "العروض والتعديلات السالبة",
+          render: (row) => formatMoney(row.negativeAdjustmentsValue)
         },
         {
           label: "صافي المبيعات",
@@ -632,8 +644,12 @@ function renderProducts(rows) {
           render: (row) => formatMoney(row.grossSales)
         },
         {
-          label: "المرتجعات",
+          label: "المرتجعات / استرداد أموال",
           render: (row) => formatMoney(row.returnsValue)
+        },
+        {
+          label: "العروض والتعديلات السالبة",
+          render: (row) => formatMoney(row.negativeAdjustmentsValue)
         },
         {
           label: "صافي المبيعات",
@@ -839,6 +855,15 @@ async function downloadBranchSalesExcel() {
       exportBtn.textContent = "تصدير Excel";
     }
   }
+}
+
+function calculatePercent(value, total) {
+  const numerator = Number(value || 0);
+  const denominator = Number(total || 0);
+
+  if (!denominator) return 0;
+
+  return (numerator / denominator) * 100;
 }
 
 function formatNumber(value, digits = 2) {
