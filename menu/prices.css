@@ -148,3 +148,20 @@
   background: rgba(255, 193, 7, 0.18);
   border: 1px solid rgba(255, 193, 7, 0.55);
 }
+
+
+.menu-prices-page .report-btn-accent {
+  min-height: 48px;
+  border: 1px solid rgba(180, 137, 48, 0.35);
+  border-radius: 14px;
+  padding: 0 18px;
+  background: linear-gradient(135deg, #123a54, #0b6f6a);
+  color: #ffffff;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(9, 41, 56, 0.16);
+}
+
+.menu-prices-page .report-btn-accent:hover {
+  transform: translateY(-1px);
+}

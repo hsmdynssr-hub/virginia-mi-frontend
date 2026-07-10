@@ -19,6 +19,7 @@ let menuDiscovery = {
 };
 
 let lastMenuFilters = null;
+let lastMenuData = null;
 
 function buildMenuPricesContent() {
   return `
@@ -118,6 +119,10 @@ function buildMenuPricesContent() {
           <button id="exportMenuExcelBtn" type="button" class="report-btn-secondary">
             تصدير Excel
           </button>
+
+          <button id="openProfessionalMenuBtn" type="button" class="report-btn-accent">
+            فتح المينو الاحترافي
+          </button>
         </div>
       </section>
 
@@ -155,8 +160,8 @@ function buildMenuPricesContent() {
           </div>
           <div class="report-analysis">
             <p>
-              لو قائمة الأسعار لا تحتوي قاعدة مناسبة للمنتج، يستخدم النظام سعر البيع من كارت الصنف تلقائيًا.
-              هذا هو منطق الـ Default/Public price في Odoo.
+              لو السعر ظهر بمصدر <strong>fallback_list_price</strong>، راجع دالة قائمة الأسعار في Odoo
+              أو ابعتلي النتيجة عشان نعمل توافق أدق مع نسخة Odoo عندك.
             </p>
           </div>
         </div>
@@ -171,6 +176,7 @@ function bindMenuPricesEvents() {
   const channelSelect = document.getElementById("menuChannel");
   const viewMode = document.getElementById("menuViewMode");
   const exportBtn = document.getElementById("exportMenuExcelBtn");
+  const openProfessionalBtn = document.getElementById("openProfessionalMenuBtn");
 
   if (companySelect) {
     companySelect.addEventListener("change", async () => {
@@ -185,6 +191,10 @@ function bindMenuPricesEvents() {
 
   if (exportBtn) {
     exportBtn.addEventListener("click", exportMenuExcel);
+  }
+
+  if (openProfessionalBtn) {
+    openProfessionalBtn.addEventListener("click", openProfessionalMenu);
   }
 
   if (channelSelect) {
@@ -217,6 +227,7 @@ function bindMenuPricesEvents() {
   window.loadMenuPrices = loadMenuReport;
   window.loadMenuDiscovery = loadMenuDiscovery;
   window.exportMenuExcel = exportMenuExcel;
+  window.openProfessionalMenu = openProfessionalMenu;
 }
 
 function renderMenuInitialState() {
@@ -444,6 +455,7 @@ async function loadMenuReport() {
 
     hideMenuLoading();
     lastMenuFilters = filters;
+    lastMenuData = data;
     renderMenuReport(data, filters);
   } catch (error) {
     hideMenuLoading();
@@ -482,19 +494,32 @@ async function exportMenuExcel() {
   }
 }
 
-function formatPriceSource(value) {
-  const source = String(value || "").trim();
 
-  if (source === "product_card_list_price") return "سعر كارت الصنف";
-  if (source.startsWith("pricelist.item.fixed")) return "قاعدة سعر ثابت";
-  if (source.startsWith("pricelist.item.percentage")) return "قاعدة خصم نسبة";
-  if (source.startsWith("pricelist.item.formula")) return "قاعدة معادلة سعر";
-  if (source === "pricelist._get_product_price") return "دالة Odoo";
-  if (source === "pricelist.price_get") return "دالة Odoo قديمة";
-  if (source === "fallback_list_price") return "سعر كارت الصنف";
+function buildProfessionalMenuPayload() {
+  if (!lastMenuData || !Array.isArray(lastMenuData.rows) || !lastMenuData.rows.length) {
+    throw new Error("حمّل المينو أولًا ثم افتح الصفحة الاحترافية.");
+  }
 
-  return source || "-";
+  return {
+    generatedAt: new Date().toISOString(),
+    source: "menu-prices",
+    title: "Virginia Olive Menu",
+    companyName: document.getElementById("companySelect")?.selectedOptions?.[0]?.textContent?.trim() || "",
+    filters: lastMenuFilters || {},
+    data: lastMenuData
+  };
 }
+
+function openProfessionalMenu() {
+  try {
+    const payload = buildProfessionalMenuPayload();
+    sessionStorage.setItem("mi.professionalMenu.payload", JSON.stringify(payload));
+    window.open("./public-menu.html", "_blank");
+  } catch (error) {
+    showMenuError(error);
+  }
+}
+
 
 function renderMenuReport(data, filters) {
   const rows = data.rows || [];
@@ -555,9 +580,9 @@ function renderMenuReport(data, filters) {
       hint: "متوسط نسبة الخصم على المنتجات المخفضة"
     },
     {
-      title: "أسعار من كارت الصنف",
-      value: ReportUI.number(summary.productCardPriceCount + (summary.compareProductCardPriceCount || 0)),
-      hint: "قوائم أسعار بدون قاعدة مناسبة، فتم استخدام سعر البيع من كارت الصنف"
+      title: "أسعار fallback",
+      value: ReportUI.number(summary.fallbackPriceCount + (summary.compareFallbackPriceCount || 0)),
+      hint: "أسعار لم يتم حسابها من pricelist method وتحتاج مراجعة"
     }
   ]);
 
@@ -640,10 +665,7 @@ function renderClassicMenu(rows, filters) {
       key: "priceSource",
       label: "مصدر السعر",
       width: "170px",
-      format: (value) => ReportUI.statusPill(
-        formatPriceSource(value),
-        value === "product_card_list_price" || value === "fallback_list_price" ? "info" : "good"
-      )
+      format: (value) => ReportUI.statusPill(value, value === "fallback_list_price" ? "warn" : "good")
     }
   ];
 
@@ -693,8 +715,8 @@ function renderDynamicMenu(rows, filters) {
               : "الكمية الرقمية مخفية"}
           </div>
 
-          ${row.priceSource === "product_card_list_price" || row.priceSource === "fallback_list_price"
-            ? `<div class="menu-warning menu-info">السعر من كارت الصنف</div>`
+          ${row.priceSource === "fallback_list_price"
+            ? `<div class="menu-warning">السعر يحتاج مراجعة من قائمة الأسعار</div>`
             : ""}
         </article>
       `).join("")}
