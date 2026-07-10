@@ -265,6 +265,7 @@ function isReportApiPath(path) {
   return [
     "/pos",
     "/branches",
+    "/menu",
     "/customer",
     "/production",
     "/purchase",

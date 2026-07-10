@@ -12,6 +12,8 @@ const REPORT_PAGE_MAP = {
   "branches-replenishment": "branches.replenishment",
   "branches-comparison": "branches.comparison",
 
+  "menu-prices": "menu.prices",
+
   pos: "pos.index",
   "pos-summary": "pos.summary",
   "pos-branch-sales": "pos.branch_sales",
@@ -83,6 +85,7 @@ const PAGES_WITHOUT_REPORT_TOOLBAR = new Set([
   "admin-roles",
 
   "branches",
+  "menu-prices",
   "pos",
   "customer",
   
@@ -523,6 +526,18 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
               <a data-page="branches-inventory-count" class="nav-link" href="../branches/inventory-count.html">جرد الفرع اللحظي</a>
               <a data-page="branches-replenishment" class="nav-link" href="../branches/replenishment.html"> احتياجات الفروع واعاده الطلب</a>
               <a data-page="branches-comparison" class="nav-link" href="../branches/comparison.html">مقارنة الفروع</a>
+            </div>
+          </div>
+
+
+          <div class="nav-accordion" data-accordion="Menu">
+            <button type="button" class="nav-accordion-head" data-accordion-toggle="Menu">
+              <span>مينو الأسعار والمخزون 🧾 Menu</span>
+              <span class="nav-accordion-arrow">⌄</span>
+            </button>
+
+            <div class="nav-accordion-body">
+              <a data-page="menu-prices" class="nav-link" href="../menu/prices.html">مينو الأسعار والمخزون</a>
             </div>
           </div>
 
