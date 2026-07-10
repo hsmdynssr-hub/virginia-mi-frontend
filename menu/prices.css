@@ -104,3 +104,20 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+.menu-prices-page .report-btn-secondary {
+  min-height: 48px;
+  border: 1px solid rgba(17, 91, 126, 0.25);
+  border-radius: 14px;
+  padding: 0 18px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #0f3448;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.menu-prices-page .report-btn-secondary:disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+}

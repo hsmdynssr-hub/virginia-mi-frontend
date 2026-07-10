@@ -13,8 +13,12 @@ document.addEventListener("DOMContentLoaded", () => {
 let menuDiscovery = {
   channels: [],
   pricelists: [],
-  locations: []
+  locations: [],
+  productCategories: [],
+  posCategories: []
 };
+
+let lastMenuFilters = null;
 
 function buildMenuPricesContent() {
   return `
@@ -59,6 +63,20 @@ function buildMenuPricesContent() {
           </label>
 
           <label class="report-field">
+            فئة المنتج المخزنية
+            <select id="menuProductCategory" class="report-select">
+              <option value="">كل فئات المنتجات</option>
+            </select>
+          </label>
+
+          <label class="report-field">
+            فئة نقطة البيع
+            <select id="menuPosCategory" class="report-select">
+              <option value="">كل فئات نقاط البيع</option>
+            </select>
+          </label>
+
+          <label class="report-field">
             الحالة
             <select id="menuStatus" class="report-select">
               <option value="all">كل المنتجات</option>
@@ -88,8 +106,17 @@ function buildMenuPricesContent() {
             عرض الكمية الرقمية
           </label>
 
+          <label class="menu-check-field">
+            <input id="menuOnlyPosProducts" type="checkbox" checked />
+            منتجات نقاط البيع فقط
+          </label>
+
           <button id="loadMenuBtn" type="button" class="report-btn-primary">
             تحديث المينو
+          </button>
+
+          <button id="exportMenuExcelBtn" type="button" class="report-btn-secondary">
+            تصدير Excel
           </button>
         </div>
       </section>
@@ -143,6 +170,7 @@ function bindMenuPricesEvents() {
   const loadBtn = document.getElementById("loadMenuBtn");
   const channelSelect = document.getElementById("menuChannel");
   const viewMode = document.getElementById("menuViewMode");
+  const exportBtn = document.getElementById("exportMenuExcelBtn");
 
   if (companySelect) {
     companySelect.addEventListener("change", async () => {
@@ -155,6 +183,10 @@ function bindMenuPricesEvents() {
     loadBtn.addEventListener("click", loadMenuReport);
   }
 
+  if (exportBtn) {
+    exportBtn.addEventListener("click", exportMenuExcel);
+  }
+
   if (channelSelect) {
     channelSelect.addEventListener("change", applySelectedChannelDefaults);
   }
@@ -162,11 +194,14 @@ function bindMenuPricesEvents() {
   [
     "menuPricelist",
     "menuLocation",
+    "menuProductCategory",
+    "menuPosCategory",
     "menuStatus",
     "limitedThreshold",
     "menuSearch",
     "menuLimit",
-    "menuShowQty"
+    "menuShowQty",
+    "menuOnlyPosProducts"
   ].forEach((id) => {
     const element = document.getElementById(id);
     if (!element) return;
@@ -181,6 +216,7 @@ function bindMenuPricesEvents() {
 
   window.loadMenuPrices = loadMenuReport;
   window.loadMenuDiscovery = loadMenuDiscovery;
+  window.exportMenuExcel = exportMenuExcel;
 }
 
 function renderMenuInitialState() {
@@ -201,7 +237,13 @@ async function loadMenuDiscovery() {
   const companyId = getCompanyId();
 
   if (!companyId) {
-    menuDiscovery = { channels: [], pricelists: [], locations: [] };
+    menuDiscovery = {
+      channels: [],
+      pricelists: [],
+      locations: [],
+      productCategories: [],
+      posCategories: []
+    };
     renderDiscoveryOptions();
     return;
   }
@@ -213,7 +255,9 @@ async function loadMenuDiscovery() {
     menuDiscovery = {
       channels: data.channels || [],
       pricelists: data.pricelists || [],
-      locations: data.locations || []
+      locations: data.locations || [],
+      productCategories: data.productCategories || [],
+      posCategories: data.posCategories || []
     };
 
     renderDiscoveryOptions();
@@ -227,6 +271,8 @@ function renderDiscoveryOptions() {
   renderChannelOptions();
   renderPricelistOptions();
   renderLocationOptions();
+  renderProductCategoryOptions();
+  renderPosCategoryOptions();
   applySelectedChannelDefaults();
 }
 
@@ -290,6 +336,39 @@ function renderLocationOptions() {
   `;
 }
 
+
+function renderProductCategoryOptions() {
+  const select = document.getElementById("menuProductCategory");
+  if (!select) return;
+
+  select.innerHTML = `
+    <option value="">كل فئات المنتجات</option>
+    ${menuDiscovery.productCategories
+      .map((item) => `
+        <option value="${Number(item.id)}">
+          ${escapeHtml(item.completeName || item.name)}
+        </option>
+      `)
+      .join("")}
+  `;
+}
+
+function renderPosCategoryOptions() {
+  const select = document.getElementById("menuPosCategory");
+  if (!select) return;
+
+  select.innerHTML = `
+    <option value="">كل فئات نقاط البيع</option>
+    ${menuDiscovery.posCategories
+      .map((item) => `
+        <option value="${Number(item.id)}">
+          ${escapeHtml(item.name || item.rawName)}
+        </option>
+      `)
+      .join("")}
+  `;
+}
+
 function applySelectedChannelDefaults() {
   const channelCode = document.getElementById("menuChannel")?.value;
   const channel = menuDiscovery.channels.find((item) => item.code === channelCode);
@@ -299,6 +378,7 @@ function applySelectedChannelDefaults() {
   const pricelistSelect = document.getElementById("menuPricelist");
   const locationSelect = document.getElementById("menuLocation");
   const showQty = document.getElementById("menuShowQty");
+  const posCategorySelect = document.getElementById("menuPosCategory");
   const threshold = document.getElementById("limitedThreshold");
 
   if (pricelistSelect && channel.pricelistId) {
@@ -313,6 +393,10 @@ function applySelectedChannelDefaults() {
     showQty.checked = channel.showQty !== false;
   }
 
+  if (posCategorySelect && Array.isArray(channel.posCategoryIds) && channel.posCategoryIds.length === 1) {
+    posCategorySelect.value = String(channel.posCategoryIds[0]);
+  }
+
   if (threshold && channel.limitedThreshold) {
     threshold.value = channel.limitedThreshold;
   }
@@ -325,6 +409,8 @@ function collectMenuFilters() {
   const channelCode = document.getElementById("menuChannel")?.value || "";
   const pricelistId = document.getElementById("menuPricelist")?.value || "";
   const locationId = document.getElementById("menuLocation")?.value || "";
+  const productCategoryId = document.getElementById("menuProductCategory")?.value || "";
+  const posCategoryId = document.getElementById("menuPosCategory")?.value || "";
 
   if (!companyId) throw new Error("اختار الشركة من الهيدر أولًا.");
   if (!channelCode) throw new Error("اختار القناة / المعرض.");
@@ -336,6 +422,9 @@ function collectMenuFilters() {
     channelCode,
     pricelistId,
     locationId,
+    productCategoryId,
+    posCategoryId,
+    onlyPosProducts: document.getElementById("menuOnlyPosProducts")?.checked !== false,
     status: document.getElementById("menuStatus")?.value || "all",
     search: document.getElementById("menuSearch")?.value || "",
     limitedThreshold: document.getElementById("limitedThreshold")?.value || 5,
@@ -358,10 +447,42 @@ async function loadMenuReport() {
     const data = response.data || {};
 
     hideMenuLoading();
+    lastMenuFilters = filters;
     renderMenuReport(data, filters);
   } catch (error) {
     hideMenuLoading();
     showMenuError(error);
+  }
+}
+
+
+async function exportMenuExcel() {
+  const button = document.getElementById("exportMenuExcelBtn");
+
+  try {
+    const filters = lastMenuFilters || collectMenuFilters();
+
+    if (button) {
+      button.disabled = true;
+      button.textContent = "جاري تصدير Excel...";
+    }
+
+    await apiDownload(
+      "/exports/excel",
+      {
+        report: "menu.prices",
+        ...filters
+      },
+      "menu-prices.xlsx"
+    );
+  } catch (error) {
+    console.error(error);
+    showMenuError(error);
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = "تصدير Excel";
+    }
   }
 }
 
@@ -377,6 +498,11 @@ function renderMenuReport(data, filters) {
       title: "منتجات ظاهرة",
       value: ReportUI.number(summary.displayedProductsCount),
       hint: `من أصل ${ReportUI.number(summary.loadedProductsCount)} منتج محمل`
+    },
+    {
+      title: "منتجات POS",
+      value: ReportUI.number(summary.posProductsCount),
+      hint: "منتجات متاحة في نقاط البيع ضمن الفلاتر"
     },
     {
       title: "متوفر",
@@ -441,9 +567,15 @@ function renderClassicMenu(rows, filters) {
       `
     },
     {
-      key: "categoryName",
-      label: "التصنيف",
-      width: "180px"
+      key: "productCategoryName",
+      label: "فئة المنتج المخزنية",
+      width: "210px"
+    },
+    {
+      key: "posCategoryName",
+      label: "فئة نقطة البيع",
+      width: "210px",
+      format: (value) => value || "-"
     },
     {
       key: "price",
@@ -494,7 +626,7 @@ function renderDynamicMenu(rows, filters) {
       ${rows.map((row) => `
         <article class="menu-item-card ${escapeHtml(row.status)}">
           <div class="menu-item-top">
-            <span>${escapeHtml(row.categoryName || "منتج")}</span>
+            <span>${escapeHtml(row.posCategoryName || row.productCategoryName || "منتج POS")}</span>
             ${ReportUI.statusPill(row.statusLabel, row.statusType)}
           </div>
 
