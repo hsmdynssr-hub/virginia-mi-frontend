@@ -14,7 +14,7 @@ let menuDiscovery = {
   channels: [],
   pricelists: [],
   locations: [],
-  productCategories: [],
+
   posCategories: []
 };
 
@@ -41,9 +41,16 @@ function buildMenuPricesContent() {
           </label>
 
           <label class="report-field">
-            قائمة الأسعار
+            قائمة السعر الحالي
             <select id="menuPricelist" class="report-select">
               <option value="">اختر الشركة أولًا</option>
+            </select>
+          </label>
+
+          <label class="report-field">
+            قائمة السعر قبل الخصم
+            <select id="menuComparePricelist" class="report-select">
+              <option value="">بدون سعر قبل الخصم</option>
             </select>
           </label>
 
@@ -59,13 +66,6 @@ function buildMenuPricesContent() {
             <select id="menuViewMode" class="report-select">
               <option value="classic">Classic جدول</option>
               <option value="dynamic">Dynamic كروت</option>
-            </select>
-          </label>
-
-          <label class="report-field">
-            فئة المنتج المخزنية
-            <select id="menuProductCategory" class="report-select">
-              <option value="">كل فئات المنتجات</option>
             </select>
           </label>
 
@@ -193,8 +193,8 @@ function bindMenuPricesEvents() {
 
   [
     "menuPricelist",
+    "menuComparePricelist",
     "menuLocation",
-    "menuProductCategory",
     "menuPosCategory",
     "menuStatus",
     "limitedThreshold",
@@ -241,7 +241,7 @@ async function loadMenuDiscovery() {
       channels: [],
       pricelists: [],
       locations: [],
-      productCategories: [],
+    
       posCategories: []
     };
     renderDiscoveryOptions();
@@ -256,7 +256,6 @@ async function loadMenuDiscovery() {
       channels: data.channels || [],
       pricelists: data.pricelists || [],
       locations: data.locations || [],
-      productCategories: data.productCategories || [],
       posCategories: data.posCategories || []
     };
 
@@ -271,7 +270,6 @@ function renderDiscoveryOptions() {
   renderChannelOptions();
   renderPricelistOptions();
   renderLocationOptions();
-  renderProductCategoryOptions();
   renderPosCategoryOptions();
   applySelectedChannelDefaults();
 }
@@ -295,24 +293,38 @@ function renderChannelOptions() {
 }
 
 function renderPricelistOptions() {
-  const select = document.getElementById("menuPricelist");
-  if (!select) return;
+  const currentSelect = document.getElementById("menuPricelist");
+  const compareSelect = document.getElementById("menuComparePricelist");
+
+  if (!currentSelect && !compareSelect) return;
 
   if (!menuDiscovery.pricelists.length) {
-    select.innerHTML = `<option value="">لا توجد قوائم أسعار</option>`;
+    if (currentSelect) currentSelect.innerHTML = `<option value="">لا توجد قوائم أسعار</option>`;
+    if (compareSelect) compareSelect.innerHTML = `<option value="">لا توجد قوائم أسعار</option>`;
     return;
   }
 
-  select.innerHTML = `
-    <option value="">اختر قائمة الأسعار</option>
-    ${menuDiscovery.pricelists
-      .map((item) => `
-        <option value="${Number(item.id)}">
-          ${escapeHtml(item.name)}
-        </option>
-      `)
-      .join("")}
-  `;
+  const options = menuDiscovery.pricelists
+    .map((item) => `
+      <option value="${Number(item.id)}">
+        ${escapeHtml(item.name)}
+      </option>
+    `)
+    .join("");
+
+  if (currentSelect) {
+    currentSelect.innerHTML = `
+      <option value="">اختر قائمة السعر الحالي</option>
+      ${options}
+    `;
+  }
+
+  if (compareSelect) {
+    compareSelect.innerHTML = `
+      <option value="">بدون سعر قبل الخصم</option>
+      ${options}
+    `;
+  }
 }
 
 function renderLocationOptions() {
@@ -336,22 +348,6 @@ function renderLocationOptions() {
   `;
 }
 
-
-function renderProductCategoryOptions() {
-  const select = document.getElementById("menuProductCategory");
-  if (!select) return;
-
-  select.innerHTML = `
-    <option value="">كل فئات المنتجات</option>
-    ${menuDiscovery.productCategories
-      .map((item) => `
-        <option value="${Number(item.id)}">
-          ${escapeHtml(item.completeName || item.name)}
-        </option>
-      `)
-      .join("")}
-  `;
-}
 
 function renderPosCategoryOptions() {
   const select = document.getElementById("menuPosCategory");
@@ -408,8 +404,8 @@ function collectMenuFilters() {
   const companyId = getCompanyId();
   const channelCode = document.getElementById("menuChannel")?.value || "";
   const pricelistId = document.getElementById("menuPricelist")?.value || "";
+  const comparePricelistId = document.getElementById("menuComparePricelist")?.value || "";
   const locationId = document.getElementById("menuLocation")?.value || "";
-  const productCategoryId = document.getElementById("menuProductCategory")?.value || "";
   const posCategoryId = document.getElementById("menuPosCategory")?.value || "";
 
   if (!companyId) throw new Error("اختار الشركة من الهيدر أولًا.");
@@ -421,8 +417,8 @@ function collectMenuFilters() {
     companyId,
     channelCode,
     pricelistId,
+    comparePricelistId,
     locationId,
-    productCategoryId,
     posCategoryId,
     onlyPosProducts: document.getElementById("menuOnlyPosProducts")?.checked !== false,
     status: document.getElementById("menuStatus")?.value || "all",
@@ -525,13 +521,28 @@ function renderMenuReport(data, filters) {
       hint: filters.showQty ? "معروضة في المينو" : "غير معروضة في الكروت للعميل"
     },
     {
-      title: "متوسط السعر",
+      title: "متوسط السعر الحالي",
       value: ReportUI.money(summary.averagePrice),
       hint: "متوسط أسعار المنتجات الظاهرة"
     },
     {
+      title: "منتجات عليها خصم",
+      value: ReportUI.number(summary.discountedProductsCount),
+      hint: "سعر المقارنة أكبر من السعر الحالي"
+    },
+    {
+      title: "إجمالي الوفر",
+      value: ReportUI.money(summary.totalDiscountAmount),
+      hint: "إجمالي فرق السعر للمنتجات الظاهرة"
+    },
+    {
+      title: "متوسط الخصم",
+      value: ReportUI.percent(summary.averageDiscountPercent),
+      hint: "متوسط نسبة الخصم على المنتجات المخفضة"
+    },
+    {
       title: "أسعار fallback",
-      value: ReportUI.number(summary.fallbackPriceCount),
+      value: ReportUI.number(summary.fallbackPriceCount + (summary.compareFallbackPriceCount || 0)),
       hint: "أسعار لم يتم حسابها من pricelist method وتحتاج مراجعة"
     }
   ]);
@@ -542,7 +553,7 @@ function renderMenuReport(data, filters) {
       : "عرض Classic للمينو";
 
   document.getElementById("menuOutputHint").textContent =
-    `${data.channel?.name || "القناة"} - السعر من قائمة الأسعار والمخزون من Location المختار.`;
+    `${data.channel?.name || "القناة"} - السعر الحالي من قائمة الأسعار المختارة، وسعر المقارنة اختياري لحساب الخصم.`;
 
   if (filters.viewMode === "dynamic") {
     renderDynamicMenu(rows, filters);
@@ -567,11 +578,6 @@ function renderClassicMenu(rows, filters) {
       `
     },
     {
-      key: "productCategoryName",
-      label: "فئة المنتج المخزنية",
-      width: "210px"
-    },
-    {
       key: "posCategoryName",
       label: "فئة نقطة البيع",
       width: "210px",
@@ -579,10 +585,30 @@ function renderClassicMenu(rows, filters) {
     },
     {
       key: "price",
-      label: "السعر",
+      label: "السعر الحالي",
       width: "120px",
       className: "report-money",
       format: (value) => ReportUI.money(value)
+    },
+    {
+      key: "comparePrice",
+      label: "السعر قبل الخصم",
+      width: "140px",
+      className: "report-money",
+      format: (value) => value ? ReportUI.money(value) : "-"
+    },
+    {
+      key: "discountAmount",
+      label: "الوفر",
+      width: "120px",
+      className: "report-money",
+      format: (value) => value ? ReportUI.money(value) : "-"
+    },
+    {
+      key: "discountPercent",
+      label: "نسبة الخصم",
+      width: "120px",
+      format: (value) => value ? ReportUI.percent(value) : "-"
     },
     {
       key: "availableQty",
@@ -626,7 +652,7 @@ function renderDynamicMenu(rows, filters) {
       ${rows.map((row) => `
         <article class="menu-item-card ${escapeHtml(row.status)}">
           <div class="menu-item-top">
-            <span>${escapeHtml(row.posCategoryName || row.productCategoryName || "منتج POS")}</span>
+            <span>${escapeHtml(row.posCategoryName || "منتج POS")}</span>
             ${ReportUI.statusPill(row.statusLabel, row.statusType)}
           </div>
 
@@ -636,6 +662,13 @@ function renderDynamicMenu(rows, filters) {
             <strong>${ReportUI.money(row.price)}</strong>
             <small>${escapeHtml(row.internalCode || row.barcode || "")}</small>
           </div>
+
+          ${row.hasDiscount
+            ? `<div class="menu-discount-line">
+                <span class="menu-old-price">${ReportUI.money(row.comparePrice)}</span>
+                <span class="menu-save-badge">وفر ${ReportUI.money(row.discountAmount)} - ${ReportUI.percent(row.discountPercent)}</span>
+              </div>`
+            : ""}
 
           <div class="menu-stock-line">
             ${filters.showQty
