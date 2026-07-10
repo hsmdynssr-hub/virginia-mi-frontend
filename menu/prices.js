@@ -155,8 +155,8 @@ function buildMenuPricesContent() {
           </div>
           <div class="report-analysis">
             <p>
-              لو السعر ظهر بمصدر <strong>fallback_list_price</strong>، راجع دالة قائمة الأسعار في Odoo
-              أو ابعتلي النتيجة عشان نعمل توافق أدق مع نسخة Odoo عندك.
+              لو قائمة الأسعار لا تحتوي قاعدة مناسبة للمنتج، يستخدم النظام سعر البيع من كارت الصنف تلقائيًا.
+              هذا هو منطق الـ Default/Public price في Odoo.
             </p>
           </div>
         </div>
@@ -482,6 +482,20 @@ async function exportMenuExcel() {
   }
 }
 
+function formatPriceSource(value) {
+  const source = String(value || "").trim();
+
+  if (source === "product_card_list_price") return "سعر كارت الصنف";
+  if (source.startsWith("pricelist.item.fixed")) return "قاعدة سعر ثابت";
+  if (source.startsWith("pricelist.item.percentage")) return "قاعدة خصم نسبة";
+  if (source.startsWith("pricelist.item.formula")) return "قاعدة معادلة سعر";
+  if (source === "pricelist._get_product_price") return "دالة Odoo";
+  if (source === "pricelist.price_get") return "دالة Odoo قديمة";
+  if (source === "fallback_list_price") return "سعر كارت الصنف";
+
+  return source || "-";
+}
+
 function renderMenuReport(data, filters) {
   const rows = data.rows || [];
   const summary = data.summary || {};
@@ -541,9 +555,9 @@ function renderMenuReport(data, filters) {
       hint: "متوسط نسبة الخصم على المنتجات المخفضة"
     },
     {
-      title: "أسعار fallback",
-      value: ReportUI.number(summary.fallbackPriceCount + (summary.compareFallbackPriceCount || 0)),
-      hint: "أسعار لم يتم حسابها من pricelist method وتحتاج مراجعة"
+      title: "أسعار من كارت الصنف",
+      value: ReportUI.number(summary.productCardPriceCount + (summary.compareProductCardPriceCount || 0)),
+      hint: "قوائم أسعار بدون قاعدة مناسبة، فتم استخدام سعر البيع من كارت الصنف"
     }
   ]);
 
@@ -626,7 +640,10 @@ function renderClassicMenu(rows, filters) {
       key: "priceSource",
       label: "مصدر السعر",
       width: "170px",
-      format: (value) => ReportUI.statusPill(value, value === "fallback_list_price" ? "warn" : "good")
+      format: (value) => ReportUI.statusPill(
+        formatPriceSource(value),
+        value === "product_card_list_price" || value === "fallback_list_price" ? "info" : "good"
+      )
     }
   ];
 
@@ -676,8 +693,8 @@ function renderDynamicMenu(rows, filters) {
               : "الكمية الرقمية مخفية"}
           </div>
 
-          ${row.priceSource === "fallback_list_price"
-            ? `<div class="menu-warning">السعر يحتاج مراجعة من قائمة الأسعار</div>`
+          ${row.priceSource === "product_card_list_price" || row.priceSource === "fallback_list_price"
+            ? `<div class="menu-warning menu-info">السعر من كارت الصنف</div>`
             : ""}
         </article>
       `).join("")}
