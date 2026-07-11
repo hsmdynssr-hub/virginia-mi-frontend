@@ -22,6 +22,7 @@ const REPORT_PAGE_MAP = {
   "pos-returns": "pos.returns",
   "pos-discounts": "pos.discounts",
   "pos-offers": "pos.offers",
+  "alerts-dashboard": "alerts.view",
   
   
 
@@ -76,7 +77,8 @@ const EXPORT_ENABLED_PAGES = new Set([
   "forecast-target-report",
   "forecast-planning-achievement",
   "customer-pos-phones",
-  "production-mo-cost"
+  "production-mo-cost",
+  "alerts-dashboard"
 ]);
 const PAGES_WITHOUT_REPORT_TOOLBAR = new Set([
   "dashboard",
@@ -553,6 +555,7 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
               <a data-page="pos-branch-sales" class="nav-link" href="../pos/branch-sales.html">تحليل أداء المعارض</a>
               <a data-page="pos-cashiers" class="nav-link" href="../pos/cashiers.html">تحليل الكاشيرات</a>
               <a data-page="pos-peak-hours" class="nav-link" href="../pos/peak-hours.html">تحليل ساعات البيع</a>
+              <a data-page="alerts-dashboard" class="nav-link" href="../pos/alerts-dashboard.html">داشبورد تنبيهات Telegram</a>
             </div>
           </div>
 

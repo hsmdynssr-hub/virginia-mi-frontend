@@ -18,10 +18,42 @@
     "branches-sales",
     "branches-stock",
     "branches-replenishment",
-    "branches-inventory-count"
+    "branches-inventory-count",
+
+    "alerts-dashboard",
+    "review-coupons"
   ]);
 
+  const BUILT_IN_REPORT_MAP = {
+    "alerts-dashboard": "alerts.telegram_dashboard",
+    "review-coupons": "customer.review_coupons"
+  };
+
   const CUSTOM_PARAMS = {
+    "review-coupons": () => {
+      return {
+        companyId: document.getElementById("companyId")?.value || "",
+        status: document.getElementById("couponStatusFilter")?.value || "all",
+        customerPhone: document.getElementById("couponPhoneFilter")?.value || "",
+        dateFrom: document.getElementById("couponDateFrom")?.value || "",
+        dateTo: document.getElementById("couponDateTo")?.value || "",
+        limit: "100000"
+      };
+    },
+
+    "alerts-dashboard": () => {
+      return {
+        companyId: document.getElementById("companySelect")?.value || "",
+        eventType: document.getElementById("alertEventType")?.value || "all",
+        status: document.getElementById("alertStatus")?.value || "all",
+        branchName: document.getElementById("alertBranchName")?.value || "",
+        cashierName: document.getElementById("alertCashierName")?.value || "",
+        dateFrom: document.getElementById("dateFrom")?.value || "",
+        dateTo: document.getElementById("dateTo")?.value || "",
+        limit: "100000"
+      };
+    },
+
     "forecast-target-report": () => {
       const params = new URLSearchParams(window.location.search);
 
@@ -124,6 +156,10 @@
   };
 
   function getReportCode(activePage) {
+    if (BUILT_IN_REPORT_MAP[activePage]) {
+      return BUILT_IN_REPORT_MAP[activePage];
+    }
+
     if (typeof REPORT_PAGE_MAP === "undefined") {
       return "";
     }
@@ -143,6 +179,7 @@
     }
 
     if (typeof hasPermission === "function") {
+      if (["alerts-dashboard", "review-coupons"].includes(activePage)) return true;
       return hasPermission(activePage);
     }
 
@@ -370,12 +407,22 @@
         return;
       }
 
+      const exportUrl = activePage === "alerts-dashboard"
+        ? `${getApiBaseUrl()}/alerts/dashboard/export/excel?${params.toString()}`
+        : activePage === "review-coupons"
+          ? `${getApiBaseUrl()}/customer/review-sms/coupons/export/excel?${params.toString()}`
+          : `${getApiBaseUrl()}/exports/excel?${params.toString()}`;
+
       const response = await fetch(
-        `${getApiBaseUrl()}/exports/excel?${params.toString()}`,
+        exportUrl,
         {
           method: "GET",
           headers: {
-            ...(token ? { Authorization: `Bearer ${token}` } : {})
+            ...(activePage === "review-coupons"
+              ? { "x-admin-key": localStorage.getItem("reviewSmsAdminKey") || "" }
+              : token
+                ? { Authorization: `Bearer ${token}` }
+                : {})
           },
           cache: "no-store"
         }

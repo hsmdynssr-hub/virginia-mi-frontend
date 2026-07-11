@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>داشبورد تنبيهات Telegram</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="./alerts-dashboard.css" />
+</head>
+<body>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+
+  <script>
+    renderLayout(
+      "داشبورد تنبيهات Telegram",
+      "حصر مرتجعات POS والخصومات اليدوية والمشاكل التي أُرسلت إلى جروب Telegram",
+      "alerts-dashboard",
+      `
+        <section class="alerts-extra-filters report-toolbar">
+          <div class="alerts-filter-field">
+            <label for="alertEventType">نوع المشكلة</label>
+            <select id="alertEventType">
+              <option value="all">كل المشاكل</option>
+              <option value="POS_RETURN">المرتجعات</option>
+              <option value="POS_DISCOUNT">الخصومات اليدوية</option>
+            </select>
+          </div>
+
+          <div class="alerts-filter-field">
+            <label for="alertStatus">حالة الإرسال</label>
+            <select id="alertStatus">
+              <option value="all">كل الحالات</option>
+              <option value="SENT">تم الإرسال</option>
+              <option value="FAILED">فشل</option>
+              <option value="PENDING">Pending</option>
+            </select>
+          </div>
+
+          <div class="alerts-filter-field">
+            <label for="alertBranchName">اسم الفرع</label>
+            <input id="alertBranchName" type="text" placeholder="كل الفروع" />
+          </div>
+
+          <div class="alerts-filter-field">
+            <label for="alertCashierName">اسم الكاشير</label>
+            <input id="alertCashierName" type="text" placeholder="كل الكاشيرات" />
+          </div>
+
+          <div class="alerts-filter-field">
+            <label for="alertLimit">عدد النتائج</label>
+            <input id="alertLimit" type="number" value="500" min="1" max="2000" />
+          </div>
+        </section>
+
+        <div id="alertsDashboardStatus" class="alerts-dashboard-status">
+          اختر الشركة والفترة واضغط تحديث التقرير. لا يتم تحميل التقرير تلقائيًا.
+        </div>
+
+        <div id="reportArea"></div>
+      `
+    );
+  </script>
+
+  <script src="./alerts-dashboard.js"></script>
+  <script src="../js/report-export.js"></script>
+</body>
+</html>
