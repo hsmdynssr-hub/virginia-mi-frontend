@@ -23,6 +23,16 @@
       return;
     }
 
+    if (page === "coupon-dashboard") {
+      initCouponDashboard();
+      return;
+    }
+
+    if (page === "coupon") {
+      initCouponPage();
+      return;
+    }
+
     if (page === "review") {
       initReviewPage();
     }
@@ -140,6 +150,347 @@
     if (number === 1) return "😡 غير راضٍ";
 
     return rating ? `${rating}` : "";
+  }
+
+  function getCouponStatusLabel(status) {
+    const labels = {
+      pending: "في الانتظار",
+      processing: "جاري الإنشاء",
+      active: "نشط",
+      failed: "فشل",
+      expired: "منتهي"
+    };
+
+    return labels[status] || status || "-";
+  }
+
+  /* =========================
+     Coupon admin dashboard
+  ========================== */
+
+  function initCouponDashboard() {
+    if (byId("apiBase")) byId("apiBase").value = getStoredApiBase();
+    if (byId("adminKey")) {
+      byId("adminKey").value = localStorage.getItem("reviewSmsAdminKey") || "";
+    }
+
+    const today = formatDateInput(new Date());
+    if (byId("couponDateFrom")) byId("couponDateFrom").value = today;
+    if (byId("couponDateTo")) byId("couponDateTo").value = today;
+
+    document.querySelectorAll("[data-coupon-action]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const action = button.dataset.couponAction;
+        if (action === "load-settings") loadCouponSettings();
+        if (action === "save-settings") saveCouponSettings();
+        if (action === "shopify-health") loadShopifyHealth();
+        if (action === "load-coupons") loadCoupons();
+        if (action === "load-today") setCouponTodayAndLoad();
+      });
+    });
+
+    byId("couponsBody")?.addEventListener("click", async (event) => {
+      const retryButton = event.target.closest("[data-retry-coupon]");
+      const copyButton = event.target.closest("[data-copy-coupon]");
+
+      if (copyButton) {
+        await copyText(copyButton.dataset.copyCoupon);
+        setStatus("تم نسخ الكوبون.");
+      }
+
+      if (retryButton) {
+        await retryCoupon(retryButton.dataset.retryCoupon);
+      }
+    });
+
+    setStatus("جاهز. لا يتم إصدار كوبونات من هذه الصفحة تلقائيًا.");
+    loadCouponSettings();
+
+    if (window.ReportExport?.setup) {
+      window.ReportExport.setup("review-coupons");
+    }
+  }
+
+  function applyCouponSettings(settings = {}) {
+    if (byId("couponIssuingEnabled")) {
+      byId("couponIssuingEnabled").checked = Boolean(settings.couponIssuingEnabled);
+    }
+
+    if (byId("couponValidityMonths")) {
+      byId("couponValidityMonths").value = String(settings.couponValidityMonths || 1);
+    }
+
+    if (byId("googleReviewUrl")) {
+      byId("googleReviewUrl").value = settings.googleReviewUrl || "";
+    }
+  }
+
+  async function loadCouponSettings() {
+    try {
+      const data = await requestJson(`${getApiBaseFromDashboard()}/settings`, {
+        headers: { "x-admin-key": getAdminKey() }
+      });
+      applyCouponSettings(data.data || {});
+      setStatus({ message: "تم تحميل إعدادات الكوبونات.", settings: data.data });
+    } catch (error) {
+      setStatus(`Coupon Settings Error: ${error.message}`);
+    }
+  }
+
+  async function saveCouponSettings() {
+    try {
+      const data = await requestJson(`${getApiBaseFromDashboard()}/settings`, {
+        method: "PATCH",
+        headers: adminHeaders(),
+        body: JSON.stringify({
+          couponIssuingEnabled: Boolean(byId("couponIssuingEnabled")?.checked),
+          couponValidityMonths: Number(byId("couponValidityMonths")?.value || 1),
+          googleReviewUrl: String(byId("googleReviewUrl")?.value || "").trim()
+        })
+      });
+      applyCouponSettings(data.data || {});
+      setStatus("تم حفظ إعدادات الكوبونات. المدة الجديدة تطبق على الكوبونات الجديدة فقط.");
+    } catch (error) {
+      setStatus(`Save Coupon Settings Error: ${error.message}`);
+    }
+  }
+
+  async function loadShopifyHealth() {
+    try {
+      const data = await requestJson(`${getApiBaseFromDashboard()}/shopify-health`, {
+        headers: { "x-admin-key": getAdminKey() }
+      });
+      const health = data.data || {};
+      const badge = byId("shopifyStatusBadge");
+
+      if (badge) {
+        badge.textContent = health.connected
+          ? `متصل: ${health.shopName || health.shop}`
+          : health.configured
+            ? "الإعدادات موجودة - الاتصال غير مؤكد"
+            : "Shopify غير مُعد";
+        badge.classList.toggle("live", Boolean(health.connected));
+        badge.classList.toggle("mock", !health.connected);
+      }
+
+      setStatus({ message: "Shopify Health", ...health });
+    } catch (error) {
+      setStatus(`Shopify Health Error: ${error.message}`);
+    }
+  }
+
+  function getCouponFilters() {
+    const params = new URLSearchParams();
+    const companyId = getCompanyIdOrNull();
+    const status = String(byId("couponStatusFilter")?.value || "").trim();
+    const phone = String(byId("couponPhoneFilter")?.value || "").trim();
+    const dateFrom = String(byId("couponDateFrom")?.value || "").trim();
+    const dateTo = String(byId("couponDateTo")?.value || "").trim();
+
+    if (companyId) params.set("companyId", companyId);
+    if (status) params.set("status", status);
+    if (phone) params.set("customerPhone", phone);
+    if (dateFrom) params.set("dateFrom", dateFrom);
+    if (dateTo) params.set("dateTo", dateTo);
+    params.set("limit", Number(byId("couponLimit")?.value || 100));
+
+    return params;
+  }
+
+  function setCouponTodayAndLoad() {
+    const today = formatDateInput(new Date());
+    byId("couponDateFrom").value = today;
+    byId("couponDateTo").value = today;
+    loadCoupons();
+  }
+
+  async function loadCoupons() {
+    try {
+      const params = getCouponFilters();
+      const base = getApiBaseFromDashboard();
+      const headers = { "x-admin-key": getAdminKey() };
+
+      const [listData, statsData] = await Promise.all([
+        requestJson(`${base}/coupons?${params.toString()}`, { headers }),
+        requestJson(`${base}/coupons/stats?${params.toString()}`, { headers })
+      ]);
+
+      renderCoupons(listData.data || []);
+      renderCouponStats(statsData.data || {});
+      setStatus(`تم تحميل ${listData.data?.length || 0} كوبون.`);
+    } catch (error) {
+      setStatus(`Coupons Error: ${error.message}`);
+    }
+  }
+
+  function renderCouponStats(stats) {
+    if (byId("couponStatTotal")) byId("couponStatTotal").textContent = stats.total ?? 0;
+    if (byId("couponStatActive")) byId("couponStatActive").textContent = stats.active ?? 0;
+    if (byId("couponStatFailed")) byId("couponStatFailed").textContent = stats.failed ?? 0;
+    if (byId("couponStatExpired")) byId("couponStatExpired").textContent = stats.expired ?? 0;
+    if (byId("couponStatCustomers")) {
+      byId("couponStatCustomers").textContent = stats.customers_created ?? 0;
+    }
+  }
+
+  function renderCoupons(rows) {
+    const tbody = byId("couponsBody");
+    if (!tbody) return;
+
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="13">لا توجد كوبونات حسب الفلاتر.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = rows.map((row) => `
+      <tr>
+        <td>${escapeHtml(row.id)}</td>
+        <td>${badge(row.status)} ${escapeHtml(getCouponStatusLabel(row.status))}</td>
+        <td>${escapeHtml(row.customerName || "-")}</td>
+        <td>${escapeHtml(row.customerPhone || "-")}</td>
+        <td>${escapeHtml(row.odooOrderName || "-")}</td>
+        <td>${escapeHtml(row.couponCode || "-")}</td>
+        <td>${escapeHtml(row.validityMonths)} شهر</td>
+        <td>${escapeHtml(formatDate(row.startsAt))}</td>
+        <td>${escapeHtml(formatDate(row.endsAt))}</td>
+        <td>${escapeHtml(
+          !row.shopifyCustomerId ? "-" : row.shopifyCustomerCreated ? "جديد" : "موجود"
+        )}</td>
+        <td>${escapeHtml(row.attemptCount || 0)}</td>
+        <td title="${escapeHtml(row.lastError || "")}">${escapeHtml(row.lastError || "-")}</td>
+        <td>
+          <div class="crsms-mini-actions">
+            ${row.couponCode ? `<button type="button" data-copy-coupon="${escapeHtml(row.couponCode)}">نسخ</button>` : ""}
+            ${row.status === "failed" ? `<button type="button" data-retry-coupon="${escapeHtml(row.id)}">إعادة المحاولة</button>` : ""}
+          </div>
+        </td>
+      </tr>
+    `).join("");
+  }
+
+  async function retryCoupon(id) {
+    try {
+      setStatus(`جاري إعادة محاولة الكوبون ${id}...`);
+      await requestJson(`${getApiBaseFromDashboard()}/coupons/${encodeURIComponent(id)}/retry`, {
+        method: "POST",
+        headers: adminHeaders(),
+        body: "{}"
+      });
+      await loadCoupons();
+    } catch (error) {
+      setStatus(`Retry Coupon Error: ${error.message}`);
+    }
+  }
+
+  async function copyText(value) {
+    await navigator.clipboard.writeText(String(value || ""));
+  }
+
+  /* =========================
+     Public coupon page
+  ========================== */
+
+  function initCouponPage() {
+    const token = new URLSearchParams(window.location.search).get("token");
+
+    if (!token) {
+      showCouponError("رابط الكوبون غير مكتمل.");
+      return;
+    }
+
+    byId("claimCouponBtn")?.addEventListener("click", () => claimPublicCoupon(token));
+    byId("copyCouponBtn")?.addEventListener("click", async () => {
+      try {
+        await copyText(byId("couponCode")?.textContent.trim());
+        showCouponMessage("تم نسخ الكوبون ✅", true);
+      } catch (error) {
+        showCouponMessage(`انسخ الكود يدويًا: ${byId("couponCode")?.textContent.trim()}`);
+      }
+    });
+
+    loadPublicCoupon(token);
+  }
+
+  function showCouponError(message) {
+    if (byId("couponLoading")) byId("couponLoading").hidden = true;
+    const errorBox = byId("couponError");
+    if (errorBox) {
+      errorBox.textContent = message;
+      errorBox.hidden = false;
+    }
+  }
+
+  function showCouponMessage(message, success = false) {
+    const box = byId("couponMessage");
+    if (!box) return;
+    box.hidden = false;
+    box.className = `crsms-review-message ${success ? "crsms-success" : ""}`;
+    box.textContent = message;
+  }
+
+  function applyPublicCoupon(data = {}) {
+    const coupon = data.coupon || data;
+    const loading = byId("couponLoading");
+    const content = byId("couponContent");
+    const claimButton = byId("claimCouponBtn");
+
+    if (loading) loading.hidden = true;
+    if (content) content.hidden = false;
+
+    if (coupon?.status === "active" && coupon.couponCode) {
+      byId("couponCode").textContent = coupon.couponCode;
+      byId("couponBox").hidden = false;
+      claimButton.hidden = true;
+      byId("couponExpiry").textContent = coupon.endsAt
+        ? `صالح حتى ${formatDate(coupon.endsAt)}`
+        : "";
+    } else {
+      byId("couponBox").hidden = true;
+      claimButton.hidden = false;
+      claimButton.disabled = data.issuingEnabled === false;
+      claimButton.textContent = data.issuingEnabled === false
+        ? "إصدار الكوبونات متوقف مؤقتًا"
+        : "إصدار كوبون الشحن المجاني";
+    }
+
+  }
+
+  async function loadPublicCoupon(token) {
+    try {
+      const data = await requestJson(
+        `${getReviewApiBase()}/coupon-data/${encodeURIComponent(token)}`
+      );
+      applyPublicCoupon(data.data || {});
+    } catch (error) {
+      showCouponError(error.message);
+    }
+  }
+
+  async function claimPublicCoupon(token) {
+    const button = byId("claimCouponBtn");
+
+    try {
+      button.disabled = true;
+      button.textContent = "جاري إصدار الكوبون...";
+      const data = await requestJson(
+        `${getReviewApiBase()}/coupon/${encodeURIComponent(token)}/claim`,
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }
+      );
+      const coupon = data.data || {};
+      applyPublicCoupon(coupon);
+
+      if (coupon.status === "active") {
+        showCouponMessage("تم إصدار كوبونك وربطه بحسابك على Shopify ✅", true);
+      } else {
+        button.disabled = false;
+        button.textContent = "تحديث حالة الكوبون";
+        showCouponMessage(coupon.message || "جاري إصدار الكوبون، حاول التحديث بعد لحظات.");
+      }
+    } catch (error) {
+      button.disabled = false;
+      button.textContent = "إعادة محاولة إصدار الكوبون";
+      showCouponMessage(error.message);
+    }
   }
 
   function getReasonLabel(reason) {
@@ -1166,8 +1517,22 @@
       const reviewForm = byId("reviewForm");
 
       if (review.status === "reviewed") {
-        if (alreadyReviewedBox) alreadyReviewedBox.hidden = false;
+        if (alreadyReviewedBox) {
+          alreadyReviewedBox.hidden = false;
+
+          if (Number(review.rating) === 5) {
+            alreadyReviewedBox.innerHTML = `
+              <strong>تم تسجيل تقييمك بالفعل. شكراً لك ❤️</strong>
+              <a class="crsms-coupon-link" href="./review-coupon.html?token=${encodeURIComponent(token)}">
+                فتح كوبون الشحن المجاني 🎁
+              </a>
+            `;
+          } else {
+            alreadyReviewedBox.textContent = "تم تسجيل تقييمك بالفعل. شكراً لك.";
+          }
+        }
         if (reviewForm) reviewForm.hidden = true;
+        showGoogleReviewLink(review.googleReviewUrl);
       } else {
         if (alreadyReviewedBox) alreadyReviewedBox.hidden = true;
         if (reviewForm) reviewForm.hidden = false;
@@ -1229,7 +1594,7 @@
         submitButton.disabled = true;
         submitButton.textContent = "جاري الإرسال...";
 
-        await requestJson(`${getReviewApiBase()}/review/${encodeURIComponent(token)}`, {
+        const submitData = await requestJson(`${getReviewApiBase()}/review/${encodeURIComponent(token)}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -1248,7 +1613,7 @@
   messageBox.innerHTML = `
     <strong>شكراً لتقييمك ❤️</strong>
     <p>فيرجينيا دايمًا معاك</p>
-    <a class="crsms-coupon-link" href="./review-coupon.html">
+    <a class="crsms-coupon-link" href="./review-coupon.html?token=${encodeURIComponent(token)}">
       احصل على كوبون الشحن المجاني 🎁
     </a>
   `;
@@ -1259,6 +1624,7 @@
 
         form.hidden = true;
         submitButton.textContent = "تم الإرسال";
+        showGoogleReviewLink(submitData.data?.googleReviewUrl);
       } catch (error) {
         messageBox.hidden = false;
         messageBox.className = "crsms-review-message crsms-error";
@@ -1268,5 +1634,16 @@
         submitButton.textContent = "إرسال التقييم";
       }
     });
+  }
+
+  function showGoogleReviewLink(url) {
+    const section = byId("reviewGoogleSection");
+    const link = byId("reviewGoogleLink");
+    const safeUrl = String(url || "").trim();
+
+    if (!section || !link || !safeUrl) return;
+
+    link.href = safeUrl;
+    section.hidden = false;
   }
 })();

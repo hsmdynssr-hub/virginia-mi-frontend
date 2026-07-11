@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إدارة كوبونات الشحن</title>
+  <link rel="stylesheet" href="./review-sms.css" />
+  <script src="./review-sms.js" defer></script>
+  <script src="../js/report-export.js" defer></script>
+</head>
+
+<body data-page="coupon-dashboard">
+  <main class="crsms-page">
+    <section class="crsms-return-bar" aria-label="Review coupon navigation">
+      <a class="crsms-return-link main" href="../dashboard/index.html">
+        <span>🏠</span><strong>الرجوع للمشروع الرئيسي</strong>
+      </a>
+      <a class="crsms-return-link" href="./index.html">
+        <span>👥</span><strong>صفحة العملاء</strong>
+      </a>
+      <a class="crsms-return-link" href="./review-sms-queue.html">
+        <span>🧾</span><strong>تشغيل الرسائل</strong>
+      </a>
+      <a class="crsms-return-link" href="./review-followups.html">
+        <span>☎️</span><strong>المتابعات</strong>
+      </a>
+      <a class="crsms-return-link active" href="./review-coupons-dashboard.html">
+        <span>🎁</span><strong>كوبونات الشحن</strong>
+      </a>
+      <a class="crsms-return-link" href="./review-sms-dashboard.html">
+        <span>⚙️</span><strong>إعدادات الرسائل</strong>
+      </a>
+    </section>
+
+    <section class="crsms-header">
+      <div>
+        <h1>إدارة كوبونات الشحن المجاني</h1>
+        <p>التحكم في مدة الكوبون، اتصال Shopify، ومراجعة كل عمليات الإصدار.</p>
+      </div>
+      <div class="crsms-mode-badge" id="shopifyStatusBadge">Shopify غير مفحوص</div>
+    </section>
+
+    <section class="crsms-panel">
+      <div class="crsms-section-title">
+        <h2>الاتصال والسياسة الحالية</h2>
+        <button type="button" class="crsms-secondary" data-coupon-action="shopify-health">
+          فحص Shopify
+        </button>
+      </div>
+
+      <div class="crsms-form-grid">
+        <div class="crsms-field crsms-span-2">
+          <label for="apiBase">API Base</label>
+          <input id="apiBase" type="text" value="http://localhost:5050/api/customer/review-sms" />
+        </div>
+        <div class="crsms-field">
+          <label for="adminKey">Admin Key</label>
+          <input id="adminKey" type="password" autocomplete="off" />
+        </div>
+        <div class="crsms-field">
+          <label for="companyId">Company ID</label>
+          <input id="companyId" type="number" placeholder="1 أو 2" />
+        </div>
+        <div class="crsms-field">
+          <label for="couponValidityMonths">صلاحية الكوبونات الجديدة</label>
+          <select id="couponValidityMonths">
+            <option value="1">شهر واحد</option>
+            <option value="3">3 أشهر</option>
+            <option value="6">6 أشهر</option>
+            <option value="9">9 أشهر</option>
+            <option value="12">سنة</option>
+          </select>
+        </div>
+        <div class="crsms-field crsms-span-2">
+          <label for="googleReviewUrl">رابط Google Review الاختياري</label>
+          <input id="googleReviewUrl" type="url" placeholder="https://g.page/r/.../review" />
+        </div>
+      </div>
+
+      <div class="crsms-toggle-grid">
+        <label class="crsms-toggle-card">
+          <input id="couponIssuingEnabled" type="checkbox" />
+          <span>
+            <strong>تشغيل إصدار كوبونات Shopify</strong>
+            <small>اتركه مغلقًا حتى تنتهي من إعداد Shopify وتشغيل SQL.</small>
+          </span>
+        </label>
+      </div>
+
+      <div class="crsms-actions">
+        <button type="button" data-coupon-action="load-settings">تحميل الإعدادات</button>
+        <button type="button" data-coupon-action="save-settings">حفظ سياسة الكوبونات</button>
+        <button type="button" class="crsms-secondary" data-coupon-action="shopify-health">
+          فحص الاتصال
+        </button>
+      </div>
+
+      <p class="crsms-hint">
+        تغيير المدة يطبق على الكوبونات التي تصدر بعد الحفظ فقط. الكوبونات القديمة تحتفظ بتاريخ انتهائها.
+      </p>
+      <pre class="crsms-status" id="statusBox">جاهز. لا يتم إصدار كوبونات من الداشبورد تلقائيًا.</pre>
+    </section>
+
+    <section class="crsms-panel report-toolbar">
+      <div class="crsms-section-title">
+        <h2>البحث في الكوبونات</h2>
+        <button type="button" class="crsms-secondary" data-coupon-action="load-today">
+          كوبونات اليوم
+        </button>
+      </div>
+
+      <div class="crsms-form-grid">
+        <div class="crsms-field">
+          <label for="couponDateFrom">من تاريخ</label>
+          <input id="couponDateFrom" type="date" />
+        </div>
+        <div class="crsms-field">
+          <label for="couponDateTo">إلى تاريخ</label>
+          <input id="couponDateTo" type="date" />
+        </div>
+        <div class="crsms-field">
+          <label for="couponStatusFilter">الحالة</label>
+          <select id="couponStatusFilter">
+            <option value="">الكل</option>
+            <option value="active">نشط</option>
+            <option value="pending">في الانتظار</option>
+            <option value="processing">جاري الإنشاء</option>
+            <option value="failed">فشل</option>
+            <option value="expired">منتهي</option>
+          </select>
+        </div>
+        <div class="crsms-field">
+          <label for="couponPhoneFilter">رقم العميل</label>
+          <input id="couponPhoneFilter" type="text" placeholder="201xxxxxxxxx" />
+        </div>
+        <div class="crsms-field">
+          <label for="couponLimit">عدد النتائج</label>
+          <input id="couponLimit" type="number" value="100" min="1" max="500" />
+        </div>
+      </div>
+
+      <div class="crsms-actions">
+        <button type="button" data-coupon-action="load-coupons">تحديث الكوبونات</button>
+      </div>
+    </section>
+
+    <section class="crsms-stats">
+      <article class="crsms-stat-card"><span>الإجمالي</span><strong id="couponStatTotal">-</strong></article>
+      <article class="crsms-stat-card"><span>نشط</span><strong id="couponStatActive">-</strong></article>
+      <article class="crsms-stat-card"><span>فشل</span><strong id="couponStatFailed">-</strong></article>
+      <article class="crsms-stat-card"><span>منتهي</span><strong id="couponStatExpired">-</strong></article>
+      <article class="crsms-stat-card"><span>عملاء Shopify جدد</span><strong id="couponStatCustomers">-</strong></article>
+    </section>
+
+    <section class="crsms-panel">
+      <div class="crsms-section-title">
+        <h2>سجل الكوبونات</h2>
+        <button type="button" class="crsms-secondary" data-coupon-action="load-coupons">تحديث</button>
+      </div>
+
+      <div class="crsms-table-wrap">
+        <table class="crsms-table crsms-coupons-table">
+          <thead>
+            <tr>
+              <th>ID</th><th>الحالة</th><th>العميل</th><th>الموبايل</th>
+              <th>الفاتورة</th><th>الكوبون</th><th>المدة</th><th>البداية</th>
+              <th>الانتهاء</th><th>عميل Shopify</th><th>المحاولات</th><th>الخطأ</th><th>إجراء</th>
+            </tr>
+          </thead>
+          <tbody id="couponsBody">
+            <tr><td colspan="13">اضغط تحديث الكوبونات.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

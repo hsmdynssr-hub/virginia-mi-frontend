@@ -1025,6 +1025,78 @@ body[data-page="followups"] .crsms-table-wrap {
   }
 }
 
+.crsms-claim-coupon-btn {
+  width: 100%;
+  margin: 22px 0;
+  padding: 15px 20px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--crsms-review-green), var(--crsms-review-green-dark));
+  color: #fff;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(103, 134, 31, 0.22);
+}
+
+.crsms-claim-coupon-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.crsms-coupon-box small {
+  display: block;
+  margin: 8px 0 14px;
+  color: var(--crsms-review-muted);
+}
+
+.crsms-google-review-box {
+  margin-top: 20px;
+  padding: 18px;
+  border: 1px solid rgba(197, 138, 32, 0.32);
+  border-radius: 16px;
+  background: rgba(255, 249, 232, 0.82);
+  text-align: center;
+}
+
+.crsms-google-review-box strong {
+  display: block;
+  color: var(--crsms-review-gold-dark);
+}
+
+.crsms-google-review-box p {
+  margin: 7px 0 13px;
+  color: var(--crsms-review-muted);
+  font-size: 0.9rem;
+}
+
+.crsms-google-review-box a {
+  display: inline-flex;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--crsms-review-text);
+  font-weight: 800;
+  text-decoration: none;
+  border: 1px solid rgba(80, 97, 54, 0.22);
+}
+
+body[data-page="coupon-dashboard"] .crsms-return-link.active {
+  border-color: var(--crsms-review-green);
+  background: rgba(132, 165, 42, 0.12);
+}
+
+.crsms-coupons-table {
+  min-width: 1500px;
+}
+
+.crsms-coupons-table td:nth-child(12) {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 
 /* ================================
    Internal return navigation
@@ -1102,4 +1174,3 @@ body[data-page="followups"] .crsms-return-link[data-return-page="followups"] {
     justify-content: center;
   }
 }
-
