@@ -1556,3 +1556,271 @@ body[data-page="coupon-dashboard"] .crsms-mini-actions a {
     grid-template-columns: 1fr !important;
   }
 }
+
+
+
+/* =========================================================
+   WIDTH FIX - Review Coupons Dashboard
+   Expand internal coupon dashboard on desktop screens.
+   ========================================================= */
+
+@media (min-width: 1181px) {
+  body[data-page="coupon-dashboard"] .crsms-page {
+    max-width: min(1500px, calc(100vw - 28px)) !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  body[data-page="coupon-dashboard"] .crsms-header,
+  body[data-page="coupon-dashboard"] .crsms-panel,
+  body[data-page="coupon-dashboard"] .crsms-return-bar {
+    width: 100% !important;
+  }
+
+  body[data-page="coupon-dashboard"] .crsms-form-grid {
+    grid-template-columns: repeat(5, minmax(160px, 1fr)) !important;
+  }
+
+  body[data-page="coupon-dashboard"] .crsms-coupon-search-grid {
+    grid-template-columns: 1fr 1fr 1fr 1.25fr 125px 220px !important;
+  }
+
+  body[data-page="coupon-dashboard"] .crsms-table-wrap {
+    max-height: 520px !important;
+  }
+
+  body[data-page="coupon-dashboard"] .crsms-coupons-table {
+    min-width: 1240px !important;
+  }
+}
+
+/* =========================================================
+   CUSTOMER MOBILE UX - Review + Coupon pages
+   These are public customer-facing pages. Mobile is priority.
+   ========================================================= */
+
+body[data-page="review"],
+body[data-page="coupon"] {
+  min-height: 100svh !important;
+  overflow-x: hidden !important;
+}
+
+body[data-page="review"] .crsms-review-shell,
+body[data-page="coupon"] .crsms-review-shell {
+  min-height: 100svh !important;
+  padding: 10px !important;
+  align-items: flex-start !important;
+}
+
+body[data-page="review"] .crsms-review-card,
+body[data-page="coupon"] .crsms-review-card {
+  width: min(100%, 760px) !important;
+}
+
+@media (max-width: 760px) {
+  body[data-page="review"],
+  body[data-page="coupon"] {
+    background-attachment: scroll !important;
+    background-position: center top !important;
+  }
+
+  body[data-page="review"] .crsms-review-shell,
+  body[data-page="coupon"] .crsms-review-shell {
+    padding: 8px !important;
+  }
+
+  body[data-page="review"] .crsms-review-card,
+  body[data-page="coupon"] .crsms-review-card {
+    max-width: 100% !important;
+    margin: 0 auto 12px !important;
+    border-radius: 20px !important;
+  }
+
+  body[data-page="review"] .crsms-review-card::before,
+  body[data-page="coupon"] .crsms-review-card::before {
+    height: 74px !important;
+  }
+
+  body[data-page="review"] .crsms-review-card::after,
+  body[data-page="coupon"] .crsms-review-card::after {
+    top: 13px !important;
+    left: 12px !important;
+    padding: 5px 8px !important;
+    font-size: 10px !important;
+  }
+
+  body[data-page="review"] .crsms-brand,
+  body[data-page="coupon"] .crsms-brand {
+    top: 14px !important;
+    right: 14px !important;
+    max-width: 65% !important;
+    font-size: 19px !important;
+    line-height: 1.1 !important;
+  }
+
+  body[data-page="review"] .crsms-brand::after,
+  body[data-page="coupon"] .crsms-brand::after {
+    font-size: 10px !important;
+  }
+
+  body[data-page="review"] #reviewLoading,
+  body[data-page="review"] #reviewError,
+  body[data-page="review"] #reviewContent,
+  body[data-page="coupon"] #couponLoading,
+  body[data-page="coupon"] #couponError,
+  body[data-page="coupon"] #couponContent {
+    padding: 12px !important;
+  }
+
+  body[data-page="review"] .crsms-review-hero,
+  body[data-page="coupon"] .crsms-review-hero {
+    min-height: 96px !important;
+    margin-bottom: 10px !important;
+    padding: 12px !important;
+    border-radius: 18px !important;
+    background-position: center !important;
+  }
+
+  body[data-page="review"] .crsms-hero-copy strong,
+  body[data-page="coupon"] .crsms-hero-copy strong {
+    font-size: 21px !important;
+    line-height: 1.25 !important;
+  }
+
+  body[data-page="review"] .crsms-hero-copy p,
+  body[data-page="coupon"] .crsms-hero-copy p {
+    font-size: 11px !important;
+    line-height: 1.55 !important;
+  }
+
+  body[data-page="review"] .crsms-review-info {
+    grid-template-columns: 1fr !important;
+    border-radius: 16px !important;
+  }
+
+  body[data-page="review"] .crsms-review-info > div {
+    padding: 10px 11px !important;
+    border-left: 0 !important;
+    border-bottom: 1px solid rgba(197, 138, 32, 0.15) !important;
+  }
+
+  body[data-page="review"] .crsms-review-info > div:last-child {
+    border-bottom: 0 !important;
+  }
+
+  body[data-page="review"] .crsms-form-title {
+    display: block !important;
+    margin: 2px 0 10px !important;
+  }
+
+  body[data-page="review"] .crsms-form-title strong {
+    font-size: 18px !important;
+  }
+
+  body[data-page="review"] .crsms-reactions {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  body[data-page="review"] .crsms-reactions button {
+    min-height: 56px !important;
+    padding: 11px 12px !important;
+    border-radius: 15px !important;
+  }
+
+  body[data-page="review"] .crsms-reactions button span {
+    font-size: 23px !important;
+  }
+
+  body[data-page="review"] .crsms-reactions button strong {
+    font-size: 16px !important;
+  }
+
+  body[data-page="review"] .crsms-reason-box,
+  body[data-page="review"] textarea,
+  body[data-page="review"] select {
+    font-size: 15px !important;
+  }
+
+  body[data-page="review"] textarea {
+    min-height: 94px !important;
+  }
+
+  body[data-page="review"] #submitReviewBtn,
+  body[data-page="coupon"] .crsms-claim-coupon-btn {
+    width: 100% !important;
+    min-height: 48px !important;
+    border-radius: 14px !important;
+    font-size: 15px !important;
+  }
+
+  body[data-page="review"] .crsms-review-message,
+  body[data-page="coupon"] .crsms-review-message {
+    margin-top: 10px !important;
+    padding: 11px !important;
+    border-radius: 14px !important;
+    font-size: 13px !important;
+  }
+
+  body[data-page="review"] .crsms-google-review-box,
+  body[data-page="coupon"] .crsms-google-review-box {
+    margin-top: 12px !important;
+    padding: 14px 12px !important;
+    border-radius: 15px !important;
+  }
+
+  body[data-page="review"] .crsms-google-review-box a,
+  body[data-page="coupon"] .crsms-google-review-box a {
+    width: 100% !important;
+    justify-content: center !important;
+    min-height: 44px !important;
+  }
+
+  body[data-page="coupon"] .crsms-coupon-box {
+    margin: 16px 0 !important;
+    padding: 18px 12px !important;
+    border-radius: 18px !important;
+  }
+
+  body[data-page="coupon"] .crsms-coupon-box strong {
+    font-size: clamp(21px, 7vw, 28px) !important;
+    line-height: 1.25 !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  body[data-page="coupon"] .crsms-coupon-box button,
+  body[data-page="coupon"] #copyCouponBtn {
+    width: 100% !important;
+    min-height: 44px !important;
+  }
+
+  body[data-page="review"] .crsms-review-footer,
+  body[data-page="coupon"] .crsms-review-footer {
+    gap: 8px !important;
+    align-items: center !important;
+    font-size: 12px !important;
+  }
+
+  body[data-page="review"] .crsms-review-footnote {
+    font-size: 11px !important;
+    line-height: 1.55 !important;
+  }
+}
+
+@media (max-width: 380px) {
+  body[data-page="review"] .crsms-brand,
+  body[data-page="coupon"] .crsms-brand {
+    font-size: 17px !important;
+  }
+
+  body[data-page="review"] .crsms-review-card::after,
+  body[data-page="coupon"] .crsms-review-card::after {
+    display: none !important;
+  }
+
+  body[data-page="review"] .crsms-hero-copy strong,
+  body[data-page="coupon"] .crsms-hero-copy strong {
+    font-size: 19px !important;
+  }
+}
