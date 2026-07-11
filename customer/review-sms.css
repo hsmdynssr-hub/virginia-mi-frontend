@@ -1824,3 +1824,204 @@ body[data-page="coupon"] .crsms-review-card {
     font-size: 19px !important;
   }
 }
+
+
+
+/* =========================================================
+   REVIEW HERO CLARITY + PLATINUM MEDAL
+   Customer-facing review page polish
+   ========================================================= */
+
+body[data-page="review"] .crsms-review-hero {
+  display: grid !important;
+  grid-template-columns: 1fr 138px !important;
+  align-items: center !important;
+  gap: 18px !important;
+  min-height: 168px !important;
+  padding: 20px !important;
+  background:
+    linear-gradient(90deg, rgba(255, 250, 235, 0.92), rgba(255, 250, 235, 0.80)),
+    url("./virginia-review-bg.png") center / cover no-repeat !important;
+}
+
+body[data-page="review"] .crsms-review-hero::after {
+  background:
+    linear-gradient(90deg, rgba(255, 252, 244, 0.72), rgba(255, 252, 244, 0.18)),
+    radial-gradient(circle at 78% 50%, rgba(255, 255, 255, 0.42), transparent 34%) !important;
+}
+
+body[data-page="review"] .crsms-hero-copy {
+  max-width: 100% !important;
+  padding: 14px 16px !important;
+  border-radius: 18px !important;
+  background: rgba(255, 252, 244, 0.72) !important;
+  border: 1px solid rgba(197, 138, 32, 0.20) !important;
+  box-shadow: 0 12px 26px rgba(53, 63, 31, 0.08) !important;
+}
+
+body[data-page="review"] .crsms-hero-copy span {
+  color: #7a5210 !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+}
+
+body[data-page="review"] .crsms-hero-copy strong {
+  color: #111827 !important;
+  font-size: 34px !important;
+  font-weight: 950 !important;
+  letter-spacing: -0.4px !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75) !important;
+}
+
+body[data-page="review"] .crsms-hero-copy p {
+  color: #111827 !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  line-height: 1.75 !important;
+  max-width: 430px !important;
+}
+
+/* CSS-built silver/platinum medal so we do not need a new image asset */
+.crsms-platinum-medal {
+  position: relative;
+  z-index: 3;
+  width: 126px;
+  height: 126px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  text-align: center;
+  padding: 16px;
+  color: #1f2937;
+  background:
+    radial-gradient(circle at 32% 26%, #ffffff 0%, #f4efe0 20%, #c9c0aa 47%, #f8f4e8 67%, #9a907c 100%);
+  border: 2px solid rgba(96, 77, 45, 0.48);
+  box-shadow:
+    inset 0 0 0 7px rgba(255, 255, 255, 0.25),
+    inset 0 0 0 10px rgba(96, 77, 45, 0.16),
+    0 18px 32px rgba(53, 63, 31, 0.20);
+}
+
+.crsms-platinum-medal::before,
+.crsms-platinum-medal::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 19px;
+  height: 56px;
+  border-top: 3px solid rgba(31, 41, 55, 0.70);
+  border-bottom: 3px solid rgba(31, 41, 55, 0.70);
+  opacity: 0.45;
+}
+
+.crsms-platinum-medal::before {
+  right: 10px;
+  border-right: 3px solid rgba(31, 41, 55, 0.70);
+  border-radius: 0 999px 999px 0;
+  transform: translateY(-50%) rotate(8deg);
+}
+
+.crsms-platinum-medal::after {
+  left: 10px;
+  border-left: 3px solid rgba(31, 41, 55, 0.70);
+  border-radius: 999px 0 0 999px;
+  transform: translateY(-50%) rotate(-8deg);
+}
+
+.crsms-platinum-medal span,
+.crsms-platinum-medal strong,
+.crsms-platinum-medal small {
+  position: relative;
+  z-index: 2;
+  display: block;
+}
+
+.crsms-platinum-medal span {
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.crsms-platinum-medal strong {
+  margin: 5px 0;
+  font-size: 14px;
+  line-height: 1.25;
+  font-weight: 950;
+}
+
+.crsms-platinum-medal small {
+  font-size: 11px;
+  line-height: 1.35;
+  font-weight: 900;
+}
+
+/* Coupon page: keep typography clear too */
+body[data-page="coupon"] .crsms-hero-copy strong {
+  color: #111827 !important;
+  font-weight: 950 !important;
+}
+
+body[data-page="coupon"] .crsms-hero-copy p {
+  color: #111827 !important;
+  font-weight: 850 !important;
+}
+
+@media (max-width: 760px) {
+  body[data-page="review"] .crsms-review-hero {
+    grid-template-columns: 1fr !important;
+    min-height: auto !important;
+    gap: 12px !important;
+    padding: 12px !important;
+  }
+
+  body[data-page="review"] .crsms-hero-copy {
+    padding: 12px !important;
+    text-align: right !important;
+  }
+
+  body[data-page="review"] .crsms-hero-copy strong {
+    font-size: 25px !important;
+  }
+
+  body[data-page="review"] .crsms-hero-copy p {
+    font-size: 13px !important;
+    max-width: 100% !important;
+  }
+
+  body[data-page="review"] .crsms-platinum-medal {
+    width: 92px !important;
+    height: 92px !important;
+    padding: 12px !important;
+    justify-self: start !important;
+    margin-top: -2px !important;
+  }
+
+  body[data-page="review"] .crsms-platinum-medal span {
+    font-size: 10px !important;
+  }
+
+  body[data-page="review"] .crsms-platinum-medal strong {
+    font-size: 11px !important;
+    margin: 3px 0 !important;
+  }
+
+  body[data-page="review"] .crsms-platinum-medal small {
+    font-size: 9px !important;
+  }
+
+  body[data-page="review"] .crsms-platinum-medal::before,
+  body[data-page="review"] .crsms-platinum-medal::after {
+    display: none !important;
+  }
+}
+
+@media (min-width: 760px) {
+  body[data-page="review"] .crsms-review-hero {
+    grid-template-columns: 1fr 148px !important;
+  }
+
+  body[data-page="review"] .crsms-platinum-medal {
+    width: 138px;
+    height: 138px;
+  }
+}
