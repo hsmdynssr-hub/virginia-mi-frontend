@@ -186,6 +186,7 @@
         if (action === "shopify-health") loadShopifyHealth();
         if (action === "load-coupons") loadCoupons();
         if (action === "load-today") setCouponTodayAndLoad();
+        if (action === "export-coupons-excel") exportCouponsExcel();
       });
     });
 
@@ -206,9 +207,8 @@
     setStatus("جاهز. لا يتم إصدار كوبونات من هذه الصفحة تلقائيًا.");
     loadCouponSettings();
 
-    if (window.ReportExport?.setup) {
-      window.ReportExport.setup("review-coupons");
-    }
+    // Excel export is handled locally for this standalone dashboard.
+    // Do not inject the generic ReportExport button here.
   }
 
   function applyCouponSettings(settings = {}) {
@@ -320,6 +320,41 @@
       setStatus(`تم تحميل ${listData.data?.length || 0} كوبون.`);
     } catch (error) {
       setStatus(`Coupons Error: ${error.message}`);
+    }
+  }
+
+  async function exportCouponsExcel() {
+    try {
+      const params = getCouponFilters();
+      const url = `${getApiBaseFromDashboard()}/coupons/export/excel?${params.toString()}`;
+
+      setStatus("جاري تجهيز ملف Excel للكوبونات...");
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: { "x-admin-key": getAdminKey() }
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text.slice(0, 220) || "Excel export failed");
+      }
+
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const today = new Date().toISOString().slice(0, 10);
+
+      link.href = objectUrl;
+      link.download = `customer-review-coupons-${today}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(objectUrl);
+
+      setStatus("تم تصدير Excel بنجاح.");
+    } catch (error) {
+      setStatus(`Export Excel Error: ${error.message}`);
     }
   }
 

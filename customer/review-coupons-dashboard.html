@@ -4,9 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>إدارة كوبونات الشحن</title>
-  <link rel="stylesheet" href="./review-sms.css" />
-  <script src="./review-sms.js" defer></script>
-  <script src="../js/report-export.js" defer></script>
+  <link rel="stylesheet" href="./review-sms.css?v=review-coupons-ui-20260712" />
+  <script src="./review-sms.js?v=review-coupons-ui-20260712" defer></script>
 </head>
 
 <body data-page="coupon-dashboard">
@@ -101,23 +100,28 @@
       <pre class="crsms-status" id="statusBox">جاهز. لا يتم إصدار كوبونات من الداشبورد تلقائيًا.</pre>
     </section>
 
-    <section class="crsms-panel report-toolbar">
+    <section class="crsms-panel crsms-coupon-search-panel">
       <div class="crsms-section-title">
-        <h2>البحث في الكوبونات</h2>
+        <div>
+          <h2>البحث في الكوبونات</h2>
+          <p>فلتر حسب التاريخ أو الحالة أو رقم العميل، ثم حدث النتائج أو صدر Excel.</p>
+        </div>
         <button type="button" class="crsms-secondary" data-coupon-action="load-today">
           كوبونات اليوم
         </button>
       </div>
 
-      <div class="crsms-form-grid">
+      <div class="crsms-coupon-search-grid">
         <div class="crsms-field">
           <label for="couponDateFrom">من تاريخ</label>
           <input id="couponDateFrom" type="date" />
         </div>
+
         <div class="crsms-field">
           <label for="couponDateTo">إلى تاريخ</label>
           <input id="couponDateTo" type="date" />
         </div>
+
         <div class="crsms-field">
           <label for="couponStatusFilter">الحالة</label>
           <select id="couponStatusFilter">
@@ -129,18 +133,21 @@
             <option value="expired">منتهي</option>
           </select>
         </div>
+
         <div class="crsms-field">
           <label for="couponPhoneFilter">رقم العميل</label>
-          <input id="couponPhoneFilter" type="text" placeholder="201xxxxxxxxx" />
+          <input id="couponPhoneFilter" type="text" placeholder="مثال: 201095193385" />
         </div>
-        <div class="crsms-field">
+
+        <div class="crsms-field compact">
           <label for="couponLimit">عدد النتائج</label>
           <input id="couponLimit" type="number" value="100" min="1" max="500" />
         </div>
-      </div>
 
-      <div class="crsms-actions">
-        <button type="button" data-coupon-action="load-coupons">تحديث الكوبونات</button>
+        <div class="crsms-coupon-search-actions">
+          <button type="button" class="primary" data-coupon-action="load-coupons">تحديث الكوبونات</button>
+          <button type="button" class="secondary" data-coupon-action="export-coupons-excel">تصدير Excel</button>
+        </div>
       </div>
     </section>
 
@@ -154,7 +161,10 @@
 
     <section class="crsms-panel">
       <div class="crsms-section-title">
-        <h2>سجل الكوبونات</h2>
+        <div>
+          <h2>سجل الكوبونات</h2>
+          <p>كل كوبون صادر، حالة Shopify، تاريخ الانتهاء، ومحاولات الإصدار.</p>
+        </div>
         <button type="button" class="crsms-secondary" data-coupon-action="load-coupons">تحديث</button>
       </div>
 
