@@ -26,7 +26,7 @@
   if (!hasStylesheet("bootstrap-theme.css")) {
     const themeCss = document.createElement("link");
     themeCss.rel = "stylesheet";
-    themeCss.href = `${assetUrl("../css/bootstrap-theme.css")}?v=20260713-5`;
+    themeCss.href = `${assetUrl("../css/bootstrap-theme.css")}?v=20260713-6`;
     document.head.appendChild(themeCss);
   }
 
@@ -91,7 +91,12 @@ function enhanceLegacyReportUi(root = document) {
   ).forEach((title) => title.classList.add("mi-report-title"));
 
   scope.querySelectorAll(".inventory-table-wrap, .table-wrap, .report-table-wrap")
-    .forEach((wrapper) => wrapper.classList.add("table-responsive"));
+    .forEach((wrapper) => {
+      wrapper.classList.add("table-responsive", "mi-table-scroll");
+      wrapper.tabIndex = 0;
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute("aria-label", "جدول قابل للتحريك أفقيًا");
+    });
 
   scope.querySelectorAll(
     ".inventory-data-table, .data-table, .report-table, .table-wrap > table"
