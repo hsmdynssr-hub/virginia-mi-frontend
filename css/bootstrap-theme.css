@@ -1,0 +1,449 @@
+/*
+  Bootstrap migration layer
+  -------------------------
+  Loaded after Bootstrap RTL and the legacy stylesheet. New Bootstrap pages
+  should be scoped by data-active-page while the legacy UI is migrated.
+*/
+
+:root {
+  --bs-primary: #2563eb;
+  --bs-primary-rgb: 37, 99, 235;
+  --bs-success: #15803d;
+  --bs-success-rgb: 21, 128, 61;
+  --bs-danger: #dc2626;
+  --bs-danger-rgb: 220, 38, 38;
+  --bs-warning: #d97706;
+  --bs-warning-rgb: 217, 119, 6;
+  --bs-border-color: #d9e2ec;
+  --bs-body-color: #0f172a;
+  --bs-body-font-family: "Cairo", "Tajawal", "Segoe UI", Arial, sans-serif;
+  --mi-radius: 1rem;
+  --mi-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+body[data-active-page="inventory-executive-summary"] .mi-bootstrap-page,
+body[data-active-page="pos-summary"] .mi-bootstrap-page,
+body[data-active-page="forecast-target-report"] .mi-bootstrap-page {
+  --bs-gutter-x: 1.25rem;
+}
+
+.mi-bootstrap-page .mi-filter-card,
+.mi-bootstrap-page .mi-report-card,
+.mi-bootstrap-page .mi-kpi-card {
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--mi-radius);
+  background: #fff;
+  box-shadow: var(--mi-shadow);
+}
+
+.mi-bootstrap-page .mi-filter-card,
+.mi-bootstrap-page .mi-report-card {
+  padding: 1.25rem;
+}
+
+.mi-bootstrap-page .mi-filter-card {
+  margin-bottom: 1.25rem;
+}
+
+.mi-bootstrap-page .mi-filter-card .form-label {
+  margin-bottom: 0.45rem;
+  color: #334155;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.mi-bootstrap-page .form-select,
+.mi-bootstrap-page .form-control {
+  min-height: 42px;
+  border-radius: 0.75rem;
+  border-color: #cbd5e1;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.mi-bootstrap-page .form-select:focus,
+.mi-bootstrap-page .form-control:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.14);
+}
+
+.mi-bootstrap-page .mi-kpi-card {
+  position: relative;
+  min-height: 128px;
+  padding: 1.1rem;
+  overflow: hidden;
+}
+
+.mi-bootstrap-page .mi-kpi-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, #2563eb, #0f766e);
+}
+
+.mi-bootstrap-page .mi-kpi-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.mi-bootstrap-page .mi-kpi-value {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #06111f;
+  direction: ltr;
+  text-align: right;
+  font-size: clamp(1.15rem, 2vw, 1.65rem);
+  font-weight: 900;
+}
+
+.mi-bootstrap-page .mi-kpi-hint {
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.mi-bootstrap-page .mi-report-card {
+  height: 100%;
+  margin-bottom: 1.25rem;
+}
+
+.mi-bootstrap-page .mi-report-title {
+  margin: 0 0 1rem;
+  color: #06111f;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.mi-bootstrap-page .table-responsive {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.85rem;
+}
+
+.mi-bootstrap-page .mi-data-table {
+  min-width: 880px;
+  margin-bottom: 0;
+  font-size: 0.78rem;
+}
+
+.mi-bootstrap-page .mi-data-table > :not(caption) > * > * {
+  padding: 0.78rem 0.85rem;
+  text-align: right;
+  vertical-align: middle;
+}
+
+.mi-bootstrap-page .mi-data-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  color: #0b1728;
+  background: #eff6ff;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.mi-bootstrap-page .mi-empty-state {
+  margin: 0;
+  border: 1px dashed #cbd5e1;
+  border-radius: 0.85rem;
+  background: #f8fafc;
+  color: #64748b;
+  text-align: center;
+  font-weight: 800;
+}
+
+.mi-bootstrap-page .mi-loading-spinner {
+  width: 1rem;
+  height: 1rem;
+  margin-left: 0.5rem;
+  vertical-align: -0.15rem;
+}
+
+@media (max-width: 767.98px) {
+  .mi-bootstrap-page .mi-filter-card,
+  .mi-bootstrap-page .mi-report-card {
+    padding: 1rem;
+  }
+}
+
+.mi-bootstrap-page .mi-kpi-card {
+  --mi-tone: #2563eb;
+  --mi-tone-soft: rgba(37, 99, 235, 0.18);
+  isolation: isolate;
+  border-color: color-mix(in srgb, var(--mi-tone) 28%, #d9e2ec);
+  background:
+    radial-gradient(circle at 10% 120%, var(--mi-tone-soft), transparent 52%),
+    linear-gradient(145deg, #ffffff 38%, var(--mi-tone-soft));
+  box-shadow:
+    0 12px 28px rgba(15, 23, 42, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  animation: mi-card-enter 0.48s cubic-bezier(0.2, 0.75, 0.25, 1) both;
+  animation-delay: var(--mi-delay, 0ms);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.mi-bootstrap-page .mi-kpi-card:hover {
+  transform: translateY(-7px) scale(1.015);
+  border-color: color-mix(in srgb, var(--mi-tone) 55%, #fff);
+  box-shadow:
+    0 22px 44px rgba(15, 23, 42, 0.16),
+    0 0 0 4px color-mix(in srgb, var(--mi-tone) 10%, transparent);
+}
+
+.mi-bootstrap-page .mi-kpi-card::before {
+  z-index: 2;
+  height: 6px;
+  background: var(--mi-tone);
+}
+
+.mi-bootstrap-page .mi-kpi-card::after {
+  content: attr(data-icon);
+  position: absolute;
+  z-index: -1;
+  left: 0.65rem;
+  bottom: -0.6rem;
+  color: var(--mi-tone);
+  font-size: 4.5rem;
+  line-height: 1;
+  opacity: 0.12;
+  filter: saturate(1.2);
+  transform: rotate(-8deg);
+  pointer-events: none;
+}
+
+.mi-bootstrap-page .mi-kpi-card[data-tone="success"] {
+  --mi-tone: #15803d;
+  --mi-tone-soft: rgba(21, 128, 61, 0.18);
+}
+
+.mi-bootstrap-page .mi-kpi-card[data-tone="danger"] {
+  --mi-tone: #dc2626;
+  --mi-tone-soft: rgba(220, 38, 38, 0.17);
+}
+
+.mi-bootstrap-page .mi-kpi-card[data-tone="warning"] {
+  --mi-tone: #d97706;
+  --mi-tone-soft: rgba(217, 119, 6, 0.18);
+}
+
+.mi-bootstrap-page .mi-kpi-card[data-tone="teal"] {
+  --mi-tone: #0f766e;
+  --mi-tone-soft: rgba(15, 118, 110, 0.18);
+}
+
+.mi-bootstrap-page .mi-kpi-card[data-tone="purple"] {
+  --mi-tone: #7c3aed;
+  --mi-tone-soft: rgba(124, 58, 237, 0.17);
+}
+
+.mi-bootstrap-page .mi-kpi-card[data-tone="danger"] .mi-kpi-value {
+  color: #b91c1c;
+}
+
+.mi-bootstrap-page .mi-kpi-card[data-tone="success"] .mi-kpi-value {
+  color: #166534;
+}
+
+.mi-bootstrap-page .mi-kpi-card[data-tone="warning"] .mi-kpi-value {
+  color: #9a3412;
+}
+
+.mi-bootstrap-page .mi-kpi-progress {
+  height: 6px;
+  margin-top: 0.75rem;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.24);
+  overflow: hidden;
+}
+
+.mi-bootstrap-page .mi-kpi-progress > span {
+  display: block;
+  width: var(--mi-progress, 0%);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--mi-tone);
+  animation: mi-progress-grow 0.9s 0.18s ease both;
+  transform-origin: right center;
+}
+
+.mi-bootstrap-page .mi-section-icon {
+  display: inline-grid;
+  width: 2rem;
+  height: 2rem;
+  margin-left: 0.55rem;
+  place-items: center;
+  border-radius: 0.65rem;
+  color: #1d4ed8;
+  background: linear-gradient(135deg, #dbeafe, #ccfbf1);
+  box-shadow: 0 7px 16px rgba(37, 99, 235, 0.13);
+  vertical-align: middle;
+}
+
+.mi-bootstrap-page .mi-pending-card {
+  border: 1px dashed #93c5fd;
+  border-radius: var(--mi-radius);
+  background: linear-gradient(135deg, #eff6ff, #f0fdfa);
+  color: #334155;
+}
+
+.mi-bootstrap-page .mi-insight-item {
+  border-right: 4px solid #2563eb;
+  border-radius: 0.75rem;
+  background: #f8fafc;
+  padding: 0.9rem 1rem;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.mi-bootstrap-page .mi-insight-item:hover {
+  transform: translateX(-4px);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
+.mi-bootstrap-page .mi-risk-item {
+  border-right-color: #dc2626;
+  background: #fff7f7;
+}
+
+.mi-bootstrap-page .bom-tree-card {
+  margin-bottom: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.85rem;
+  background: #fff;
+  overflow: hidden;
+}
+
+.mi-bootstrap-page .bom-tree-card summary {
+  cursor: pointer;
+  padding: 0.9rem 1rem;
+  background: #f8fafc;
+  font-weight: 800;
+}
+
+@keyframes mi-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes mi-progress-grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mi-bootstrap-page .mi-kpi-card,
+  .mi-bootstrap-page .mi-kpi-progress > span {
+    animation: none;
+  }
+
+  .mi-bootstrap-page .mi-kpi-card,
+  .mi-bootstrap-page .mi-insight-item {
+    transition: none;
+  }
+}
+
+/* Compact shared report headers: keep the report visible above the fold. */
+.main > .topbar,
+.main > .report-toolbar {
+  min-height: 78px !important;
+  height: auto !important;
+  margin: 10px 20px 8px !important;
+  padding: 12px 20px !important;
+  border-radius: 18px !important;
+  gap: 16px !important;
+}
+
+.main > .report-toolbar {
+  min-height: 72px !important;
+}
+
+.main > .topbar .page-heading,
+.main > .report-toolbar .page-heading {
+  gap: 2px !important;
+}
+
+.main > .topbar .page-pill,
+.main > .report-toolbar .page-pill {
+  margin-bottom: 3px !important;
+  padding: 4px 9px !important;
+  font-size: 9px !important;
+}
+
+.main > .topbar .page-heading h2,
+.main > .report-toolbar .page-heading h2 {
+  margin: 0 !important;
+  font-size: clamp(20px, 2vw, 24px) !important;
+  line-height: 1.15 !important;
+}
+
+.main > .topbar .page-heading p,
+.main > .report-toolbar .page-heading p {
+  max-width: 620px !important;
+  margin: 2px 0 0 !important;
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+}
+
+.main > .topbar .header-actions,
+.main > .report-toolbar .header-actions {
+  min-width: 0 !important;
+  gap: 7px !important;
+}
+
+.main > .topbar .filter-row,
+.main > .report-toolbar .filter-row {
+  gap: 7px !important;
+}
+
+.main > .topbar .control,
+.main > .report-toolbar .control,
+.main > .topbar .run-btn,
+.main > .report-toolbar .run-btn,
+.main > .topbar .export-btn,
+.main > .report-toolbar .export-btn,
+.main > .report-toolbar #reportExportExcelBtn {
+  min-height: 36px !important;
+  height: 36px !important;
+  padding: 0 12px !important;
+  border-radius: 10px !important;
+  font-size: 11px !important;
+}
+
+.main > .topbar .user-chip {
+  min-height: 36px !important;
+  height: 36px !important;
+  padding: 0 12px !important;
+  font-size: 10px !important;
+}
+
+.main > .topbar::after,
+.main > .report-toolbar::after {
+  width: 170px !important;
+  height: 170px !important;
+  opacity: 0.5 !important;
+}
+
+.main > .content {
+  padding-top: 4px !important;
+}
+
+@media (max-width: 900px) {
+  .main > .topbar,
+  .main > .report-toolbar {
+    align-items: stretch !important;
+    padding: 12px 14px !important;
+  }
+
+  .main > .topbar .header-actions,
+  .main > .report-toolbar .header-actions {
+    width: 100% !important;
+  }
+}

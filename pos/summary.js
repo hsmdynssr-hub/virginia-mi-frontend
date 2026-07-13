@@ -22,61 +22,64 @@ async function waitForReportFilters() {
 
 function buildPosSummaryPage() {
   return `
-    <section id="loadingBox" class="loading-box hidden">
+    <div class="container-fluid mi-bootstrap-page px-0">
+    <section id="loadingBox" class="alert alert-warning d-flex align-items-center hidden" role="status">
+      <span class="spinner-border spinner-border-sm mi-loading-spinner" aria-hidden="true"></span>
       جاري تحميل ملخص نقاط البيع...
     </section>
 
-    <section id="errorBox" class="error-box hidden"></section>
+    <section id="errorBox" class="alert alert-danger hidden" role="alert"></section>
 
-    <section id="pendingBox" class="inventory-report-card">
-      <h2>التقرير لم يتم تحميله بعد</h2>
-      <p class="inventory-muted-text">
+    <section id="pendingBox" class="mi-pending-card p-4 mb-4">
+      <h2 class="h6 fw-bold mb-2">التقرير لم يتم تحميله بعد</h2>
+      <p class="mb-0">
         اختار الشركة ثم الفرع / النطاق، وبعدها اضغط
         <strong>تحديث التقرير</strong>
         لعرض البيانات.
       </p>
     </section>
 
-    <section id="kpiGrid" class="inventory-kpi-grid"></section>
+    <section id="kpiGrid" class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3 mb-4"></section>
 
-    <section class="inventory-report-card pos-summary-section">
-      <h2>مؤشرات إدارية سريعة</h2>
+    <section class="mi-report-card pos-summary-section">
+      <h2 class="mi-report-title"><span class="mi-section-icon">⚡</span>مؤشرات إدارية سريعة</h2>
       <div id="highlightsBox"></div>
     </section>
 
-    <section class="inventory-report-card pos-summary-section">
-      <h2>ملخص المعارض</h2>
-      <p class="inventory-muted-text">
+    <section class="mi-report-card pos-summary-section">
+      <h2 class="mi-report-title"><span class="mi-section-icon">🏬</span>ملخص المعارض</h2>
+      <p class="text-secondary small">
         أعلى المعارض حسب صافي المبيعات. التفاصيل الكاملة متاحة في Excel.
       </p>
       <div id="branchesTable"></div>
     </section>
 
-    <section class="inventory-report-card pos-summary-section">
-      <h2>ملخص الكاشيرات</h2>
-      <p class="inventory-muted-text">
+    <section class="mi-report-card pos-summary-section">
+      <h2 class="mi-report-title"><span class="mi-section-icon">👤</span>ملخص الكاشيرات</h2>
+      <p class="text-secondary small">
         أعلى الكاشيرات حسب صافي المبيعات. التفاصيل الكاملة متاحة في Excel.
       </p>
       <div id="cashiersTable"></div>
     </section>
 
-    <section class="inventory-report-card pos-summary-section">
-      <h2>ساعات الذروة</h2>
-      <p class="inventory-muted-text">
+    <section class="mi-report-card pos-summary-section">
+      <h2 class="mi-report-title"><span class="mi-section-icon">⏱</span>ساعات الذروة</h2>
+      <p class="text-secondary small">
         أقوى الساعات حسب عدد الفواتير. هذا مؤشر ضغط وليس مدة خدمة العميل.
       </p>
       <div id="hoursTable"></div>
     </section>
 
-    <section class="inventory-report-card pos-summary-section">
-      <h2>تحذيرات إدارية</h2>
+    <section class="mi-report-card pos-summary-section">
+      <h2 class="mi-report-title"><span class="mi-section-icon">⚠</span>تحذيرات إدارية</h2>
       <div id="warningsBox"></div>
     </section>
 
-    <section class="inventory-report-card pos-summary-section">
-      <h2>ملاحظات الحساب</h2>
+    <section class="mi-report-card pos-summary-section">
+      <h2 class="mi-report-title"><span class="mi-section-icon">ℹ</span>ملاحظات الحساب</h2>
       <div id="notesBox"></div>
     </section>
+    </div>
   `;
 }
 
@@ -128,8 +131,8 @@ function renderInitialState() {
   if (pendingBox) {
     pendingBox.classList.remove("hidden");
     pendingBox.innerHTML = `
-      <h2>التقرير لم يتم تحميله بعد</h2>
-      <p class="inventory-muted-text">
+      <h2 class="h6 fw-bold mb-2">التقرير لم يتم تحميله بعد</h2>
+      <p class="mb-0">
         اختار الشركة ثم الفرع / النطاق، وبعدها اضغط
         <strong>تحديث التقرير</strong>
         لعرض ملخص نقاط البيع.
@@ -150,8 +153,8 @@ function renderFilterChangedState() {
   if (pendingBox) {
     pendingBox.classList.remove("hidden");
     pendingBox.innerHTML = `
-      <h2>تم تغيير الفلاتر</h2>
-      <p class="inventory-muted-text">
+      <h2 class="h6 fw-bold mb-2">تم تغيير الفلاتر</h2>
+      <p class="mb-0">
         اضغط <strong>تحديث التقرير</strong> لتطبيق الشركة والفرع والفترة الجديدة.
       </p>
     `;
@@ -327,32 +330,38 @@ function renderPosSummaryKpis(summary) {
     {
       title: "عدد الفواتير",
       value: formatNumber(summary.ordersCount, 0),
-      hint: "إجمالي فواتير POS في الفترة"
+      hint: "إجمالي فواتير POS في الفترة",
+      tone: "purple"
     },
     {
       title: "إجمالي المبيعات",
       value: formatMoney(summary.grossSales),
-      hint: "المبيعات الموجبة فقط قبل المرتجعات"
+      hint: "المبيعات الموجبة فقط قبل المرتجعات",
+      tone: "teal"
     },
     {
       title: "المرتجعات / استرداد أموال",
       value: formatMoney(summary.returnsValue),
-      hint: "استرداد أموال فقط، وليس كل سطر سالب"
+      hint: "استرداد أموال فقط، وليس كل سطر سالب",
+      tone: "danger"
     },
     {
       title: "العروض والتعديلات السالبة",
       value: formatMoney(summary.negativeAdjustmentsValue),
-      hint: "سطور سالبة داخل فواتير البيع العادية مثل عروض أو كوبونات أو تسويات"
+      hint: "سطور سالبة داخل فواتير البيع العادية مثل عروض أو كوبونات أو تسويات",
+      tone: "warning"
     },
     {
       title: "صافي المبيعات",
       value: formatMoney(summary.netSales),
-      hint: "إجمالي المبيعات - المرتجعات - العروض والتعديلات السالبة"
+      hint: "إجمالي المبيعات - المرتجعات - العروض والتعديلات السالبة",
+      tone: "success"
     },
     {
       title: "متوسط الفاتورة",
       value: formatMoney(summary.averageTicket),
-      hint: "صافي المبيعات ÷ عدد الفواتير"
+      hint: "صافي المبيعات ÷ عدد الفواتير",
+      tone: "teal"
     },
     {
       title: "إجمالي الخصومات",
@@ -416,14 +425,30 @@ function renderPosSummaryKpis(summary) {
     }
   ];
 
+  const icons = ["🧾", "💰", "↩", "🎁", "✅", "🛒", "🏷", "%", "↩", "%", "📈", "%", "👥", "🏬", "👤", "🧾", "🏆", "⏱"];
+
   kpiGrid.innerHTML = cards
-    .map((card) => `
-      <div class="inventory-kpi-card">
-        <span>${escapeHtml(card.title)}</span>
-        <strong>${escapeHtml(card.value)}</strong>
-        <small>${escapeHtml(card.hint)}</small>
+    .map((card, index) => {
+      const percentValue = String(card.value || "").includes("%")
+        ? Math.min(Math.max(Number.parseFloat(String(card.value)), 0), 100)
+        : null;
+
+      return `
+      <div class="col">
+       <div class="mi-kpi-card h-100"
+            data-tone="${escapeHtml(card.tone || ["purple", "teal", "success", "warning"][index % 4])}"
+            data-icon="${icons[index] || "📊"}"
+            style="--mi-delay:${index * 45}ms">
+        <span class="mi-kpi-label">${escapeHtml(card.title)}</span>
+        <strong class="mi-kpi-value">${escapeHtml(card.value)}</strong>
+        <small class="mi-kpi-hint">${escapeHtml(card.hint)}</small>
+        ${percentValue !== null ? `
+          <div class="mi-kpi-progress"><span style="--mi-progress:${percentValue}%"></span></div>
+        ` : ""}
+       </div>
       </div>
-    `)
+    `;
+    })
     .join("");
 }
 
@@ -432,17 +457,22 @@ function renderHighlights(rows) {
   if (!container) return;
 
   if (!rows.length) {
-    container.innerHTML = `<div class="inventory-empty">لا توجد مؤشرات.</div>`;
+    container.innerHTML = `<div class="alert mi-empty-state py-4">لا توجد مؤشرات.</div>`;
     return;
   }
 
   container.innerHTML = `
-    <div class="inventory-kpi-grid">
-      ${rows.map((item) => `
-        <div class="inventory-kpi-card">
-          <span>${escapeHtml(item.label)}</span>
-          <strong>${escapeHtml(item.value || "-")}</strong>
-          <small>${escapeHtml(item.metric || "-")}</small>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3">
+      ${rows.map((item, index) => `
+        <div class="col">
+         <div class="mi-kpi-card h-100"
+              data-tone="${["teal", "purple", "success", "warning"][index % 4]}"
+              data-icon="${["⚡", "🏆", "📈", "💡"][index % 4]}"
+              style="--mi-delay:${index * 55}ms">
+          <span class="mi-kpi-label">${escapeHtml(item.label)}</span>
+          <strong class="mi-kpi-value">${escapeHtml(item.value || "-")}</strong>
+          <small class="mi-kpi-hint">${escapeHtml(item.metric || "-")}</small>
+         </div>
         </div>
       `).join("")}
     </div>
@@ -494,7 +524,7 @@ function renderWarnings(warnings) {
 
   if (!warnings.length) {
     container.innerHTML = `
-      <div class="analysis-box">
+      <div class="alert alert-success mb-0">
         لا توجد تحذيرات إدارية واضحة في الفترة المحددة.
       </div>
     `;
@@ -502,15 +532,13 @@ function renderWarnings(warnings) {
   }
 
   container.innerHTML = `
-    <div class="analysis-box">
-      <ul>
+    <div class="d-grid gap-2">
         ${warnings.map((warning) => `
-          <li>
+          <div class="mi-insight-item mi-risk-item">
             <strong>${escapeHtml(warning.level || "info")}:</strong>
             ${escapeHtml(warning.message || warning)}
-          </li>
+          </div>
         `).join("")}
-      </ul>
     </div>
   `;
 }
@@ -520,17 +548,15 @@ function renderNotes(notes) {
   if (!container) return;
 
   if (!notes.length) {
-    container.innerHTML = `<div class="inventory-empty">لا توجد ملاحظات.</div>`;
+    container.innerHTML = `<div class="alert mi-empty-state py-4">لا توجد ملاحظات.</div>`;
     return;
   }
 
   container.innerHTML = `
-    <div class="analysis-box">
-      <ul>
+    <div class="d-grid gap-2">
         ${notes.map((note) => `
-          <li>${escapeHtml(note)}</li>
+          <div class="mi-insight-item">${escapeHtml(note)}</div>
         `).join("")}
-      </ul>
     </div>
   `;
 }
@@ -540,7 +566,7 @@ function renderTable(containerId, rows, columns) {
   if (!container) return;
 
   if (!Array.isArray(rows) || !rows.length) {
-    container.innerHTML = `<div class="inventory-empty">لا توجد بيانات.</div>`;
+    container.innerHTML = `<div class="alert mi-empty-state py-4">لا توجد بيانات.</div>`;
     return;
   }
 
@@ -562,8 +588,8 @@ function renderTable(containerId, rows, columns) {
     .join("");
 
   container.innerHTML = `
-    <div class="inventory-table-wrap">
-      <table class="inventory-data-table">
+    <div class="table-responsive">
+      <table class="table table-hover table-striped align-middle mi-data-table">
         <thead>
           <tr>${header}</tr>
         </thead>

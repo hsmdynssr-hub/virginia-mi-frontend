@@ -4,8 +4,10 @@ function createReportPage(config) {
     config.subtitle,
     config.activePage,
     `
-      ${config.extraFiltersHtml || ""}
-      <div id="reportArea"></div>
+      <div class="container-fluid mi-bootstrap-page px-0">
+        ${config.extraFiltersHtml || ""}
+        <div id="reportArea"></div>
+      </div>
     `
   );
 
@@ -15,9 +17,9 @@ function createReportPage(config) {
     if (!reportArea) return;
 
     reportArea.innerHTML = `
-      <div class="report-panel">
-        <h3>التقرير لم يتم تحميله بعد</h3>
-        <p>
+      <div class="mi-pending-card p-4 mb-4">
+        <h3 class="h6 fw-bold mb-2">التقرير لم يتم تحميله بعد</h3>
+        <p class="mb-0">
           اختار الفلاتر المطلوبة ثم اضغط زر
           <strong>تحديث التقرير</strong>
           لعرض البيانات.
@@ -30,9 +32,9 @@ function createReportPage(config) {
     if (!reportArea) return;
 
     reportArea.innerHTML = `
-      <div class="report-panel">
-        <h3>تم تغيير الفلاتر</h3>
-        <p>
+      <div class="mi-pending-card p-4 mb-4">
+        <h3 class="h6 fw-bold mb-2">تم تغيير الفلاتر</h3>
+        <p class="mb-0">
           اضغط زر <strong>تحديث التقرير</strong> لتطبيق الفلاتر الجديدة.
         </p>
       </div>

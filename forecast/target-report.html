@@ -2,23 +2,20 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-
   <title>تقرير التارجت</title>
   <link rel="icon" href="data:," />
-
-  <script>
-    const DEV_VERSION = Date.now();
-    document.write(`<link rel="stylesheet" href="../css/style.css?v=${DEV_VERSION}">`);
-  </script>
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.rtl.min.css" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/bootstrap-theme.css?v=20260713-5" />
 </head>
 <body>
-  <script>
-    document.write(`<script src="../js/api.js?v=${DEV_VERSION}"><\/script>`);
-    document.write(`<script src="../js/layout.js?v=${DEV_VERSION}"><\/script>`);
-    document.write(`<script src="./target-report.js?v=${DEV_VERSION}"><\/script>`);
-  </script>
+  <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="./target-report.js"></script>
 </body>
 </html>

@@ -1,3 +1,135 @@
+/*
+  Shared UI foundation
+  --------------------
+  Every authenticated page that loads layout.js inherits Bootstrap RTL and
+  the project theme from one place. Existing page styles remain loaded during
+  the gradual migration.
+*/
+(function ensureSharedUiFoundation() {
+  const scriptUrl = document.currentScript?.src || window.location.href;
+  const assetUrl = (relativePath) => new URL(relativePath, scriptUrl).href;
+
+  function hasStylesheet(fragment) {
+    return Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+      .some((link) => String(link.href || "").includes(fragment));
+  }
+
+  if (!hasStylesheet("bootstrap.rtl.min.css")) {
+    const bootstrapCss = document.createElement("link");
+    bootstrapCss.rel = "stylesheet";
+    bootstrapCss.href = assetUrl("../vendor/bootstrap/css/bootstrap.rtl.min.css");
+
+    const firstStylesheet = document.querySelector('link[rel="stylesheet"]');
+    document.head.insertBefore(bootstrapCss, firstStylesheet || null);
+  }
+
+  if (!hasStylesheet("bootstrap-theme.css")) {
+    const themeCss = document.createElement("link");
+    themeCss.rel = "stylesheet";
+    themeCss.href = `${assetUrl("../css/bootstrap-theme.css")}?v=20260713-5`;
+    document.head.appendChild(themeCss);
+  }
+
+  const hasBootstrapJs = Array.from(document.scripts)
+    .some((script) => String(script.src || "").includes("bootstrap.bundle.min.js"));
+
+  if (!hasBootstrapJs) {
+    const bootstrapJs = document.createElement("script");
+    bootstrapJs.src = assetUrl("../vendor/bootstrap/js/bootstrap.bundle.min.js");
+    bootstrapJs.defer = true;
+    bootstrapJs.dataset.miUiFoundation = "true";
+    document.head.appendChild(bootstrapJs);
+  }
+})();
+
+const MI_VISUAL_TONES = ["purple", "teal", "success", "warning"];
+const MI_VISUAL_ICONS = ["📊", "◆", "✓", "⚡", "💰", "📦", "↗", "⚠"];
+
+function enhanceLegacyReportUi(root = document) {
+  const scope = root.querySelectorAll ? root : document;
+
+  scope.querySelectorAll(
+    ".inventory-kpi-card, .report-kpi-card, .kpi-card, .cards-grid > .card"
+  ).forEach((card, index) => {
+    if (card.dataset.miEnhanced === "true") return;
+
+    card.dataset.miEnhanced = "true";
+    card.classList.add("mi-kpi-card", "h-100");
+
+    const cardText = String(card.textContent || "").toLowerCase();
+    const isDanger = /مرتجع|خطر|سالب|عجز|متأخر|خسار|نفاد/.test(cardText);
+    const isWarning = /خصم|تحذير|قريب|معلق|مراجعة/.test(cardText);
+    const isSuccess = /صافي|ربح|هامش|متاح|آمن|منجز|أفضل/.test(cardText);
+
+    card.dataset.tone ||= isDanger
+      ? "danger"
+      : isWarning
+        ? "warning"
+        : isSuccess
+          ? "success"
+          : MI_VISUAL_TONES[index % MI_VISUAL_TONES.length];
+
+    card.dataset.icon ||= isDanger
+      ? "⚠"
+      : isWarning
+        ? "!"
+        : isSuccess
+          ? "✓"
+          : MI_VISUAL_ICONS[index % MI_VISUAL_ICONS.length];
+    card.style.setProperty("--mi-delay", `${(index % 12) * 45}ms`);
+
+    card.querySelector(".card-label, span")?.classList.add("mi-kpi-label");
+    card.querySelector("strong")?.classList.add("mi-kpi-value");
+    card.querySelector("small")?.classList.add("mi-kpi-hint");
+  });
+
+  scope.querySelectorAll(".inventory-report-card, .report-ui-page > .report-card, .panel")
+    .forEach((card) => card.classList.add("mi-report-card"));
+
+  scope.querySelectorAll(
+    ".inventory-report-card > h2, .report-card-head > h2, .panel-title > h3, .panel > h3"
+  ).forEach((title) => title.classList.add("mi-report-title"));
+
+  scope.querySelectorAll(".inventory-table-wrap, .table-wrap, .report-table-wrap")
+    .forEach((wrapper) => wrapper.classList.add("table-responsive"));
+
+  scope.querySelectorAll(
+    ".inventory-data-table, .data-table, .report-table, .table-wrap > table"
+  ).forEach((table) => {
+    table.classList.add("table", "table-hover", "table-striped", "align-middle", "mi-data-table");
+  });
+
+  scope.querySelectorAll(".filters-grid select, .report-field select")
+    .forEach((select) => select.classList.add("form-select"));
+
+  scope.querySelectorAll(".filters-grid input, .report-field input")
+    .forEach((input) => input.classList.add("form-control"));
+
+  scope.querySelectorAll(".primary-btn, .run-btn, .report-btn-primary")
+    .forEach((button) => button.classList.add("btn", "btn-primary"));
+
+  scope.querySelectorAll(".inventory-empty, .report-empty, .empty")
+    .forEach((empty) => empty.classList.add("alert", "mi-empty-state"));
+}
+
+function observeLegacyReportUi() {
+  if (window.__miVisualObserver) return;
+
+  let scheduled = false;
+  const observer = new MutationObserver(() => {
+    if (scheduled) return;
+    scheduled = true;
+
+    window.requestAnimationFrame(() => {
+      scheduled = false;
+      enhanceLegacyReportUi(document);
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+  window.__miVisualObserver = observer;
+}
+
 const REPORT_PAGE_MAP = {
   dashboard: "dashboard.index",
 
@@ -676,7 +808,7 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
         </header>
         ${reportToolbarHtml}
 
-        <section class="content">
+        <section class="content mi-bootstrap-page">
           ${finalContentHtml}
         </section>
       </main>
@@ -687,6 +819,8 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
   setupSidebarAccordions(activePage);
   loadReportExportEngine(activePage);
   loadReportFiltersEngine(activePage);
+  enhanceLegacyReportUi(document);
+  observeLegacyReportUi();
 }
 
 function kpiCard(label, value, hint = "") {

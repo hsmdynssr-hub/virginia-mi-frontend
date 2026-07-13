@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function buildReplenishmentContent() {
   return `
-    <div class="report-ui-page">
+    <div class="report-ui-page mi-bootstrap-page">
       <section class="report-card">
         <div class="report-card-head">
           <h2>فلاتر التقرير</h2>

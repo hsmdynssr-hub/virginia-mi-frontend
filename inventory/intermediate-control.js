@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
   renderLayout(
     "رقابة المخازن الوسيطة",
     "مراقبة مخزن التحويلات ومخزن الشحن، الحركات المتأخرة، وفروقات الكمية والقيمة.",
@@ -9,57 +9,60 @@ document.addEventListener("DOMContentLoaded", async () => {
   forceIntermediateDateRange();
   bindIntermediateEvents();
 
-  await refreshIntermediateControl();
+  clearIntermediateReport();
 });
 
 function buildIntermediateControlContent() {
   return `
-<section class="filters-card inventory-filters-card">
-      <div class="filters-grid">
-        <label>
-          حد التأخير المسموح
-          <input id="maxAllowedDaysView" type="text" value="2 يوم" disabled />
-        </label>
+    <div class="container-fluid mi-bootstrap-page px-0">
+    <section class="mi-filter-card">
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="maxAllowedDaysView">حد التأخير المسموح</label>
+          <input id="maxAllowedDaysView" class="form-control" type="text" value="2 يوم" disabled />
+        </div>
 
-        <label>
-          نطاق التقرير
-          <input id="intermediateScopeView" type="text" value="مخزن التحويلات + مخزن الشحن" disabled />
-        </label>
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="intermediateScopeView">نطاق التقرير</label>
+          <input id="intermediateScopeView" class="form-control" type="text" value="مخزن التحويلات + مخزن الشحن" disabled />
+        </div>
       </div>
     </section>
 
-    <section id="loadingBox" class="loading-box hidden">
+    <section id="loadingBox" class="alert alert-warning d-flex align-items-center hidden" role="status">
+      <span class="spinner-border spinner-border-sm mi-loading-spinner" aria-hidden="true"></span>
       جاري تحميل التقرير...
     </section>
 
-    <section id="errorBox" class="error-box hidden"></section>
+    <section id="errorBox" class="alert alert-danger hidden" role="alert"></section>
 
-    <section id="kpiGrid" class="inventory-kpi-grid"></section>
+    <section id="kpiGrid" class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3 mb-4"></section>
 
-    <section class="inventory-report-card">
-      <h2>التحليل والتوصيات</h2>
+    <section class="mi-report-card">
+      <h2 class="mi-report-title"><span class="mi-section-icon">💡</span>التحليل والتوصيات</h2>
       <div id="intermediateInsights"></div>
     </section>
 
-    <section class="inventory-report-card">
-      <h2>ملخص المخازن الوسيطة</h2>
+    <section class="mi-report-card">
+      <h2 class="mi-report-title"><span class="mi-section-icon">🏬</span>ملخص المخازن الوسيطة</h2>
       <div id="locationsSummary"></div>
     </section>
 
-    <section class="inventory-report-card">
-      <h2>الحركات المتأخرة أكثر من يومين</h2>
+    <section class="mi-report-card">
+      <h2 class="mi-report-title"><span class="mi-section-icon">⚠</span>الحركات المتأخرة أكثر من يومين</h2>
       <div id="overdueMoves"></div>
     </section>
 
-    <section class="inventory-report-card">
-      <h2>فروقات حسب الصنف</h2>
+    <section class="mi-report-card">
+      <h2 class="mi-report-title"><span class="mi-section-icon">⚖</span>فروقات حسب الصنف</h2>
       <div id="byProduct"></div>
     </section>
 
-    <section class="inventory-report-card">
-      <h2>تفاصيل الحركات الوسيطة</h2>
+    <section class="mi-report-card">
+      <h2 class="mi-report-title"><span class="mi-section-icon">↔</span>تفاصيل الحركات الوسيطة</h2>
       <div id="movements"></div>
     </section>
+    </div>
   `;
 }
 
@@ -101,14 +104,14 @@ function bindIntermediateEvents() {
 
   const companySelect = document.getElementById("companySelect");
   if (companySelect) {
-    companySelect.addEventListener("change", refreshIntermediateControl);
+    companySelect.addEventListener("change", clearIntermediateReport);
   }
 
   ["dateFrom", "dateTo"].forEach((id) => {
     const element = document.getElementById(id);
     if (!element) return;
 
-    element.addEventListener("change", loadIntermediateReport);
+    element.addEventListener("change", clearIntermediateReport);
   });
 
   const exportExcelBtn = document.getElementById("exportExcelBtn");
@@ -127,12 +130,28 @@ function bindIntermediateEvents() {
 }
 
 async function refreshIntermediateControl() {
+  if (!document.getElementById("companySelect")?.value) {
+    const errorBox = document.getElementById("errorBox");
+    if (errorBox) {
+      errorBox.textContent = "لازم تختار الشركة قبل تحديث التقرير.";
+      errorBox.classList.remove("hidden");
+    }
+    return;
+  }
   await loadIntermediateReport();
+}
+
+function clearIntermediateReport() {
+  ["kpiGrid", "intermediateInsights", "locationsSummary", "overdueMoves", "byProduct", "movements"]
+    .forEach((id) => {
+      const element = document.getElementById(id);
+      if (element) element.innerHTML = "";
+    });
 }
 
 function getIntermediateFilters() {
   return {
-    companyId: document.getElementById("companySelect")?.value || "1",
+    companyId: document.getElementById("companySelect")?.value || "",
     dateFrom: document.getElementById("dateFrom")?.value || "",
     dateTo: document.getElementById("dateTo")?.value || "",
     limit: 15000
@@ -270,11 +289,16 @@ function renderIntermediateKpis(summary) {
   ];
 
   kpiGrid.innerHTML = cards
-    .map((card) => `
-      <div class="inventory-kpi-card">
-        <span>${card.title}</span>
-        <strong>${card.value}</strong>
-        <small>${card.hint}</small>
+    .map((card, index) => `
+      <div class="col">
+       <div class="mi-kpi-card h-100"
+            data-tone="${["purple", "teal", "danger", "warning"][index % 4]}"
+            data-icon="${["⏱", "↔", "⚠", "🚨", "⚖", "💰", "📦", "💵"][index]}"
+            style="--mi-delay:${index * 45}ms">
+        <span class="mi-kpi-label">${card.title}</span>
+        <strong class="mi-kpi-value">${card.value}</strong>
+        <small class="mi-kpi-hint">${card.hint}</small>
+       </div>
       </div>
     `)
     .join("");
@@ -288,15 +312,15 @@ function renderIntermediateInsights(data) {
   const recommendations = data.recommendations || [];
 
   if (!insights.length && !recommendations.length) {
-    container.innerHTML = `<div class="inventory-empty">لا توجد توصيات حالية</div>`;
+    container.innerHTML = `<div class="alert mi-empty-state py-4">لا توجد توصيات حالية</div>`;
     return;
   }
 
   container.innerHTML = `
-    <div class="analysis-box">
-      ${insights.map((item) => `<p>${item}</p>`).join("")}
+    <div class="d-grid gap-2">
+      ${insights.map((item) => `<div class="mi-insight-item">${item}</div>`).join("")}
       ${recommendations
-        .map((item) => `<p><b>توصية:</b> ${item}</p>`)
+        .map((item) => `<div class="mi-insight-item"><b>توصية:</b> ${item}</div>`)
         .join("")}
     </div>
   `;
@@ -387,12 +411,12 @@ function renderMovements(rows) {
 
 function buildIntermediateTable({ columns, rows }) {
   if (!rows || rows.length === 0) {
-    return `<div class="inventory-empty">لا توجد بيانات داخل الفلتر الحالي</div>`;
+    return `<div class="alert mi-empty-state py-4">لا توجد بيانات داخل الفلتر الحالي</div>`;
   }
 
   return `
-    <div class="inventory-table-wrap">
-      <table class="inventory-data-table">
+    <div class="table-responsive">
+      <table class="table table-hover table-striped align-middle mi-data-table">
         <thead>
           <tr>
             ${columns.map((column) => `<th>${column.label}</th>`).join("")}

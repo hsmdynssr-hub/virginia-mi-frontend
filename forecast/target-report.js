@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   );
 
   bindTargetReportEvents();
-  await loadTargetReport();
+  renderTargetPendingState();
 });
 
 function getTargetId() {
@@ -17,45 +17,59 @@ function getTargetId() {
 
 function buildTargetReportPage() {
   return `
-<section id="targetInfoBox"></section>
+    <div class="container-fluid mi-bootstrap-page px-0">
+    <section id="targetPendingBox" class="mi-pending-card p-4 mb-4"></section>
+    <section id="targetInfoBox"></section>
 
-    <section id="targetKpiGrid" class="inventory-kpi-grid"></section>
+    <section id="targetKpiGrid" class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3 mb-4"></section>
 
-    <section class="inventory-report-card">
-      <h2>منتجات التارجت</h2>
+    <section class="mi-report-card target-report-section hidden">
+      <h2 class="mi-report-title"><span class="mi-section-icon">🎯</span>منتجات التارجت</h2>
       <div id="targetProductsTable"></div>
     </section>
 
-    <section class="inventory-report-card">
-      <h2>خطة تصنيع المنتجات الوسيطة</h2>
+    <section class="mi-report-card target-report-section hidden">
+      <h2 class="mi-report-title"><span class="mi-section-icon">🏭</span>خطة تصنيع المنتجات الوسيطة</h2>
       <div id="manufacturingTable"></div>
     </section>
 
-    <section class="inventory-report-card">
-      <h2>خطة شراء الخامات</h2>
+    <section class="mi-report-card target-report-section hidden">
+      <h2 class="mi-report-title"><span class="mi-section-icon">🛒</span>خطة شراء الخامات</h2>
       <div id="purchaseTable"></div>
     </section>
 
-    <section class="inventory-report-card">
-      <h2>المخاطر والتنبيهات</h2>
+    <section class="mi-report-card target-report-section hidden">
+      <h2 class="mi-report-title"><span class="mi-section-icon">⚠</span>المخاطر والتنبيهات</h2>
       <div id="risksBox"></div>
     </section>
 
-    <section class="inventory-report-card">
-      <h2>BOM Trace</h2>
+    <section class="mi-report-card target-report-section hidden">
+      <h2 class="mi-report-title"><span class="mi-section-icon">🧩</span>BOM Trace</h2>
       <div id="bomTreesBox"></div>
     </section>
 
-    <section class="inventory-report-card">
-      <h2>ملاحظات التقرير</h2>
+    <section class="mi-report-card target-report-section hidden">
+      <h2 class="mi-report-title"><span class="mi-section-icon">ℹ</span>ملاحظات التقرير</h2>
       <div id="notesBox"></div>
     </section>
 
-    <section id="loadingBox" class="loading-box hidden">
+    <section id="loadingBox" class="alert alert-warning d-flex align-items-center hidden" role="status">
+      <span class="spinner-border spinner-border-sm mi-loading-spinner" aria-hidden="true"></span>
       جاري تحميل تقرير التارجت...
     </section>
 
-    <section id="errorBox" class="error-box hidden"></section>
+    <section id="errorBox" class="alert alert-danger hidden" role="alert"></section>
+    </div>
+  `;
+}
+
+function renderTargetPendingState() {
+  const pending = document.getElementById("targetPendingBox");
+  if (!pending) return;
+
+  pending.innerHTML = `
+    <h2 class="h6 fw-bold mb-2">التقرير لم يتم تحميله بعد</h2>
+    <p class="mb-0">اضغط <strong>تحديث التقرير</strong> لعرض تحليل التارجت وخطط التصنيع والشراء.</p>
   `;
 }
 
@@ -122,6 +136,10 @@ async function loadTargetReport() {
       throw new Error(response.message || "فشل تحميل تقرير التارجت");
     }
 
+    document.getElementById("targetPendingBox")?.classList.add("hidden");
+    document.querySelectorAll(".target-report-section").forEach((section) => {
+      section.classList.remove("hidden");
+    });
     renderTargetReport(response);
   } catch (error) {
     console.error(error);
@@ -147,12 +165,14 @@ function renderTargetInfo(target, settings) {
   if (!container) return;
 
   container.innerHTML = `
-    <section class="analysis-box">
-      <p><strong>Target:</strong> ${target?.targetName || "-"}</p>
-      <p><strong>Company:</strong> ${target?.companyId || "-"}</p>
-      <p><strong>Period:</strong> ${formatDate(target?.dateFrom)} → ${formatDate(target?.dateTo)}</p>
-      <p><strong>Status:</strong> ${target?.status || "-"}</p>
-      <p><strong>FG Stock Mode:</strong> ${settings?.stockMode || "-"}</p>
+    <section class="mi-report-card mb-4">
+      <div class="row g-3">
+        <div class="col-12 col-md"><span class="text-secondary small d-block">Target</span><strong>${target?.targetName || "-"}</strong></div>
+        <div class="col-6 col-md"><span class="text-secondary small d-block">Company</span><strong>${target?.companyId || "-"}</strong></div>
+        <div class="col-12 col-md"><span class="text-secondary small d-block">Period</span><strong>${formatDate(target?.dateFrom)} → ${formatDate(target?.dateTo)}</strong></div>
+        <div class="col-6 col-md"><span class="text-secondary small d-block">Status</span><span class="badge text-bg-primary">${target?.status || "-"}</span></div>
+        <div class="col-12 col-md"><span class="text-secondary small d-block">FG Stock Mode</span><strong>${settings?.stockMode || "-"}</strong></div>
+      </div>
     </section>
   `;
 }
@@ -225,11 +245,16 @@ function renderKpis(summary) {
   ];
 
   grid.innerHTML = cards
-    .map((card) => `
-      <div class="inventory-kpi-card">
-        <span>${card.title}</span>
-        <strong>${card.value}</strong>
-        <small>${card.hint}</small>
+    .map((card, index) => `
+      <div class="col">
+       <div class="mi-kpi-card h-100"
+            data-tone="${["purple", "teal", "success", "warning"][index % 4]}"
+            data-icon="${["🎯", "📦", "↗", "📅", "📊", "%", "%", "✅", "🏭", "🧩", "🌾", "⚠"][index]}"
+            style="--mi-delay:${index * 45}ms">
+        <span class="mi-kpi-label">${card.title}</span>
+        <strong class="mi-kpi-value">${card.value}</strong>
+        <small class="mi-kpi-hint">${card.hint}</small>
+       </div>
       </div>
     `)
     .join("");
@@ -303,17 +328,17 @@ function renderRisks(risks) {
   if (!container) return;
 
   if (!risks.length) {
-    container.innerHTML = `<div class="inventory-empty">لا توجد مخاطر واضحة</div>`;
+    container.innerHTML = `<div class="alert alert-success mb-0">لا توجد مخاطر واضحة</div>`;
     return;
   }
 
   container.innerHTML = `
-    <div class="analysis-box">
+    <div class="d-grid gap-2">
       ${risks.map((risk) => `
-        <p>
+        <div class="mi-insight-item mi-risk-item">
           <strong>${risk.level || "info"}:</strong>
           ${risk.message || "-"}
-        </p>
+        </div>
       `).join("")}
     </div>
   `;
@@ -324,7 +349,7 @@ function renderBomTrees(trees) {
   if (!container) return;
 
   if (!trees.length) {
-    container.innerHTML = `<div class="inventory-empty">لا توجد BOM Trees للعرض</div>`;
+    container.innerHTML = `<div class="alert mi-empty-state py-4">لا توجد BOM Trees للعرض</div>`;
     return;
   }
 
@@ -372,25 +397,25 @@ function renderNotes(notes) {
   if (!container) return;
 
   if (!notes.length) {
-    container.innerHTML = `<div class="inventory-empty">لا توجد ملاحظات</div>`;
+    container.innerHTML = `<div class="alert mi-empty-state py-4">لا توجد ملاحظات</div>`;
     return;
   }
 
   container.innerHTML = `
-    <div class="analysis-box">
-      ${notes.map((note) => `<p>${note}</p>`).join("")}
+    <div class="d-grid gap-2">
+      ${notes.map((note) => `<div class="mi-insight-item">${note}</div>`).join("")}
     </div>
   `;
 }
 
 function buildTable({ columns, rows }) {
   if (!rows || rows.length === 0) {
-    return `<div class="inventory-empty">لا توجد بيانات</div>`;
+    return `<div class="alert mi-empty-state py-4">لا توجد بيانات</div>`;
   }
 
   return `
-    <div class="inventory-table-wrap">
-      <table class="inventory-data-table">
+    <div class="table-responsive">
+      <table class="table table-hover table-striped align-middle mi-data-table">
         <thead>
           <tr>
             ${columns.map((column) => `<th>${column.label}</th>`).join("")}

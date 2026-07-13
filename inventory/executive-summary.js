@@ -8,32 +8,31 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   forceInventoryDateRange();
   bindInventoryEvents();
-
-  await refreshExecutiveSummary();
 });
 
 function buildInventoryExecutiveContent() {
   return `
-    <section class="filters-card inventory-filters-card">
-      <div class="filters-grid">
+    <div class="container-fluid mi-bootstrap-page px-0">
+    <section class="mi-filter-card">
+      <div class="row g-3">
 
-        <label>
-          فئة التخزين
-          <select id="storageCategory">
+        <div class="col-12 col-md-6 col-xl">
+          <label class="form-label" for="storageCategory">فئة التخزين</label>
+          <select id="storageCategory" class="form-select">
             <option value="">كل فئات التخزين</option>
           </select>
-        </label>
+        </div>
 
-        <label>
-          الموقع المخزني
-          <select id="locationId">
+        <div class="col-12 col-md-6 col-xl">
+          <label class="form-label" for="locationId">الموقع المخزني</label>
+          <select id="locationId" class="form-select">
             <option value="">كل المواقع</option>
           </select>
-        </label>
+        </div>
 
-        <label>
-          نوع المنتج
-          <select id="productType">
+        <div class="col-12 col-md-6 col-xl">
+          <label class="form-label" for="productType">نوع المنتج</label>
+          <select id="productType" class="form-select">
             <option value="">كل الأنواع</option>
             <option value="RAW_MATERIALS">خامات</option>
             <option value="PACKAGING">مستلزمات / تعبئة</option>
@@ -42,59 +41,65 @@ function buildInventoryExecutiveContent() {
             <option value="WORK_IN_PROGRESS">شبه نهائي</option>
             <option value="OTHER">غير مصنف</option>
           </select>
-        </label>
+        </div>
 
-        <label>
-          فئة المنتج
-          <select id="categoryId">
+        <div class="col-12 col-md-6 col-xl">
+          <label class="form-label" for="categoryId">فئة المنتج</label>
+          <select id="categoryId" class="form-select">
             <option value="">كل الفئات</option>
           </select>
-        </label>
+        </div>
 
-        <label>
-          المنتج
-          <select id="productId">
+        <div class="col-12 col-md-6 col-xl">
+          <label class="form-label" for="productId">المنتج</label>
+          <select id="productId" class="form-select">
             <option value="">كل المنتجات</option>
           </select>
-        </label>
+        </div>
 
       </div>
     </section>
 
-    <section id="loadingBox" class="loading-box hidden">
+    <section id="loadingBox" class="alert alert-warning d-flex align-items-center hidden" role="status">
+      <span class="spinner-border spinner-border-sm mi-loading-spinner" aria-hidden="true"></span>
       جاري تحميل التقرير...
     </section>
 
-    <section id="errorBox" class="error-box hidden"></section>
+    <section id="errorBox" class="alert alert-danger hidden" role="alert"></section>
 
-    <section id="kpiGrid" class="inventory-kpi-grid"></section>
+    <section id="kpiGrid" class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3 mb-4"></section>
 
-    <section class="inventory-report-grid">
-      <div class="inventory-report-card">
-        <h2>توزيع المخزون حسب نوع المنتج</h2>
+    <section class="row g-3 mb-1">
+      <div class="col-12 col-xl-6">
+       <div class="mi-report-card">
+        <h2 class="mi-report-title">توزيع المخزون حسب نوع المنتج</h2>
         <div id="productTypeBreakdown"></div>
+       </div>
       </div>
 
-      <div class="inventory-report-card">
-        <h2>توزيع المخزون حسب فئة التخزين</h2>
+      <div class="col-12 col-xl-6">
+       <div class="mi-report-card">
+        <h2 class="mi-report-title">توزيع المخزون حسب فئة التخزين</h2>
         <div id="storageBreakdown"></div>
+       </div>
       </div>
     </section>
 
-    <section class="inventory-report-card">
-      <h2>أعلى أصناف حابسة قيمة مخزون</h2>
+    <section class="mi-report-card">
+      <h2 class="mi-report-title">أعلى أصناف حابسة قيمة مخزون</h2>
       <div id="topInventoryValue"></div>
     </section>
 
-    <section class="inventory-report-card">
-      <h2>أسرع أصناف دورانًا</h2>
+    <section class="mi-report-card">
+      <h2 class="mi-report-title">أسرع أصناف دورانًا</h2>
       <div id="topFastMoving"></div>
     </section>
 
-    <section class="inventory-report-card">
-      <h2>أصناف بطيئة الحركة</h2>
+    <section class="mi-report-card">
+      <h2 class="mi-report-title">أصناف بطيئة الحركة</h2>
       <div id="slowMoving"></div>
     </section>
+    </div>
   `;
 }
 
@@ -160,7 +165,6 @@ function bindInventoryEvents() {
   }
 
   const cascadeFilters = [
-    "companySelect",
     "storageCategory",
     "locationId",
     "productType",
@@ -171,23 +175,18 @@ function bindInventoryEvents() {
     const element = document.getElementById(id);
     if (!element) return;
 
-    element.addEventListener("change", async () => {
+    element.addEventListener("change", () => {
       resetDependentFilters(id);
-      await refreshExecutiveSummary();
     });
   });
 
-  const productSelect = document.getElementById("productId");
-  if (productSelect) {
-    productSelect.addEventListener("change", loadInventoryReport);
+  const companySelect = document.getElementById("companySelect");
+  if (companySelect) {
+    companySelect.addEventListener("change", () => {
+      resetDependentFilters("companySelect");
+      clearInventoryReport();
+    });
   }
-
-  ["dateFrom", "dateTo"].forEach((id) => {
-    const element = document.getElementById(id);
-    if (!element) return;
-
-    element.addEventListener("change", loadInventoryReport);
-  });
 
   const exportExcelBtn = document.getElementById("exportExcelBtn");
   if (exportExcelBtn) {
@@ -232,13 +231,41 @@ function resetDependentFilters(changedId) {
 }
 
 async function refreshExecutiveSummary() {
+  const companyId = document.getElementById("companySelect")?.value || "";
+  if (!companyId) {
+    showInventoryError("لازم تختار الشركة قبل تحديث التقرير.");
+    clearInventoryReport();
+    return;
+  }
+
   await loadInventoryFilterOptions();
   await loadInventoryReport();
 }
 
+function showInventoryError(message) {
+  const errorBox = document.getElementById("errorBox");
+  if (!errorBox) return;
+  errorBox.textContent = message;
+  errorBox.classList.remove("hidden");
+}
+
+function clearInventoryReport() {
+  [
+    "kpiGrid",
+    "productTypeBreakdown",
+    "storageBreakdown",
+    "topInventoryValue",
+    "topFastMoving",
+    "slowMoving"
+  ].forEach((id) => {
+    const element = document.getElementById(id);
+    if (element) element.innerHTML = "";
+  });
+}
+
 function getInventoryFilters() {
   return {
-    companyId: document.getElementById("companySelect")?.value || "1",
+    companyId: document.getElementById("companySelect")?.value || "",
 
     /*
       مهم:
@@ -503,11 +530,16 @@ function renderInventoryKpis(summary) {
   ];
 
   kpiGrid.innerHTML = cards
-    .map((card) => `
-      <div class="inventory-kpi-card">
-        <span>${card.title}</span>
-        <strong>${card.value}</strong>
-        <small>${card.hint}</small>
+    .map((card, index) => `
+      <div class="col">
+       <div class="mi-kpi-card h-100"
+            data-tone="${["teal", "purple", "success", "warning", "purple", "teal", "danger", "danger"][index]}"
+            data-icon="${["💰", "📦", "⚖", "↗", "🔄", "📅", "⚠", "▼"][index]}"
+            style="--mi-delay:${index * 45}ms">
+        <span class="mi-kpi-label">${card.title}</span>
+        <strong class="mi-kpi-value">${card.value}</strong>
+        <small class="mi-kpi-hint">${card.hint}</small>
+       </div>
       </div>
     `)
     .join("");
@@ -593,12 +625,12 @@ function renderSlowMoving(rows) {
 
 function buildInventoryTable({ columns, rows }) {
   if (!rows || rows.length === 0) {
-    return `<div class="inventory-empty">لا توجد بيانات داخل الفلتر الحالي</div>`;
+    return `<div class="alert mi-empty-state py-4">لا توجد بيانات داخل الفلتر الحالي</div>`;
   }
 
   return `
-    <div class="inventory-table-wrap">
-      <table class="inventory-data-table">
+    <div class="table-responsive">
+      <table class="table table-hover table-striped align-middle mi-data-table">
         <thead>
           <tr>
             ${columns.map((column) => `<th>${column.label}</th>`).join("")}

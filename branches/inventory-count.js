@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function buildInventoryCountContent() {
   return `
-    <div class="report-ui-page">
+    <div class="report-ui-page mi-bootstrap-page">
       <section class="report-card">
         <div class="report-card-head">
           <h2>إعداد جلسة الجرد</h2>

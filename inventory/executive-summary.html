@@ -2,131 +2,18 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ملخص المخزون التنفيذي</title>
+
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.rtl.min.css" />
   <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/bootstrap-theme.css?v=20260713-5" />
 </head>
 
 <body>
   <div id="layout"></div>
 
-  <main class="page-content">
-    <section class="page-header">
-      <div>
-        <h1>ملخص المخزون التنفيذي</h1>
-        <p>
-          قيمة المخزون، معدل الدوران، أيام التغطية، والأصناف بطيئة الحركة.
-        </p>
-      </div>
-
-      <button class="primary-btn" onclick="refreshExecutiveSummary()">
-        تحديث التقرير
-      </button>
-    </section>
-
-    <section class="filters-card">
-      <div class="filters-grid">
-
-        <label>
-          الشركة
-          <select id="companySelect">
-            <option value="1">فيرجينيا</option>
-            <option value="2">كليوباترا</option>
-          </select>
-        </label>
-
-        <label>
-          فئة التخزين
-          <select id="storageCategory">
-            <option value="CAPITAL">CAPITAL - رأس المال</option>
-            <option value="SALES">SALES - البيع</option>
-            <option value="TRANSIT">TRANSIT - التحويل والشحن</option>
-            <option value="PRODUCTION">PRODUCTION - الإنتاج</option>
-          </select>
-        </label>
-
-        <label>
-          الموقع المخزني
-          <select id="locationId">
-            <option value="">كل المواقع</option>
-          </select>
-        </label>
-
-        <label>
-          نوع المنتج
-          <select id="productType">
-            <option value="">كل الأنواع</option>
-            <option value="RAW_MATERIALS">خامات</option>
-            <option value="PACKAGING">مستلزمات / تعبئة</option>
-            <option value="FINISHED_GOODS">منتج تام</option>
-            <option value="PURCHASED_FOR_RESALE">مشتراه بغرض البيع</option>
-            <option value="WORK_IN_PROGRESS">شبه نهائي</option>
-            <option value="OTHER">غير مصنف</option>
-          </select>
-        </label>
-
-        <label>
-          فئة المنتج
-          <select id="categoryId">
-            <option value="">كل الفئات</option>
-          </select>
-        </label>
-
-        <label>
-          المنتج
-          <select id="productId">
-            <option value="">كل المنتجات</option>
-          </select>
-        </label>
-
-        <label>
-          من تاريخ
-          <input id="dateFrom" type="date" />
-        </label>
-
-        <label>
-          إلى تاريخ
-          <input id="dateTo" type="date" />
-        </label>
-
-      </div>
-    </section>
-
-    <section id="loadingBox" class="loading-box hidden">
-      جاري تحميل التقرير...
-    </section>
-
-    <section id="errorBox" class="error-box hidden"></section>
-
-    <section id="kpiGrid" class="kpi-grid"></section>
-
-    <section class="report-grid">
-      <div class="report-card">
-        <h2>توزيع المخزون حسب نوع المنتج</h2>
-        <div id="productTypeBreakdown"></div>
-      </div>
-
-      <div class="report-card">
-        <h2>توزيع المخزون حسب فئة التخزين</h2>
-        <div id="storageBreakdown"></div>
-      </div>
-    </section>
-
-    <section class="report-card">
-      <h2>أعلى أصناف حابسة قيمة مخزون</h2>
-      <div id="topInventoryValue"></div>
-    </section>
-
-    <section class="report-card">
-      <h2>أسرع أصناف دورانًا</h2>
-      <div id="topFastMoving"></div>
-    </section>
-
-    <section class="report-card">
-      <h2>أصناف بطيئة الحركة</h2>
-      <div id="slowMoving"></div>
-    </section>
-  </main>
-
+  <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/layout.js"></script>
   <script src="./executive-summary.js"></script>
