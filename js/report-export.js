@@ -210,7 +210,7 @@
       return "http://localhost:5050/api";
     }
 
-    return "https://odoo-management-intelligence-agent-production.up.railway.app/api";
+    return "https://odoo-mi-api.vercel.app/api";
   }
 
   function setParamIfValue(params, key, value) {

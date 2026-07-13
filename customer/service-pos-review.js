@@ -30,11 +30,11 @@
       return "http://localhost:5050/api/customer/service-pos-review";
     }
 
-    if (host.includes("odoo-management-intelligence-agent-production.up.railway.app")) {
+    if (host.includes("odoo-mi-api.vercel.app")) {
       return "/api/customer/service-pos-review";
     }
 
-    return "https://odoo-management-intelligence-agent-production.up.railway.app/api/customer/service-pos-review";
+    return "https://odoo-mi-api.vercel.app/api/customer/service-pos-review";
   }
 
   const API_BASE = getCustomerServiceApiBase();
@@ -1274,11 +1274,11 @@
       return "http://localhost:5050/api/customer/review-sms";
     }
 
-    if (host.includes("odoo-management-intelligence-agent-production.up.railway.app")) {
+    if (host.includes("odoo-mi-api.vercel.app")) {
       return "/api/customer/review-sms";
     }
 
-    return "https://odoo-management-intelligence-agent-production.up.railway.app/api/customer/review-sms";
+    return "https://odoo-mi-api.vercel.app/api/customer/review-sms";
   }
 
   function getReviewSmsAdminKey() {

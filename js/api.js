@@ -2,7 +2,7 @@ const API_BASE_URL =
   window.location.hostname === "localhost" ||
   window.location.hostname === "127.0.0.1"
     ? "http://localhost:5050/api"
-    : "https://odoo-management-intelligence-agent-production.up.railway.app/api";
+    : "https://odoo-mi-api.vercel.app/api";
 
 window.API_BASE_URL = API_BASE_URL;
 

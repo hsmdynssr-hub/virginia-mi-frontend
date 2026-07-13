@@ -1521,7 +1521,7 @@
   }
 
   function getReviewApiBase() {
-  return "https://odoo-management-intelligence-agent-production.up.railway.app/api/customer/review-sms";
+  return "https://odoo-mi-api.vercel.app/api/customer/review-sms";
 }
 
   function showReviewError(message) {
