@@ -7,10 +7,12 @@
   <title>تشغيل فواتير تقييم العملاء SMS</title>
 
   <link rel="stylesheet" href="./review-sms.css" />
+  <script src="../js/api.js" defer></script>
+  <script src="../js/layout.js" defer></script>
   <script src="./review-sms.js" defer></script>
 </head>
 
-<body data-page="queue">
+<body data-page="queue" data-report-code="customer.review_sms.send">
   <main class="crsms-page">
 
     <section class="crsms-return-bar" aria-label="Review SMS navigation">
@@ -65,16 +67,6 @@
       </div>
 
       <div class="crsms-form-grid">
-        <div class="crsms-field crsms-span-2">
-          <label for="apiBase">API Base</label>
-          <input id="apiBase" type="text" value="http://localhost:5050/api/customer/review-sms" />
-        </div>
-
-        <div class="crsms-field">
-          <label for="adminKey">Admin Key</label>
-          <input id="adminKey" type="password" autocomplete="off" />
-        </div>
-
         <div class="crsms-field">
           <label for="companyId">Company ID</label>
           <input id="companyId" type="number" placeholder="1 أو 2" />

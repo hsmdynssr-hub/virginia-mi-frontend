@@ -56,10 +56,16 @@
   }
 
   function getMainAuthToken() {
+    if (typeof window.getToken === "function") {
+      const sharedToken = window.getToken();
+      if (sharedToken) return sharedToken;
+    }
     const keys = [
       "authToken",
       "token",
       "accessToken",
+      "jwt",
+      "appToken",
       "odooMiToken",
       "miToken",
       "adminToken"
@@ -333,8 +339,6 @@
   }
 
   function updateUserUi() {
-    ensureBootstrapCard();
-
     const bootstrapCard = el("bootstrapCard");
     const loginCard = el("loginCard");
     const workArea = el("workArea");
@@ -361,15 +365,15 @@
     hideElement(bootstrapCard);
 
     if (!currentUser) {
-      showElement(loginCard);
+      hideElement(loginCard);
       hideElement(workArea);
       hideElement(managerPanel);
       removeUserManagementPanel();
 
       if (state) {
         state.innerHTML = `
-          <span class="page-pill">الدخول الداخلي</span>
-          <span class="page-pill">اكتب بيانات مستخدم خدمة العملاء</span>
+          <span class="page-pill">جلسة الدخول الرئيسية مطلوبة</span>
+          <span class="page-pill">أعد تسجيل الدخول من لوحة الإدارة</span>
         `;
       }
 
@@ -390,12 +394,7 @@
     if (managerPanel) {
       if (isManagerUser()) {
         showElement(managerPanel);
-
-        if (isAdminUser()) {
-          ensureUserManagementPanel();
-        } else {
-          removeUserManagementPanel();
-        }
+        removeUserManagementPanel();
       } else {
         hideElement(managerPanel);
         removeUserManagementPanel();
@@ -447,9 +446,6 @@
 
       setMessage("تم إنشاء أول مدير وتسجيل الدخول بنجاح.", "success");
 
-      if (isAdminUser()) {
-        await loadUsers();
-      }
     } catch (error) {
       setMessage(error.message, "error");
     } finally {
@@ -509,15 +505,6 @@
   }
 
   async function verifySession() {
-    const token = getCsToken();
-    const storedUser = readStoredUser();
-
-    if (!token || !storedUser) {
-      currentUser = null;
-      updateUserUi();
-      return;
-    }
-
     try {
       const data = await request("/me");
       currentUser = data.user;
@@ -1295,17 +1282,7 @@
   }
 
   function getReviewSmsAdminKey() {
-    let key = localStorage.getItem("reviewSmsAdminKey") || "";
-
-    if (!key) {
-      key = window.prompt("اكتب Admin Key الخاص بتقييم العملاء SMS مرة واحدة على هذا الجهاز:") || "";
-
-      if (key) {
-        localStorage.setItem("reviewSmsAdminKey", key.trim());
-      }
-    }
-
-    return key.trim();
+    return "";
   }
 
   async function reviewSmsRequest(path, options = {}) {
@@ -1314,11 +1291,8 @@
       ...(options.headers || {})
     };
 
-    const adminKey = getReviewSmsAdminKey();
-
-    if (adminKey) {
-      headers["x-admin-key"] = adminKey;
-    }
+    const mainToken = getMainAuthToken();
+    if (mainToken) headers.Authorization = `Bearer ${mainToken}`;
 
     const response = await fetch(`${getReviewSmsApiBase()}${path}`, {
       ...options,
@@ -1636,24 +1610,14 @@
   async function init() {
     defaultDates();
     applyUrlParamsToFilters();
-    ensureBootstrapCard();
     bindEvents();
 
-    await checkSetupStatus();
-
-    if (setupNeedsBootstrap) {
-      updateUserUi();
-      return;
-    }
+    setupNeedsBootstrap = false;
 
     await verifySession();
 
     if (currentUser) {
       await autoSearchFromUrlAfterLogin();
-
-      if (isAdminUser()) {
-        await loadUsers();
-      }
     }
   }
 

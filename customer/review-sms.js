@@ -6,6 +6,8 @@
   let lastQueueRows = [];
 
   document.addEventListener("DOMContentLoaded", () => {
+    localStorage.removeItem("reviewSmsAdminKey");
+    localStorage.removeItem("reviewSmsApiBase");
     const page = document.body.dataset.page;
 
     if (page === "dashboard") {
@@ -62,7 +64,7 @@
   }
 
   function getStoredApiBase() {
-    return localStorage.getItem("reviewSmsApiBase") || resolveDefaultApiBase();
+    return resolveDefaultApiBase();
   }
 
   function cleanApiBase(value) {
@@ -228,7 +230,7 @@
   async function loadCouponSettings() {
     try {
       const data = await requestJson(`${getApiBaseFromDashboard()}/settings`, {
-        headers: { "x-admin-key": getAdminKey() }
+        headers: authHeaders()
       });
       applyCouponSettings(data.data || {});
       setStatus({ message: "تم تحميل إعدادات الكوبونات.", settings: data.data });
@@ -258,7 +260,7 @@
   async function loadShopifyHealth() {
     try {
       const data = await requestJson(`${getApiBaseFromDashboard()}/shopify-health`, {
-        headers: { "x-admin-key": getAdminKey() }
+        headers: authHeaders()
       });
       const health = data.data || {};
       const badge = byId("shopifyStatusBadge");
@@ -308,7 +310,7 @@
     try {
       const params = getCouponFilters();
       const base = getApiBaseFromDashboard();
-      const headers = { "x-admin-key": getAdminKey() };
+      const headers = authHeaders();
 
       const [listData, statsData] = await Promise.all([
         requestJson(`${base}/coupons?${params.toString()}`, { headers }),
@@ -332,7 +334,7 @@
 
       const response = await fetch(url, {
         method: "GET",
-        headers: { "x-admin-key": getAdminKey() }
+        headers: authHeaders()
       });
 
       if (!response.ok) {
@@ -566,9 +568,8 @@
       });
     });
 
-    setStatus("جاهز. اضغط تحديث المتابعات لعرض العملاء الغاضبين.");
+    setStatus("جاهز. اضغط تحديث المتابعات لعرض الحالات المسندة إليك.");
     loadHealth();
-    loadSettings();
   }
 
   /* =========================
@@ -612,22 +613,32 @@
   }
 
   function getApiBaseFromDashboard() {
-    const value = cleanApiBase(byId("apiBase")?.value);
-    localStorage.setItem("reviewSmsApiBase", value);
-    return value;
+    return cleanApiBase(resolveDefaultApiBase());
   }
 
   function getAdminKey() {
-    const value = String(byId("adminKey")?.value || "").trim();
-    localStorage.setItem("reviewSmsAdminKey", value);
-    return value;
+    return "";
   }
 
   function adminHeaders() {
+    const token =
+      (typeof window.getToken === "function" ? window.getToken() : "") ||
+      localStorage.getItem("token") ||
+      localStorage.getItem("authToken") ||
+      localStorage.getItem("accessToken") ||
+      localStorage.getItem("jwt") ||
+      "";
+
     return {
       "Content-Type": "application/json",
-      "x-admin-key": getAdminKey()
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
     };
+  }
+
+  function authHeaders() {
+    const headers = adminHeaders();
+    delete headers["Content-Type"];
+    return headers;
   }
 
   function setStatus(message) {
@@ -639,7 +650,7 @@
   }
 
   function getCompanyIdOrNull() {
-    const value = byId("companyId")?.value;
+    const value = byId("companyId")?.value || localStorage.getItem("companyId");
     const number = Number(value);
 
     if (!value || !Number.isFinite(number) || number <= 0) {
@@ -763,9 +774,7 @@
     try {
       const data = await requestJson(`${getApiBaseFromDashboard()}/settings`, {
         method: "GET",
-        headers: {
-          "x-admin-key": getAdminKey()
-        }
+        headers: authHeaders()
       });
 
       applySettingsToUi(data.data || {});
@@ -800,13 +809,15 @@
 
   async function loadHealth() {
     try {
-      const data = await requestJson(`${getApiBaseFromDashboard()}/health`);
+      const data = await requestJson(`${getApiBaseFromDashboard()}/health`, {
+        headers: authHeaders()
+      });
       const health = data || {};
 
       const modeBadge = byId("modeBadge");
       if (modeBadge) {
         const liveSms = Boolean(health.liveSms);
-        const protectedText = health.adminKeyProtected ? "Protected" : "No Admin Key";
+        const protectedText = "جلسة مستخدم آمنة";
 
         modeBadge.textContent = liveSms
           ? `LIVE SMS مفعّل - ${protectedText}`
@@ -823,7 +834,7 @@
         provider: health.provider,
         liveSms: health.liveSms,
         autoCronEnv: health.autoCronEnv,
-        adminKeyProtected: health.adminKeyProtected,
+        authentication: health.authentication,
         threshold: health.threshold,
         settings: health.settings
       });
@@ -839,9 +850,7 @@
 
       const data = await requestJson(`${getApiBaseFromDashboard()}/stats${query}`, {
         method: "GET",
-        headers: {
-          "x-admin-key": getAdminKey()
-        }
+        headers: authHeaders()
       });
 
       const stats = data.data || {};
@@ -893,9 +902,7 @@
         `${getApiBaseFromDashboard()}/followups/stats?${params}`,
         {
           method: "GET",
-          headers: {
-            "x-admin-key": getAdminKey()
-          }
+          headers: authHeaders()
         }
       );
 
@@ -928,9 +935,7 @@
 
       const data = await requestJson(`${getApiBaseFromDashboard()}/logs?${params}`, {
         method: "GET",
-        headers: {
-          "x-admin-key": getAdminKey()
-        }
+        headers: authHeaders()
       });
 
       renderLogs(data.data || []);
@@ -949,9 +954,7 @@
 
       const data = await requestJson(`${getApiBaseFromDashboard()}/followups?${params}`, {
         method: "GET",
-        headers: {
-          "x-admin-key": getAdminKey()
-        }
+        headers: authHeaders()
       });
 
       renderFollowups(data.data || []);
@@ -1136,9 +1139,17 @@
     if (!tbody) return;
 
     if (!rows.length) {
-      tbody.innerHTML = `<tr><td colspan="12">لا توجد متابعات حتى الآن.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="14">لا توجد متابعات مسندة إليك حاليًا.</td></tr>`;
       return;
     }
+
+    const currentUser = (() => {
+      try { return JSON.parse(localStorage.getItem("user") || "{}"); } catch (_) { return {}; }
+    })();
+    const permissions = Array.isArray(currentUser.permissions) ? currentUser.permissions : [];
+    const manager = permissions.includes("*") ||
+      permissions.includes("customer.review_sms.manage_followups") ||
+      currentUser.role === "admin";
 
     tbody.innerHTML = rows
       .map((row) => {
@@ -1155,6 +1166,12 @@
             <td>${escapeHtml(row.customerPhone || "")}</td>
             <td>${escapeHtml(row.odooOrderName || "")}</td>
             <td>${escapeHtml(formatMoney(row.amountTotal))}</td>
+            <td>
+              ${manager
+                ? `<input class="crsms-followup-input" data-followup-assigned="${escapeHtml(row.id)}" value="${escapeHtml(row.assignedTo || "")}" placeholder="اسم المستخدم أو ID" />`
+                : escapeHtml(row.assignedTo || "-")}
+            </td>
+            <td><textarea class="crsms-followup-input" data-followup-note="${escapeHtml(row.id)}" placeholder="نتيجة المكالمة أو الملاحظة">${escapeHtml(row.internalNote || "")}</textarea></td>
             <td>
               <div class="crsms-mini-actions">
                 <select class="crsms-followup-select" data-followup-status="${escapeHtml(row.id)}">
@@ -1193,6 +1210,8 @@
       button.addEventListener("click", async () => {
         const id = button.dataset.followupUpdate;
         const select = container.querySelector(`[data-followup-status="${id}"]`);
+        const assignedInput = container.querySelector(`[data-followup-assigned="${id}"]`);
+        const noteInput = container.querySelector(`[data-followup-note="${id}"]`);
 
         if (!id || !select) return;
 
@@ -1201,7 +1220,9 @@
             method: "PATCH",
             headers: adminHeaders(),
             body: JSON.stringify({
-              status: select.value
+              status: select.value,
+              assignedTo: assignedInput?.value || null,
+              internalNote: noteInput?.value || null
             })
           });
 
@@ -1251,13 +1272,15 @@
 
   async function loadQueueHealth() {
     try {
-      const data = await requestJson(`${getApiBaseFromDashboard()}/health`);
+      const data = await requestJson(`${getApiBaseFromDashboard()}/health`, {
+        headers: authHeaders()
+      });
       const health = data || {};
 
       const modeBadge = byId("modeBadge");
       if (modeBadge) {
         const liveSms = Boolean(health.liveSms);
-        const protectedText = health.adminKeyProtected ? "Protected" : "No Admin Key";
+        const protectedText = "جلسة مستخدم آمنة";
 
         modeBadge.textContent = liveSms
           ? `LIVE SMS مفعّل - ${protectedText}`
@@ -1272,7 +1295,7 @@
         provider: health.provider,
         liveSms: health.liveSms,
         autoCronEnv: health.autoCronEnv,
-        adminKeyProtected: health.adminKeyProtected,
+        authentication: health.authentication,
         settings: health.settings
       });
     } catch (error) {

@@ -26,7 +26,7 @@
   if (!hasStylesheet("bootstrap-theme.css")) {
     const themeCss = document.createElement("link");
     themeCss.rel = "stylesheet";
-    themeCss.href = `${assetUrl("../css/bootstrap-theme.css")}?v=20260713-6`;
+    themeCss.href = `${assetUrl("../css/bootstrap-theme.css")}?v=20260713-7`;
     document.head.appendChild(themeCss);
   }
 
@@ -164,21 +164,16 @@ const REPORT_PAGE_MAP = {
   
 
   customer: "customer.index",
-  "customer-pos-phones": "customer.pos_phones",
+  "customer-pos-phones": "customer.review_sms.view",
   "customer-service-pos-review": "customer.service_pos_review",
   
 
   
 
-  /*
-    Customer Review SMS pages.
-    مبدئيًا مربوطة على صلاحية مراجعة خدمة العملاء عشان تظهر فورًا
-    للمستخدمين المصرح لهم بخدمة العملاء. نقدر نفصلها لاحقًا بصلاحيات مستقلة.
-  */
-  "customer-review-sms-dashboard": "customer.service_pos_review",
-  "customer-review-sms-queue": "customer.service_pos_review",
-  "customer-review-followups": "customer.service_pos_review",
-  "customer-review-coupon": "customer.service_pos_review",
+  "customer-review-sms-dashboard": "admin.users",
+  "customer-review-sms-queue": "customer.review_sms.send",
+  "customer-review-followups": "customer.review_sms.followup",
+  "customer-review-coupons-dashboard": "customer.review_sms.view",
   production: "production.index",
   "production-daily": "production.daily",
   "production-report": "production.report",
@@ -231,7 +226,7 @@ const PAGES_WITHOUT_REPORT_TOOLBAR = new Set([
   "customer-review-sms-dashboard",
   "customer-review-sms-queue",
   "customer-review-followups",
-  "customer-review-coupon",
+  "customer-review-coupons-dashboard",
   "production",
   "purchase",
   "inventory",
@@ -704,14 +699,14 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
 
             <div class="nav-accordion-body">
               <a data-page="customer" class="nav-link" href="../customer/index.html">صفحة تقارير العملاء</a>
-              <a data-page="customer-pos-phones" class="nav-link" href="../customer/pos-phones.html">أرقام عملاء نقاط البيع</a>
+              <a data-page="customer-pos-phones" class="nav-link" href="../customer/pos-phones.html">متابعة عملاء نقاط البيع</a>
               <a data-page="customer-service-pos-review" class="nav-link" href="../customer/service-pos-review.html">مراجعة خدمات نقاط البيع</a>
             
 
               <a data-page="customer-review-sms-queue" class="nav-link" href="../customer/review-sms-queue.html">تشغيل رسائل تقييم العملاء</a>
-              <a data-page="customer-review-followups" class="nav-link" href="../customer/review-followups.html">متابعة العملاء الغاضبين</a>
+              <a data-page="customer-review-followups" class="nav-link" href="../customer/review-followups.html">متابعة المحايدين والغاضبين</a>
+              <a data-page="customer-review-coupons-dashboard" class="nav-link" href="../customer/review-coupons-dashboard.html">الكوبونات والتقارير اليومية</a>
               <a data-page="customer-review-sms-dashboard" class="nav-link" href="../customer/review-sms-dashboard.html">لوحة إعدادات رسائل التقييم</a>
-              <a data-page="customer-review-coupon" class="nav-link" href="../customer/review-coupon.html">كوبون الشحن المجاني</a>
 </div>
           </div>
 

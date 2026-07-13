@@ -5,10 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>إدارة كوبونات الشحن</title>
   <link rel="stylesheet" href="./review-sms.css?v=review-coupons-ui-20260712" />
+  <script src="../js/api.js" defer></script>
+  <script src="../js/layout.js" defer></script>
   <script src="./review-sms.js?v=review-coupons-ui-20260712" defer></script>
 </head>
 
-<body data-page="coupon-dashboard">
+<body data-page="coupon-dashboard" data-report-code="customer.review_sms.view">
   <main class="crsms-page">
     <section class="crsms-return-bar" aria-label="Review coupon navigation">
       <a class="crsms-return-link main" href="../dashboard/index.html">
@@ -48,14 +50,6 @@
       </div>
 
       <div class="crsms-form-grid">
-        <div class="crsms-field crsms-span-2">
-          <label for="apiBase">API Base</label>
-          <input id="apiBase" type="text" value="http://localhost:5050/api/customer/review-sms" />
-        </div>
-        <div class="crsms-field">
-          <label for="adminKey">Admin Key</label>
-          <input id="adminKey" type="password" autocomplete="off" />
-        </div>
         <div class="crsms-field">
           <label for="companyId">Company ID</label>
           <input id="companyId" type="number" placeholder="1 أو 2" />

@@ -169,6 +169,25 @@ body[data-active-page="forecast-target-report"] .mi-bootstrap-page {
   }
 }
 
+.mi-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 92px;
+  padding: .36rem .65rem;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.customer-state-positive { color: #086c43; background: #dff7ea; }
+.customer-state-neutral { color: #8a5800; background: #fff0bf; }
+.customer-state-angry { color: #a52828; background: #ffe0e0; }
+.customer-state-pending_review { color: #155e75; background: #dff6fb; }
+.customer-state-not_sent { color: #475569; background: #e8edf3; }
+.customer-state-send_failed { color: #9f1239; background: #ffe4ed; }
+
 .mi-bootstrap-page .mi-kpi-card {
   --mi-tone: #2563eb;
   --mi-tone-soft: rgba(37, 99, 235, 0.18);

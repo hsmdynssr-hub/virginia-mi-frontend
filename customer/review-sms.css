@@ -312,6 +312,18 @@ body[data-page="dashboard"] {
   padding: 8px;
 }
 
+.crsms-followup-input {
+  width: 180px;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid rgba(148, 163, 184, .45);
+  border-radius: 10px;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+  resize: vertical;
+}
+
 /* =========================
    Review Page
 ========================= */

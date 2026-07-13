@@ -6,8 +6,8 @@ const selectedInvoiceRows = new Map();
 
 document.addEventListener("DOMContentLoaded", () => {
   renderLayout(
-    "أرقام عملاء نقاط البيع",
-    "عرض مبسط لفواتير POS التي تحتوي على رقم عميل مع رابط فتح الفاتورة في شاشة خدمة العملاء.",
+    "متابعة عملاء نقاط البيع",
+    "كل أرقام عملاء POS مع حالة الرسالة والتقييم والمتابعة والكوبون في شاشة واحدة.",
     "customer-pos-phones",
     buildCustomerPosPhonesPage()
   );
@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function buildCustomerPosPhonesPage() {
   return `
     <section id="loadingBox" class="loading-box hidden">
-      جاري تحميل تقرير أرقام عملاء نقاط البيع...
+      جاري تحميل متابعة عملاء نقاط البيع...
     </section>
 
     <section id="errorBox" class="error-box hidden"></section>
@@ -38,15 +38,25 @@ function buildCustomerPosPhonesPage() {
     <section class="inventory-report-card customer-pos-phones-report-section hidden">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
         <div>
-          <h2>فواتير العملاء حسب رقم الهاتف</h2>
+          <h2>عملاء نقاط البيع وحالة التواصل</h2>
           <p class="inventory-muted-text">
             يعرض التقرير 200 صف في الصفحة الواحدة. استخدم التقسيم للانتقال بين باقي الأرقام.
           </p>
         </div>
 
-        <button class="run-btn" id="exportSelectedInvoicesBtn">
-          تصدير المحدد Excel
-        </button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <select class="control" id="customerStateFilter">
+            <option value="all">كل الحالات</option>
+            <option value="not_sent">لم تُرسل رسالة</option>
+            <option value="pending_review">في انتظار التقييم</option>
+            <option value="positive">إيجابي</option>
+            <option value="neutral">محايد</option>
+            <option value="angry">غاضب</option>
+            <option value="send_failed">فشل الإرسال</option>
+          </select>
+          <button class="run-btn" id="exportDailyTrackingBtn">تصدير التقرير اليومي Excel</button>
+          <button class="run-btn" id="exportSelectedInvoicesBtn">تصدير المحدد</button>
+        </div>
       </div>
 
       <div id="invoiceRowsTable"></div>
@@ -68,6 +78,12 @@ function bindCustomerPosPhonesEvents() {
 
   document.getElementById("exportSelectedInvoicesBtn")
     ?.addEventListener("click", exportSelectedInvoicesToExcel);
+
+  document.getElementById("exportDailyTrackingBtn")
+    ?.addEventListener("click", exportDailyTrackingExcel);
+
+  document.getElementById("customerStateFilter")
+    ?.addEventListener("change", loadCustomerPosPhonesReport);
 
   document.getElementById("companySelect")
     ?.addEventListener("change", async () => {
@@ -148,7 +164,8 @@ function getFilters() {
     branchCode: getSelectedBranchCode(),
 
     limit: 100000,
-    linesLimit: 250000
+    linesLimit: 250000,
+    segment: document.getElementById("customerStateFilter")?.value || "all"
   };
 }
 
@@ -174,7 +191,7 @@ async function loadCustomerPosPhonesReport() {
 
     resetReportState();
 
-    const response = await apiGet("/customer/pos-phones", getFilters());
+    const response = await apiGet("/customer/review-tracking", getFilters());
 
     if (!response.success) {
       throw new Error(response.message || "فشل تحميل تقرير أرقام العملاء");
@@ -267,7 +284,9 @@ function showError(message) {
 }
 
 function renderReport(data) {
-  allInvoiceRows = Array.isArray(data.invoiceRows)
+  allInvoiceRows = Array.isArray(data.rows)
+    ? data.rows
+    : Array.isArray(data.invoiceRows)
     ? data.invoiceRows
     : Array.isArray(data.customers)
       ? data.customers
@@ -302,19 +321,24 @@ function renderKpis(summary) {
 
   const cards = [
     {
-      title: "عدد فواتير الفترة",
-      value: formatNumber(summary.ordersCount, 0),
-      hint: "إجمالي فواتير POS داخل الفلاتر"
+      title: "إجمالي العملاء",
+      value: formatNumber(summary.total, 0),
+      hint: "كل فواتير العملاء داخل الفترة"
     },
     {
-      title: "فواتير بها رقم عميل",
-      value: formatNumber(summary.invoiceRowsCount, 0),
-      hint: "الفواتير التي ستظهر في الجدول"
+      title: "محايدون وغاضبون",
+      value: formatNumber(Number(summary.neutral || 0) + Number(summary.angry || 0), 0),
+      hint: "تحتاج متابعة خدمة العملاء"
     },
     {
-      title: "فواتير بدون رقم",
-      value: formatNumber(summary.ordersWithoutPhone, 0),
-      hint: "لا تظهر في الجدول الحالي"
+      title: "في انتظار التقييم",
+      value: formatNumber(summary.pendingReview, 0),
+      hint: "تم الإرسال ولم يصل تقييم"
+    },
+    {
+      title: "عملاء إيجابيون",
+      value: formatNumber(summary.positive, 0),
+      hint: `كوبونات نشطة: ${formatNumber(summary.activeCoupons, 0)}`
     }
   ];
 
@@ -364,7 +388,12 @@ function renderInvoiceRows() {
             />
           </td>
           <td>${escapeHtml(row.phone || "-")}</td>
-          <td>${escapeHtml(row.phoneSource || row.phoneSources || "-")}</td>
+          <td>${renderCustomerState(row.customerState)}</td>
+          <td>${escapeHtml(row.messageStatus || "-")}</td>
+          <td>${escapeHtml(row.rating || "-")}</td>
+          <td>${escapeHtml(row.followupStatus || "-")}</td>
+          <td>${escapeHtml(row.assignedTo || "-")}</td>
+          <td>${escapeHtml(row.couponStatus || "-")}</td>
           <td class="num">${escapeHtml(formatMoney(row.grossInvoice ?? row.grossSales ?? 0))}</td>
           <td class="num">${escapeHtml(formatMoney(row.returnsValue ?? 0))}</td>
           <td class="num">${escapeHtml(formatMoney(row.netPurchase ?? row.netSales ?? 0))}</td>
@@ -421,7 +450,12 @@ function renderInvoiceRows() {
           <tr>
             <th>تحديد</th>
             <th>رقم العميل</th>
-            <th>مصدر الرقم</th>
+            <th>حالة العميل</th>
+            <th>الرسالة</th>
+            <th>التقييم</th>
+            <th>المتابعة</th>
+            <th>المسؤول</th>
+            <th>الكوبون</th>
             <th>إجمالي الفاتورة</th>
             <th>المرتجع</th>
             <th>صافي الشراء</th>
@@ -570,6 +604,55 @@ function updateSelectedRowsCount() {
   const box = document.getElementById("selectedRowsCount");
   if (box) {
     box.textContent = `المحدد: ${formatNumber(count, 0)}`;
+  }
+}
+
+function renderCustomerState(state) {
+  const labels = {
+    not_sent: "لم تُرسل",
+    pending_review: "في انتظار التقييم",
+    positive: "إيجابي",
+    neutral: "محايد",
+    angry: "غاضب",
+    send_failed: "فشل الإرسال"
+  };
+  const safeState = String(state || "not_sent").replace(/[^a-z_]/g, "");
+  return `<span class="mi-status-badge customer-state-${safeState}">${escapeHtml(labels[safeState] || safeState)}</span>`;
+}
+
+async function exportDailyTrackingExcel() {
+  const button = document.getElementById("exportDailyTrackingBtn");
+  try {
+    if (button) {
+      button.disabled = true;
+      button.textContent = "جاري تجهيز Excel...";
+    }
+    const params = new URLSearchParams(getFilters());
+    const token = typeof getToken === "function" ? getToken() : "";
+    const response = await fetch(
+      `${window.API_BASE_URL}/customer/review-tracking/export/excel?${params.toString()}`,
+      { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+    );
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text.slice(0, 220) || "فشل تجهيز ملف Excel");
+    }
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `daily-customer-followup-${new Date().toISOString().slice(0, 10)}.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    showError(error.message || "تعذر تصدير التقرير اليومي");
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = "تصدير التقرير اليومي Excel";
+    }
   }
 }
 

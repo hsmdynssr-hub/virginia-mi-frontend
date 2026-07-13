@@ -4,13 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>متابعة العملاء الغاضبين</title>
+  <title>متابعة العملاء المحايدين والغاضبين</title>
 
   <link rel="stylesheet" href="./review-sms.css" />
+  <script src="../js/api.js" defer></script>
+  <script src="../js/layout.js" defer></script>
   <script src="./review-sms.js" defer></script>
 </head>
 
-<body data-page="followups">
+<body data-page="followups" data-report-code="customer.review_sms.followup">
   <main class="crsms-page">
 
     <section class="crsms-return-bar" aria-label="Review SMS navigation">
@@ -42,7 +44,7 @@
 
     <section class="crsms-header">
       <div>
-        <h1>متابعة العملاء الغاضبين</h1>
+        <h1>متابعة العملاء المحايدين والغاضبين</h1>
         <p>
           صفحة تشغيلية لخدمة العملاء لمتابعة تقييمات 1 و 3 فقط، تغيير حالة المتابعة، ومراجعة أسباب عدم الرضا.
         </p>
@@ -66,16 +68,6 @@
       </div>
 
       <div class="crsms-form-grid">
-        <div class="crsms-field crsms-span-2">
-          <label for="apiBase">API Base</label>
-          <input id="apiBase" type="text" value="http://localhost:5050/api/customer/review-sms" />
-        </div>
-
-        <div class="crsms-field">
-          <label for="adminKey">Admin Key</label>
-          <input id="adminKey" type="password" autocomplete="off" />
-        </div>
-
         <div class="crsms-field">
           <label for="companyId">Company ID</label>
           <input id="companyId" type="number" placeholder="1 أو 2" />
@@ -143,7 +135,6 @@
 
       <div class="crsms-actions">
         <button type="button" data-followups-action="followups">تحديث المتابعات</button>
-        <button type="button" class="crsms-secondary" data-followups-action="settings">تحميل الإعدادات</button>
       </div>
 
       <pre class="crsms-status" id="statusBox">جاهز. اضغط تحديث المتابعات.</pre>
@@ -160,8 +151,8 @@
 
     <section class="crsms-panel">
       <div class="crsms-section-title">
-        <h2>قائمة العملاء الغاضبين / غير الراضين</h2>
-        <span class="crsms-hint">التقييمات هنا من 1 أو 3 فقط. استخدم الحالة لمتابعة الإجراء مع خدمة العملاء.</span>
+        <h2>قائمة العملاء المحايدين والغاضبين</h2>
+        <span class="crsms-hint">المدير يرى ويوزع كل الحالات، والموظف يرى الحالات المسندة إليه فقط.</span>
       </div>
 
       <div class="crsms-table-wrap">
@@ -179,11 +170,13 @@
               <th>الموبايل</th>
               <th>الفاتورة</th>
               <th>القيمة</th>
+              <th>مسؤول المتابعة</th>
+              <th>ملاحظة الاتصال</th>
               <th>إجراءات</th>
             </tr>
           </thead>
           <tbody id="followupsBody">
-            <tr><td colspan="12">اضغط تحديث المتابعات.</td></tr>
+            <tr><td colspan="14">اضغط تحديث المتابعات.</td></tr>
           </tbody>
         </table>
       </div>
