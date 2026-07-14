@@ -6,10 +6,10 @@ document.addEventListener("DOMContentLoaded", () => {
     buildContent()
   );
   document.getElementById("loadReorderRiskBtn")?.addEventListener("click", loadReport);
-  document.getElementById("loadBtn")?.addEventListener("click", loadReport);
+  document.getElementById("reportExportExcelBtn")?.addEventListener("click", () => window.ReportExport?.downloadExcel("inventory-reorder-risk"));
   document.querySelectorAll(".op-tab").forEach((button) => button.addEventListener("click", () => activateTab(button.dataset.tab)));
-  window.addEventListener("company-context-changed", loadReport);
-  loadReport();
+  window.addEventListener("company-context-changed", clearReport);
+  clearReport();
 });
 
 function buildContent() {
@@ -26,14 +26,14 @@ function buildContent() {
   </section>
   <div id="opLoading" class="alert alert-warning hidden">جاري تجميع أرصدة وحركات المخازن...</div><div id="opError" class="alert alert-danger hidden"></div>
   <section id="opKpis" class="op-kpis"></section>
-  <section class="op-section"><div class="op-tabs">
+  <section class="op-section"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px"><div><h2 style="margin:0">التقارير التشغيلية</h2><small>اختر القسم المطلوب، ثم يمكنك تصدير المصنف كاملًا إلى Excel.</small></div><button type="button" id="reportExportExcelBtn" class="op-export" style="border:0;border-radius:10px;padding:11px 18px;font-weight:800;cursor:pointer">تصدير Excel</button></div><div class="op-tabs">
     <button class="op-tab active" data-tab="reorder">مخاطر وإعادة الطلب</button><button class="op-tab" data-tab="consumption">متوسطات السحب</button><button class="op-tab" data-tab="supply">التوريدات</button><button class="op-tab" data-tab="slow">الراكد والزائد</button><button class="op-tab" data-tab="category">مراجعة الفئات</button><button class="op-tab" data-tab="notes">منطق الحساب</button>
   </div><div id="opPanes"></div></section>`;
 }
 
 function filters() { return { companyId: document.getElementById("companySelect")?.value || 1, warehouseRole: val("warehouseRole","all"), productGroup: val("productGroup","all"), categoryId: val("categoryId",""), status: val("riskStatus","all"), search: val("productSearch","") }; }
 function val(id, fallback) { return document.getElementById(id)?.value ?? fallback; }
-function n(value, digits=2) { return Number(value || 0).toLocaleString("en-US", { maximumFractionDigits: digits }); }
+function n(value, digits=2) { const safeDigits=Number.isInteger(digits)?Math.min(6,Math.max(0,digits)):2; return Number(value || 0).toLocaleString("en-US", { maximumFractionDigits: safeDigits }); }
 function safe(value) { const node=document.createElement("span"); node.textContent=value ?? "-"; return node.innerHTML; }
 
 async function loadReport() {
@@ -41,6 +41,13 @@ async function loadReport() {
   try { const response=await apiGet("/inventory/operational/reorder-risk", filters()); if(!response.success) throw new Error(response.message||"تعذر تحميل التقرير"); renderReport(response.data||{}); }
   catch(err){ if(error){error.textContent=err.message||"حدث خطأ أثناء تحميل التقرير";error.classList.remove("hidden");} }
   finally { loading?.classList.add("hidden"); }
+}
+
+function clearReport() {
+  const kpis=document.getElementById("opKpis"), panes=document.getElementById("opPanes"), error=document.getElementById("opError");
+  if(kpis) kpis.innerHTML="";
+  if(panes) panes.innerHTML='<div class="alert alert-info">حدد الفلاتر المطلوبة ثم اضغط «تحديث التقرير» لعرض البيانات.</div>';
+  error?.classList.add("hidden");
 }
 
 function renderReport(data) {
@@ -53,7 +60,7 @@ function renderReport(data) {
 }
 function pane(id,html,active=false){return `<div class="op-pane ${active?'active':''}" data-pane="${id}">${html}</div>`;}
 function activateTab(id){document.querySelectorAll(".op-tab").forEach(x=>x.classList.toggle("active",x.dataset.tab===id));document.querySelectorAll(".op-pane").forEach(x=>x.classList.toggle("active",x.dataset.pane===id));}
-function baseCols(){return [["warehouseName","المخزن"],["defaultCode","الكود"],["productName","الصنف"],["categoryPath","مسار الفئة"],["productGroupLabel","المجموعة"]];}
+function baseCols(){return [["warehouseName","المخزن"],["defaultCode","الكود"],["barcode","الباركود"],["productName","الصنف"],["categoryPath","مسار الفئة"],["productGroupLabel","المجموعة"]];}
 function reorderCols(){return [...baseCols(),["availableQuantity","المتاح",n],["incomingPending","وارد منتظر",n],["avgDailyApproved","متوسط يومي معتمد",n],["daysCover","أيام التغطية",n],["minQuantity","الحد الأدنى",n],["maxQuantity","الحد الأقصى",n],["reorderQuantity","كمية إعادة الطلب",n],["statusLabel","الحالة",(v,r)=>`<span class="risk risk-${r.status}">${safe(v)}</span>`]];}
 function consumptionCols(){return [...baseCols(),["withdrawal7Days","سحب 7 أيام",n],["avgDailyWeekly","متوسط يومي أسبوعي",n],["withdrawal30Days","سحب 30 يومًا",n],["avgDailyMonthly","متوسط يومي شهري",n],["avgDailyApproved","المتوسط المعتمد",n],["lastMovementDate","آخر حركة"]];}
 function supplyCols(){return [...baseCols(),["currentSupplyTotal","توريد العام الحالي",n],["currentSupplyCount","عدد التوريدات",n],["currentSupplyMin","أقل توريدة",n],["currentSupplyMax","أعلى توريدة",n],["currentSupplyAverage","متوسط التوريدة",n],["previousSupplyTotal","نفس الفترة سابقًا",n],["supplyChangePercent","التغير %",n],["lastSupplyDate","آخر توريد"],["incomingPending","وارد منتظر",n]];}

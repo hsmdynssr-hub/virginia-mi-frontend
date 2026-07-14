@@ -12,7 +12,6 @@
 
     "inventory-executive-summary",
     "inventory-intermediate-control",
-    "inventory-reorder-risk",
 
     "production-mo-cost",
 
