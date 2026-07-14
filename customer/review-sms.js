@@ -6,6 +6,7 @@
   let selectedRating = null;
   let selectedQueueOrderIds = new Set();
   let lastQueueRows = [];
+  let couponGoogleReviewUrl = "";
 
   document.addEventListener("DOMContentLoaded", () => {
     localStorage.removeItem("reviewSmsAdminKey");
@@ -459,6 +460,7 @@
       }
     });
 
+    loadCouponGoogleReviewUrl(token);
     loadPublicCoupon(token);
   }
 
@@ -495,6 +497,7 @@
       byId("couponExpiry").textContent = coupon.endsAt
         ? `صالح حتى ${formatDate(coupon.endsAt)}`
         : "";
+      showCouponGoogleReviewLink(couponGoogleReviewUrl);
     } else {
       byId("couponBox").hidden = true;
       claimButton.hidden = false;
@@ -502,8 +505,45 @@
       claimButton.textContent = data.issuingEnabled === false
         ? "إصدار الكوبونات متوقف مؤقتًا"
         : "إصدار كوبون الشحن المجاني";
+      hideCouponGoogleReviewLink();
     }
 
+  }
+
+  async function loadCouponGoogleReviewUrl(token) {
+    try {
+      const data = await requestJson(
+        `${getReviewApiBase()}/review-data/${encodeURIComponent(token)}`
+      );
+
+      couponGoogleReviewUrl = String(data.data?.googleReviewUrl || "").trim();
+
+      if (!byId("couponBox")?.hidden) {
+        showCouponGoogleReviewLink(couponGoogleReviewUrl);
+      }
+    } catch (error) {
+      couponGoogleReviewUrl = "";
+      hideCouponGoogleReviewLink();
+    }
+  }
+
+  function hideCouponGoogleReviewLink() {
+    const section = byId("couponGoogleSection");
+    if (section) section.hidden = true;
+  }
+
+  function showCouponGoogleReviewLink(url) {
+    const section = byId("couponGoogleSection");
+    const link = byId("couponGoogleLink");
+    const safeUrl = String(url || "").trim();
+
+    if (!section || !link || !safeUrl || byId("couponBox")?.hidden) {
+      hideCouponGoogleReviewLink();
+      return;
+    }
+
+    link.href = safeUrl;
+    section.hidden = false;
   }
 
   async function loadPublicCoupon(token) {
@@ -1604,7 +1644,6 @@
           }
         }
         if (reviewForm) reviewForm.hidden = true;
-        showGoogleReviewLink(review.googleReviewUrl);
       } else {
         if (alreadyReviewedBox) alreadyReviewedBox.hidden = true;
         if (reviewForm) reviewForm.hidden = false;
@@ -1696,7 +1735,6 @@
 
         form.hidden = true;
         submitButton.textContent = "تم الإرسال";
-        showGoogleReviewLink(submitData.data?.googleReviewUrl);
       } catch (error) {
         messageBox.hidden = false;
         messageBox.className = "crsms-review-message crsms-error";
@@ -1708,14 +1746,4 @@
     });
   }
 
-  function showGoogleReviewLink(url) {
-    const section = byId("reviewGoogleSection");
-    const link = byId("reviewGoogleLink");
-    const safeUrl = String(url || "").trim();
-
-    if (!section || !link || !safeUrl) return;
-
-    link.href = safeUrl;
-    section.hidden = false;
-  }
 })();
