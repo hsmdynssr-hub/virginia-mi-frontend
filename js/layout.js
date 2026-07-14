@@ -193,6 +193,7 @@ const REPORT_PAGE_MAP = {
   "inventory-intermediate-control": "inventory.intermediate_control",
   "inventory-flow-control": "inventory.flow_control",
   "inventory-movement-intelligence": "inventory.movement_intelligence",
+  "inventory-reorder-risk": "inventory.operational.reorder_risk",
 
   forecast: "forecast.index",
   "forecast-products": "forecast.products",
@@ -218,6 +219,7 @@ const PAGES_WITHOUT_REPORT_TOOLBAR = new Set([
 
   "admin-users",
   "admin-roles",
+  "inventory-reorder-risk",
 
   "branches",
   "menu-prices",
@@ -756,6 +758,7 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
               <a data-page="inventory-executive-summary" class="nav-link" href="../inventory/executive-summary.html">ملخص المخزون التنفيذي</a>
               <a data-page="inventory-flow-control" class="nav-link" href="../inventory/flow-control.html">تحكم حركة المخزون</a>
               <a data-page="inventory-movement-intelligence" class="nav-link" href="../inventory/movement-intelligence.html">تحليل حركة المخزون</a>
+              <a data-page="inventory-reorder-risk" class="nav-link" href="../inventory/reorder-risk.html">تشغيل المخازن وإعادة الطلب</a>
             </div>
           </div>
 

@@ -12,6 +12,7 @@
 
     "inventory-executive-summary",
     "inventory-intermediate-control",
+    "inventory-reorder-risk",
 
     "production-mo-cost",
 
@@ -30,6 +31,14 @@
   };
 
   const CUSTOM_PARAMS = {
+    "inventory-reorder-risk": () => ({
+      companyId: document.getElementById("companySelect")?.value || "1",
+      warehouseRole: document.getElementById("warehouseRole")?.value || "all",
+      productGroup: document.getElementById("productGroup")?.value || "all",
+      categoryId: document.getElementById("categoryId")?.value || "",
+      status: document.getElementById("riskStatus")?.value || "all",
+      search: document.getElementById("productSearch")?.value || ""
+    }),
     "review-coupons": () => {
       return {
         companyId: document.getElementById("companyId")?.value || "",
