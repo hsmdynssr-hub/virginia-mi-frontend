@@ -1,5 +1,7 @@
 (function () {
   const DEFAULT_LOCAL_API_BASE = "http://localhost:5050/api/customer/review-sms";
+  const DEFAULT_PRODUCTION_API_BASE =
+    "https://odoo-mi-api.vercel.app/api/customer/review-sms";
 
   let selectedRating = null;
   let selectedQueueOrderIds = new Set();
@@ -60,7 +62,19 @@
       return DEFAULT_LOCAL_API_BASE;
     }
 
-    return `${window.location.origin}/api/customer/review-sms`;
+    const sharedApiBase = String(window.API_BASE_URL || "")
+      .trim()
+      .replace(/\/+$/, "");
+
+    if (sharedApiBase) {
+      if (/\/customer\/review-sms$/i.test(sharedApiBase)) {
+        return sharedApiBase;
+      }
+
+      return `${sharedApiBase}/customer/review-sms`;
+    }
+
+    return DEFAULT_PRODUCTION_API_BASE;
   }
 
   function getStoredApiBase() {
