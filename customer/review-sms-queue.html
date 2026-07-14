@@ -6,7 +6,9 @@
 
   <title>تشغيل فواتير تقييم العملاء SMS</title>
 
-  <link rel="stylesheet" href="./review-sms.css" />
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.rtl.min.css" />
+  <link rel="stylesheet" href="../css/bootstrap-theme.css" />
+  <link rel="stylesheet" href="./review-sms.css?v=sms-unified-ui-20260714" />
   <script src="../js/api.js" defer></script>
   <script src="../js/layout.js" defer></script>
   <script src="./review-sms.js" defer></script>
@@ -37,9 +39,11 @@
       </a>
 
       <a class="crsms-return-link" data-return-page="dashboard" href="./review-sms-dashboard.html">
-        <span>⚙️</span>
-        <strong>إعدادات الرسائل</strong>
+        <span>📊</span>
+        <strong>الداش بورد الفني</strong>
       </a>
+      <a class="crsms-return-link" href="./review-coupons-dashboard.html"><span>🎁</span><strong>الكوبونات</strong></a>
+      <a class="crsms-return-link" href="./review-sms-settings.html"><span>⚙️</span><strong>إعدادات الأدمن</strong></a>
     </section>
 
     <section class="crsms-header">
@@ -56,8 +60,8 @@
     </section>
 
     <section class="crsms-panel crsms-queue-nav">
-      <a class="crsms-nav-link" href="./review-sms-dashboard.html">الداشبورد الفني</a>
-      <span>هذه الصفحة لا ترسل أي رسائل أثناء البحث. الإرسال يحدث فقط من زر إرسال المحدد وبشرط أن يكون تشغيل الإرسال مفعّلًا من الداشبورد.</span>
+        <a class="crsms-nav-link" href="./review-sms-dashboard.html">الداش بورد الفني</a>
+      <span>تشغيل فيرجينيا فقط. سياسات العملاء وطريقة التشغيل تُحدد من صفحة إعدادات الأدمن.</span>
     </section>
 
     <section class="crsms-panel">
@@ -68,23 +72,24 @@
 
       <div class="crsms-form-grid">
         <div class="crsms-field">
-          <label for="companyId">Company ID</label>
-          <input id="companyId" type="number" placeholder="1 أو 2" />
+          <label for="companyId">الشركة</label>
+          <input id="companyId" type="hidden" value="1" />
+          <input type="text" value="فيرجينيا — Company ID 1" readonly />
         </div>
 
         <div class="crsms-field">
           <label for="threshold">الحد الأدنى للفاتورة</label>
-          <input id="threshold" type="number" value="1000" />
+          <input id="threshold" type="number" value="1000" readonly />
         </div>
 
         <div class="crsms-field">
           <label for="lookbackMinutes">فترة البحث بالدقائق</label>
-          <input id="lookbackMinutes" type="number" value="10080" />
+          <input id="lookbackMinutes" type="number" value="10080" readonly />
         </div>
 
         <div class="crsms-field">
           <label for="limit">عدد الفواتير المطلوب فحصها</label>
-          <input id="limit" type="number" value="20" min="1" max="500" />
+          <input id="limit" type="number" value="100" min="1" max="500" readonly />
         </div>
 
         <div class="crsms-field">
@@ -110,7 +115,7 @@
 
         <div class="crsms-field crsms-span-2">
           <label for="repeatPolicy">سياسة تكرار رقم العميل</label>
-          <select id="repeatPolicy">
+          <select id="repeatPolicy" disabled>
             <option value="same_day" selected>لا ترسل لنفس الرقم أكثر من مرة في نفس اليوم</option>
             <option value="last_24h">لا ترسل لنفس الرقم أكثر من مرة خلال آخر 24 ساعة</option>
             <option value="allow">السماح بإرسال أكثر من رسالة لنفس الرقم</option>

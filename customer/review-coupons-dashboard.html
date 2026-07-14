@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>إدارة كوبونات الشحن</title>
-  <link rel="stylesheet" href="./review-sms.css?v=review-coupons-ui-20260712" />
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.rtl.min.css" />
+  <link rel="stylesheet" href="../css/bootstrap-theme.css" />
+  <link rel="stylesheet" href="./review-sms.css?v=sms-unified-ui-20260714" />
   <script src="../js/api.js" defer></script>
   <script src="../js/layout.js" defer></script>
   <script src="./review-sms.js?v=review-coupons-ui-20260712" defer></script>
@@ -29,68 +31,27 @@
         <span>🎁</span><strong>كوبونات الشحن</strong>
       </a>
       <a class="crsms-return-link" href="./review-sms-dashboard.html">
-        <span>⚙️</span><strong>إعدادات الرسائل</strong>
+        <span>📊</span><strong>الداش بورد الفني</strong>
       </a>
+      <a class="crsms-return-link" href="./review-sms-settings.html"><span>⚙️</span><strong>إعدادات الأدمن</strong></a>
     </section>
 
     <section class="crsms-header">
       <div>
         <h1>إدارة كوبونات الشحن المجاني</h1>
-        <p>التحكم في مدة الكوبون، اتصال Shopify، ومراجعة كل عمليات الإصدار.</p>
+        <p>متابعة كل الكوبونات وحالة Shopify ومحاولات الإصدار والتقارير اليومية.</p>
       </div>
       <div class="crsms-mode-badge" id="shopifyStatusBadge">Shopify غير مفحوص</div>
     </section>
 
-    <section class="crsms-panel">
+    <section class="crsms-panel crsms-coupon-health-panel">
       <div class="crsms-section-title">
-        <h2>الاتصال والسياسة الحالية</h2>
+        <div><h2>حالة ربط Shopify</h2><p>هذه الصفحة للمتابعة فقط؛ سياسة الكوبونات موجودة في إعدادات الأدمن.</p></div>
         <button type="button" class="crsms-secondary" data-coupon-action="shopify-health">
           فحص Shopify
         </button>
       </div>
-
-      <div class="crsms-form-grid">
-        <div class="crsms-field">
-          <label for="companyId">Company ID</label>
-          <input id="companyId" type="number" placeholder="1 أو 2" />
-        </div>
-        <div class="crsms-field">
-          <label for="couponValidityMonths">صلاحية الكوبونات الجديدة</label>
-          <select id="couponValidityMonths">
-            <option value="1">شهر واحد</option>
-            <option value="3">3 أشهر</option>
-            <option value="6">6 أشهر</option>
-            <option value="9">9 أشهر</option>
-            <option value="12">سنة</option>
-          </select>
-        </div>
-        <div class="crsms-field crsms-span-2">
-          <label for="googleReviewUrl">رابط Google Review الاختياري</label>
-          <input id="googleReviewUrl" type="url" placeholder="https://g.page/r/.../review" />
-        </div>
-      </div>
-
-      <div class="crsms-toggle-grid">
-        <label class="crsms-toggle-card">
-          <input id="couponIssuingEnabled" type="checkbox" />
-          <span>
-            <strong>تشغيل إصدار كوبونات Shopify</strong>
-            <small>اتركه مغلقًا حتى تنتهي من إعداد Shopify وتشغيل SQL.</small>
-          </span>
-        </label>
-      </div>
-
-      <div class="crsms-actions">
-        <button type="button" data-coupon-action="load-settings">تحميل الإعدادات</button>
-        <button type="button" data-coupon-action="save-settings">حفظ سياسة الكوبونات</button>
-        <button type="button" class="crsms-secondary" data-coupon-action="shopify-health">
-          فحص الاتصال
-        </button>
-      </div>
-
-      <p class="crsms-hint">
-        تغيير المدة يطبق على الكوبونات التي تصدر بعد الحفظ فقط. الكوبونات القديمة تحتفظ بتاريخ انتهائها.
-      </p>
+      <input id="companyId" type="hidden" value="1" />
       <pre class="crsms-status" id="statusBox">جاهز. لا يتم إصدار كوبونات من الداشبورد تلقائيًا.</pre>
     </section>
 

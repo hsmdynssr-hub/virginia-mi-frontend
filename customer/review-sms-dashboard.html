@@ -3,267 +3,55 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>Dashboard تقييم العملاء SMS</title>
-
-  <link rel="stylesheet" href="./review-sms.css" />
+  <title>الداش بورد الفني — رسائل العملاء</title>
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.rtl.min.css" />
+  <link rel="stylesheet" href="../css/bootstrap-theme.css" />
+  <link rel="stylesheet" href="./review-sms.css?v=sms-technical-dashboard-20260714" />
   <script src="../js/api.js" defer></script>
   <script src="../js/layout.js" defer></script>
-  <script src="./review-sms.js" defer></script>
+  <script src="./review-sms.js?v=sms-technical-dashboard-20260714" defer></script>
 </head>
-
-<body data-page="dashboard" data-report-code="customer.review_sms.send">
+<body data-page="dashboard" data-report-code="customer.review_sms.view">
   <main class="crsms-page">
-
-    <section class="crsms-return-bar" aria-label="Review SMS navigation">
-      <a class="crsms-return-link main" data-return-page="dashboard-main" href="../dashboard/index.html">
-        <span>🏠</span>
-        <strong>الرجوع للمشروع الرئيسي</strong>
-      </a>
-
-      <a class="crsms-return-link" data-return-page="customer-home" href="./index.html">
-        <span>👥</span>
-        <strong>صفحة العملاء</strong>
-      </a>
-
-      <a class="crsms-return-link" data-return-page="queue" href="./review-sms-queue.html">
-        <span>🧾</span>
-        <strong>تشغيل الرسائل</strong>
-      </a>
-
-      <a class="crsms-return-link" data-return-page="followups" href="./review-followups.html">
-        <span>☎️</span>
-        <strong>المتابعات</strong>
-      </a>
-
-      <a class="crsms-return-link" data-return-page="coupons" href="./review-coupons-dashboard.html">
-        <span>🎁</span>
-        <strong>كوبونات الشحن</strong>
-      </a>
-
-      <a class="crsms-return-link" data-return-page="dashboard" href="./review-sms-dashboard.html">
-        <span>⚙️</span>
-        <strong>إعدادات الرسائل</strong>
-      </a>
+    <section class="crsms-return-bar" aria-label="التنقل في منظومة الرسائل">
+      <a class="crsms-return-link main" href="../dashboard/index.html"><span>🏠</span><strong>المشروع الرئيسي</strong></a>
+      <a class="crsms-return-link active" href="./review-sms-dashboard.html"><span>📊</span><strong>الداش بورد الفني</strong></a>
+      <a class="crsms-return-link" href="./review-sms-queue.html"><span>✉️</span><strong>تشغيل الرسائل</strong></a>
+      <a class="crsms-return-link" href="./review-followups.html"><span>☎️</span><strong>متابعة العملاء</strong></a>
+      <a class="crsms-return-link" href="./review-coupons-dashboard.html"><span>🎁</span><strong>الكوبونات</strong></a>
+      <a class="crsms-return-link" href="./review-sms-settings.html"><span>⚙️</span><strong>إعدادات الأدمن</strong></a>
     </section>
 
     <section class="crsms-header">
-      <div>
-        <h1>Dashboard تقييم العملاء SMS</h1>
-        <p>
-          داشبورد فني للتحكم في الربط، إعدادات التشغيل، الإرسال التجريبي، ومراجعة حالة الرسائل.
-        </p>
-      </div>
+      <div><span class="crsms-eyebrow">CUSTOMER COMMUNICATION OVERVIEW</span><h1>الداش بورد الفني لمنظومة العملاء</h1><p>ملخص حالة الإرسال والتقييمات والمتابعات والكوبونات بدون تعديل الإعدادات.</p></div>
+      <div class="crsms-mode-badge" id="modeBadge">جاري فحص النظام</div>
+    </section>
 
-      <div class="crsms-mode-badge" id="modeBadge">
-        جاهز للفحص
-      </div>
+    <input id="companyId" type="hidden" value="1" />
+    <input id="limit" type="hidden" value="100" />
+
+    <section class="crsms-panel crsms-queue-nav">
+      <strong>فيرجينيا — Company ID 1</strong>
+      <span>هذه الشاشة للمتابعة والقراءة فقط. تغيير التشغيل والسياسات متاح من إعدادات الأدمن.</span>
+      <div class="crsms-actions"><button type="button" data-action="refresh-all">تحديث الملخص</button><button type="button" class="crsms-secondary" data-action="health">فحص الاتصال</button></div>
+    </section>
+
+    <section class="crsms-stats crsms-technical-stats">
+      <article class="crsms-stat-card"><span>كل المعاملات</span><strong id="statTotal">-</strong><small>إجمالي سجلات الرسائل</small></article>
+      <article class="crsms-stat-card"><span>تم الإرسال</span><strong id="statSent">-</strong><small>رسائل وصلت للمزوّد</small></article>
+      <article class="crsms-stat-card"><span>فشل</span><strong id="statFailed">-</strong><small>تحتاج مراجعة فنية</small></article>
+      <article class="crsms-stat-card"><span>فتح الرابط</span><strong id="statOpened">-</strong><small>عملاء بدأوا التقييم</small></article>
+      <article class="crsms-stat-card"><span>اكتمل التقييم</span><strong id="statReviewed">-</strong><small>تقييمات مسجلة</small></article>
+      <article class="crsms-stat-card"><span>متوسط التقييم</span><strong id="statAvgRating">-</strong><small>مؤشر رضا العملاء</small></article>
     </section>
 
     <section class="crsms-panel">
-      <div class="crsms-section-title">
-        <h2>إعدادات الاتصال والتحكم</h2>
-        <button type="button" class="crsms-secondary" data-action="settings">تحميل الإعدادات</button>
-      </div>
-
-      <div class="crsms-form-grid">
-        <div class="crsms-field">
-          <label for="companyId">Company ID</label>
-          <input id="companyId" type="number" placeholder="1 أو 2" />
-        </div>
-
-        <div class="crsms-field">
-          <label for="threshold">Threshold</label>
-          <input id="threshold" type="number" value="1000" />
-        </div>
-
-        <div class="crsms-field">
-          <label for="lookbackMinutes">Lookback Minutes</label>
-          <input id="lookbackMinutes" type="number" value="10080" />
-        </div>
-
-        <div class="crsms-field">
-          <label for="limit">Limit</label>
-          <input id="limit" type="number" value="20" />
-        </div>
-
-        <div class="crsms-field">
-          <label for="statusFilter">Status</label>
-          <select id="statusFilter">
-            <option value="">All</option>
-            <option value="pending">Pending</option>
-            <option value="sent">Sent</option>
-            <option value="opened">Opened</option>
-            <option value="reviewed">Reviewed</option>
-            <option value="failed">Failed</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="crsms-toggle-grid">
-        <label class="crsms-toggle-card">
-          <input id="smsSendingEnabled" type="checkbox" />
-          <span>
-            <strong>تشغيل إرسال الرسائل</strong>
-            <small>لو مقفولة، أي Scan أو Manual Send لن يرسل SMS حقيقي.</small>
-          </span>
-        </label>
-
-        <label class="crsms-toggle-card">
-          <input id="manualSendEnabled" type="checkbox" />
-          <span>
-            <strong>السماح بالإرسال اليدوي</strong>
-            <small>مخصص لإرسال أرقام محددة أثناء التجربة.</small>
-          </span>
-        </label>
-
-        <label class="crsms-toggle-card">
-          <input id="autoScanEnabled" type="checkbox" />
-          <span>
-            <strong>تشغيل Auto Scan</strong>
-            <small>يعمل فقط لو Scheduler مفعّل من ENV.</small>
-          </span>
-        </label>
-      </div>
-
-      <div class="crsms-actions">
-        <a class="crsms-nav-link" href="./review-sms-queue.html">صفحة تشغيل الفواتير</a>
-        <a class="crsms-nav-link" href="./review-followups.html">متابعة العملاء الغاضبين</a>
-        <button type="button" data-action="health">Health</button>
-        <button type="button" data-action="save-settings">حفظ إعدادات التشغيل</button>
-        <button type="button" data-action="stats">تحديث الإحصائيات</button>
-        <button type="button" data-action="logs">عرض الرسائل</button>
-        <button type="button" class="crsms-secondary" data-action="send-pending">
-          إرسال Pending
-        </button>
-
-        <button type="button" class="crsms-secondary" data-action="dry-run">
-          Odoo Dry Run
-        </button>
-
-        <button type="button" class="crsms-danger" data-action="scan">
-          Odoo Scan فعلي
-        </button>
-      </div>
-
-      <pre class="crsms-status" id="statusBox">جاهز. لا يتم تحميل أو إرسال شيء تلقائيًا.</pre>
-    </section>
-
-    <section class="crsms-panel">
-      <div class="crsms-section-title">
-        <h2>إرسال يدوي لأرقام محددة</h2>
-        <button type="button" class="crsms-secondary" data-action="manual-dry-run">
-          تجربة بدون إرسال
-        </button>
-      </div>
-
-      <div class="crsms-form-grid">
-        <div class="crsms-field crsms-span-2">
-          <label for="manualPhones">أرقام التليفون</label>
-          <textarea
-            id="manualPhones"
-            class="crsms-textarea"
-            placeholder="اكتب كل رقم في سطر، أو افصل بينهم بفاصلة"
-          ></textarea>
-        </div>
-
-        <div class="crsms-field">
-          <label for="manualCustomerName">اسم العميل الافتراضي</label>
-          <input id="manualCustomerName" type="text" placeholder="عميل يدوي" />
-        </div>
-
-        <div class="crsms-field">
-          <label for="manualBranchName">اسم الفرع في الرسالة</label>
-          <input id="manualBranchName" type="text" placeholder="معصرة فيرجينيا مطروح" />
-        </div>
-
-        <div class="crsms-field crsms-span-2">
-          <label for="manualNote">ملاحظة داخلية</label>
-          <input id="manualNote" type="text" placeholder="مثال: تجربة SMS Misr Trial" />
-        </div>
-      </div>
-
-      <div class="crsms-actions">
-        <button type="button" class="crsms-secondary" data-action="manual-dry-run">
-          Manual Dry Run
-        </button>
-
-        <button type="button" class="crsms-danger" data-action="manual-send">
-          إرسال للأرقام المحددة
-        </button>
-      </div>
-
-      <p class="crsms-hint">
-        الإرسال اليدوي ينشئ Logs بروابط تقييم مثل فواتير Odoo، وبالتالي أي تقييم 1 أو 3 سيظهر في Follow-ups.
-      </p>
-    </section>
-
-    <section class="crsms-stats">
-      <article class="crsms-stat-card">
-        <span>Total</span>
-        <strong id="statTotal">-</strong>
-      </article>
-
-      <article class="crsms-stat-card">
-        <span>Sent</span>
-        <strong id="statSent">-</strong>
-      </article>
-
-      <article class="crsms-stat-card">
-        <span>Failed</span>
-        <strong id="statFailed">-</strong>
-      </article>
-
-      <article class="crsms-stat-card">
-        <span>Opened</span>
-        <strong id="statOpened">-</strong>
-      </article>
-
-      <article class="crsms-stat-card">
-        <span>Reviewed</span>
-        <strong id="statReviewed">-</strong>
-      </article>
-
-      <article class="crsms-stat-card">
-        <span>Avg Rating</span>
-        <strong id="statAvgRating">-</strong>
-      </article>
-    </section>
-
-    <section class="crsms-panel">
-      <div class="crsms-section-title">
-        <h2>آخر الرسائل</h2>
-        <button type="button" class="crsms-secondary" data-action="logs">
-          تحديث الرسائل
-        </button>
-      </div>
-
+      <div class="crsms-section-title"><div><h2>آخر معاملات العملاء</h2><p>حالة الرسالة والعميل والفاتورة والتقييم في شاشة واحدة.</p></div><button type="button" class="crsms-secondary" data-action="logs">تحديث المعاملات</button></div>
       <div class="crsms-table-wrap">
-        <table class="crsms-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>الحالة</th>
-              <th>Provider</th>
-              <th>الفرع</th>
-              <th>العميل</th>
-              <th>الموبايل</th>
-              <th>الفاتورة</th>
-              <th>القيمة</th>
-              <th>التقييم</th>
-              <th>لينك التقييم</th>
-              <th>تاريخ الإرسال</th>
-            </tr>
-          </thead>
-
-          <tbody id="logsBody">
-            <tr>
-              <td colspan="11">اضغط عرض الرسائل.</td>
-            </tr>
-          </tbody>
-        </table>
+        <table class="crsms-table"><thead><tr><th>ID</th><th>الحالة</th><th>Provider</th><th>الفرع</th><th>العميل</th><th>الموبايل</th><th>الفاتورة</th><th>القيمة</th><th>التقييم</th><th>رابط التقييم</th><th>تاريخ الإرسال</th></tr></thead><tbody id="logsBody"><tr><td colspan="11">جاري تحميل المعاملات...</td></tr></tbody></table>
       </div>
     </section>
+    <pre class="crsms-status" id="statusBox">جاري تحميل ملخص المنظومة.</pre>
   </main>
 </body>
 </html>

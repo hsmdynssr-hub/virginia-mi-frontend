@@ -6,7 +6,9 @@
 
   <title>متابعة العملاء المحايدين والغاضبين</title>
 
-  <link rel="stylesheet" href="./review-sms.css" />
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.rtl.min.css" />
+  <link rel="stylesheet" href="../css/bootstrap-theme.css" />
+  <link rel="stylesheet" href="./review-sms.css?v=sms-unified-ui-20260714" />
   <script src="../js/api.js" defer></script>
   <script src="../js/layout.js" defer></script>
   <script src="./review-sms.js" defer></script>
@@ -37,9 +39,11 @@
       </a>
 
       <a class="crsms-return-link" data-return-page="dashboard" href="./review-sms-dashboard.html">
-        <span>⚙️</span>
-        <strong>إعدادات الرسائل</strong>
+        <span>📊</span>
+        <strong>الداش بورد الفني</strong>
       </a>
+      <a class="crsms-return-link" href="./review-coupons-dashboard.html"><span>🎁</span><strong>الكوبونات</strong></a>
+      <a class="crsms-return-link" href="./review-sms-settings.html"><span>⚙️</span><strong>إعدادات الأدمن</strong></a>
     </section>
 
     <section class="crsms-header">
@@ -69,8 +73,9 @@
 
       <div class="crsms-form-grid">
         <div class="crsms-field">
-          <label for="companyId">Company ID</label>
-          <input id="companyId" type="number" placeholder="1 أو 2" />
+          <label for="companyId">الشركة</label>
+          <input id="companyId" type="hidden" value="1" />
+          <input type="text" value="فيرجينيا — Company ID 1" readonly />
         </div>
 
         <div class="crsms-field">

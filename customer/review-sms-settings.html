@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إعدادات منظومة رسائل العملاء</title>
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.rtl.min.css" />
+  <link rel="stylesheet" href="../css/bootstrap-theme.css" />
+  <link rel="stylesheet" href="./review-sms.css?v=sms-admin-settings-20260714" />
+  <script src="../js/api.js" defer></script>
+  <script src="../js/layout.js" defer></script>
+  <script src="./review-sms.js?v=sms-admin-settings-20260714" defer></script>
+</head>
+<body data-page="settings" data-report-code="customer.review_sms.view">
+  <main class="crsms-page">
+    <section class="crsms-return-bar" aria-label="التنقل في منظومة الرسائل">
+      <a class="crsms-return-link main" href="../dashboard/index.html"><span>🏠</span><strong>المشروع الرئيسي</strong></a>
+      <a class="crsms-return-link" href="./review-sms-dashboard.html"><span>📊</span><strong>الداش بورد الفني</strong></a>
+      <a class="crsms-return-link" href="./review-sms-queue.html"><span>✉️</span><strong>تشغيل الرسائل</strong></a>
+      <a class="crsms-return-link" href="./review-followups.html"><span>☎️</span><strong>متابعة العملاء</strong></a>
+      <a class="crsms-return-link" href="./review-coupons-dashboard.html"><span>🎁</span><strong>الكوبونات</strong></a>
+      <a class="crsms-return-link active" href="./review-sms-settings.html"><span>⚙️</span><strong>إعدادات الأدمن</strong></a>
+    </section>
+
+    <section class="crsms-header crsms-admin-header">
+      <div>
+        <span class="crsms-eyebrow">ADMIN CONTROL CENTER</span>
+        <h1>إعدادات منظومة رسائل العملاء</h1>
+        <p>مكان واحد للتحكم في الرسائل، اختيار العملاء، التشغيل، الكوبونات وربط Google وShopify.</p>
+      </div>
+      <div class="crsms-mode-badge live">فيرجينيا · Company 1</div>
+    </section>
+
+    <section id="settingsLoginGate" class="crsms-panel crsms-admin-login">
+      <div class="crsms-section-title"><div><h2>دخول الأدمن</h2><p>كلمة المرور لا تظهر ولا تُحفظ داخل أي صفحة.</p></div></div>
+      <div class="crsms-form-grid">
+        <div class="crsms-field"><label for="settingsUsername">اسم المستخدم</label><input id="settingsUsername" autocomplete="username" /></div>
+        <div class="crsms-field"><label for="settingsPassword">كلمة المرور</label><input id="settingsPassword" type="password" autocomplete="current-password" /></div>
+      </div>
+      <div class="crsms-actions"><button id="settingsLoginBtn" type="button">فتح الإعدادات</button></div>
+    </section>
+
+    <div id="settingsWorkspace" hidden>
+      <section class="crsms-settings-toolbar">
+        <div><span>جلسة الأدمن:</span> <strong id="settingsAdminName">-</strong></div>
+        <div class="crsms-actions">
+          <button id="reloadAllSettingsBtn" class="crsms-secondary" type="button">إعادة تحميل</button>
+          <button id="settingsLogoutBtn" class="crsms-danger" type="button">تسجيل الخروج</button>
+        </div>
+      </section>
+
+      <section class="crsms-panel crsms-settings-section accent-blue">
+        <div class="crsms-section-title"><div><span class="crsms-section-kicker">01 · الرسائل</span><h2>التشغيل والإرسال</h2><p>تحكم مركزي في حالة المنظومة وطريقة التشغيل.</p></div></div>
+        <div class="crsms-form-grid">
+          <div class="crsms-field"><label for="operationMode">نظام التشغيل</label><select id="operationMode"><option value="manual">يدوي</option><option value="automatic">أوتوماتيك</option></select></div>
+          <div class="crsms-field"><label>الشركة</label><input value="فيرجينيا — Company ID 1" readonly /></div>
+        </div>
+        <div class="crsms-toggle-grid">
+          <label class="crsms-toggle-card"><input id="smsSendingEnabled" type="checkbox" /><span><strong>تشغيل إرسال SMS</strong><small>المفتاح الرئيسي لكل عمليات الإرسال الحقيقي.</small></span></label>
+          <label class="crsms-toggle-card"><input id="manualSendEnabled" type="checkbox" /><span><strong>السماح بالتشغيل اليدوي</strong><small>للمدير من صفحة تشغيل الرسائل.</small></span></label>
+          <label class="crsms-toggle-card"><input id="autoScanEnabled" type="checkbox" /><span><strong>التشغيل الأوتوماتيك</strong><small>يتطلب تفعيل Scheduler في الاستضافة.</small></span></label>
+        </div>
+      </section>
+
+      <section class="crsms-panel crsms-settings-section accent-green">
+        <div class="crsms-section-title"><div><span class="crsms-section-kicker">02 · العملاء</span><h2>اختيار العملاء والفواتير</h2><p>القواعد الافتراضية المستخدمة في البحث والتشغيل.</p></div></div>
+        <div class="crsms-form-grid">
+          <div class="crsms-field"><label for="threshold">الحد الأدنى لقيمة الشراء</label><input id="threshold" type="number" min="0" /></div>
+          <div class="crsms-field"><label for="lookbackMinutes">فترة البحث بالدقائق</label><input id="lookbackMinutes" type="number" min="1" /></div>
+          <div class="crsms-field"><label for="limit">الحد الأقصى للفحص</label><input id="limit" type="number" min="1" max="500" /></div>
+          <div class="crsms-field"><label for="repeatPolicy">سياسة تكرار العميل</label><select id="repeatPolicy"><option value="same_day">مرة واحدة في اليوم</option><option value="last_24h">مرة كل 24 ساعة</option><option value="allow">السماح بالتكرار</option></select></div>
+        </div>
+      </section>
+
+      <section class="crsms-panel crsms-settings-section accent-purple">
+        <div class="crsms-section-title"><div><span class="crsms-section-kicker">03 · الكوبونات</span><h2>المكافأة وShopify</h2><p>سياسة إصدار كوبون الشحن المجاني بعد التقييم.</p></div></div>
+        <div class="crsms-form-grid">
+          <div class="crsms-field"><label for="couponValidityMonths">مدة صلاحية الكوبون</label><select id="couponValidityMonths"><option value="1">شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="9">9 أشهر</option><option value="12">12 شهرًا</option></select></div>
+          <div class="crsms-field crsms-span-2"><label for="googleReviewUrl">رابط تقييم Google بعد ظهور الكوبون</label><input id="googleReviewUrl" type="url" placeholder="https://g.page/r/.../review" /></div>
+        </div>
+        <div class="crsms-toggle-grid"><label class="crsms-toggle-card"><input id="couponIssuingEnabled" type="checkbox" /><span><strong>تشغيل إصدار كوبونات Shopify</strong><small>الكوبون شخصي ومربوط برقم العميل طوال فترة الصلاحية.</small></span></label></div>
+      </section>
+
+      <section class="crsms-panel crsms-save-panel">
+        <div><h2>حفظ الإعدادات</h2><p>تُطبق الإعدادات الجديدة على العمليات التالية بعد الحفظ.</p></div>
+        <button id="saveAllSettingsBtn" type="button">حفظ كل الإعدادات</button>
+      </section>
+    </div>
+
+    <pre class="crsms-status" id="statusBox">سجّل دخول الأدمن لفتح الإعدادات.</pre>
+  </main>
+</body>
+</html>

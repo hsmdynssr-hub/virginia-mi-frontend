@@ -1176,6 +1176,98 @@ body[data-page="followups"] .crsms-return-link[data-return-page="followups"] {
   background: linear-gradient(135deg, #60a5fa, #93c5fd);
 }
 
+/* Unified SMS administration */
+.crsms-eyebrow,
+.crsms-section-kicker {
+  display: inline-block;
+  margin-bottom: .45rem;
+  color: #10b981;
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+
+.crsms-admin-header {
+  background:
+    radial-gradient(circle at 12% 20%, rgba(16, 185, 129, .2), transparent 28%),
+    linear-gradient(135deg, #081b2c, #103752);
+}
+
+.crsms-admin-login {
+  max-width: 760px;
+  margin-inline: auto;
+  border-top: 4px solid #10b981;
+}
+
+.crsms-settings-toolbar,
+.crsms-save-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem 1.2rem;
+  border: 1px solid rgba(15, 61, 85, .13);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .88);
+  box-shadow: 0 12px 34px rgba(15, 61, 85, .08);
+}
+
+.crsms-settings-toolbar .crsms-actions { margin: 0; }
+
+.crsms-settings-section {
+  position: relative;
+  overflow: hidden;
+  border-top: 4px solid var(--settings-accent, #0ea5e9);
+}
+
+.crsms-settings-section::after {
+  position: absolute;
+  inset-inline-end: -34px;
+  top: -44px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--settings-accent) 12%, transparent);
+  content: "";
+  pointer-events: none;
+}
+
+.crsms-settings-section.accent-blue { --settings-accent: #0ea5e9; }
+.crsms-settings-section.accent-green { --settings-accent: #10b981; }
+.crsms-settings-section.accent-purple { --settings-accent: #8b5cf6; }
+
+.crsms-save-panel {
+  border: 1px solid rgba(16, 185, 129, .25);
+  background: linear-gradient(135deg, rgba(236, 253, 245, .98), rgba(239, 246, 255, .96));
+}
+
+.crsms-save-panel h2,
+.crsms-save-panel p { margin: 0; }
+.crsms-save-panel p { margin-top: .35rem; color: #64748b; }
+
+.crsms-technical-stats .crsms-stat-card {
+  min-height: 138px;
+}
+
+.crsms-stat-card small {
+  display: block;
+  margin-top: .55rem;
+  color: #64748b;
+  font-size: .75rem;
+}
+
+body[data-page="settings"] .crsms-return-link[href$="review-sms-settings.html"] {
+  color: #fff;
+  border-color: #10b981;
+  background: linear-gradient(135deg, #059669, #0f766e);
+}
+
+@media (max-width: 720px) {
+  .crsms-settings-toolbar,
+  .crsms-save-panel { align-items: stretch; flex-direction: column; }
+}
+
 @media (max-width: 760px) {
   .crsms-return-bar {
     display: grid;

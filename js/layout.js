@@ -170,7 +170,8 @@ const REPORT_PAGE_MAP = {
 
   
 
-  "customer-review-sms-dashboard": "admin.users",
+  "customer-review-sms-dashboard": "customer.review_sms.view",
+  "customer-review-sms-settings": "admin.users",
   "customer-review-sms-queue": "customer.review_sms.send",
   "customer-review-followups": "customer.review_sms.followup",
   "customer-review-coupons-dashboard": "customer.review_sms.view",
@@ -224,6 +225,7 @@ const PAGES_WITHOUT_REPORT_TOOLBAR = new Set([
   "customer",
   
   "customer-review-sms-dashboard",
+  "customer-review-sms-settings",
   "customer-review-sms-queue",
   "customer-review-followups",
   "customer-review-coupons-dashboard",
@@ -706,7 +708,8 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
               <a data-page="customer-review-sms-queue" class="nav-link" href="../customer/review-sms-queue.html">تشغيل رسائل تقييم العملاء</a>
               <a data-page="customer-review-followups" class="nav-link" href="../customer/review-followups.html">متابعة المحايدين والغاضبين</a>
               <a data-page="customer-review-coupons-dashboard" class="nav-link" href="../customer/review-coupons-dashboard.html">الكوبونات والتقارير اليومية</a>
-              <a data-page="customer-review-sms-dashboard" class="nav-link" href="../customer/review-sms-dashboard.html">لوحة إعدادات رسائل التقييم</a>
+              <a data-page="customer-review-sms-dashboard" class="nav-link" href="../customer/review-sms-dashboard.html">الداش بورد الفني للرسائل</a>
+              <a data-page="customer-review-sms-settings" class="nav-link" href="../customer/review-sms-settings.html">إعدادات منظومة الرسائل</a>
 </div>
           </div>
 
