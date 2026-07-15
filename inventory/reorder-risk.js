@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("loadReorderRiskBtn")?.addEventListener("click", loadReport);
   document.getElementById("reportExportExcelBtn")?.addEventListener("click", () => window.ReportExport?.downloadExcel("inventory-reorder-risk"));
   document.querySelectorAll(".op-tab").forEach((button) => button.addEventListener("click", () => activateTab(button.dataset.tab)));
+  initMultiSelects();
   window.addEventListener("company-context-changed", clearReport);
   clearReport();
 });
@@ -16,8 +17,8 @@ function buildContent() {
   return `<section class="op-filter-card">
     <div class="op-filter-grid">
       <div><label for="warehouseRole">المخزن التشغيلي</label><select id="warehouseRole"><option value="all">الكل</option><option value="main">المخزن الرئيسي</option><option value="finished">مخزن المنتج التام</option></select></div>
-      <div><label for="productGroup">مجموعة المنتج</label><select id="productGroup"><option value="all">الكل</option><option value="raw">الخامات</option><option value="packaging">مستلزمات التعبئة</option><option value="finished">المنتج التام</option><option value="resale">المشتراة بغرض البيع</option><option value="unclassified">غير مصنف</option></select></div>
-      <div><label for="categoryId">فئة المنتج في Odoo</label><select id="categoryId"><option value="">كل الفئات</option></select></div>
+      <div><label>مجموعة المنتج</label>${multiSelect("productGroup", [{value:"all",label:"كل المجموعات"},{value:"raw",label:"الخامات"},{value:"packaging",label:"مستلزمات التعبئة"},{value:"finished",label:"المنتج التام"},{value:"resale",label:"المشتراة بغرض البيع"},{value:"unclassified",label:"غير مصنف"}])}</div>
+      <div><label>فئة المنتج في Odoo</label>${multiSelect("categoryId", [{value:"all",label:"كل الفئات"}])}</div>
       <div><label for="riskStatus">الحالة</label><select id="riskStatus"><option value="all">كل الحالات</option><option value="very_critical">خطر جدًا</option><option value="critical">خطر</option><option value="normal">طبيعي</option><option value="overstock">مخزون زائد</option><option value="slow">راكد</option></select></div>
       <div><label for="productSearch">بحث</label><input id="productSearch" placeholder="الكود أو الصنف أو الفئة" /></div>
       <div class="op-actions"><button id="loadReorderRiskBtn" class="op-load">تحديث التقرير</button></div>
@@ -29,6 +30,37 @@ function buildContent() {
   <section class="op-section"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px"><div><h2 style="margin:0">التقارير التشغيلية</h2><small>اختر القسم المطلوب، ثم يمكنك تصدير المصنف كاملًا إلى Excel.</small></div><button type="button" id="reportExportExcelBtn" class="op-export" style="border:0;border-radius:10px;padding:11px 18px;font-weight:800;cursor:pointer">تصدير Excel</button></div><div class="op-tabs">
     <button class="op-tab active" data-tab="reorder">مخاطر وإعادة الطلب</button><button class="op-tab" data-tab="consumption">متوسطات السحب</button><button class="op-tab" data-tab="supply">التوريدات</button><button class="op-tab" data-tab="slow">الراكد والزائد</button><button class="op-tab" data-tab="category">مراجعة الفئات</button><button class="op-tab" data-tab="notes">منطق الحساب</button>
   </div><div id="opPanes"></div></section>`;
+}
+
+function multiSelect(id, options) {
+  return `<div class="op-multi" data-multi="${id}"><input type="hidden" id="${id}" value="all"><button type="button" class="op-multi-toggle"><span data-multi-label>الكل</span><span>⌄</span></button><div class="op-multi-menu">${options.map((item,index)=>`<label class="op-multi-option"><input type="checkbox" value="${item.value}" ${index===0?'checked':''}><span>${item.label}</span></label>`).join("")}</div></div>`;
+}
+
+function initMultiSelects() {
+  document.querySelectorAll(".op-multi").forEach(bindMultiSelect);
+  document.addEventListener("click", (event) => {
+    document.querySelectorAll(".op-multi.open").forEach((multi) => { if(!multi.contains(event.target)) multi.classList.remove("open"); });
+  });
+}
+
+function bindMultiSelect(multi) {
+  if(multi.dataset.bound==="true") return;
+  multi.dataset.bound="true";
+  multi.querySelector(".op-multi-toggle")?.addEventListener("click",()=>multi.classList.toggle("open"));
+  multi.querySelectorAll('input[type="checkbox"]').forEach((box)=>box.addEventListener("change",()=>syncMultiSelect(multi,box)));
+  syncMultiSelect(multi);
+}
+
+function syncMultiSelect(multi, changed) {
+  const boxes=[...multi.querySelectorAll('input[type="checkbox"]')], all=boxes.find(x=>x.value==="all");
+  if(changed?.value==="all" && changed.checked) boxes.filter(x=>x!==all).forEach(x=>x.checked=false);
+  if(changed?.value!=="all" && changed?.checked && all) all.checked=false;
+  let selected=boxes.filter(x=>x.checked);
+  if(!selected.length && all){all.checked=true;selected=[all];}
+  const hidden=multi.querySelector('input[type="hidden"]');
+  if(hidden) hidden.value=selected.map(x=>x.value).join(",");
+  const label=multi.querySelector("[data-multi-label]");
+  if(label) label.textContent=selected.some(x=>x.value==="all")?(all?.nextElementSibling?.textContent||"الكل"):selected.length===1?selected[0].nextElementSibling?.textContent:`تم اختيار ${selected.length}`;
 }
 
 function filters() { return { companyId: document.getElementById("companySelect")?.value || 1, warehouseRole: val("warehouseRole","all"), productGroup: val("productGroup","all"), categoryId: val("categoryId",""), status: val("riskStatus","all"), search: val("productSearch","") }; }
@@ -54,9 +86,17 @@ function renderReport(data) {
   const s=data.summary||{}; document.getElementById("opKpis").innerHTML=[
     ["إجمالي الأصناف",s.products,""],["خطر جدًا",s.veryCritical,"danger"],["خطر",s.critical,"warning"],["طبيعي",s.normal,""],["زائد / راكد",Number(s.overstock||0)+Number(s.slow||0),"warning"],["تحتاج إعادة طلب",s.totalReorderQuantity,"danger"],["مراجعة الفئة",s.categoryIssues,"warning"]
   ].map(([label,value,tone])=>`<article class="op-kpi ${tone}"><span>${label}</span><strong>${n(value,0)}</strong></article>`).join("");
-  const category=document.getElementById("categoryId"), selected=category?.value||""; if(category){category.innerHTML='<option value="">كل الفئات</option>'+ (data.categoryOptions||[]).map(x=>`<option value="${x.id}">${safe(x.name)}</option>`).join("");category.value=selected;}
+  renderCategoryOptions(data.categoryOptions||[]);
   document.getElementById("opPanes").innerHTML=`
     ${pane("reorder", table(data.reorderRows, reorderCols()), true)}${pane("consumption", table(data.consumptionRows, consumptionCols()))}${pane("supply", table(data.supplyRows, supplyCols()))}${pane("slow", table(data.slowOverstockRows, reorderCols()))}${pane("category", table(data.categoryIssueRows, categoryCols()))}${pane("notes", (data.notes||[]).map(x=>`<div class="op-note">${safe(x)}</div>`).join(""))}`;
+}
+function renderCategoryOptions(options) {
+  const multi=document.querySelector('[data-multi="categoryId"]');
+  if(!multi) return;
+  const previous=new Set((document.getElementById("categoryId")?.value||"all").split(","));
+  multi.querySelector(".op-multi-menu").innerHTML=[{id:"all",name:"كل الفئات"},...options].map((item)=>`<label class="op-multi-option"><input type="checkbox" value="${item.id}" ${previous.has(String(item.id))?'checked':''}><span>${safe(item.name)}</span></label>`).join("");
+  multi.querySelectorAll('input[type="checkbox"]').forEach((box)=>box.addEventListener("change",()=>syncMultiSelect(multi,box)));
+  syncMultiSelect(multi);
 }
 function pane(id,html,active=false){return `<div class="op-pane ${active?'active':''}" data-pane="${id}">${html}</div>`;}
 function activateTab(id){document.querySelectorAll(".op-tab").forEach(x=>x.classList.toggle("active",x.dataset.tab===id));document.querySelectorAll(".op-pane").forEach(x=>x.classList.toggle("active",x.dataset.pane===id));}
