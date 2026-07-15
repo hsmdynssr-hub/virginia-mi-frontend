@@ -26,7 +26,7 @@
   if (!hasStylesheet("bootstrap-theme.css")) {
     const themeCss = document.createElement("link");
     themeCss.rel = "stylesheet";
-    themeCss.href = `${assetUrl("../css/bootstrap-theme.css")}?v=20260713-7`;
+    themeCss.href = `${assetUrl("../css/bootstrap-theme.css")}?v=20260715-8`;
     document.head.appendChild(themeCss);
   }
 

@@ -107,7 +107,9 @@ body[data-active-page="forecast-target-report"] .mi-bootstrap-page {
 }
 
 .mi-bootstrap-page .mi-report-card {
-  height: 100%;
+  height: auto;
+  min-height: 0;
+  align-self: start;
   margin-bottom: 1.25rem;
 }
 
