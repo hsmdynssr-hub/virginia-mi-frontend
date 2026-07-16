@@ -1,14 +1,22 @@
 (function () {
   const DEFAULT_LOCAL_API_BASE = "http://localhost:5050/api/customer/review-sms";
+  const DEFAULT_PRODUCTION_API_BASE =
+    "https://odoo-mi-api.vercel.app/api/customer/review-sms";
 
   let selectedRating = null;
   let selectedQueueOrderIds = new Set();
   let lastQueueRows = [];
+  let couponGoogleReviewUrl = "";
 
   document.addEventListener("DOMContentLoaded", () => {
     localStorage.removeItem("reviewSmsAdminKey");
     localStorage.removeItem("reviewSmsApiBase");
     const page = document.body.dataset.page;
+
+    if (page === "settings") {
+      initSettingsPage();
+      return;
+    }
 
     if (page === "dashboard") {
       initDashboard();
@@ -60,7 +68,19 @@
       return DEFAULT_LOCAL_API_BASE;
     }
 
-    return `${window.location.origin}/api/customer/review-sms`;
+    const sharedApiBase = String(window.API_BASE_URL || "")
+      .trim()
+      .replace(/\/+$/, "");
+
+    if (sharedApiBase) {
+      if (/\/customer\/review-sms$/i.test(sharedApiBase)) {
+        return sharedApiBase;
+      }
+
+      return `${sharedApiBase}/customer/review-sms`;
+    }
+
+    return DEFAULT_PRODUCTION_API_BASE;
   }
 
   function getStoredApiBase() {
@@ -445,6 +465,7 @@
       }
     });
 
+    loadCouponGoogleReviewUrl(token);
     loadPublicCoupon(token);
   }
 
@@ -481,6 +502,7 @@
       byId("couponExpiry").textContent = coupon.endsAt
         ? `صالح حتى ${formatDate(coupon.endsAt)}`
         : "";
+      showCouponGoogleReviewLink(couponGoogleReviewUrl);
     } else {
       byId("couponBox").hidden = true;
       claimButton.hidden = false;
@@ -488,8 +510,45 @@
       claimButton.textContent = data.issuingEnabled === false
         ? "إصدار الكوبونات متوقف مؤقتًا"
         : "إصدار كوبون الشحن المجاني";
+      hideCouponGoogleReviewLink();
     }
 
+  }
+
+  async function loadCouponGoogleReviewUrl(token) {
+    try {
+      const data = await requestJson(
+        `${getReviewApiBase()}/review-data/${encodeURIComponent(token)}`
+      );
+
+      couponGoogleReviewUrl = String(data.data?.googleReviewUrl || "").trim();
+
+      if (!byId("couponBox")?.hidden) {
+        showCouponGoogleReviewLink(couponGoogleReviewUrl);
+      }
+    } catch (error) {
+      couponGoogleReviewUrl = "";
+      hideCouponGoogleReviewLink();
+    }
+  }
+
+  function hideCouponGoogleReviewLink() {
+    const section = byId("couponGoogleSection");
+    if (section) section.hidden = true;
+  }
+
+  function showCouponGoogleReviewLink(url) {
+    const section = byId("couponGoogleSection");
+    const link = byId("couponGoogleLink");
+    const safeUrl = String(url || "").trim();
+
+    if (!section || !link || !safeUrl || byId("couponBox")?.hidden) {
+      hideCouponGoogleReviewLink();
+      return;
+    }
+
+    link.href = safeUrl;
+    section.hidden = false;
   }
 
   async function loadPublicCoupon(token) {
@@ -614,6 +673,165 @@
 
   function getApiBaseFromDashboard() {
     return cleanApiBase(resolveDefaultApiBase());
+  }
+
+  function getCustomerServiceApiBase() {
+    return getApiBaseFromDashboard().replace(/\/customer\/review-sms$/i, "") + "/customer/service";
+  }
+
+  function getSettingsSessionToken() {
+    return sessionStorage.getItem("reviewSmsSettingsToken") || "";
+  }
+
+  function settingsSessionHeaders(withJson = false) {
+    const token = getSettingsSessionToken();
+    return {
+      ...(withJson ? { "Content-Type": "application/json" } : {}),
+      ...(token ? { "x-cs-token": token } : {})
+    };
+  }
+
+  function setSettingsGate(isAuthenticated, user = null) {
+    const gate = byId("settingsLoginGate");
+    const workspace = byId("settingsWorkspace");
+    if (gate) gate.hidden = Boolean(isAuthenticated);
+    if (workspace) workspace.hidden = !isAuthenticated;
+    if (byId("settingsAdminName")) {
+      byId("settingsAdminName").textContent = user?.fullName || user?.username || "Admin";
+    }
+  }
+
+  function applyAllSettings(settings = {}) {
+    if (byId("operationMode")) byId("operationMode").value = settings.operationMode || "manual";
+    if (byId("smsSendingEnabled")) byId("smsSendingEnabled").checked = Boolean(settings.smsSendingEnabled);
+    if (byId("manualSendEnabled")) byId("manualSendEnabled").checked = Boolean(settings.manualSendEnabled);
+    if (byId("autoScanEnabled")) byId("autoScanEnabled").checked = Boolean(settings.autoScanEnabled);
+    if (byId("threshold")) byId("threshold").value = settings.customerMinimumPurchase ?? 1000;
+    if (byId("lookbackMinutes")) byId("lookbackMinutes").value = settings.customerLookbackMinutes ?? 10080;
+    if (byId("limit")) byId("limit").value = settings.customerScanLimit ?? 100;
+    if (byId("repeatPolicy")) byId("repeatPolicy").value = settings.customerRepeatPolicy || "same_day";
+    if (byId("couponIssuingEnabled")) byId("couponIssuingEnabled").checked = Boolean(settings.couponIssuingEnabled);
+    if (byId("couponValidityMonths")) byId("couponValidityMonths").value = String(settings.couponValidityMonths || 1);
+    if (byId("googleReviewUrl")) byId("googleReviewUrl").value = settings.googleReviewUrl || "";
+  }
+
+  function collectAllSettings() {
+    return {
+      operationMode: byId("operationMode")?.value || "manual",
+      smsSendingEnabled: Boolean(byId("smsSendingEnabled")?.checked),
+      manualSendEnabled: Boolean(byId("manualSendEnabled")?.checked),
+      autoScanEnabled: Boolean(byId("autoScanEnabled")?.checked),
+      customerMinimumPurchase: Number(byId("threshold")?.value || 0),
+      customerLookbackMinutes: Number(byId("lookbackMinutes")?.value || 1),
+      customerScanLimit: Number(byId("limit")?.value || 100),
+      customerRepeatPolicy: byId("repeatPolicy")?.value || "same_day",
+      couponIssuingEnabled: Boolean(byId("couponIssuingEnabled")?.checked),
+      couponValidityMonths: Number(byId("couponValidityMonths")?.value || 1),
+      googleReviewUrl: String(byId("googleReviewUrl")?.value || "").trim()
+    };
+  }
+
+  async function loadAllAdminSettings() {
+    const data = await requestJson(`${getApiBaseFromDashboard()}/settings`, {
+      headers: settingsSessionHeaders()
+    });
+    applyAllSettings(data.data || {});
+    setStatus("تم تحميل إعدادات منظومة الرسائل.");
+  }
+
+  async function loginSettingsAdmin() {
+    const username = String(byId("settingsUsername")?.value || "").trim();
+    const password = String(byId("settingsPassword")?.value || "");
+    const button = byId("settingsLoginBtn");
+    if (!username || !password) {
+      setStatus("اكتب اسم المستخدم وكلمة المرور.");
+      return;
+    }
+    try {
+      if (button) { button.disabled = true; button.textContent = "جاري التحقق..."; }
+      const data = await requestJson(`${getCustomerServiceApiBase()}/internal-login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
+      if (data.user?.role !== "admin") {
+        throw new Error("هذه الصفحة متاحة لحساب الأدمن فقط.");
+      }
+      sessionStorage.setItem("reviewSmsSettingsToken", data.token);
+      if (byId("settingsPassword")) byId("settingsPassword").value = "";
+      setSettingsGate(true, data.user);
+      await loadAllAdminSettings();
+    } catch (error) {
+      sessionStorage.removeItem("reviewSmsSettingsToken");
+      setSettingsGate(false);
+      setStatus(`فشل دخول الأدمن: ${error.message}`);
+    } finally {
+      if (button) { button.disabled = false; button.textContent = "فتح الإعدادات"; }
+    }
+  }
+
+  async function saveAllAdminSettings() {
+    const button = byId("saveAllSettingsBtn");
+    try {
+      if (button) { button.disabled = true; button.textContent = "جاري الحفظ..."; }
+      const data = await requestJson(`${getApiBaseFromDashboard()}/settings`, {
+        method: "PATCH",
+        headers: settingsSessionHeaders(true),
+        body: JSON.stringify(collectAllSettings())
+      });
+      applyAllSettings(data.data || {});
+      setStatus("تم حفظ كل الإعدادات بنجاح.");
+    } catch (error) {
+      setStatus(`فشل حفظ الإعدادات: ${error.message}`);
+    } finally {
+      if (button) { button.disabled = false; button.textContent = "حفظ كل الإعدادات"; }
+    }
+  }
+
+  async function logoutSettingsAdmin() {
+    const token = getSettingsSessionToken();
+    try {
+      if (token) {
+        await requestJson(`${getCustomerServiceApiBase()}/internal-logout`, {
+          method: "POST",
+          headers: settingsSessionHeaders(true),
+          body: JSON.stringify({ token })
+        });
+      }
+    } catch (error) {
+      console.warn(error);
+    }
+    sessionStorage.removeItem("reviewSmsSettingsToken");
+    setSettingsGate(false);
+    setStatus("تم تسجيل خروج الأدمن.");
+  }
+
+  async function restoreSettingsSession() {
+    if (!getSettingsSessionToken()) return;
+    try {
+      const data = await requestJson(`${getCustomerServiceApiBase()}/me`, {
+        headers: settingsSessionHeaders()
+      });
+      if (data.user?.role !== "admin") throw new Error("Admin role is required");
+      setSettingsGate(true, data.user);
+      await loadAllAdminSettings();
+    } catch (error) {
+      sessionStorage.removeItem("reviewSmsSettingsToken");
+      setSettingsGate(false);
+    }
+  }
+
+  function initSettingsPage() {
+    setSettingsGate(false);
+    byId("settingsLoginBtn")?.addEventListener("click", loginSettingsAdmin);
+    byId("settingsPassword")?.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") loginSettingsAdmin();
+    });
+    byId("reloadAllSettingsBtn")?.addEventListener("click", loadAllAdminSettings);
+    byId("saveAllSettingsBtn")?.addEventListener("click", saveAllAdminSettings);
+    byId("settingsLogoutBtn")?.addEventListener("click", logoutSettingsAdmin);
+    setStatus("سجّل دخول الأدمن لفتح الإعدادات.");
+    restoreSettingsSession();
   }
 
   function getAdminKey() {
@@ -1521,7 +1739,7 @@
   }
 
   function getReviewApiBase() {
-  return "https://odoo-mi-api.vercel.app/api/v1/review-sms";
+  return "https://odoo-mi-api.vercel.app/api/customer/review-sms";
 }
 
   function showReviewError(message) {
@@ -1590,7 +1808,6 @@
           }
         }
         if (reviewForm) reviewForm.hidden = true;
-        showGoogleReviewLink(review.googleReviewUrl);
       } else {
         if (alreadyReviewedBox) alreadyReviewedBox.hidden = true;
         if (reviewForm) reviewForm.hidden = false;
@@ -1682,7 +1899,6 @@
 
         form.hidden = true;
         submitButton.textContent = "تم الإرسال";
-        showGoogleReviewLink(submitData.data?.googleReviewUrl);
       } catch (error) {
         messageBox.hidden = false;
         messageBox.className = "crsms-review-message crsms-error";
@@ -1694,14 +1910,4 @@
     });
   }
 
-  function showGoogleReviewLink(url) {
-    const section = byId("reviewGoogleSection");
-    const link = byId("reviewGoogleLink");
-    const safeUrl = String(url || "").trim();
-
-    if (!section || !link || !safeUrl) return;
-
-    link.href = safeUrl;
-    section.hidden = false;
-  }
 })();
