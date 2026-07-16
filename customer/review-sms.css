@@ -106,7 +106,8 @@ body[data-page="dashboard"] {
 }
 
 .crsms-field input,
-.crsms-field select {
+.crsms-field select,
+.crsms-field textarea {
   width: 100%;
   border: 1px solid var(--crsms-border-2);
   background: var(--crsms-panel-2);
@@ -118,8 +119,14 @@ body[data-page="dashboard"] {
 }
 
 .crsms-field input:focus,
-.crsms-field select:focus {
+.crsms-field select:focus,
+.crsms-field textarea:focus {
   border-color: var(--crsms-accent);
+}
+
+.crsms-field textarea {
+  resize: vertical;
+  min-height: 108px;
 }
 
 .crsms-actions {

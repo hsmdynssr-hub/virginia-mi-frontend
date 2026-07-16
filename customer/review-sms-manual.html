@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إرسال رسالة تقييم يدوي</title>
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.rtl.min.css" />
+  <link rel="stylesheet" href="../css/bootstrap-theme.css" />
+  <link rel="stylesheet" href="./review-sms.css?v=sms-manual-send-20260716" />
+  <script src="../js/api.js" defer></script>
+  <script src="../js/layout.js" defer></script>
+  <script src="./review-sms.js?v=sms-manual-send-20260716" defer></script>
+</head>
+<body data-page="dashboard" data-report-code="customer.review_sms.send">
+  <main class="crsms-page">
+    <section class="crsms-return-bar" aria-label="التنقل في منظومة الرسائل">
+      <a class="crsms-return-link main" href="../dashboard/index.html"><span>🏠</span><strong>المشروع الرئيسي</strong></a>
+      <a class="crsms-return-link" href="./review-sms-dashboard.html"><span>📊</span><strong>الداش بورد الفني</strong></a>
+      <a class="crsms-return-link" href="./review-sms-queue.html"><span>✉️</span><strong>تشغيل الرسائل</strong></a>
+      <a class="crsms-return-link active" href="./review-sms-manual.html"><span>📱</span><strong>إرسال يدوي</strong></a>
+      <a class="crsms-return-link" href="./review-followups.html"><span>☎️</span><strong>متابعة العملاء</strong></a>
+      <a class="crsms-return-link" href="./review-coupons-dashboard.html"><span>🎁</span><strong>الكوبونات</strong></a>
+      <a class="crsms-return-link" href="./review-sms-settings.html"><span>⚙️</span><strong>إعدادات الأدمن</strong></a>
+    </section>
+
+    <section class="crsms-header">
+      <div>
+        <span class="crsms-eyebrow">MANUAL CUSTOMER MESSAGE</span>
+        <h1>إرسال رسالة تقييم يدوي</h1>
+        <p>أدخل رقم العميل يدويًا لإرسال رابط التقييم بنفس سياسات الرسائل والكوبونات المعتمدة.</p>
+      </div>
+      <div class="crsms-mode-badge" id="modeBadge">جاري فحص النظام</div>
+    </section>
+
+    <section class="crsms-panel">
+      <div class="crsms-section-title">
+        <div>
+          <h2>بيانات العميل والرسالة</h2>
+          <p class="crsms-hint">يمكن إدخال رقم واحد أو عدة أرقام، كل رقم في سطر مستقل أو مفصول بفاصلة.</p>
+        </div>
+        <button type="button" class="crsms-secondary" data-action="health">فحص الاتصال</button>
+      </div>
+
+      <input id="companyId" type="hidden" value="1" />
+      <input id="limit" type="hidden" value="100" />
+
+      <div class="crsms-form-grid">
+        <div class="crsms-field crsms-span-2">
+          <label for="manualPhones">رقم العميل *</label>
+          <textarea id="manualPhones" rows="4" inputmode="tel" placeholder="مثال: 01012345678" required></textarea>
+        </div>
+        <div class="crsms-field">
+          <label for="manualCustomerName">اسم العميل</label>
+          <input id="manualCustomerName" type="text" placeholder="اختياري" />
+        </div>
+        <div class="crsms-field">
+          <label for="manualBranchName">الفرع</label>
+          <input id="manualBranchName" type="text" placeholder="اختياري" />
+        </div>
+        <div class="crsms-field crsms-span-2">
+          <label for="manualNote">ملاحظة داخلية</label>
+          <input id="manualNote" type="text" placeholder="لا تُرسل للعميل" />
+        </div>
+      </div>
+
+      <div class="crsms-actions">
+        <button type="button" class="crsms-secondary" data-action="manual-dry-run">اختبار بدون إرسال SMS</button>
+        <button type="button" class="crsms-danger" data-action="manual-send">إرسال الرسالة الآن</button>
+      </div>
+      <pre class="crsms-status" id="statusBox">جاهز للإرسال اليدوي — شركة فيرجينيا (Company ID 1).</pre>
+    </section>
+  </main>
+</body>
+</html>
