@@ -676,7 +676,7 @@
   }
 
   function getCustomerServiceApiBase() {
-    return getApiBaseFromDashboard().replace(/\/customer\/review-sms$/i, "") + "/customer/service";
+    return getApiBaseFromDashboard().replace(/\/customer\/review-sms$/i, "") + "/customer/service-pos-review";
   }
 
   function getSettingsSessionToken() {
