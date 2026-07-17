@@ -12,13 +12,13 @@
 <script>
 renderLayout(
   "إدارة المستخدمين",
-  "إنشاء مستخدم وربطه بأكثر من دور",
+  "تحديد الشركة والفروع والتقارير لكل مستخدم مباشرة",
   "admin-users",
   `
     <div class="admin-users-hero">
       <div>
         <h3>مركز التحكم في المستخدمين</h3>
-        <p>يمكن ربط المستخدم بأكثر من دور: مخازن + مشتريات + POS.</p>
+        <p>كل مستخدم يحصل على الشركات والفروع والتقارير التي يحددها الأدمن مباشرة.</p>
       </div>
       <div class="admin-user-stats">
         <div><strong id="totalUsers">0</strong><span>مستخدم</span></div>
@@ -41,10 +41,6 @@ renderLayout(
       </div>
 
       <div class="roles-box">
-        <h4>الأدوار المسموحة</h4>
-        <div id="rolesCheckboxes" class="roles-checkbox-grid"></div>
-      </div>
-      <div class="roles-box">
         <h4>الشركات المسموحة</h4>
         <p class="muted-text">اختر الشركات التي يستطيع المستخدم رؤية بياناتها.</p>
         <div id="companiesCheckboxes" class="roles-checkbox-grid"></div>
@@ -58,7 +54,7 @@ renderLayout(
          <div class="report-access-heading">
            <div>
              <h4>صلاحيات التقارير المباشرة</h4>
-             <p class="muted-text">اختر نوع التقارير، ثم امنح المستخدم التقارير المطلوبة مباشرة. صلاحيات الأدوار تظل فعالة بالإضافة إلى الاختيارات هنا.</p>
+             <p class="muted-text">امنح المستخدم التقارير المطلوبة مباشرة. تغيير نوع التقرير يتم من صفحة «تصنيف التقارير» وينعكس هنا تلقائيًا.</p>
            </div>
            <div class="report-access-actions">
              <button type="button" class="export-btn" onclick="setAllDirectReports(true)">تحديد الكل</button>
@@ -76,24 +72,11 @@ renderLayout(
   `
 );
 
-let roles = [];
 let users = [];
 let companyCatalog = [];
 let posBranchCatalogByCompany = {};
 let reportCatalog = [];
 
-
-async function loadRoles() {
-  const response = await apiGet("/roles");
-  roles = response.data || [];
-
-  document.getElementById("rolesCheckboxes").innerHTML = roles.map(role => `
-    <label class="permission-item">
-      <input type="checkbox" class="role-check" value="${role.id}">
-      ${role.name}
-    </label>
-  `).join("");
-}
 
 async function loadUsers() {
   const response = await apiGet("/users");
@@ -114,7 +97,7 @@ function renderUsers() {
       <div class="user-info">
         <h4>${user.full_name || "-"}</h4>
         <p>@${user.username}</p>
-        <span class="role-chip">${user.role_name || "متعدد الأدوار"}</span>
+        <span class="role-chip">${user.role === "admin" ? "أدمن" : "مستخدم"}</span>
         <span class="status-chip ${user.is_active ? "active" : "inactive"}">
           ${user.is_active ? "نشط" : "موقوف"}
         </span>
@@ -129,17 +112,6 @@ function renderUsers() {
       </div>
     </div>
   `).join("");
-}
-
-function getSelectedRoleIds() {
-  return Array.from(document.querySelectorAll(".role-check:checked"))
-    .map(input => Number(input.value));
-}
-
-function setSelectedRoleIds(roleIds = []) {
-  document.querySelectorAll(".role-check").forEach(input => {
-    input.checked = roleIds.includes(Number(input.value));
-  });
 }
 
 async function loadCompanyCatalog() {
@@ -263,7 +235,6 @@ async function saveUser() {
   const fullName = document.getElementById("fullName").value.trim();
   const password = document.getElementById("password").value.trim();
 
-  const roleIds = getSelectedRoleIds();
   const companyIds = getSelectedCompanyIds();
   const selectedBranchesByCompany = getSelectedPosBranchesByCompany();
   const directReports = getSelectedDirectReports();
@@ -273,11 +244,6 @@ async function saveUser() {
 
   if (!id && (!username || !password)) {
     alert("اسم المستخدم وكلمة المرور مطلوبين");
-    return;
-  }
-
-  if (!roleIds.length) {
-    alert("اختر دور واحد على الأقل");
     return;
   }
 
@@ -312,15 +278,6 @@ async function saveUser() {
     }
 
     userId = Number(createResponse.data.id);
-  }
-
-  const rolesResponse = await apiPut(`/users/${userId}/roles`, {
-    roleIds
-  });
-
-  if (!rolesResponse.success) {
-    alert(rolesResponse.message || "فشل حفظ أدوار المستخدم");
-    return;
   }
 
   const companiesResponse = await apiPut(`/company-access/users/${userId}`, {
@@ -510,8 +467,6 @@ async function editUser(id) {
   document.getElementById("password").value = "";
   document.getElementById("password").placeholder = "اتركها فارغة";
 
-  const response = await apiGet(`/users/${id}/roles`);
-  setSelectedRoleIds(response.data || []);
   const companyResponse = await apiGet(`/company-access/users/${id}`);
 setSelectedCompanyIds(
   (companyResponse.data || []).map(item => Number(item.companyId))
@@ -548,14 +503,12 @@ function resetForm() {
   document.getElementById("fullName").value = "";
   document.getElementById("password").value = "";
   document.getElementById("password").placeholder = "كلمة المرور";
-  setSelectedRoleIds([]);
   setSelectedCompanyIds([]);
   clearSelectedPosBranches();
   setSelectedDirectReports([]);
 }
 
 async function init() {
-  await loadRoles();
   await loadCompanyCatalog();
   await loadPosBranchCatalog();
   await loadDirectReportsCatalog();

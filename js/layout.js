@@ -143,6 +143,7 @@ const REPORT_PAGE_MAP = {
 
   "admin-users": "admin.users",
   "admin-roles": "admin.roles",
+  "admin-report-classification": "admin.users",
 
   branches: "branches.overview",
   "branches-overview": "branches.overview",
@@ -222,6 +223,7 @@ const PAGES_WITHOUT_REPORT_TOOLBAR = new Set([
 
   "admin-users",
   "admin-roles",
+  "admin-report-classification",
   "reports-executive",
   "reports-management",
   "reports-operational",
@@ -680,7 +682,7 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
 
           <div class="nav-group">⚙️ Administration</div>
           <a data-page="admin-users" class="nav-link" href="../admin/users.html">إدارة المستخدمين</a>
-          <a data-page="admin-roles" class="nav-link" href="../admin/roles.html">الأدوار والصلاحيات</a>
+          <a data-page="admin-report-classification" class="nav-link" href="../admin/report-classification.html">تصنيف التقارير</a>
 
           <div class="nav-accordion" data-accordion="branches">
             <button type="button" class="nav-accordion-head" data-accordion-toggle="branches">

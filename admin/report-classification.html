@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تصنيف التقارير</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+<script src="../js/api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+renderLayout(
+  "تصنيف التقارير",
+  "نقل أي تقرير بين الواجهة التنفيذية أو الإدارية أو التشغيلية",
+  "admin-report-classification",
+  `
+    <section class="panel report-classification-hero">
+      <div>
+        <span class="page-pill">ADMIN REPORT CONTROL</span>
+        <h3>تنظيم واجهات التقارير</h3>
+        <p>غيّر نوع أي تقرير وسيُنقل تلقائيًا إلى الواجهة الجديدة لكل مستخدم لديه صلاحية التقرير.</p>
+      </div>
+      <div class="report-classification-stats">
+        <div><strong id="executiveCount">0</strong><span>تنفيذي</span></div>
+        <div><strong id="managementCount">0</strong><span>إداري</span></div>
+        <div><strong id="operationalCount">0</strong><span>تشغيلي</span></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="report-classification-toolbar">
+        <input id="reportSearch" class="control" placeholder="ابحث باسم التقرير أو القسم..." />
+        <select id="typeFilter" class="control">
+          <option value="">كل الأنواع</option>
+          <option value="executive">تنفيذي</option>
+          <option value="management">إداري</option>
+          <option value="operational">تشغيلي</option>
+        </select>
+        <button class="export-btn" type="button" onclick="loadCatalog()">إعادة تحميل</button>
+      </div>
+      <div id="classificationStatus" class="muted-text">جاري تحميل التقارير...</div>
+      <div id="classificationArea"></div>
+    </section>
+  `
+);
+
+let reportCatalog = [];
+
+function escapeHtml(value) {
+  return String(value || "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+  })[char]);
+}
+
+function updateCounts() {
+  ["executive", "management", "operational"].forEach(type => {
+    const element = document.getElementById(`${type}Count`);
+    if (element) element.textContent = reportCatalog.filter(report => report.reportType === type).length;
+  });
+}
+
+function renderCatalog() {
+  const search = document.getElementById("reportSearch").value.trim().toLowerCase();
+  const typeFilter = document.getElementById("typeFilter").value;
+  const visible = reportCatalog.filter(report => {
+    if (report.reportType === "system") return false;
+    if (typeFilter && report.reportType !== typeFilter) return false;
+    const text = `${report.label} ${report.moduleLabel} ${report.code}`.toLowerCase();
+    return !search || text.includes(search);
+  });
+
+  const modules = {};
+  visible.forEach(report => {
+    const key = report.moduleLabel || report.module;
+    if (!modules[key]) modules[key] = [];
+    modules[key].push(report);
+  });
+
+  document.getElementById("classificationArea").innerHTML = Object.entries(modules).map(([moduleName, reports]) => `
+    <section class="classification-module">
+      <h4>${escapeHtml(moduleName)}</h4>
+      <div class="classification-table-wrap">
+        <table class="classification-table">
+          <thead><tr><th>التقرير</th><th>كود التقرير</th><th>نطاق البيانات</th><th>نوع التقرير</th><th>الحالة</th></tr></thead>
+          <tbody>
+            ${reports.map(report => `
+              <tr data-report-row="${escapeHtml(report.code)}">
+                <td><strong>${escapeHtml(report.label)}</strong></td>
+                <td><code>${escapeHtml(report.code)}</code></td>
+                <td>${escapeHtml(report.scopeLabel)}</td>
+                <td>
+                  <select class="control classification-select" onchange="changeReportType('${escapeHtml(report.code)}', this)">
+                    <option value="executive" ${report.reportType === "executive" ? "selected" : ""}>تنفيذي</option>
+                    <option value="management" ${report.reportType === "management" ? "selected" : ""}>إداري</option>
+                    <option value="operational" ${report.reportType === "operational" ? "selected" : ""}>تشغيلي</option>
+                  </select>
+                </td>
+                <td class="classification-state">${report.classificationSource === "admin" ? "محفوظ بواسطة الأدمن" : "التصنيف الافتراضي"}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  `).join("") || '<div class="permission-denied-card"><h3>لا توجد نتائج مطابقة</h3></div>';
+  updateCounts();
+}
+
+async function changeReportType(reportCode, select) {
+  const previous = reportCatalog.find(report => report.code === reportCode)?.reportType;
+  select.disabled = true;
+  const row = select.closest("tr");
+  const state = row.querySelector(".classification-state");
+  state.textContent = "جاري الحفظ...";
+  try {
+    const response = await apiPut(`/permissions/catalog/${encodeURIComponent(reportCode)}`, {
+      reportType: select.value
+    });
+    if (!response.success) throw new Error(response.message || "فشل حفظ التصنيف");
+    const index = reportCatalog.findIndex(report => report.code === reportCode);
+    reportCatalog[index] = response.data;
+    state.textContent = "تم الحفظ ✓";
+    updateCounts();
+  } catch (error) {
+    select.value = previous;
+    state.textContent = `خطأ: ${error.message}`;
+  } finally {
+    select.disabled = false;
+  }
+}
+
+async function loadCatalog() {
+  const status = document.getElementById("classificationStatus");
+  status.textContent = "جاري تحميل التقارير...";
+  try {
+    const response = await apiGet("/permissions/catalog");
+    reportCatalog = response.data || [];
+    status.textContent = `تم تحميل ${reportCatalog.filter(report => report.reportType !== "system").length} تقريرًا قابلًا للتصنيف.`;
+    renderCatalog();
+  } catch (error) {
+    status.textContent = `تعذر تحميل التقارير: ${error.message}`;
+  }
+}
+
+document.getElementById("reportSearch").addEventListener("input", renderCatalog);
+document.getElementById("typeFilter").addEventListener("change", renderCatalog);
+loadCatalog();
+</script>
+</body>
+</html>
