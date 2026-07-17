@@ -1,0 +1,43 @@
+.forecast-feasibility-page .feasibility-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+.forecast-feasibility-page .forecast-input {
+  width: 130px;
+  min-height: 40px;
+  border: 1px solid #93c5fd;
+  border-radius: 10px;
+  padding: 7px 10px;
+  text-align: center;
+  font-weight: 900;
+  color: #0f172a;
+  background: #eff6ff;
+}
+
+.forecast-feasibility-page .forecast-input:focus {
+  outline: 3px solid rgba(37, 99, 235, .16);
+  border-color: #2563eb;
+  background: #fff;
+}
+
+.forecast-products-card { margin-top: 14px; }
+.feasibility-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.feasibility-status { margin: 12px 0; }
+.feasibility-status:empty { display: none; }
+.feasibility-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.feasibility-tab.active { background: #0b2b46; color: #fff; }
+.feasibility-section.hidden { display: none !important; }
+.status-critical { color: #b91c1c; font-weight: 900; }
+.status-ready { color: #047857; font-weight: 900; }
+
+@media (max-width: 1050px) {
+  .forecast-feasibility-page .feasibility-filter-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 650px) {
+  .forecast-feasibility-page .feasibility-filter-grid { grid-template-columns: 1fr; }
+  .forecast-feasibility-page .forecast-input { width: 100%; }
+}

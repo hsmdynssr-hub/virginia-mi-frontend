@@ -204,7 +204,8 @@ const REPORT_PAGE_MAP = {
   "forecast-targets": "forecast.targets",
   "forecast-target-report": "forecast.target_report",
 
-  "forecast-planning-achievement": "forecast_planning.achievement"
+  "forecast-planning-achievement": "forecast_planning.achievement",
+  "forecast-planning-feasibility": "forecast_planning.feasibility"
 };
 
 const EXPORT_ENABLED_PAGES = new Set([
@@ -243,7 +244,8 @@ const PAGES_WITHOUT_REPORT_TOOLBAR = new Set([
   "purchase",
   "inventory",
   "forecast",
-  "forecast-planning-achievement"
+  "forecast-planning-achievement",
+  "forecast-planning-feasibility"
 ]);
 
 function shouldShowReportToolbar(activePage) {
@@ -817,6 +819,7 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
 
             <div class="nav-accordion-body">
               <a data-page="forecast-planning-achievement" class="nav-link" href="../forecast-planning/index.html">تحقق الفوركاست والمبيعات الفعلية</a>
+              <a data-page="forecast-planning-feasibility" class="nav-link" href="../forecast-planning/feasibility.html">قابلية تحقيق الفوركاست والخامات</a>
             </div>
           </div>
         </nav>
