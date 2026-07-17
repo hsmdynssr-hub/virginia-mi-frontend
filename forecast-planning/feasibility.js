@@ -85,7 +85,12 @@ async function loadFeasibilityOptions() {
     const response = await apiGet("/forecast-planning/feasibility/options", { companyId: companyId() });
     const categories = response.data?.categories || [];
     document.getElementById("feasibilityCategory").innerHTML = `<option value="">كل فئات المنتج التام</option>${categories.map((row) => `<option value="${Number(row.categoryId || row.id)}">${esc(row.categoryName || row.name)}</option>`).join("")}`;
-    await loadFeasibilityProducts();
+    feasibilityProducts = [];
+    lastFeasibilityReport = null;
+    document.getElementById("feasibilityProductsTable").innerHTML = "";
+    document.getElementById("feasibilityResults")?.classList.add("hidden");
+    document.getElementById("exportFeasibilityExcel").disabled = true;
+    setFeasibilityStatus("اختر الفئة المطلوبة ثم اضغط عرض المنتجات. لن يتم تحميل المنتجات تلقائيًا.", "info");
   } catch (error) { setFeasibilityStatus(error.message, "danger"); }
 }
 
@@ -173,7 +178,11 @@ function renderFeasibilityReport(report) {
 
   ReportUI.renderTable("productResult", { rows: report.productRows, minWidth: 1800, columns: [
     { key: "defaultCode", label: "الكود" }, { key: "barcode", label: "الباركود" }, { key: "productName", label: "المنتج" },
-    { key: "forecastQty", label: "الفوركاست", format: (v) => num(v) }, { key: "actualSalesQty", label: "المبيعات", format: (v) => num(v) },
+    { key: "forecastQty", label: "الفوركاست", format: (v) => num(v) },
+    { key: "posSalesQty", label: "مبيعات POS", format: (v) => num(v) },
+    { key: "saleOrderQty", label: "أوامر البيع", format: (v) => num(v) },
+    { key: "returnsQty", label: "المرتجعات", format: (v) => num(v) },
+    { key: "actualSalesQty", label: "صافي المبيعات", format: (v) => num(v) },
     { key: "achievementPercent", label: "التحقيق", format: (v) => `${num(v)}%` }, { key: "elapsedPercent", label: "الزمن المنقضي", format: (v) => `${num(v)}%` },
     { key: "availableFgQty", label: "منتج تام متاح", format: (v) => num(v) }, { key: "expectedProductionQty", label: "تصنيع مؤكد", format: (v) => num(v) },
     { key: "toManufactureQty", label: "مطلوب تصنيعه", format: (v) => num(v) }, { key: "materialCoveragePercent", label: "تغطية الخامات", format: (v) => `${num(v)}%` },
