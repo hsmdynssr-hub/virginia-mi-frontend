@@ -71,12 +71,14 @@ window.ReportUI = (() => {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    container.classList.add("row", "row-cols-1", "row-cols-md-2", "row-cols-xl-4", "g-3");
+    // KPI containers use the shared report CSS grid. Mixing Bootstrap's
+    // `.row/.col` flex rules with `.report-kpi-grid` makes the cards collapse
+    // into very narrow columns on some viewport sizes.
+    container.classList.remove("row", "row-cols-1", "row-cols-md-2", "row-cols-xl-4", "g-3");
 
     container.innerHTML = cards
       .map((card, index) => `
-        <div class="col">
-         <div class="report-kpi-card mi-kpi-card h-100"
+        <div class="report-kpi-card mi-kpi-card h-100"
               data-tone="${escapeHtml(card.tone || ["purple", "teal", "success", "warning"][index % 4])}"
               data-icon="${escapeHtml(card.icon || ["📊", "◆", "✓", "⚡"][index % 4])}"
               style="--mi-delay:${index * 45}ms">
@@ -90,7 +92,6 @@ window.ReportUI = (() => {
               <span style="--mi-progress:${Math.min(Math.max(Number(card.progress), 0), 100)}%"></span>
             </div>
           ` : ""}
-         </div>
         </div>
       `)
       .join("");
