@@ -183,12 +183,12 @@ function renderCategoryOptions(rows) {
 
 function renderProfessionalMenu(state) {
   const filteredRows = applyFilters(state.rows, state);
-  renderHeroState(filteredRows, state.rows, state.filters);
+  renderHeroState(filteredRows, state.rows, state.filters, state.data);
   renderFeaturedOffers(filteredRows);
   renderGroupedCards(filteredRows, state.filters);
 }
 
-function renderHeroState(rows, allRows, filters) {
+function renderHeroState(rows, allRows, filters, data) {
   const heroStats = document.getElementById("heroStats");
   const quickPanel = document.getElementById("heroQuickPanel");
   if (!heroStats || !quickPanel) return;
@@ -211,6 +211,11 @@ function renderHeroState(rows, allRows, filters) {
     <div class="quick-highlight">
       <span class="label">أقوى وفر ظاهر</span>
       <strong>${topOffer ? formatMoney(topOffer.discountAmount) : 'لا يوجد'}</strong>
+    </div>
+    <div class="quick-highlight">
+      <span class="label">صور Shopify المطابقة</span>
+      <strong>${formatNumber(data?.summary?.productsWithImagesCount || 0)} / ${formatNumber(allRows.length)}</strong>
+      ${data?.summary?.shopifyImagesWarning ? `<small class="shopify-image-warning">${escapeHtml(data.summary.shopifyImagesWarning)}</small>` : ''}
     </div>
   `;
 
@@ -265,6 +270,7 @@ function renderFeaturedOffers(rows) {
     <div class="offers-cards">
       ${offers.map((row, index) => `
         <article class="offer-card">
+          ${buildProductImage(row, "offer-product-image")}
           <span class="offer-badge">عرض #${index + 1}</span>
           <h3>${escapeHtml(row.productName || 'منتج')}</h3>
           <div class="offer-prices">
@@ -338,6 +344,7 @@ function buildProductCard(row, filters) {
 
   return `
     <article class="customer-product-card ${escapeHtml(cardClass)}">
+      ${buildProductImage(row, "customer-product-image")}
       <div class="card-top">
         <div>
           <div class="card-code">${escapeHtml(row.internalCode || row.barcode || '')}</div>
@@ -364,6 +371,26 @@ function buildProductCard(row, filters) {
         </div>
       </div>
     </article>
+  `;
+}
+
+function buildProductImage(row, className) {
+  const imageUrl = normalizeText(row.imageUrl);
+  const alt = normalizeText(row.imageAlt) || normalizeText(row.productName) || "صورة المنتج";
+
+  if (!imageUrl) {
+    return `
+      <div class="${escapeHtml(className)} product-image-placeholder" aria-label="لا توجد صورة مطابقة">
+        <span>Virginia Olive</span>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="${escapeHtml(className)}">
+      <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(alt)}" loading="lazy" decoding="async"
+           onerror="this.parentElement.classList.add('product-image-placeholder'); this.remove();" />
+    </div>
   `;
 }
 
