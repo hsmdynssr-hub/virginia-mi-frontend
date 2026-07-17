@@ -3528,6 +3528,7 @@ td,
 .permission-module-head button { border: 0; border-radius: 9px; padding: 6px 9px; cursor: pointer; background: #e0f2fe; color: #075985; font-weight: 700; }
 .report-permission-item span { display: grid; gap: 3px; }
 .report-permission-item small { color: #64748b; font-size: 11px; }
+.permission-scope-disabled { opacity: .48; filter: grayscale(.3); }
 @media (max-width: 900px) {
   .permission-modules-grid { grid-template-columns: 1fr; }
   .report-access-heading { align-items: flex-start; flex-direction: column; }

@@ -248,6 +248,33 @@
       content: "⏳";
     }
 
+    .report-portals-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(240px, 1fr));
+      gap: 18px;
+    }
+
+    .report-portal-card {
+      display: grid;
+      gap: 12px;
+      min-height: 210px;
+      padding: 24px;
+      border-radius: 24px;
+      color: #ffffff;
+      text-decoration: none;
+      box-shadow: 0 18px 42px rgba(15, 23, 42, .14);
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    .report-portal-card:hover { transform: translateY(-5px); box-shadow: 0 25px 55px rgba(15, 23, 42, .2); }
+    .report-portal-card.executive { background: linear-gradient(135deg, #312e81, #1d4ed8); }
+    .report-portal-card.management { background: linear-gradient(135deg, #0f172a, #334155); }
+    .report-portal-card.operational { background: linear-gradient(135deg, #065f46, #0f766e); }
+    .report-portal-card span { font-size: 34px; }
+    .report-portal-card h3 { margin: 0; font-size: 23px; }
+    .report-portal-card p { margin: 0; color: rgba(255,255,255,.8); line-height: 1.7; }
+    .report-portal-card strong { margin-top: auto; }
+
     @media (max-width: 1200px) {
       .dashboard-modules-grid {
         grid-template-columns: repeat(2, minmax(260px, 1fr));
@@ -256,6 +283,8 @@
       .dashboard-hero-inner {
         grid-template-columns: 1fr;
       }
+
+      .report-portals-grid { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 760px) {
@@ -693,7 +722,24 @@
           </div>
         </div>
 
-        ${dashboard.html}
+        <div class="dashboard-section-title">
+          <div>
+            <h3>اختر واجهة العمل</h3>
+            <p>لن تظهر للمستخدم إلا الواجهات التي تحتوي على تقارير ممنوحة له.</p>
+          </div>
+        </div>
+
+        <div class="report-portals-grid">
+          <a data-report-type-nav="executive" class="report-portal-card executive" href="../reports/executive.html">
+            <span>📊</span><h3>التقارير التنفيذية</h3><p>مؤشرات الإدارة العليا والملخصات السريعة لاتخاذ القرار.</p><strong>فتح الواجهة ←</strong>
+          </a>
+          <a data-report-type-nav="management" class="report-portal-card management" href="../reports/management.html">
+            <span>📈</span><h3>التقارير الإدارية</h3><p>تحليل الأداء والمقارنات والرقابة على الإدارات.</p><strong>فتح الواجهة ←</strong>
+          </a>
+          <a data-report-type-nav="operational" class="report-portal-card operational" href="../reports/operational.html">
+            <span>⚙️</span><h3>التقارير التشغيلية</h3><p>العمل اليومي والمتابعة والتنفيذ داخل الأقسام.</p><strong>فتح الواجهة ←</strong>
+          </a>
+        </div>
       `
     );
   </script>

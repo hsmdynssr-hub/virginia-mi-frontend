@@ -50,8 +50,8 @@ renderLayout(
         <div id="companiesCheckboxes" class="roles-checkbox-grid"></div>
        </div>
        <div class="roles-box">
-       <h4>فروع POS المسموحة</h4>
-       <p class="muted-text">اختر المعارض / الفروع التي يستطيع المستخدم رؤيتها داخل تقارير POS.</p>
+       <h4>الفروع المسموحة داخل كل شركة</h4>
+       <p class="muted-text">اختر الفروع التي يستطيع المستخدم رؤية بياناتها في تقارير الفروع ونقاط البيع والعملاء. التقارير ذات نطاق «شركة فقط» لا تتأثر بهذا الاختيار.</p>
        <div id="posBranchesCheckboxes" class="roles-checkbox-grid"></div>
        </div>
        <div class="roles-box report-access-box">
@@ -150,7 +150,7 @@ async function loadCompanyCatalog() {
   document.getElementById("companiesCheckboxes").innerHTML =
     companyCatalog.map(company => `
       <label class="permission-item">
-        <input type="checkbox" class="company-check" value="${company.companyId}">
+        <input type="checkbox" class="company-check" value="${company.companyId}" onchange="syncCompanyBranchAvailability()">
         ${company.companyName}
       </label>
     `).join("");
@@ -199,6 +199,7 @@ function renderDirectReports() {
                   <input type="checkbox" class="direct-report-check"
                     data-report-type="${type.code}"
                     data-report-module="${module.code}"
+                    data-report-scope="${report.scope}"
                     value="${report.code}"
                     onchange="syncReportTypeToggles()">
                   <span><strong>${report.label}</strong><small>${report.scopeLabel}</small></span>
@@ -266,6 +267,9 @@ async function saveUser() {
   const companyIds = getSelectedCompanyIds();
   const selectedBranchesByCompany = getSelectedPosBranchesByCompany();
   const directReports = getSelectedDirectReports();
+  const hasBranchScopedReports = Array.from(
+    document.querySelectorAll('.direct-report-check[data-report-scope="company_branch"]:checked')
+  ).length > 0;
 
   if (!id && (!username || !password)) {
     alert("اسم المستخدم وكلمة المرور مطلوبين");
@@ -356,6 +360,16 @@ async function saveUser() {
     return;
   }
 
+  if (hasBranchScopedReports) {
+    const companiesWithoutBranches = companyIds.filter(companyId =>
+      !(selectedBranchesByCompany[companyId] || []).length
+    );
+    if (companiesWithoutBranches.length) {
+      alert("اختر فرعًا واحدًا على الأقل لكل شركة لأن المستخدم لديه تقارير بنطاق شركة وفرع");
+      return;
+    }
+  }
+
   alert("تم حفظ المستخدم والشركات والفروع وصلاحيات التقارير بنجاح");
 
   resetForm();
@@ -392,8 +406,11 @@ function renderPosBranchCheckboxes() {
     }
 
     return `
-      <div class="permission-group-block">
-        <h5>${company.companyName}</h5>
+      <div class="permission-group-block" data-branch-company-block="${company.companyId}">
+        <div class="permission-module-head">
+          <h5>${company.companyName}</h5>
+          <button type="button" onclick="toggleCompanyBranches(${company.companyId}, true)">كل الفروع</button>
+        </div>
 
         ${branches.map(branch => `
           <label class="permission-item">
@@ -409,6 +426,25 @@ function renderPosBranchCheckboxes() {
       </div>
     `;
   }).join("");
+  syncCompanyBranchAvailability();
+}
+
+function toggleCompanyBranches(companyId, checked) {
+  document.querySelectorAll(`.pos-branch-check[data-company-id="${companyId}"]:not(:disabled)`)
+    .forEach(input => { input.checked = checked; });
+}
+
+function syncCompanyBranchAvailability() {
+  const selectedCompanies = new Set(getSelectedCompanyIds());
+  document.querySelectorAll("[data-branch-company-block]").forEach(block => {
+    const companyId = Number(block.dataset.branchCompanyBlock);
+    const enabled = selectedCompanies.has(companyId);
+    block.classList.toggle("permission-scope-disabled", !enabled);
+    block.querySelectorAll("input, button").forEach(control => {
+      control.disabled = !enabled;
+      if (!enabled && control.matches("input")) control.checked = false;
+    });
+  });
 }
 
 function findBranchInCatalog(companyId, branchCode) {
@@ -480,6 +516,7 @@ async function editUser(id) {
 setSelectedCompanyIds(
   (companyResponse.data || []).map(item => Number(item.companyId))
 );
+syncCompanyBranchAvailability();
 const branchResponse = await apiGet(`/pos-branch-access/users/${id}`);
 
 setSelectedPosBranches(branchResponse.data || []);
