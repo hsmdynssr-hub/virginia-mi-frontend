@@ -54,6 +54,19 @@ renderLayout(
        <p class="muted-text">اختر المعارض / الفروع التي يستطيع المستخدم رؤيتها داخل تقارير POS.</p>
        <div id="posBranchesCheckboxes" class="roles-checkbox-grid"></div>
        </div>
+       <div class="roles-box report-access-box">
+         <div class="report-access-heading">
+           <div>
+             <h4>صلاحيات التقارير المباشرة</h4>
+             <p class="muted-text">اختر نوع التقارير، ثم امنح المستخدم التقارير المطلوبة مباشرة. صلاحيات الأدوار تظل فعالة بالإضافة إلى الاختيارات هنا.</p>
+           </div>
+           <div class="report-access-actions">
+             <button type="button" class="export-btn" onclick="setAllDirectReports(true)">تحديد الكل</button>
+             <button type="button" class="export-btn" onclick="setAllDirectReports(false)">إلغاء الكل</button>
+           </div>
+         </div>
+         <div id="directReportsArea"></div>
+       </div>
       </div>
 
     <div class="panel">
@@ -67,6 +80,7 @@ let roles = [];
 let users = [];
 let companyCatalog = [];
 let posBranchCatalogByCompany = {};
+let reportCatalog = [];
 
 
 async function loadRoles() {
@@ -153,6 +167,95 @@ function setSelectedCompanyIds(companyIds = []) {
   });
 }
 
+async function loadDirectReportsCatalog() {
+  const response = await apiGet("/permissions/catalog/grouped");
+  reportCatalog = response.data || [];
+  renderDirectReports();
+}
+
+function renderDirectReports() {
+  const container = document.getElementById("directReportsArea");
+  if (!container) return;
+
+  container.innerHTML = reportCatalog.map(type => `
+    <section class="permission-type-block" data-report-type="${type.code}">
+      <div class="permission-type-head">
+        <label class="permission-type-toggle">
+          <input type="checkbox" onchange="toggleReportType('${type.code}', this.checked)">
+          <strong>${type.label}</strong>
+        </label>
+        <span>${type.modules.reduce((sum, module) => sum + module.reports.length, 0)} تقرير</span>
+      </div>
+      <div class="permission-modules-grid">
+        ${type.modules.map(module => `
+          <div class="permission-module-card">
+            <div class="permission-module-head">
+              <h5>${module.label}</h5>
+              <button type="button" onclick="toggleReportModule('${type.code}', '${module.code}', true)">تحديد القسم</button>
+            </div>
+            <div class="permissions-grid">
+              ${module.reports.map(report => `
+                <label class="permission-item report-permission-item">
+                  <input type="checkbox" class="direct-report-check"
+                    data-report-type="${type.code}"
+                    data-report-module="${module.code}"
+                    value="${report.code}"
+                    onchange="syncReportTypeToggles()">
+                  <span><strong>${report.label}</strong><small>${report.scopeLabel}</small></span>
+                </label>
+              `).join("")}
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    </section>
+  `).join("");
+}
+
+function getSelectedDirectReports() {
+  return Array.from(document.querySelectorAll(".direct-report-check:checked"))
+    .map(input => input.value);
+}
+
+function setSelectedDirectReports(codes = []) {
+  const allowed = new Set(codes);
+  document.querySelectorAll(".direct-report-check").forEach(input => {
+    input.checked = allowed.has(input.value);
+  });
+  syncReportTypeToggles();
+}
+
+function setAllDirectReports(checked) {
+  document.querySelectorAll(".direct-report-check").forEach(input => {
+    input.checked = checked;
+  });
+  syncReportTypeToggles();
+}
+
+function toggleReportType(typeCode, checked) {
+  document.querySelectorAll(`.direct-report-check[data-report-type="${typeCode}"]`)
+    .forEach(input => { input.checked = checked; });
+  syncReportTypeToggles();
+}
+
+function toggleReportModule(typeCode, moduleCode, checked) {
+  document.querySelectorAll(
+    `.direct-report-check[data-report-type="${typeCode}"][data-report-module="${moduleCode}"]`
+  ).forEach(input => { input.checked = checked; });
+  syncReportTypeToggles();
+}
+
+function syncReportTypeToggles() {
+  document.querySelectorAll(".permission-type-block").forEach(block => {
+    const boxes = Array.from(block.querySelectorAll(".direct-report-check"));
+    const toggle = block.querySelector(".permission-type-toggle input");
+    const checkedCount = boxes.filter(box => box.checked).length;
+    if (!toggle) return;
+    toggle.checked = boxes.length > 0 && checkedCount === boxes.length;
+    toggle.indeterminate = checkedCount > 0 && checkedCount < boxes.length;
+  });
+}
+
 async function saveUser() {
   const id = document.getElementById("userId").value;
   const username = document.getElementById("username").value.trim();
@@ -162,6 +265,7 @@ async function saveUser() {
   const roleIds = getSelectedRoleIds();
   const companyIds = getSelectedCompanyIds();
   const selectedBranchesByCompany = getSelectedPosBranchesByCompany();
+  const directReports = getSelectedDirectReports();
 
   if (!id && (!username || !password)) {
     alert("اسم المستخدم وكلمة المرور مطلوبين");
@@ -243,7 +347,16 @@ async function saveUser() {
   }
 }
 
-  alert("تم حفظ المستخدم والصلاحيات والشركات بنجاح");
+  const permissionsResponse = await apiPut(`/permissions/users/${userId}`, {
+    permissions: directReports
+  });
+
+  if (!permissionsResponse.success) {
+    alert(permissionsResponse.message || "فشل حفظ صلاحيات التقارير المباشرة");
+    return;
+  }
+
+  alert("تم حفظ المستخدم والشركات والفروع وصلاحيات التقارير بنجاح");
 
   resetForm();
   await loadUsers();
@@ -370,6 +483,8 @@ setSelectedCompanyIds(
 const branchResponse = await apiGet(`/pos-branch-access/users/${id}`);
 
 setSelectedPosBranches(branchResponse.data || []);
+const permissionsResponse = await apiGet(`/permissions/users/${id}`);
+setSelectedDirectReports(permissionsResponse.data || []);
 }
 
 async function changePassword(id) {
@@ -399,12 +514,14 @@ function resetForm() {
   setSelectedRoleIds([]);
   setSelectedCompanyIds([]);
   clearSelectedPosBranches();
+  setSelectedDirectReports([]);
 }
 
 async function init() {
   await loadRoles();
   await loadCompanyCatalog();
   await loadPosBranchCatalog();
+  await loadDirectReportsCatalog();
   await loadUsers();
 }
 

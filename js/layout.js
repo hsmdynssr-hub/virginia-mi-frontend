@@ -137,6 +137,9 @@ function observeLegacyReportUi() {
 
 const REPORT_PAGE_MAP = {
   dashboard: "dashboard.index",
+  "reports-executive": "dashboard.index",
+  "reports-management": "dashboard.index",
+  "reports-operational": "dashboard.index",
 
   "admin-users": "admin.users",
   "admin-roles": "admin.roles",
@@ -219,6 +222,9 @@ const PAGES_WITHOUT_REPORT_TOOLBAR = new Set([
 
   "admin-users",
   "admin-roles",
+  "reports-executive",
+  "reports-management",
+  "reports-operational",
   "inventory-reorder-risk",
 
   "branches",
@@ -281,6 +287,10 @@ function getReportCodeForPage(pageCode) {
 function hasPermission(pageCode) {
   if (isAdmin()) return true;
 
+  if (["reports-executive", "reports-management", "reports-operational"].includes(pageCode)) {
+    return getUserPermissions().length > 0;
+  }
+
   const reportCode = getReportCodeForPage(pageCode);
 
   if (!reportCode) return false;
@@ -288,6 +298,21 @@ function hasPermission(pageCode) {
   const permissions = getUserPermissions();
 
   return permissions.includes(reportCode);
+}
+
+async function applyReportTypeNavigation() {
+  const links = document.querySelectorAll("[data-report-type-nav]");
+  if (!links.length) return;
+
+  try {
+    const response = await apiGet("/permissions/me");
+    const allowedTypes = new Set(response.data?.reportTypes || []);
+    links.forEach((link) => {
+      link.style.display = allowedTypes.has(link.dataset.reportTypeNav) ? "" : "none";
+    });
+  } catch (error) {
+    console.warn("Could not load report type navigation", error.message);
+  }
 }
 
 function guardPage(activePage) {
@@ -586,6 +611,7 @@ function initLayout(activePage) {
   });
 
   applySidebarPermissions();
+  applyReportTypeNavigation();
 }
 
 function renderLayout(title, subtitle, activePage, contentHtml) {
@@ -646,6 +672,11 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
           <a data-page="dashboard" class="nav-link" href="../dashboard/index.html">
             <span>🏠</span> لوحة الإدارة
           </a>
+
+          <div class="nav-group">📚 واجهات التقارير</div>
+          <a data-page="reports-executive" data-report-type-nav="executive" class="nav-link" href="../reports/executive.html">التقارير التنفيذية</a>
+          <a data-page="reports-management" data-report-type-nav="management" class="nav-link" href="../reports/management.html">التقارير الإدارية</a>
+          <a data-page="reports-operational" data-report-type-nav="operational" class="nav-link" href="../reports/operational.html">التقارير التشغيلية</a>
 
           <div class="nav-group">⚙️ Administration</div>
           <a data-page="admin-users" class="nav-link" href="../admin/users.html">إدارة المستخدمين</a>

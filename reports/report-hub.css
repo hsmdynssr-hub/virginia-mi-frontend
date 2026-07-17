@@ -1,0 +1,22 @@
+.report-hub-hero {
+  padding: 28px;
+  border-radius: 26px;
+  color: #fff;
+  background: linear-gradient(135deg, #082f49, #0f172a 58%, #0f766e);
+  box-shadow: 0 20px 48px rgba(15, 23, 42, .16);
+  margin-bottom: 20px;
+}
+.report-hub-hero h2 { margin: 8px 0; font-size: 30px; }
+.report-hub-hero p { margin: 0; color: rgba(255,255,255,.78); }
+.report-hub-eyebrow { font-size: 12px; font-weight: 900; color: #5eead4; }
+.report-hub-modules { display: grid; grid-template-columns: repeat(3, minmax(250px, 1fr)); gap: 16px; }
+.report-hub-module { background: #fff; border: 1px solid #dbe5f1; border-radius: 20px; padding: 18px; box-shadow: 0 12px 30px rgba(15,23,42,.07); }
+.report-hub-module h3 { margin: 0 0 12px; color: #0f172a; }
+.report-hub-list { display: grid; gap: 9px; }
+.report-hub-link { display: grid; gap: 4px; text-decoration: none; padding: 12px; border-radius: 13px; background: #f1f5f9; color: #0f172a; transition: .16s ease; }
+.report-hub-link:hover { transform: translateY(-2px); background: #e0f2fe; }
+.report-hub-link strong { font-size: 13px; }
+.report-hub-link small { color: #64748b; font-size: 11px; }
+.report-hub-empty { padding: 30px; text-align: center; border-radius: 18px; background: #fff; border: 1px dashed #94a3b8; color: #64748b; }
+@media (max-width: 1100px) { .report-hub-modules { grid-template-columns: repeat(2, minmax(240px, 1fr)); } }
+@media (max-width: 720px) { .report-hub-modules { grid-template-columns: 1fr; } .report-hub-hero h2 { font-size: 24px; } }

@@ -85,58 +85,61 @@ async function loadPermissions() {
 }
 
 function renderPermissions() {
-
-  const modules = {};
+  const types = {};
 
   allPermissions.forEach(permission => {
-
-    if (!modules[permission.module]) {
-      modules[permission.module] = [];
+    const typeCode = permission.reportType || "management";
+    if (!types[typeCode]) {
+      types[typeCode] = {
+        label: permission.reportTypeLabel || "تقارير إدارية",
+        order: permission.reportTypeOrder || 99,
+        modules: {}
+      };
     }
-
-    modules[permission.module].push(permission);
-
+    if (!types[typeCode].modules[permission.module]) {
+      types[typeCode].modules[permission.module] = {
+        label: permission.moduleLabel || permission.module,
+        items: []
+      };
+    }
+    types[typeCode].modules[permission.module].items.push(permission);
   });
 
-  document.getElementById("permissionsArea").innerHTML =
+  document.getElementById("permissionsArea").innerHTML = Object.entries(types)
+    .sort(([, a], [, b]) => a.order - b.order)
+    .map(([typeCode, type]) => `
+      <div class="panel permission-type-block">
+        <div class="permission-type-head">
+          <h3>${type.label}</h3>
+          <button type="button" class="export-btn" onclick="toggleRoleType('${typeCode}', true)">تحديد النوع بالكامل</button>
+        </div>
+        <div class="permission-modules-grid">
+          ${Object.entries(type.modules).map(([moduleCode, module]) => `
+            <section class="permission-module-card">
+              <div class="permission-module-head"><h5>${module.label}</h5></div>
+              <div class="permissions-grid">
+                ${module.items.map(permission => `
+                  <label class="permission-item report-permission-item">
+                    <input type="checkbox"
+                      data-role-report-type="${typeCode}"
+                      data-role-report-module="${moduleCode}"
+                      value="${permission.code}"
+                      ${currentPermissions.includes(permission.code) ? "checked" : ""}>
+                    <span><strong>${permission.label}</strong><small>${permission.scopeLabel || "شركة فقط"}</small></span>
+                  </label>
+                `).join("")}
+              </div>
+            </section>
+          `).join("")}
+        </div>
+      </div>
+    `).join("");
 
-    Object.entries(modules)
-      .map(([moduleName, items]) => {
+}
 
-        return `
-
-          <div class="panel">
-
-            <h3>${moduleName}</h3>
-
-            <div class="permissions-grid">
-
-              ${items.map(permission => `
-
-                <label class="permission-item">
-
-                  <input
-                    type="checkbox"
-                    value="${permission.code}"
-                    ${currentPermissions.includes(permission.code)
-                      ? "checked"
-                      : ""}>
-
-                  ${permission.label}
-
-                </label>
-
-              `).join("")}
-
-            </div>
-
-          </div>
-
-        `;
-
-      })
-      .join("");
-
+function toggleRoleType(typeCode, checked) {
+  document.querySelectorAll(`[data-role-report-type="${typeCode}"]`)
+    .forEach(input => { input.checked = checked; });
 }
 
 async function savePermissions() {
