@@ -417,6 +417,10 @@ function applyDatePreset(preset) {
     from.setDate(today.getDate() - 29);
   } else if (preset === "thisMonth") {
     from.setDate(1);
+  } else if (preset === "last6CompleteMonths") {
+    to.setDate(1);
+    to.setDate(0);
+    from.setFullYear(to.getFullYear(), to.getMonth() - 5, 1);
   } else if (preset === "custom") {
     if (customDates) customDates.style.display = "flex";
     return;
@@ -602,8 +606,12 @@ function initLayout(activePage) {
   }
 
   if (datePreset) {
-    datePreset.value = "today";
-    applyDatePreset("today");
+    const defaultPreset = ["pos-summary", "pos-branch-sales"].includes(activePage)
+      ? "last6CompleteMonths"
+      : "today";
+
+    datePreset.value = defaultPreset;
+    applyDatePreset(defaultPreset);
 
     datePreset.addEventListener("change", () => {
       applyDatePreset(datePreset.value);
@@ -646,6 +654,7 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
             <option value="last7">آخر 7 أيام</option>
             <option value="last30">آخر 30 يوم</option>
             <option value="thisMonth">الشهر الحالي</option>
+            <option value="last6CompleteMonths">آخر 6 شهور مكتملة</option>
             <option value="custom">تاريخ مخصص</option>
           </select>
 

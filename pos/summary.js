@@ -42,6 +42,11 @@ function buildPosSummaryPage() {
     <section id="kpiGrid" class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3 mb-4"></section>
 
     <section class="mi-report-card pos-summary-section">
+      <h2 class="mi-report-title"><span class="mi-section-icon">📊</span>مقارنة المبيعات مع نفس الفترة من السنة السابقة</h2>
+      <div id="periodComparisonGrid"></div>
+    </section>
+
+    <section class="mi-report-card pos-summary-section">
       <h2 class="mi-report-title"><span class="mi-section-icon">⚡</span>مؤشرات إدارية سريعة</h2>
       <div id="highlightsBox"></div>
     </section>
@@ -178,6 +183,7 @@ function showReportSections() {
 function clearReportData() {
   const ids = [
     "kpiGrid",
+    "periodComparisonGrid",
     "highlightsBox",
     "branchesTable",
     "cashiersTable",
@@ -314,6 +320,7 @@ async function loadPosSummaryReport() {
 
 function renderPosSummaryReport(data) {
   renderPosSummaryKpis(data.summary || {});
+  renderPeriodComparison(data.comparison || {});
   renderHighlights(data.highlights || []);
   renderBranches(data.branches || []);
   renderCashiers(data.cashiers || []);
@@ -450,6 +457,94 @@ function renderPosSummaryKpis(summary) {
     `;
     })
     .join("");
+}
+
+function formatPeriodLabel(period = {}) {
+  if (!period.dateFrom || !period.dateTo) return "-";
+  return `${period.dateFrom} إلى ${period.dateTo}`;
+}
+
+function signedPercent(value) {
+  const number = Number(value || 0);
+  const sign = number > 0 ? "+" : "";
+  return `${sign}${formatPercent(number)}`;
+}
+
+function signedMoney(value) {
+  const number = Number(value || 0);
+  const sign = number > 0 ? "+" : "";
+  return `${sign}${formatMoney(number)}`;
+}
+
+function renderPeriodComparison(comparison = {}) {
+  const container = document.getElementById("periodComparisonGrid");
+  if (!container) return;
+
+  const current = comparison.current || {};
+  const previous = comparison.previous || {};
+  const changes = comparison.changes || {};
+
+  const cards = [
+    {
+      title: "إجمالي المبيعات — الفترة الحالية",
+      value: formatMoney(current.grossSales || 0),
+      hint: formatPeriodLabel(comparison.currentPeriod),
+      tone: "teal",
+      icon: "💰"
+    },
+    {
+      title: "صافي المبيعات — الفترة الحالية",
+      value: formatMoney(current.netSales || 0),
+      hint: formatPeriodLabel(comparison.currentPeriod),
+      tone: "success",
+      icon: "✅"
+    },
+    {
+      title: "إجمالي المبيعات — السنة السابقة",
+      value: formatMoney(previous.grossSales || 0),
+      hint: formatPeriodLabel(comparison.previousPeriod),
+      tone: "purple",
+      icon: "🗓"
+    },
+    {
+      title: "صافي المبيعات — السنة السابقة",
+      value: formatMoney(previous.netSales || 0),
+      hint: formatPeriodLabel(comparison.previousPeriod),
+      tone: "purple",
+      icon: "📅"
+    },
+    {
+      title: "تغير إجمالي المبيعات",
+      value: signedPercent(changes.grossSalesPercent),
+      hint: signedMoney(changes.grossSales),
+      tone: Number(changes.grossSales || 0) >= 0 ? "success" : "danger",
+      icon: "📈"
+    },
+    {
+      title: "تغير صافي المبيعات",
+      value: signedPercent(changes.netSalesPercent),
+      hint: signedMoney(changes.netSales),
+      tone: Number(changes.netSales || 0) >= 0 ? "success" : "danger",
+      icon: "📉"
+    }
+  ];
+
+  container.innerHTML = `
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
+      ${cards.map((card, index) => `
+        <div class="col">
+          <div class="mi-kpi-card h-100"
+               data-tone="${escapeHtml(card.tone)}"
+               data-icon="${card.icon}"
+               style="--mi-delay:${index * 45}ms">
+            <span class="mi-kpi-label">${escapeHtml(card.title)}</span>
+            <strong class="mi-kpi-value">${escapeHtml(card.value)}</strong>
+            <small class="mi-kpi-hint">${escapeHtml(card.hint)}</small>
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  `;
 }
 
 function renderHighlights(rows) {

@@ -11,6 +11,7 @@
     "forecast-target-report",
 
     "inventory-executive-summary",
+    "inventory-historical-executive-summary",
     "inventory-intermediate-control",
 
     "production-mo-cost",
@@ -437,6 +438,11 @@
       );
 
       if (!response.ok) {
+        const contentType = response.headers.get("Content-Type") || "";
+        if (contentType.includes("application/json")) {
+          const payload = await response.json().catch(() => null);
+          throw new Error(payload?.message || "فشل تصدير Excel");
+        }
         const text = await response.text();
         throw new Error(text || "فشل تصدير Excel");
       }

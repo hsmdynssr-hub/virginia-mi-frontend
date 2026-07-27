@@ -40,6 +40,16 @@
             </p>
           </a>
 
+          ${typeof hasPermission === "function" && hasPermission("inventory-historical-executive-summary") ? `
+          <a class="report-card" href="./historical-executive-summary.html">
+            <span class="page-pill">Historical Executive</span>
+            <h3>المخزون التنفيذي التاريخي</h3>
+            <p>
+              رصيد أول وآخر الفترة، الوارد، الصرف، قيمة المخزون، ومعدل الدوران
+              محسوبة طبقًا للفلاتر والتاريخ المختار.
+            </p>
+          </a>` : ""}
+
           <a class="report-card" href="./flow-control.html">
             <span class="page-pill">Flow Control</span>
             <h3>تحكم حركة المخزون</h3>
