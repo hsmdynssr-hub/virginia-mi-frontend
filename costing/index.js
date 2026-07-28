@@ -10,10 +10,16 @@ function escapeHtml(value) {
 }
 
 function numberText(value, digits = 2) {
-  const number = Number(value || 0);
-  return number.toLocaleString("ar-EG", {
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits
+  const parsedNumber = Number(value ?? 0);
+  const parsedDigits = Number(digits);
+  const safeNumber = Number.isFinite(parsedNumber) ? parsedNumber : 0;
+  const safeDigits = Number.isInteger(parsedDigits) && parsedDigits >= 0 && parsedDigits <= 20
+    ? parsedDigits
+    : 2;
+
+  return safeNumber.toLocaleString("ar-EG", {
+    minimumFractionDigits: safeDigits,
+    maximumFractionDigits: safeDigits
   });
 }
 
