@@ -184,6 +184,9 @@ const REPORT_PAGE_MAP = {
   "production-report": "production.report",
   "production-mo-cost": "production.mo_cost",
 
+  costing: "costing.overview",
+  "costing-overview": "costing.overview",
+
   purchase: "purchase.index",
   "purchase-daily": "purchase.daily",
   "purchase-report": "purchase.report",
@@ -194,6 +197,7 @@ const REPORT_PAGE_MAP = {
 
   inventory: "inventory.index",
   "inventory-executive-summary": "inventory.executive_summary",
+  "inventory-historical-executive-summary": "inventory.historical_executive_summary",
   "inventory-intermediate-control": "inventory.intermediate_control",
   "inventory-flow-control": "inventory.flow_control",
   "inventory-movement-intelligence": "inventory.movement_intelligence",
@@ -210,6 +214,7 @@ const REPORT_PAGE_MAP = {
 
 const EXPORT_ENABLED_PAGES = new Set([
   "inventory-executive-summary",
+  "inventory-historical-executive-summary",
   "inventory-intermediate-control",
   "pos-branch-sales",
   "pos-peak-hours",
@@ -217,6 +222,7 @@ const EXPORT_ENABLED_PAGES = new Set([
   "forecast-planning-achievement",
   "customer-pos-phones",
   "production-mo-cost",
+  "costing-overview",
   "alerts-dashboard"
 ]);
 const PAGES_WITHOUT_REPORT_TOOLBAR = new Set([
@@ -608,7 +614,9 @@ function initLayout(activePage) {
   if (datePreset) {
     const defaultPreset = ["pos-summary", "pos-branch-sales"].includes(activePage)
       ? "last6CompleteMonths"
-      : "today";
+      : activePage === "costing-overview"
+        ? "thisMonth"
+        : "today";
 
     datePreset.value = defaultPreset;
     applyDatePreset(defaultPreset);
@@ -770,6 +778,17 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
               <a data-page="production-daily" class="nav-link" href="../production/daily.html">إنتاج يومي</a>
               <a data-page="production-report" class="nav-link" href="../production/report.html">إنتاج بالفترة</a>
               <a data-page="production-mo-cost" class="nav-link" href="../production/mo-cost.html">تكلفة أمر التصنيع</a>
+            </div>
+          </div>
+
+          <div class="nav-accordion" data-accordion="Costing">
+            <button type="button" class="nav-accordion-head" data-accordion-toggle="Costing">
+              <span>مراقبة التكاليف 💰 Costing</span>
+              <span class="nav-accordion-arrow">⌄</span>
+            </button>
+
+            <div class="nav-accordion-body">
+              <a data-page="costing-overview" class="nav-link" href="../costing/index.html">لوحة التكاليف ونقطة التعادل</a>
             </div>
           </div>
 

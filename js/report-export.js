@@ -15,6 +15,7 @@
     "inventory-intermediate-control",
 
     "production-mo-cost",
+    "costing-overview",
 
     "branches-sales",
     "branches-stock",
@@ -119,6 +120,15 @@
       return {
         state: "done",
         limit: "100000"
+      };
+    },
+
+
+    "costing-overview": () => {
+      return {
+        branchCode: document.getElementById("branchCode")?.value || "all",
+        productLimit: "10000",
+        uiProductLimit: "10000"
       };
     },
 
