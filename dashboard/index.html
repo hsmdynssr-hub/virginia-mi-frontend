@@ -323,7 +323,7 @@
 </head>
 <body>
   <script src="../js/api.js"></script>
-  <script src="../js/layout.js?v=20260814-04"></script>
+  <script src="../js/layout.js?v=20260815-01"></script>
 
   <script>
     const DASHBOARD_MODULES = [
@@ -358,7 +358,6 @@
             page: "branches-comparison",
             title: "مقارنة الفروع",
             href: "../branches/comparison.html",
-            hidden: true,
             disabled: true
           }
         ]
@@ -407,6 +406,21 @@
             href: "../pos/peak-hours.html"
           },
           {
+            page: "pos-returns",
+            title: "المرتجعات",
+            href: "../pos/returns.html"
+          },
+          {
+            page: "pos-discounts",
+            title: "الخصومات",
+            href: "../pos/discounts.html"
+          },
+          {
+            page: "pos-offers",
+            title: "العروض وتأثيرها",
+            href: "../pos/offers.html"
+          },
+          {
             page: "alerts-dashboard",
             title: "داشبورد تنبيهات Telegram",
             href: "../pos/alerts-dashboard.html"
@@ -430,8 +444,22 @@
             page: "customer-service-pos-review",
             title: "مراجعة خدمات نقاط البيع",
             href: "../customer/service-pos-review.html"
-          }
-        ,
+          },
+          {
+            page: "customer-vip",
+            title: "عملاء VIP",
+            href: "../customer/vip.html"
+          },
+          {
+            page: "customer-migration",
+            title: "تحول قنوات العملاء",
+            href: "../customer/migration.html"
+          },
+          {
+            page: "customer-rfm",
+            title: "تحليل RFM",
+            href: "../customer/rfm.html"
+          },
           {
             page: "customer-review-sms-queue",
             title: "تشغيل رسائل تقييم العملاء",
@@ -490,6 +518,21 @@
       },
 
       {
+        title: "مراقبة التكاليف",
+        icon: "💰",
+        description: "التكاليف، هامش الربح، ونقطة التعادل وإعداداتها التشغيلية.",
+        indexPage: "costing-overview",
+        indexHref: "../costing/index.html",
+        reports: [
+          {
+            page: "costing-overview",
+            title: "لوحة التكاليف ونقطة التعادل",
+            href: "../costing/index.html"
+          }
+        ]
+      },
+
+      {
         title: "المخزون",
         icon: "🏬",
         description: "الأرصدة، التغطية، الدوران، المخازن الوسيطة، وتحليل الحركة.",
@@ -507,6 +550,11 @@
             href: "../inventory/executive-summary.html"
           },
           {
+            page: "inventory-historical-executive-summary",
+            title: "المخزون التنفيذي التاريخي",
+            href: "../inventory/historical-executive-summary.html"
+          },
+          {
             page: "inventory-flow-control",
             title: "تحكم حركة المخزون",
             href: "../inventory/flow-control.html"
@@ -515,6 +563,11 @@
             page: "inventory-movement-intelligence",
             title: "تحليل حركة المخزون",
             href: "../inventory/movement-intelligence.html"
+          },
+          {
+            page: "inventory-reorder-risk",
+            title: "تشغيل المخازن وإعادة الطلب",
+            href: "../inventory/reorder-risk.html"
           }
         ]
       },
@@ -606,34 +659,21 @@
       {
         title: "الإدارة",
         icon: "⚙️",
-        description: "المستخدمين، الأدوار، والصلاحيات.",
+        description: "إدارة المستخدمين وصلاحيات الوصول المباشرة.",
         indexPage: "admin-users",
         indexHref: "../admin/users.html",
         reports: [
           {
             page: "admin-users",
-            title: "إدارة المستخدمين",
+            title: "إدارة المستخدمين والصلاحيات",
             href: "../admin/users.html"
-          },
-          {
-            page: "admin-roles",
-            title: "الأدوار والصلاحيات",
-            href: "../admin/roles.html"
           }
         ]
       }
     ];
 
-    const VISIBLE_MODULE_TITLES = new Set([
-      "ذكاء الفروع",
-      "المينو والأسعار",
-      "نقاط البيع والمبيعات",
-      "خدمة عملاء Virginia"
-    ]);
-
     function getAllowedReports(module) {
       return module.reports.filter((report) => {
-        if (report.hidden) return false;
         if (report.disabled) return hasPermission(report.page);
         return hasPermission(report.page);
       });
@@ -641,8 +681,14 @@
 
     function countAllowedReports(modules) {
       return modules.reduce((total, module) => {
-        return total + module.allowedReports.length;
+        const includesIndex = module.allowedReports.some(report => report.page === module.indexPage);
+        return total + module.allowedReports.length + (module.indexAllowed && !includesIndex ? 1 : 0);
       }, 0);
+    }
+
+    function getModuleAccessCount(module) {
+      const includesIndex = module.allowedReports.some(report => report.page === module.indexPage);
+      return module.allowedReports.length + (module.indexAllowed && !includesIndex ? 1 : 0);
     }
 
     function buildReportLinks(reports) {
@@ -652,7 +698,7 @@
 
       return `
         <div class="dashboard-report-links">
-          ${reports.slice(0, 4).map((report) => {
+          ${reports.map((report) => {
             if (report.disabled) {
               return `
                 <div class="disabled-report" title="الصفحة غير موجودة بعد">
@@ -673,16 +719,17 @@
 
     function buildDashboardModules() {
       const allowedModules = DASHBOARD_MODULES
-        .filter((module) => VISIBLE_MODULE_TITLES.has(module.title))
         .map((module) => {
           const allowedReports = getAllowedReports(module);
+          const indexAllowed = hasPermission(module.indexPage);
 
           return {
             ...module,
-            allowedReports
+            allowedReports,
+            indexAllowed
           };
         })
-        .filter((module) => module.allowedReports.length > 0);
+        .filter((module) => module.indexAllowed || module.allowedReports.length > 0);
 
       if (!allowedModules.length) {
         return {
@@ -731,7 +778,7 @@
                       </div>
                     </div>
                     <div class="dashboard-badge">
-                      <strong>${module.allowedReports.length}</strong><span>وظائف</span>
+                      <strong>${getModuleAccessCount(module)}</strong><span>وظائف</span>
                     </div>
                   </div>
 
@@ -739,9 +786,11 @@
 
                   <div class="dashboard-card-actions">
                     <span class="dashboard-links-label">اختصارات سريعة</span>
-                    <a class="dashboard-module-main-link" href="${module.indexHref}">
-                      فتح القسم
-                    </a>
+                    ${module.indexAllowed ? `
+                      <a class="dashboard-module-main-link" href="${module.indexHref}">
+                        فتح القسم
+                      </a>
+                    ` : ""}
                   </div>
 
                   ${buildReportLinks(module.allowedReports)}

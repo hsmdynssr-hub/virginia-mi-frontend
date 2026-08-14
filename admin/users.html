@@ -2,72 +2,160 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>إدارة المستخدمين</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إدارة المستخدمين والصلاحيات</title>
   <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/admin-users-access.css?v=20260815-01" />
 </head>
 <body>
 <script src="../js/api.js"></script>
-<script src="../js/layout.js"></script>
+<script src="../js/layout.js?v=20260815-01"></script>
 
 <script>
 renderLayout(
-  "إدارة المستخدمين",
-  "تحديد الشركة والفروع والتقارير لكل مستخدم مباشرة",
+  "إدارة المستخدمين والصلاحيات",
+  "اختر المستخدم وحدد الشركات والفروع والتقارير التي تظهر له",
   "admin-users",
   `
-    <div class="admin-users-hero">
-      <div>
-        <h3>مركز التحكم في المستخدمين</h3>
-        <p>كل مستخدم يحصل على الشركات والفروع والتقارير التي يحددها الأدمن مباشرة.</p>
-      </div>
-      <div class="admin-user-stats">
-        <div><strong id="totalUsers">0</strong><span>مستخدم</span></div>
-        <div><strong id="activeUsers">0</strong><span>نشط</span></div>
-        <div><strong id="disabledUsers">0</strong><span>موقوف</span></div>
-      </div>
-    </div>
+    <div class="user-access-page">
+      <section class="admin-users-hero access-hero">
+        <div>
+          <span class="access-hero-kicker">Access Control</span>
+          <h3>مركز المستخدمين والصلاحيات</h3>
+          <p>كل مستخدم يرى فقط التقارير المحددة له، وتبقى صفحات الإدارة محجوزة للأدمن.</p>
+        </div>
 
-    <div class="panel admin-form-panel">
-      <h3 id="formTitle">إضافة مستخدم جديد</h3>
+        <div class="admin-user-stats">
+          <div><strong id="totalUsers">0</strong><span>مستخدم</span></div>
+          <div><strong id="activeUsers">0</strong><span>نشط</span></div>
+          <div><strong id="disabledUsers">0</strong><span>موقوف</span></div>
+        </div>
+      </section>
 
-      <div class="user-form-grid">
-        <input id="userId" type="hidden" />
-        <input id="username" placeholder="اسم المستخدم" />
-        <input id="fullName" placeholder="الاسم الكامل" />
-        <input id="password" type="password" placeholder="كلمة المرور" />
+      <section class="user-access-workspace">
+        <aside class="panel user-directory-panel">
+          <div class="directory-head">
+            <div>
+              <span class="section-kicker">Users</span>
+              <h3>المستخدمون</h3>
+              <p>اختر مستخدمًا لتعديل صلاحياته.</p>
+            </div>
+            <button class="primary-btn compact-action" type="button" onclick="startNewUser()">+ مستخدم جديد</button>
+          </div>
 
-        <button class="primary-btn" onclick="saveUser()">حفظ المستخدم</button>
-        <button class="export-btn" onclick="resetForm()">تفريغ</button>
-      </div>
+          <label class="user-search-field">
+            <span>بحث</span>
+            <input id="usersSearch" type="search" placeholder="الاسم أو اسم المستخدم" oninput="renderUsers()" />
+          </label>
 
-      <div class="roles-box">
-        <h4>الشركات المسموحة</h4>
-        <p class="muted-text">اختر الشركات التي يستطيع المستخدم رؤية بياناتها.</p>
-        <div id="companiesCheckboxes" class="roles-checkbox-grid"></div>
-       </div>
-       <div class="roles-box">
-       <h4>الفروع المسموحة داخل كل شركة</h4>
-       <p class="muted-text">اختر الفروع التي يستطيع المستخدم رؤية بياناتها في تقارير الفروع ونقاط البيع والعملاء. التقارير ذات نطاق «شركة فقط» لا تتأثر بهذا الاختيار.</p>
-       <div id="posBranchesCheckboxes" class="roles-checkbox-grid"></div>
-       </div>
-       <div class="roles-box report-access-box">
-         <div class="report-access-heading">
-           <div>
-             <h4>صلاحيات التقارير المباشرة</h4>
-             <p class="muted-text">امنح المستخدم التقارير المطلوبة مباشرة. تغيير نوع التقرير يتم من صفحة «تصنيف التقارير» وينعكس هنا تلقائيًا.</p>
-           </div>
-           <div class="report-access-actions">
-             <button type="button" class="export-btn" onclick="setAllDirectReports(true)">تحديد الكل</button>
-             <button type="button" class="export-btn" onclick="setAllDirectReports(false)">إلغاء الكل</button>
-           </div>
-         </div>
-         <div id="directReportsArea"></div>
-       </div>
-      </div>
+          <div id="usersCards" class="users-directory-list"></div>
+        </aside>
 
-    <div class="panel">
-      <h3>قائمة المستخدمين</h3>
-      <div id="usersCards" class="users-card-grid"></div>
+        <section class="panel user-editor-panel">
+          <div id="userEditorEmpty" class="user-editor-empty">
+            <span class="empty-editor-icon">✓</span>
+            <h3>اختر مستخدمًا من القائمة</h3>
+            <p>ستظهر بياناته وكل تقارير المشروع هنا لتحديد المسموح له.</p>
+            <button class="primary-btn" type="button" onclick="startNewUser()">إنشاء مستخدم جديد</button>
+          </div>
+
+          <div id="userEditorContent" class="hidden">
+            <header class="editor-head">
+              <div>
+                <span id="editorModeBadge" class="editor-mode-badge">مستخدم جديد</span>
+                <h3 id="formTitle">إضافة مستخدم جديد</h3>
+                <p id="editorSubtitle">أدخل بيانات المستخدم ثم حدد نطاق البيانات والتقارير.</p>
+              </div>
+
+              <div class="editor-head-actions">
+                <button id="deleteUserBtn" class="danger-outline-btn hidden" type="button" onclick="deleteSelectedUser()">حذف المستخدم</button>
+                <button class="secondary-action-btn" type="button" onclick="closeEditor()">إغلاق</button>
+              </div>
+            </header>
+
+            <div id="adminAccessNotice" class="admin-access-notice hidden">
+              هذا حساب Admin؛ يمتلك جميع الشركات والفروع والتقارير تلقائيًا ولا يحتاج صلاحيات يدوية.
+            </div>
+
+            <section class="access-section identity-section">
+              <div class="access-section-head">
+                <div>
+                  <span class="section-number">01</span>
+                  <h4>بيانات المستخدم</h4>
+                  <p>البيانات الأساسية المستخدمة في تسجيل الدخول.</p>
+                </div>
+              </div>
+
+              <div class="user-form-grid access-user-form">
+                <input id="userId" type="hidden" />
+                <label>
+                  <span>اسم المستخدم</span>
+                  <input id="username" autocomplete="off" placeholder="اسم المستخدم" />
+                </label>
+                <label>
+                  <span>الاسم الكامل</span>
+                  <input id="fullName" autocomplete="off" placeholder="الاسم الكامل" />
+                </label>
+                <label>
+                  <span>كلمة المرور</span>
+                  <input id="password" type="password" autocomplete="new-password" placeholder="كلمة المرور" />
+                </label>
+              </div>
+            </section>
+
+            <section class="access-section" data-access-control-section>
+              <div class="access-section-head">
+                <div>
+                  <span class="section-number">02</span>
+                  <h4>الشركات المسموحة</h4>
+                  <p>اختر الشركات التي يمكن للمستخدم قراءة بياناتها.</p>
+                </div>
+              </div>
+              <div id="companiesCheckboxes" class="company-access-grid"></div>
+            </section>
+
+            <section class="access-section" data-access-control-section>
+              <div class="access-section-head">
+                <div>
+                  <span class="section-number">03</span>
+                  <h4>الفروع المسموحة</h4>
+                  <p>الفروع المختارة تطبق على التقارير التي تعمل بنطاق الشركة والفرع.</p>
+                </div>
+              </div>
+              <div id="posBranchesCheckboxes" class="branch-access-stack"></div>
+            </section>
+
+            <section class="access-section reports-access-section" data-access-control-section>
+              <div class="report-access-heading access-section-head">
+                <div>
+                  <span class="section-number">04</span>
+                  <h4>تقارير المشروع المسموحة</h4>
+                  <p>الأقسام والتقارير كلها أمامك؛ المحدد فقط سيظهر للمستخدم داخل الصفحة الرئيسية والقائمة.</p>
+                </div>
+
+                <div class="report-access-actions">
+                  <span class="selected-permissions-count"><strong id="selectedReportsCount">0</strong> تقرير محدد</span>
+                  <button type="button" class="secondary-action-btn" onclick="setAllDirectReports(true)">تحديد الكل</button>
+                  <button type="button" class="secondary-action-btn" onclick="setAllDirectReports(false)">إلغاء الكل</button>
+                </div>
+              </div>
+
+              <div id="directReportsArea" class="project-permissions-stack"></div>
+            </section>
+
+            <footer class="editor-save-bar">
+              <div>
+                <strong>راجع الاختيارات قبل الحفظ</strong>
+                <span>أي تقرير غير محدد لن يظهر للمستخدم.</span>
+              </div>
+              <div class="editor-save-actions">
+                <button class="secondary-action-btn" type="button" onclick="resetEditorValues()">إعادة ضبط</button>
+                <button id="saveUserBtn" class="primary-btn" type="button" onclick="saveUser()">حفظ المستخدم والصلاحيات</button>
+              </div>
+            </footer>
+          </div>
+        </section>
+      </section>
     </div>
   `
 );
@@ -76,118 +164,230 @@ let users = [];
 let companyCatalog = [];
 let posBranchCatalogByCompany = {};
 let reportCatalog = [];
+let selectedUserId = null;
+let selectedUserSnapshot = null;
 
+const REPORT_MODULE_ICONS = {
+  Branches: "🏬",
+  Menu: "📋",
+  POS: "🧾",
+  Customers: "👥",
+  "Customer Reviews": "💬",
+  Purchase: "📦",
+  Inventory: "🏷️",
+  Production: "🏭",
+  Costing: "💰",
+  Forecast: "🎯",
+  Sales: "📈",
+  Alerts: "🔔",
+  "Forecast Planning": "📊"
+};
+
+const UNAVAILABLE_REPORT_CODES = new Set([
+  "branches.comparison",
+  "pos.branches",
+  "sales.daily",
+  "sales.report"
+]);
+
+const REPORT_PERMISSION_PARENTS = {
+  "branches.manage": "branches.overview",
+  "customer.review_sms.manage_followups": "customer.review_sms.followup",
+  "costing.settings": "costing.overview",
+  "alerts.manage": "alerts.view"
+};
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function localText(arabic, english) {
+  return window.MI18n?.getLanguage?.() === "en" ? english : arabic;
+}
+
+function getStoredUser() {
+  try {
+    return JSON.parse(localStorage.getItem("user") || "{}");
+  } catch (_) {
+    return {};
+  }
+}
+
+function isAdminAccount(user = {}) {
+  return ["admin", "super_admin"].includes(String(user.role || "").toLowerCase()) ||
+    ["admin", "super_admin"].includes(String(user.role_code || "").toLowerCase());
+}
+
+function showEditor() {
+  document.getElementById("userEditorEmpty")?.classList.add("hidden");
+  document.getElementById("userEditorContent")?.classList.remove("hidden");
+}
+
+function closeEditor() {
+  selectedUserId = null;
+  selectedUserSnapshot = null;
+  document.getElementById("userEditorContent")?.classList.add("hidden");
+  document.getElementById("userEditorEmpty")?.classList.remove("hidden");
+  renderUsers();
+}
 
 async function loadUsers() {
   const response = await apiGet("/users");
   users = response.data || [];
 
   document.getElementById("totalUsers").innerText = users.length;
-  document.getElementById("activeUsers").innerText = users.filter(u => u.is_active).length;
-  document.getElementById("disabledUsers").innerText = users.filter(u => !u.is_active).length;
-
+  document.getElementById("activeUsers").innerText = users.filter(user => user.is_active).length;
+  document.getElementById("disabledUsers").innerText = users.filter(user => !user.is_active).length;
   renderUsers();
 }
 
 function renderUsers() {
-  document.getElementById("usersCards").innerHTML = users.map(user => `
-    <div class="user-card ${user.is_active ? "" : "disabled-user"}">
-      <div class="user-avatar">${(user.full_name || user.username || "?").slice(0, 1).toUpperCase()}</div>
+  const container = document.getElementById("usersCards");
+  if (!container) return;
 
-      <div class="user-info">
-        <h4>${user.full_name || "-"}</h4>
-        <p>@${user.username}</p>
-        <span class="role-chip">${user.role === "admin" ? "أدمن" : "مستخدم"}</span>
-        <span class="status-chip ${user.is_active ? "active" : "inactive"}">
-          ${user.is_active ? "نشط" : "موقوف"}
-        </span>
-      </div>
+  const query = String(document.getElementById("usersSearch")?.value || "").trim().toLowerCase();
+  const filtered = users.filter(user => {
+    const haystack = `${user.full_name || ""} ${user.username || ""}`.toLowerCase();
+    return !query || haystack.includes(query);
+  });
 
-      <div class="user-actions">
-        <button onclick="editUser(${user.id})">تعديل</button>
-        <button onclick="changePassword(${user.id})">كلمة المرور</button>
-        <button onclick="toggleUser(${user.id}, ${user.is_active})">
-          ${user.is_active ? "تعطيل" : "تفعيل"}
+  if (!filtered.length) {
+    container.innerHTML = `<div class="directory-empty">لا يوجد مستخدمون مطابقون للبحث.</div>`;
+    return;
+  }
+
+  const currentUserId = Number(getStoredUser().id);
+  container.innerHTML = filtered.map(user => {
+    const active = Boolean(user.is_active);
+    const selected = Number(user.id) === Number(selectedUserId);
+    const admin = isAdminAccount(user);
+    const canDelete = Number(user.id) !== currentUserId;
+
+    return `
+      <article class="directory-user-card ${active ? "" : "disabled-user"} ${selected ? "selected" : ""}">
+        <button class="user-select-area" type="button" onclick="selectUser(${Number(user.id)})">
+          <span class="user-avatar">${escapeHtml((user.full_name || user.username || "?").slice(0, 1).toUpperCase())}</span>
+          <span class="directory-user-copy">
+            <strong>${escapeHtml(user.full_name || user.username || "-")}</strong>
+            <small>@${escapeHtml(user.username || "-")}</small>
+            <span class="user-state-row">
+              <i class="status-dot ${active ? "active" : "inactive"}"></i>
+              ${active ? "نشط" : "موقوف"}
+              ${admin ? '<b class="admin-mini-badge">Admin</b>' : ""}
+            </span>
+          </span>
+          <span class="select-user-arrow">‹</span>
         </button>
-      </div>
-    </div>
-  `).join("");
+
+        <div class="directory-user-actions">
+          <button type="button" onclick="changePassword(${Number(user.id)})">كلمة المرور</button>
+          <button type="button" onclick="toggleUser(${Number(user.id)}, ${active})">${active ? "تعطيل" : "تفعيل"}</button>
+          ${canDelete ? `<button class="danger-text-action" type="button" onclick="deleteUser(${Number(user.id)})">حذف</button>` : ""}
+        </div>
+      </article>
+    `;
+  }).join("");
 }
 
 async function loadCompanyCatalog() {
   const response = await apiGet("/company-access/catalog");
-
   companyCatalog = response.data || [];
-
-  document.getElementById("companiesCheckboxes").innerHTML =
-    companyCatalog.map(company => `
-      <label class="permission-item">
-        <input type="checkbox" class="company-check" value="${company.companyId}" onchange="syncCompanyBranchAvailability()">
-        ${company.companyName}
-      </label>
-    `).join("");
+  document.getElementById("companiesCheckboxes").innerHTML = companyCatalog.map(company => `
+    <label class="access-check-card">
+      <input type="checkbox" class="company-check" value="${Number(company.companyId)}" onchange="syncCompanyBranchAvailability()" />
+      <span class="access-check-indicator"></span>
+      <span><strong>${escapeHtml(company.companyName)}</strong><small>السماح ببيانات الشركة</small></span>
+    </label>
+  `).join("");
 }
 
 function getSelectedCompanyIds() {
-  return Array.from(document.querySelectorAll(".company-check:checked"))
-    .map(input => Number(input.value));
+  return Array.from(document.querySelectorAll(".company-check:checked")).map(input => Number(input.value));
 }
 
 function setSelectedCompanyIds(companyIds = []) {
+  const allowed = new Set(companyIds.map(Number));
   document.querySelectorAll(".company-check").forEach(input => {
-    input.checked = companyIds.includes(Number(input.value));
+    input.checked = allowed.has(Number(input.value));
   });
 }
 
 async function loadDirectReportsCatalog() {
-  const response = await apiGet("/permissions/catalog/grouped");
-  reportCatalog = response.data || [];
+  const response = await apiGet("/permissions/catalog");
+  reportCatalog = (response.data || [])
+    .filter(report => report.module !== "Administration")
+    .filter(report => report.code !== "dashboard.index")
+    .filter(report => !UNAVAILABLE_REPORT_CODES.has(report.code));
   renderDirectReports();
+}
+
+function groupReportsByModule() {
+  const modules = new Map();
+  reportCatalog.forEach(report => {
+    if (!modules.has(report.module)) {
+      modules.set(report.module, {
+        code: report.module,
+        label: report.moduleLabel || report.module,
+        order: Number(report.order || 999),
+        reports: []
+      });
+    }
+    modules.get(report.module).reports.push(report);
+  });
+
+  return Array.from(modules.values())
+    .sort((a, b) => a.order - b.order)
+    .map(module => ({
+      ...module,
+      reports: module.reports.sort((a, b) => Number(a.order || 999) - Number(b.order || 999))
+    }));
 }
 
 function renderDirectReports() {
   const container = document.getElementById("directReportsArea");
   if (!container) return;
 
-  container.innerHTML = reportCatalog.map(type => `
-    <section class="permission-type-block" data-report-type="${type.code}">
-      <div class="permission-type-head">
-        <label class="permission-type-toggle">
-          <input type="checkbox" onchange="toggleReportType('${type.code}', this.checked)">
-          <strong>${type.label}</strong>
+  container.innerHTML = groupReportsByModule().map(module => `
+    <section class="project-permission-module" data-report-module-block="${escapeHtml(module.code)}">
+      <header class="project-permission-module-head">
+        <label class="module-master-toggle">
+          <input type="checkbox" onchange="toggleReportModule('${escapeHtml(module.code)}', this.checked)" />
+          <span class="module-icon">${REPORT_MODULE_ICONS[module.code] || "📄"}</span>
+          <span><strong>${escapeHtml(module.label)}</strong><small>${localText(`${module.reports.length} تقرير`, `${module.reports.length} reports`)}</small></span>
         </label>
-        <span>${type.modules.reduce((sum, module) => sum + module.reports.length, 0)} تقرير</span>
-      </div>
-      <div class="permission-modules-grid">
-        ${type.modules.map(module => `
-          <div class="permission-module-card">
-            <div class="permission-module-head">
-              <h5>${module.label}</h5>
-              <button type="button" onclick="toggleReportModule('${type.code}', '${module.code}', true)">تحديد القسم</button>
-            </div>
-            <div class="permissions-grid">
-              ${module.reports.map(report => `
-                <label class="permission-item report-permission-item">
-                  <input type="checkbox" class="direct-report-check"
-                    data-report-type="${type.code}"
-                    data-report-module="${module.code}"
-                    data-report-scope="${report.scope}"
-                    value="${report.code}"
-                    onchange="syncReportTypeToggles()">
-                  <span><strong>${report.label}</strong><small>${report.scopeLabel}</small></span>
-                </label>
-              `).join("")}
-            </div>
-          </div>
+        <button type="button" onclick="toggleReportModule('${escapeHtml(module.code)}', true)">تحديد القسم</button>
+      </header>
+
+      <div class="module-report-rows">
+        ${module.reports.map(report => `
+          <label class="report-access-row ${REPORT_PERMISSION_PARENTS[report.code] ? "permission-child" : ""}">
+            <input type="checkbox" class="direct-report-check"
+              data-report-module="${escapeHtml(module.code)}"
+              data-report-scope="${escapeHtml(report.scope)}"
+              data-permission-parent="${escapeHtml(REPORT_PERMISSION_PARENTS[report.code] || "")}"
+              value="${escapeHtml(report.code)}"
+              onchange="handleReportPermissionChange(this)" />
+            <span class="report-checkbox-visual"></span>
+            <span class="report-access-copy">
+              <strong>${escapeHtml(report.label)}</strong>
+              <small>${escapeHtml(report.scopeLabel || "شركة فقط")}</small>
+            </span>
+            <code>${escapeHtml(report.code)}</code>
+          </label>
         `).join("")}
       </div>
     </section>
   `).join("");
+  syncPermissionSummary();
 }
 
 function getSelectedDirectReports() {
-  return Array.from(document.querySelectorAll(".direct-report-check:checked"))
-    .map(input => input.value);
+  return Array.from(document.querySelectorAll(".direct-report-check:checked")).map(input => input.value);
 }
 
 function setSelectedDirectReports(codes = []) {
@@ -195,154 +395,66 @@ function setSelectedDirectReports(codes = []) {
   document.querySelectorAll(".direct-report-check").forEach(input => {
     input.checked = allowed.has(input.value);
   });
-  syncReportTypeToggles();
+  syncPermissionDependencies();
+  syncPermissionSummary();
 }
 
 function setAllDirectReports(checked) {
-  document.querySelectorAll(".direct-report-check").forEach(input => {
-    input.checked = checked;
-  });
-  syncReportTypeToggles();
+  document.querySelectorAll(".direct-report-check:not(:disabled)").forEach(input => { input.checked = checked; });
+  syncPermissionSummary();
 }
 
-function toggleReportType(typeCode, checked) {
-  document.querySelectorAll(`.direct-report-check[data-report-type="${typeCode}"]`)
+function toggleReportModule(moduleCode, checked) {
+  document.querySelectorAll(`.direct-report-check[data-report-module="${CSS.escape(moduleCode)}"]:not(:disabled)`)
     .forEach(input => { input.checked = checked; });
-  syncReportTypeToggles();
+  syncPermissionSummary();
 }
 
-function toggleReportModule(typeCode, moduleCode, checked) {
-  document.querySelectorAll(
-    `.direct-report-check[data-report-type="${typeCode}"][data-report-module="${moduleCode}"]`
-  ).forEach(input => { input.checked = checked; });
-  syncReportTypeToggles();
+function syncPermissionDependencies() {
+  document.querySelectorAll('.direct-report-check[data-permission-parent]:checked').forEach(input => {
+    const parentCode = input.dataset.permissionParent;
+    if (!parentCode) return;
+    const parent = document.querySelector(`.direct-report-check[value="${CSS.escape(parentCode)}"]`);
+    if (parent) parent.checked = true;
+  });
 }
 
-function syncReportTypeToggles() {
-  document.querySelectorAll(".permission-type-block").forEach(block => {
+function handleReportPermissionChange(input) {
+  const parentCode = input.dataset.permissionParent;
+  if (input.checked && parentCode) {
+    const parent = document.querySelector(`.direct-report-check[value="${CSS.escape(parentCode)}"]`);
+    if (parent) parent.checked = true;
+  }
+
+  if (!input.checked) {
+    document.querySelectorAll(`.direct-report-check[data-permission-parent="${CSS.escape(input.value)}"]`)
+      .forEach(child => { child.checked = false; });
+  }
+
+  syncPermissionSummary();
+}
+
+function syncPermissionSummary() {
+  const checkedCount = document.querySelectorAll(".direct-report-check:checked").length;
+  const counter = document.getElementById("selectedReportsCount");
+  if (counter) counter.textContent = String(checkedCount);
+
+  document.querySelectorAll("[data-report-module-block]").forEach(block => {
     const boxes = Array.from(block.querySelectorAll(".direct-report-check"));
-    const toggle = block.querySelector(".permission-type-toggle input");
-    const checkedCount = boxes.filter(box => box.checked).length;
+    const toggle = block.querySelector(".module-master-toggle input");
     if (!toggle) return;
-    toggle.checked = boxes.length > 0 && checkedCount === boxes.length;
-    toggle.indeterminate = checkedCount > 0 && checkedCount < boxes.length;
+    const selected = boxes.filter(box => box.checked).length;
+    toggle.checked = boxes.length > 0 && selected === boxes.length;
+    toggle.indeterminate = selected > 0 && selected < boxes.length;
   });
 }
 
-async function saveUser() {
-  const id = document.getElementById("userId").value;
-  const username = document.getElementById("username").value.trim();
-  const fullName = document.getElementById("fullName").value.trim();
-  const password = document.getElementById("password").value.trim();
-
-  const companyIds = getSelectedCompanyIds();
-  const selectedBranchesByCompany = getSelectedPosBranchesByCompany();
-  const directReports = getSelectedDirectReports();
-  const hasBranchScopedReports = Array.from(
-    document.querySelectorAll('.direct-report-check[data-report-scope="company_branch"]:checked')
-  ).length > 0;
-
-  if (!id && (!username || !password)) {
-    alert("اسم المستخدم وكلمة المرور مطلوبين");
-    return;
-  }
-
-  if (!companyIds.length) {
-    alert("اختر شركة واحدة على الأقل");
-    return;
-  }
-
-  let userId = Number(id);
-
-  if (id) {
-    const updateResponse = await apiPatch(`/users/${id}`, {
-      fullName,
-      role: "user"
-    });
-
-    if (!updateResponse.success) {
-      alert(updateResponse.message || "فشل تعديل المستخدم");
-      return;
-    }
-  } else {
-    const createResponse = await apiPost("/users", {
-      username,
-      fullName,
-      password,
-      role: "user"
-    });
-
-    if (!createResponse.success) {
-      alert(createResponse.message || "فشل إنشاء المستخدم");
-      return;
-    }
-
-    userId = Number(createResponse.data.id);
-  }
-
-  const companiesResponse = await apiPut(`/company-access/users/${userId}`, {
-    companyIds
-  });
-
-  if (!companiesResponse.success) {
-    alert(companiesResponse.message || "فشل حفظ شركات المستخدم");
-    return;
-  }
-  for (const company of companyCatalog) {
-  const companyId = Number(company.companyId);
-
-  const branches =
-    selectedBranchesByCompany[companyId] || [];
-
-  const branchResponse = await apiPut(
-    `/pos-branch-access/users/${userId}`,
-    {
-      companyId,
-      branches
-    }
-  );
-
-  if (!branchResponse.success) {
-    alert(branchResponse.message || `فشل حفظ فروع POS لشركة ${company.companyName}`);
-    return;
-  }
-}
-
-  const permissionsResponse = await apiPut(`/permissions/users/${userId}`, {
-    permissions: directReports
-  });
-
-  if (!permissionsResponse.success) {
-    alert(permissionsResponse.message || "فشل حفظ صلاحيات التقارير المباشرة");
-    return;
-  }
-
-  if (hasBranchScopedReports) {
-    const companiesWithoutBranches = companyIds.filter(companyId =>
-      !(selectedBranchesByCompany[companyId] || []).length
-    );
-    if (companiesWithoutBranches.length) {
-      alert("اختر فرعًا واحدًا على الأقل لكل شركة لأن المستخدم لديه تقارير بنطاق شركة وفرع");
-      return;
-    }
-  }
-
-  alert("تم حفظ المستخدم والشركات والفروع وصلاحيات التقارير بنجاح");
-
-  resetForm();
-  await loadUsers();
-}
 async function loadPosBranchCatalog() {
   posBranchCatalogByCompany = {};
-
   for (const company of companyCatalog) {
-    const response = await apiGet("/pos-branch-access/catalog", {
-      companyId: company.companyId
-    });
-
+    const response = await apiGet("/pos-branch-access/catalog", { companyId: company.companyId });
     posBranchCatalogByCompany[company.companyId] = response.data || [];
   }
-
   renderPosBranchCheckboxes();
 }
 
@@ -352,42 +464,30 @@ function renderPosBranchCheckboxes() {
 
   container.innerHTML = companyCatalog.map(company => {
     const branches = posBranchCatalogByCompany[company.companyId] || [];
-
-    if (!branches.length) {
-      return `
-        <div class="permission-group-block">
-          <h5>${company.companyName}</h5>
-          <p class="muted-text">لا توجد فروع POS لهذه الشركة</p>
-        </div>
-      `;
-    }
-
     return `
-      <div class="permission-group-block" data-branch-company-block="${company.companyId}">
-        <div class="permission-module-head">
-          <h5>${company.companyName}</h5>
-          <button type="button" onclick="toggleCompanyBranches(${company.companyId}, true)">كل الفروع</button>
+      <section class="branch-company-block" data-branch-company-block="${Number(company.companyId)}">
+        <header>
+          <div><strong>${escapeHtml(company.companyName)}</strong><small>${localText(`${branches.length} فرع متاح`, `${branches.length} available branches`)}</small></div>
+          <button type="button" onclick="toggleCompanyBranches(${Number(company.companyId)}, true)">كل الفروع</button>
+        </header>
+        <div class="branch-check-grid">
+          ${branches.length ? branches.map(branch => `
+            <label class="compact-check-row">
+              <input type="checkbox" class="pos-branch-check"
+                data-company-id="${Number(company.companyId)}"
+                value="${escapeHtml(branch.branchCode)}" />
+              <span>${escapeHtml(branch.branchName)}</span>
+            </label>
+          `).join("") : '<p class="muted-text">لا توجد فروع POS لهذه الشركة.</p>'}
         </div>
-
-        ${branches.map(branch => `
-          <label class="permission-item">
-            <input
-              type="checkbox"
-              class="pos-branch-check"
-              data-company-id="${company.companyId}"
-              value="${branch.branchCode}"
-            >
-            ${branch.branchName}
-          </label>
-        `).join("")}
-      </div>
+      </section>
     `;
   }).join("");
   syncCompanyBranchAvailability();
 }
 
 function toggleCompanyBranches(companyId, checked) {
-  document.querySelectorAll(`.pos-branch-check[data-company-id="${companyId}"]:not(:disabled)`)
+  document.querySelectorAll(`.pos-branch-check[data-company-id="${Number(companyId)}"]:not(:disabled)`)
     .forEach(input => { input.checked = checked; });
 }
 
@@ -405,114 +505,269 @@ function syncCompanyBranchAvailability() {
 }
 
 function findBranchInCatalog(companyId, branchCode) {
-  const branches = posBranchCatalogByCompany[companyId] || [];
-
-  return branches.find(branch =>
+  return (posBranchCatalogByCompany[companyId] || []).find(branch =>
     String(branch.branchCode) === String(branchCode)
   );
 }
 
 function getSelectedPosBranchesByCompany() {
   const result = {};
-
   document.querySelectorAll(".pos-branch-check:checked").forEach(input => {
     const companyId = Number(input.dataset.companyId);
-    const branchCode = input.value;
-
-    const branch = findBranchInCatalog(companyId, branchCode);
-
+    const branch = findBranchInCatalog(companyId, input.value);
     if (!branch) return;
-
-    if (!result[companyId]) {
-      result[companyId] = [];
-    }
-
+    if (!result[companyId]) result[companyId] = [];
     result[companyId].push({
       branchCode: branch.branchCode,
       branchName: branch.branchName,
       sourceLocationId: branch.sourceLocationId
     });
   });
-
   return result;
 }
 
 function setSelectedPosBranches(rows = []) {
   document.querySelectorAll(".pos-branch-check").forEach(input => {
     const companyId = Number(input.dataset.companyId);
-
-    input.checked = rows.some(row =>
-      Number(row.companyId) === companyId &&
-      String(row.branchCode) === String(input.value)
-    );
+    input.checked = rows.some(row => Number(row.companyId) === companyId && String(row.branchCode) === String(input.value));
   });
 }
 
-function clearSelectedPosBranches() {
-  document.querySelectorAll(".pos-branch-check").forEach(input => {
-    input.checked = false;
-  });
+function clearAccessSelections() {
+  setSelectedCompanyIds([]);
+  document.querySelectorAll(".pos-branch-check").forEach(input => { input.checked = false; });
+  setSelectedDirectReports([]);
+  syncCompanyBranchAvailability();
 }
 
-
-async function editUser(id) {
-  const user = users.find(u => u.id === id);
-  if (!user) return;
-
-  document.getElementById("formTitle").innerText = "تعديل المستخدم";
-  document.getElementById("userId").value = user.id;
-  document.getElementById("username").value = user.username;
-  document.getElementById("username").disabled = true;
-  document.getElementById("fullName").value = user.full_name || "";
-  document.getElementById("password").value = "";
-  document.getElementById("password").placeholder = "اتركها فارغة";
-
-  const companyResponse = await apiGet(`/company-access/users/${id}`);
-setSelectedCompanyIds(
-  (companyResponse.data || []).map(item => Number(item.companyId))
-);
-syncCompanyBranchAvailability();
-const branchResponse = await apiGet(`/pos-branch-access/users/${id}`);
-
-setSelectedPosBranches(branchResponse.data || []);
-const permissionsResponse = await apiGet(`/permissions/users/${id}`);
-setSelectedDirectReports(permissionsResponse.data || []);
+function setAccessControlsDisabled(disabled) {
+  document.querySelectorAll("[data-access-control-section] input, [data-access-control-section] button")
+    .forEach(control => { control.disabled = disabled; });
 }
 
-async function changePassword(id) {
-  const password = prompt("اكتب كلمة المرور الجديدة:");
-  if (!password) return;
-
-  await apiPatch(`/users/${id}/password`, { password });
-  alert("تم تغيير كلمة المرور");
+function applyAdminAccessState(admin) {
+  document.getElementById("adminAccessNotice")?.classList.toggle("hidden", !admin);
+  if (admin) {
+    document.querySelectorAll(".company-check, .pos-branch-check, .direct-report-check")
+      .forEach(input => { input.checked = true; });
+  }
+  setAccessControlsDisabled(admin);
+  syncPermissionSummary();
 }
 
-async function toggleUser(id, isActive) {
-  await apiPatch(`/users/${id}`, {
-    isActive: !isActive
-  });
-
-  await loadUsers();
-}
-
-function resetForm() {
-  document.getElementById("formTitle").innerText = "إضافة مستخدم جديد";
+function startNewUser() {
+  selectedUserId = null;
+  selectedUserSnapshot = null;
+  showEditor();
+  document.getElementById("editorModeBadge").textContent = "مستخدم جديد";
+  document.getElementById("formTitle").textContent = "إضافة مستخدم جديد";
+  document.getElementById("editorSubtitle").textContent = "أدخل بيانات المستخدم ثم حدد نطاق البيانات والتقارير.";
+  document.getElementById("deleteUserBtn").classList.add("hidden");
   document.getElementById("userId").value = "";
   document.getElementById("username").value = "";
   document.getElementById("username").disabled = false;
   document.getElementById("fullName").value = "";
   document.getElementById("password").value = "";
+  document.getElementById("password").disabled = false;
   document.getElementById("password").placeholder = "كلمة المرور";
-  setSelectedCompanyIds([]);
-  clearSelectedPosBranches();
-  setSelectedDirectReports([]);
+  setAccessControlsDisabled(false);
+  document.getElementById("adminAccessNotice")?.classList.add("hidden");
+  clearAccessSelections();
+  renderUsers();
+  document.querySelector(".user-editor-panel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+async function selectUser(id) {
+  const user = users.find(item => Number(item.id) === Number(id));
+  if (!user) return;
+
+  selectedUserId = Number(id);
+  selectedUserSnapshot = user;
+  showEditor();
+  renderUsers();
+  document.getElementById("editorModeBadge").textContent = isAdminAccount(user) ? "Admin" : "تعديل مستخدم";
+  document.getElementById("formTitle").textContent = user.full_name || user.username;
+  document.getElementById("editorSubtitle").textContent = `@${user.username}`;
+  document.getElementById("userId").value = user.id;
+  document.getElementById("username").value = user.username;
+  document.getElementById("username").disabled = true;
+  document.getElementById("fullName").value = user.full_name || "";
+  document.getElementById("password").value = "";
+  document.getElementById("password").disabled = true;
+  document.getElementById("password").placeholder = "استخدم زر تغيير كلمة المرور";
+
+  const currentUserId = Number(getStoredUser().id);
+  document.getElementById("deleteUserBtn").classList.toggle("hidden", Number(user.id) === currentUserId);
+  setAccessControlsDisabled(false);
+
+  if (isAdminAccount(user)) {
+    applyAdminAccessState(true);
+  } else {
+    applyAdminAccessState(false);
+    const [companyResponse, branchResponse, permissionsResponse] = await Promise.all([
+      apiGet(`/company-access/users/${id}`),
+      apiGet(`/pos-branch-access/users/${id}`),
+      apiGet(`/permissions/users/${id}`)
+    ]);
+    setSelectedCompanyIds((companyResponse.data || []).map(item => Number(item.companyId)));
+    syncCompanyBranchAvailability();
+    setSelectedPosBranches(branchResponse.data || []);
+    setSelectedDirectReports(permissionsResponse.data || []);
+  }
+
+  document.querySelector(".user-editor-panel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function resetEditorValues() {
+  if (selectedUserId) selectUser(selectedUserId);
+  else startNewUser();
+}
+
+function validateAccessSelection(companyIds, selectedBranchesByCompany) {
+  if (!companyIds.length) {
+    alert(localText("اختر شركة واحدة على الأقل", "Select at least one company"));
+    return false;
+  }
+
+  const hasBranchScopedReports = document.querySelector('.direct-report-check[data-report-scope="company_branch"]:checked');
+  if (hasBranchScopedReports) {
+    const companiesWithoutBranches = companyIds.filter(companyId => !(selectedBranchesByCompany[companyId] || []).length);
+    if (companiesWithoutBranches.length) {
+      alert(localText(
+        "اختر فرعًا واحدًا على الأقل لكل شركة لأن المستخدم لديه تقارير بنطاق الشركة والفرع",
+        "Select at least one branch for every company because the user has company-and-branch reports"
+      ));
+      return false;
+    }
+  }
+  return true;
+}
+
+async function saveUser() {
+  const id = document.getElementById("userId").value;
+  const username = document.getElementById("username").value.trim();
+  const fullName = document.getElementById("fullName").value.trim();
+  const password = document.getElementById("password").value;
+  const selectedUser = id ? users.find(user => Number(user.id) === Number(id)) : null;
+  const admin = isAdminAccount(selectedUser || {});
+
+  if (!username || (!id && password.length < 6)) {
+    alert(localText(
+      "اسم المستخدم وكلمة مرور من 6 أحرف على الأقل مطلوبان",
+      "A username and a password of at least 6 characters are required"
+    ));
+    return;
+  }
+
+  const companyIds = getSelectedCompanyIds();
+  const selectedBranchesByCompany = getSelectedPosBranchesByCompany();
+  const directReports = getSelectedDirectReports();
+  if (!admin && !validateAccessSelection(companyIds, selectedBranchesByCompany)) return;
+
+  const saveButton = document.getElementById("saveUserBtn");
+  saveButton.disabled = true;
+
+  try {
+    let userId = Number(id);
+    if (id) {
+      const updateResponse = await apiPatch(`/users/${id}`, { fullName, role: admin ? selectedUser.role : "user" });
+      if (!updateResponse.success) throw new Error(updateResponse.message || localText("فشل تعديل المستخدم", "Could not update the user"));
+    } else {
+      const createResponse = await apiPost("/users", { username, fullName, password, role: "user" });
+      if (!createResponse.success) throw new Error(createResponse.message || localText("فشل إنشاء المستخدم", "Could not create the user"));
+      userId = Number(createResponse.data.id);
+    }
+
+    if (!admin) {
+      const companiesResponse = await apiPut(`/company-access/users/${userId}`, { companyIds });
+      if (!companiesResponse.success) throw new Error(companiesResponse.message || localText("فشل حفظ شركات المستخدم", "Could not save user companies"));
+
+      for (const company of companyCatalog) {
+        const companyId = Number(company.companyId);
+        const branchResponse = await apiPut(`/pos-branch-access/users/${userId}`, {
+          companyId,
+          branches: selectedBranchesByCompany[companyId] || []
+        });
+        if (!branchResponse.success) throw new Error(
+          branchResponse.message || localText(`فشل حفظ فروع ${company.companyName}`, `Could not save branches for ${company.companyName}`)
+        );
+      }
+
+      const permissionsResponse = await apiPut(`/permissions/users/${userId}`, { permissions: directReports });
+      if (!permissionsResponse.success) throw new Error(
+        permissionsResponse.message || localText("فشل حفظ صلاحيات التقارير", "Could not save report permissions")
+      );
+    }
+
+    alert(localText("تم حفظ المستخدم والصلاحيات بنجاح", "User and permissions saved successfully"));
+    await loadUsers();
+    await selectUser(userId);
+  } catch (error) {
+    alert(error.message || localText("تعذر حفظ المستخدم", "Could not save the user"));
+  } finally {
+    saveButton.disabled = false;
+  }
+}
+
+async function changePassword(id) {
+  const password = prompt(localText("اكتب كلمة المرور الجديدة للمستخدم:", "Enter the user's new password:"));
+  if (!password) return;
+  if (password.length < 6) {
+    alert(localText("كلمة المرور يجب ألا تقل عن 6 أحرف", "The password must be at least 6 characters"));
+    return;
+  }
+  await apiPatch(`/users/${id}/password`, { password });
+  alert(localText("تم تغيير كلمة المرور", "Password changed successfully"));
+}
+
+async function toggleUser(id, isActive) {
+  try {
+    await apiPatch(`/users/${id}`, { isActive: !isActive });
+    await loadUsers();
+    if (Number(selectedUserId) === Number(id)) await selectUser(id);
+  } catch (error) {
+    alert(error.message || localText("تعذر تحديث حالة المستخدم", "Could not update the user status"));
+  }
+}
+
+async function deleteUser(id) {
+  const user = users.find(item => Number(item.id) === Number(id));
+  if (!user) return;
+  if (Number(getStoredUser().id) === Number(id)) {
+    alert(localText("لا يمكنك حذف حسابك الحالي", "You cannot delete your current account"));
+    return;
+  }
+
+  const userLabel = user.full_name || user.username;
+  const confirmed = confirm(localText(
+    `سيتم حذف المستخدم ${userLabel} وكل صلاحياته. هل تريد المتابعة؟`,
+    `User ${userLabel} and all assigned permissions will be deleted. Continue?`
+  ));
+  if (!confirmed) return;
+
+  try {
+    await apiDelete(`/users/${id}`);
+    if (Number(selectedUserId) === Number(id)) closeEditor();
+    await loadUsers();
+    alert(localText("تم حذف المستخدم من النظام", "User deleted from the system"));
+  } catch (error) {
+    alert(error.message || localText("تعذر حذف المستخدم", "Could not delete the user"));
+  }
+}
+
+function deleteSelectedUser() {
+  if (selectedUserId) deleteUser(selectedUserId);
 }
 
 async function init() {
-  await loadCompanyCatalog();
-  await loadPosBranchCatalog();
-  await loadDirectReportsCatalog();
-  await loadUsers();
+  try {
+    await Promise.all([loadCompanyCatalog(), loadDirectReportsCatalog()]);
+    await loadPosBranchCatalog();
+    await loadUsers();
+  } catch (error) {
+    console.error(error);
+    alert(error.message || localText("تعذر تحميل إدارة المستخدمين", "Could not load user management"));
+  }
 }
 
 init();

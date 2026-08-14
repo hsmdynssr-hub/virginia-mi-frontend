@@ -74,7 +74,7 @@
       }
 
       const script = document.createElement("script");
-      script.src = `${source}?v=20260814-05`;
+      script.src = `${source}?v=20260815-01`;
       script.async = false;
       script.dataset.miI18nLoader = "true";
       script.addEventListener("load", () => {
@@ -202,9 +202,6 @@ function observeLegacyReportUi() {
 
 const REPORT_PAGE_MAP = {
   dashboard: "dashboard.index",
-  "reports-executive": "dashboard.index",
-  "reports-management": "dashboard.index",
-  "reports-operational": "dashboard.index",
 
   "admin-users": "admin.users",
   "admin-roles": "admin.roles",
@@ -233,8 +230,11 @@ const REPORT_PAGE_MAP = {
   
 
   customer: "customer.index",
-  "customer-pos-phones": "customer.review_sms.view",
+  "customer-pos-phones": "customer.pos_phones",
   "customer-service-pos-review": "customer.service_pos_review",
+  "customer-vip": "customer.vip",
+  "customer-migration": "customer.migration",
+  "customer-rfm": "customer.rfm",
   
 
   
@@ -297,9 +297,6 @@ const PAGES_WITHOUT_REPORT_TOOLBAR = new Set([
   "admin-users",
   "admin-roles",
   "admin-report-classification",
-  "reports-executive",
-  "reports-management",
-  "reports-operational",
   "inventory-reorder-risk",
 
   "branches",
@@ -364,8 +361,17 @@ function getReportCodeForPage(pageCode) {
 function hasPermission(pageCode) {
   if (isAdmin()) return true;
 
-  if (["reports-executive", "reports-management", "reports-operational"].includes(pageCode)) {
-    return getUserPermissions().length > 0;
+  if (pageCode === "dashboard") {
+    return true;
+  }
+
+  if ([
+    "admin-users",
+    "admin-roles",
+    "admin-report-classification",
+    "customer-review-sms-settings"
+  ].includes(pageCode)) {
+    return false;
   }
 
   const reportCode = getReportCodeForPage(pageCode);
@@ -377,18 +383,29 @@ function hasPermission(pageCode) {
   return permissions.includes(reportCode);
 }
 
-async function applyReportTypeNavigation() {
-  const links = document.querySelectorAll("[data-report-type-nav]");
-  if (!links.length) return;
+async function syncCurrentUserPermissions() {
+  if (isAdmin()) return;
 
   try {
     const response = await apiGet("/permissions/me");
-    const allowedTypes = new Set(response.data?.reportTypes || []);
-    links.forEach((link) => {
-      link.style.display = allowedTypes.has(link.dataset.reportTypeNav) ? "" : "none";
-    });
+    const freshPermissions = (response.data?.reports || [])
+      .map(report => report.code)
+      .filter(Boolean)
+      .sort();
+    const currentPermissions = [...getUserPermissions()].sort();
+
+    if (JSON.stringify(freshPermissions) === JSON.stringify(currentPermissions)) {
+      return;
+    }
+
+    const user = getCurrentUser();
+    localStorage.setItem("user", JSON.stringify({
+      ...user,
+      permissions: freshPermissions
+    }));
+    window.location.reload();
   } catch (error) {
-    console.warn("Could not load report type navigation", error.message);
+    console.warn("Could not refresh user permissions", error.message);
   }
 }
 
@@ -698,7 +715,7 @@ function initLayout(activePage) {
   });
 
   applySidebarPermissions();
-  applyReportTypeNavigation();
+  syncCurrentUserPermissions();
 }
 
 function renderLayout(title, subtitle, activePage, contentHtml) {
@@ -803,6 +820,9 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
               <a data-page="pos-branch-sales" class="nav-link" href="../pos/branch-sales.html">تحليل أداء المعارض</a>
               <a data-page="pos-cashiers" class="nav-link" href="../pos/cashiers.html">تحليل الكاشيرات</a>
               <a data-page="pos-peak-hours" class="nav-link" href="../pos/peak-hours.html">تحليل ساعات البيع</a>
+              <a data-page="pos-returns" class="nav-link" href="../pos/returns.html">المرتجعات</a>
+              <a data-page="pos-discounts" class="nav-link" href="../pos/discounts.html">الخصومات</a>
+              <a data-page="pos-offers" class="nav-link" href="../pos/offers.html">العروض وتأثيرها</a>
               <a data-page="alerts-dashboard" class="nav-link" href="../pos/alerts-dashboard.html">داشبورد تنبيهات Telegram</a>
             </div>
           </div>
@@ -817,6 +837,9 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
               <a data-page="customer" class="nav-link" href="../customer/index.html">مركز خدمة العملاء</a>
               <a data-page="customer-pos-phones" class="nav-link" href="../customer/pos-phones.html">متابعة عملاء نقاط البيع</a>
               <a data-page="customer-service-pos-review" class="nav-link" href="../customer/service-pos-review.html">مراجعة خدمات نقاط البيع</a>
+              <a data-page="customer-vip" class="nav-link" href="../customer/vip.html">عملاء VIP</a>
+              <a data-page="customer-migration" class="nav-link" href="../customer/migration.html">تحول قنوات العملاء</a>
+              <a data-page="customer-rfm" class="nav-link" href="../customer/rfm.html">تحليل RFM</a>
             
 
               <a data-page="customer-review-sms-queue" class="nav-link" href="../customer/review-sms-queue.html">تشغيل رسائل تقييم العملاء</a>
@@ -828,11 +851,12 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
 </div>
           </div>
 
-          <div class="nav-group" hidden>⚙️ الإدارة</div>
-          <a data-page="admin-users" class="nav-link" href="../admin/users.html" hidden>إدارة المستخدمين</a>
-          <a data-page="admin-roles" class="nav-link" href="../admin/roles.html" hidden>الأدوار والصلاحيات</a>
+          <div class="nav-group">⚙️ الإدارة</div>
+          <a data-page="admin-users" class="nav-link" href="../admin/users.html">إدارة المستخدمين والصلاحيات</a>
 
-          <div class="nav-accordion" data-accordion="Production" hidden>
+          <div class="nav-group">📊 التقارير المتخصصة</div>
+
+          <div class="nav-accordion" data-accordion="Production">
             <button type="button" class="nav-accordion-head" data-accordion-toggle="Production">
               <span>الإنتاج والتصنيع 🏭 Production</span>
               <span class="nav-accordion-arrow">⌄</span>
@@ -846,7 +870,7 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
             </div>
           </div>
 
-          <div class="nav-accordion" data-accordion="Costing" hidden>
+          <div class="nav-accordion" data-accordion="Costing">
             <button type="button" class="nav-accordion-head" data-accordion-toggle="Costing">
               <span>مراقبة التكاليف 💰 Costing</span>
               <span class="nav-accordion-arrow">⌄</span>
@@ -857,7 +881,7 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
             </div>
           </div>
 
-          <div class="nav-accordion" data-accordion="Purchase" hidden>
+          <div class="nav-accordion" data-accordion="Purchase">
             <button type="button" class="nav-accordion-head" data-accordion-toggle="Purchase">
               <span>المشتريات والموردين 📦 Purchase</span>
               <span class="nav-accordion-arrow">⌄</span>
@@ -874,7 +898,7 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
             </div>
           </div>
 
-          <div class="nav-accordion" data-accordion="Inventory" hidden>
+          <div class="nav-accordion" data-accordion="Inventory">
             <button type="button" class="nav-accordion-head" data-accordion-toggle="Inventory">
               <span>المخزون والمواقع 🏬 Inventory</span>
               <span class="nav-accordion-arrow">⌄</span>
@@ -884,13 +908,14 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
               <a data-page="inventory" class="nav-link" href="../inventory/index.html">داشبورد المخزون</a>
               <a data-page="inventory-intermediate-control" class="nav-link" href="../inventory/intermediate-control.html">رقابة المخازن الوسيطة</a>
               <a data-page="inventory-executive-summary" class="nav-link" href="../inventory/executive-summary.html">ملخص المخزون التنفيذي</a>
+              <a data-page="inventory-historical-executive-summary" class="nav-link" href="../inventory/historical-executive-summary.html">المخزون التنفيذي التاريخي</a>
               <a data-page="inventory-flow-control" class="nav-link" href="../inventory/flow-control.html">تحكم حركة المخزون</a>
               <a data-page="inventory-movement-intelligence" class="nav-link" href="../inventory/movement-intelligence.html">تحليل حركة المخزون</a>
               <a data-page="inventory-reorder-risk" class="nav-link" href="../inventory/reorder-risk.html">تشغيل المخازن وإعادة الطلب</a>
             </div>
           </div>
 
-          <div class="nav-accordion" data-accordion="Forecast" hidden>
+          <div class="nav-accordion" data-accordion="Forecast">
             <button type="button" class="nav-accordion-head" data-accordion-toggle="Forecast">
               <span>التوقعات والتارجت 🎯 Forecast</span>
               <span class="nav-accordion-arrow">⌄</span>
@@ -904,7 +929,7 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
             </div>
           </div>
 
-          <div class="nav-accordion" data-accordion="ForecastPlanning" hidden>
+          <div class="nav-accordion" data-accordion="ForecastPlanning">
             <button type="button" class="nav-accordion-head" data-accordion-toggle="ForecastPlanning">
               <span>تخطيط الفوركاست 📈 Forecast Planning</span>
               <span class="nav-accordion-arrow">⌄</span>
