@@ -45,6 +45,22 @@
     document.head.appendChild(modernCss);
   }
 
+  if (!hasStylesheet("report-toolbar-fixed.css")) {
+    const reportToolbarCss = document.createElement("link");
+    reportToolbarCss.rel = "stylesheet";
+    reportToolbarCss.href = `${assetUrl("../css/report-toolbar-fixed.css")}?v=20260815-03`;
+    reportToolbarCss.dataset.miReportToolbar = "true";
+    document.head.appendChild(reportToolbarCss);
+  }
+
+  if (!hasStylesheet("virginia-showcase.css")) {
+    const showcaseCss = document.createElement("link");
+    showcaseCss.rel = "stylesheet";
+    showcaseCss.href = `${assetUrl("../css/virginia-showcase.css")}?v=20260815-04`;
+    showcaseCss.dataset.miVirginiaShowcase = "true";
+    document.head.appendChild(showcaseCss);
+  }
+
   function loadLocalizationScripts() {
     if (window.MI18n || document.querySelector('script[data-mi-i18n-loader="true"]')) {
       window.MI18n?.refresh?.();
@@ -74,7 +90,7 @@
       }
 
       const script = document.createElement("script");
-      script.src = `${source}?v=20260815-01`;
+      script.src = `${source}?v=20260815-02`;
       script.async = false;
       script.dataset.miI18nLoader = "true";
       script.addEventListener("load", () => {
@@ -512,13 +528,28 @@ function applyDatePreset(preset) {
     to.setDate(0);
     from.setFullYear(to.getFullYear(), to.getMonth() - 5, 1);
   } else if (preset === "custom") {
-    if (customDates) customDates.style.display = "flex";
+    if (customDates) customDates.hidden = false;
+    syncDatePresetButtons(preset);
     return;
   }
 
-  if (customDates) customDates.style.display = "none";
+  if (customDates) customDates.hidden = true;
   if (dateFrom) dateFrom.value = toISODate(from);
   if (dateTo) dateTo.value = toISODate(to);
+  syncDatePresetButtons(preset);
+}
+
+function syncDatePresetButtons(activePreset) {
+  document.querySelectorAll("[data-date-preset-button]").forEach((button) => {
+    const isActive = button.dataset.datePresetButton === activePreset;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-pressed", isActive ? "true" : "false");
+  });
+}
+
+function notifyDateRangeChanged() {
+  const dateFrom = document.getElementById("dateFrom");
+  dateFrom?.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
 function applySidebarPermissions() {
@@ -696,17 +727,28 @@ function initLayout(activePage) {
   }
 
   if (datePreset) {
-    const defaultPreset = ["pos-summary", "pos-branch-sales"].includes(activePage)
-      ? "last6CompleteMonths"
-      : activePage === "costing-overview"
-        ? "thisMonth"
-        : "today";
+    const defaultPreset = activePage === "costing-overview"
+      ? "thisMonth"
+      : "today";
 
     datePreset.value = defaultPreset;
     applyDatePreset(defaultPreset);
 
     datePreset.addEventListener("change", () => {
       applyDatePreset(datePreset.value);
+      notifyDateRangeChanged();
+    });
+
+    document.querySelectorAll("[data-date-preset-button]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const preset = button.dataset.datePresetButton || "today";
+        datePreset.value = preset;
+        applyDatePreset(preset);
+
+        if (preset !== "custom") {
+          notifyDateRangeChanged();
+        }
+      });
     });
   }
 
@@ -734,26 +776,36 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
       <div class="page-heading">
         <span class="page-pill">Filters</span>
         <h2>فلاتر التقرير</h2>
-        <p>اختر الفترة الزمنية ثم حدّث التقرير أو صدّر التفاصيل إلى Excel</p>
+        <p>اختر الفترة والفرع ثم حدّث التقرير أو صدّر النتائج</p>
       </div>
 
       <div class="header-actions">
         <div class="filter-row">
-          <select id="datePreset" class="control date-preset">
+          <div class="date-preset-switcher" role="group" aria-label="الفترة الزمنية">
+            <button type="button" data-date-preset-button="today">اليوم</button>
+            <button type="button" data-date-preset-button="yesterday">أمس</button>
+            <button type="button" data-date-preset-button="thisMonth">هذا الشهر</button>
+            <button type="button" data-date-preset-button="custom">📅 مخصص</button>
+          </div>
+
+          <select id="datePreset" class="date-preset-compat" aria-hidden="true" tabindex="-1">
             <option value="today">اليوم</option>
             <option value="yesterday">أمس</option>
-            <option value="last2">آخر يومين</option>
-            <option value="last7">آخر 7 أيام</option>
-            <option value="last30">آخر 30 يوم</option>
-            <option value="thisMonth">الشهر الحالي</option>
-            <option value="last6CompleteMonths">آخر 6 شهور مكتملة</option>
-            <option value="custom">تاريخ مخصص</option>
+            <option value="thisMonth">هذا الشهر</option>
+            <option value="custom">مخصص</option>
           </select>
 
-          <div id="customDates" class="custom-dates">
-            <input class="control" type="date" id="dateFrom" />
-            <input class="control" type="date" id="dateTo" />
+          <div id="customDates" class="custom-dates" hidden>
+            <label><span>من</span><input class="control" type="date" id="dateFrom" /></label>
+            <label><span>إلى</span><input class="control" type="date" id="dateTo" /></label>
           </div>
+
+          <label id="branchScopeField" class="context-field branch-context-field">
+            <span>الفرع / النطاق</span>
+            <select id="branchCode" class="control branch-control" disabled>
+              <option value="">اختر الشركة أولًا</option>
+            </select>
+          </label>
 
           <button class="run-btn" id="loadBtn">تحديث التقرير</button>
         </div>
@@ -972,6 +1024,30 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
             </div>
           </div>
         </header>
+
+        <section
+          class="mi-virginia-showcase"
+          aria-hidden="true"
+          style="max-height:116px;overflow:hidden;position:relative"
+        >
+          <picture>
+            <source
+              media="(min-width: 900px)"
+              srcset="../assets/virginia-showcase-1440.webp"
+              type="image/webp"
+            />
+            <img
+              src="../assets/virginia-showcase-960.webp"
+              width="960"
+              height="540"
+              alt=""
+              loading="lazy"
+              decoding="async"
+              fetchpriority="low"
+            />
+          </picture>
+        </section>
+
         ${reportToolbarHtml}
 
         <section class="content mi-bootstrap-page">
@@ -1320,7 +1396,7 @@ function loadReportFiltersEngine(activePage) {
 
   const script = document.createElement("script");
 
-  script.src = "../js/report-filters.js";
+  script.src = "../js/report-filters.js?v=20260815-02";
   script.dataset.reportFiltersEngine = "true";
 
   script.onload = () => {

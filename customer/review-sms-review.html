@@ -8,6 +8,7 @@
 
   <link rel="stylesheet" href="./review-sms.css?v=review-hero-medal-20260712" />
   <link rel="stylesheet" href="../css/app-modern.css?v=20260814-01" />
+  <link rel="stylesheet" href="./review-showcase.css?v=20260815-04" />
   <script src="../locales/ar.js?v=20260814-02"></script>
   <script src="../locales/en.js?v=20260814-02"></script>
   <script src="../js/i18n.js?v=20260814-02"></script>
@@ -17,8 +18,6 @@
 <body data-page="review">
   <main class="crsms-review-shell">
     <section class="crsms-review-card">
-      <div class="crsms-brand">Virginia Olive</div>
-
       <div id="reviewLoading" class="crsms-review-message">
         جاري تحميل بيانات التقييم...
       </div>
@@ -26,19 +25,22 @@
       <div id="reviewError" class="crsms-review-message crsms-error" hidden></div>
 
       <div id="reviewContent" hidden>
-        <section class="crsms-review-hero crsms-review-hero-with-medal">
-          <div class="crsms-hero-badge">الأولى عالميًا</div>
+        <section class="crsms-review-showcase">
+          <picture class="crsms-review-showcase-picture">
+            <img
+              src="../assets/virginia-showcase-960.webp"
+              width="960"
+              height="540"
+              alt="منتجات Virginia Olive الحاصلة على جوائز عالمية"
+              decoding="async"
+              fetchpriority="high"
+            />
+          </picture>
 
-          <div class="crsms-hero-copy">
-            <span>جودة عالمية من الطبيعة</span>
+          <div class="crsms-review-intro">
+            <span>الأولى عالميًا · جودة من الطبيعة</span>
             <strong>قيّم تجربة الشراء</strong>
             <p id="reviewSubtitle">رأيك مهم لتحسين الخدمة داخل فروع فيرجينيا.</p>
-          </div>
-
-          <div class="crsms-platinum-medal" aria-label="الميدالية البلاتينية">
-            <span>منتجاتنا</span>
-            <strong>نالت جوائز عالمية</strong>
-            <small>بالفضية والبلاتينية</small>
           </div>
         </section>
 

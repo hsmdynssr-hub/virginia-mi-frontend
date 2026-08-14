@@ -87,14 +87,11 @@
     field = document.createElement("label");
     field.id = "branchScopeField";
     field.className = "context-field branch-context-field";
-    field.style.display = "none";
 
     field.innerHTML = `
-      <span style="display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:#e5f3ff;">
-        الفرع / النطاق
-      </span>
+      <span>الفرع / النطاق</span>
 
-      <select id="branchCode" class="control branch-control">
+      <select id="branchCode" class="control branch-control" disabled>
         <option value="">اختر الشركة أولًا</option>
       </select>
     `;
@@ -135,13 +132,11 @@
     localStorage.setItem("branchCode", value);
   }
 
-  function hideBranchFilter(field, select) {
-    if (field) {
-      field.style.display = "none";
-    }
-
+  function renderUnavailableBranchFilter(field, select, message) {
+    field?.classList.remove("branch-filter-ready");
     if (select) {
-      select.innerHTML = "";
+      select.disabled = true;
+      select.innerHTML = `<option value="">${escapeHtml(message)}</option>`;
       select.dataset.required = "false";
     }
   }
@@ -157,13 +152,16 @@
       : [];
 
     if (!branchFilter.enabled) {
-      hideBranchFilter(field, select);
+      renderUnavailableBranchFilter(
+        field,
+        select,
+        "فلتر الفرع غير متاح لهذا التقرير"
+      );
       return;
     }
 
-    if (field) {
-      field.style.display = "block";
-    }
+    field?.classList.add("branch-filter-ready");
+    select.disabled = false;
 
     select.dataset.required = "true";
 
@@ -237,7 +235,11 @@
     const companyId = getCurrentCompanyId();
 
     if (!companyId) {
-      hideBranchFilter(field, select);
+      renderUnavailableBranchFilter(
+        field,
+        select,
+        "اختر الشركة أولًا"
+      );
       return null;
     }
 

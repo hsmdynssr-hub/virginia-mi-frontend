@@ -1,0 +1,341 @@
+.main > .report-toolbar .filter-row {
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+  width: 100% !important;
+  direction: rtl !important;
+}
+
+.date-preset-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  min-height: 44px;
+  border: 1px solid #d7e0ee;
+  border-radius: 12px;
+  background: #f6f8fc;
+  /* Keep the same visual order as the Shopify-style reference:
+     Today, Yesterday, This Month, Custom. */
+  direction: ltr;
+}
+
+.date-preset-switcher button {
+  direction: rtl;
+  min-height: 34px;
+  padding: 7px 13px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #526079;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.date-preset-switcher button:hover {
+  border-color: #bed0ef;
+  color: #1e4fb9;
+}
+
+.date-preset-switcher button.active {
+  border-color: #2455c5;
+  background: #2455c5;
+  color: #fff;
+  box-shadow: 0 5px 12px rgba(36, 85, 197, 0.22);
+}
+
+.date-preset-compat {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.main > .report-toolbar .custom-dates[hidden] {
+  display: none !important;
+}
+
+.main > .report-toolbar .custom-dates {
+  display: flex !important;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.main > .report-toolbar .custom-dates label,
+.main > .report-toolbar .branch-context-field {
+  display: flex !important;
+  flex-direction: column;
+  gap: 5px;
+  margin: 0;
+}
+
+.main > .report-toolbar .custom-dates label > span,
+.main > .report-toolbar .branch-context-field > span {
+  color: #526079;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.main > .report-toolbar .custom-dates input {
+  width: 148px !important;
+  min-height: 44px;
+}
+
+.main > .report-toolbar .branch-context-field {
+  flex: 0 0 235px;
+  width: 235px;
+  min-width: 235px;
+  visibility: visible !important;
+}
+
+.main > .report-toolbar .branch-context-field .branch-control {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 44px;
+}
+
+.main > .report-toolbar .branch-context-field .branch-control:disabled {
+  color: #778399;
+  background: #f1f4f9;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+.main > .report-toolbar #loadBtn,
+.main > .report-toolbar .report-export-action {
+  min-height: 44px;
+  margin: 0 !important;
+  white-space: nowrap;
+}
+
+.main > .report-toolbar .report-pdf-action {
+  border-color: #c33d4e !important;
+  background: #fff1f3 !important;
+  color: #a82436 !important;
+}
+
+.branch-sales-print-header {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .main > .report-toolbar .filter-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(210px, 0.8fr) auto auto auto;
+  }
+
+  .date-preset-switcher {
+    width: 100%;
+  }
+
+  .date-preset-switcher button {
+    flex: 1 1 auto;
+  }
+
+  .main > .report-toolbar .branch-context-field {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .main > .report-toolbar .custom-dates {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .main > .report-toolbar .filter-row {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .date-preset-switcher,
+  .main > .report-toolbar .branch-context-field,
+  .main > .report-toolbar .custom-dates {
+    grid-column: 1 / -1;
+  }
+
+  .date-preset-switcher {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .main > .report-toolbar .custom-dates {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .main > .report-toolbar .custom-dates input {
+    width: 100% !important;
+  }
+}
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 9mm;
+  }
+
+  html,
+  body {
+    width: auto !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+
+  body {
+    color: #182338 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .sidebar,
+  .main > .topbar,
+  .main > .report-toolbar,
+  .mobile-menu-btn,
+  .loading-box,
+  .error-box,
+  #pendingBox {
+    display: none !important;
+  }
+
+  .app-shell,
+  .main,
+  .content,
+  .mi-bootstrap-page {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+
+  .branch-sales-print-header {
+    display: flex !important;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 0 0 8mm;
+    padding: 0 0 4mm;
+    border-bottom: 2px solid #2455c5;
+  }
+
+  .branch-sales-print-header span {
+    color: #2455c5;
+    font-size: 9pt;
+    font-weight: 800;
+  }
+
+  .branch-sales-print-header h1 {
+    margin: 2mm 0 0;
+    font-size: 18pt;
+  }
+
+  .branch-sales-print-header dl {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(38mm, 1fr));
+    gap: 3mm;
+    margin: 0;
+  }
+
+  .branch-sales-print-header dl > div {
+    padding: 2.5mm 3mm;
+    border: 1px solid #d8e0ec;
+    border-radius: 3mm;
+    background: #f7f9fc;
+  }
+
+  .branch-sales-print-header dt {
+    color: #68758b;
+    font-size: 7pt;
+    font-weight: 700;
+  }
+
+  .branch-sales-print-header dd {
+    margin: 1mm 0 0;
+    font-size: 9pt;
+    font-weight: 800;
+  }
+
+  .inventory-kpi-grid,
+  #periodComparisonGrid .row {
+    break-inside: avoid;
+  }
+
+  .inventory-report-card,
+  .mi-report-card,
+  .pos-summary-section {
+    max-width: none !important;
+    margin: 0 0 5mm !important;
+    padding: 4mm !important;
+    border: 1px solid #d8e0ec !important;
+    border-radius: 3mm !important;
+    box-shadow: none !important;
+    background: #fff !important;
+  }
+
+  .inventory-report-card > h2,
+  .mi-report-title {
+    margin-bottom: 3mm !important;
+    font-size: 12pt !important;
+  }
+
+  .inventory-muted-text {
+    font-size: 8pt !important;
+  }
+
+  .inventory-table-wrap,
+  .table-responsive,
+  .mi-table-scroll {
+    width: 100% !important;
+    max-width: none !important;
+    overflow: visible !important;
+  }
+
+  .inventory-data-table,
+  .mi-data-table,
+  table {
+    width: 100% !important;
+    table-layout: auto !important;
+    border-collapse: collapse !important;
+    font-size: 6.7pt !important;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr {
+    break-inside: avoid;
+  }
+
+  th,
+  td {
+    padding: 1.6mm 1.2mm !important;
+    border: 1px solid #dfe5ef !important;
+    white-space: normal !important;
+  }
+
+  th {
+    background: #edf3ff !important;
+    color: #193d83 !important;
+  }
+
+  a[href]::after {
+    content: none !important;
+  }
+}

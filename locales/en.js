@@ -96,6 +96,7 @@
       "تقارير العمل اليومي والمتابعة والتنفيذ.": "Daily operations, follow-up and execution reports.",
       "فلاتر التقرير": "Report Filters",
       "اختر الفترة الزمنية ثم حدّث التقرير أو صدّر التفاصيل إلى Excel": "Select a date range, refresh the report, or export details to Excel.",
+      "اختر الفترة والفرع ثم حدّث التقرير أو صدّر النتائج": "Select the period and branch, then refresh or export the report.",
       "اختر الشركة": "Select company",
       "اختر الشركة أولًا": "Select a company first",
       "اختر الشركة أولًا.": "Select a company first.",
@@ -116,8 +117,12 @@
       "آخر 7 أيام": "Last 7 days",
       "آخر 30 يوم": "Last 30 days",
       "الشهر الحالي": "Current month",
+      "هذا الشهر": "This Month",
       "آخر 6 شهور مكتملة": "Last 6 full months",
       "تاريخ مخصص": "Custom range",
+      "مخصص": "Custom",
+      "من": "From",
+      "إلى": "To",
       "من تاريخ": "From date",
       "إلى تاريخ": "To date",
       "الفترة": "Period",
@@ -439,6 +444,8 @@
       ,"منتهي": "Expired"
       ,"رقم العميل": "Customer Number"
       ,"تصدير Excel": "Export Excel"
+      ,"تصدير PDF": "Export PDF"
+      ,"فلتر الفرع غير متاح لهذا التقرير": "Branch filtering is not available for this report"
       ,"جاهز. لا يتم إصدار مكافآت تلقائيًا من هذه الصفحة.": "Ready. Rewards are not issued automatically from this page."
       ,"أداء المكافآت": "Reward Performance"
       ,"ملخص كوبونات Shopify": "Shopify Coupon Summary"
@@ -1015,6 +1022,9 @@
       ,"ملخص المعارض": "Store Summary"
       ,"أداء الكاشير": "Cashier Performance"
       ,"أفضل المنتجات": "Top Products"
+      ,"نسبة البيع من إجمالي الإيراد": "Share of Total Revenue"
+      ,"حدّث التقرير أولًا قبل تصدير PDF.": "Refresh the report before exporting a PDF."
+      ,"أعلى 50 منتج حسب صافي المبيعات، مع نسبة مساهمة كل منتج من صافي إيراد الفترة المحددة. تصدير Excel يحتوي على كل المنتجات المباعة.": "Top 50 products by net sales, including each product's share of net revenue for the selected period. Excel includes all sold products."
       ,"ملاحظات التقرير": "Report Notes"
       ,"اختار الشركة ثم الفرع / النطاق، وبعدها اضغط تحديث التقرير لعرض البيانات.": "Select the company and branch/scope, then refresh the report."
       ,"اضغط تحديث التقرير لتطبيق الشركة والفرع والفترة الجديدة.": "Refresh the report to apply the new company, branch and period."

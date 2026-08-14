@@ -13,6 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function buildBranchSalesContent() {
   return `
+    <section id="branchSalesPrintHeader" class="branch-sales-print-header" aria-hidden="true"></section>
+
     <section id="loadingBox" class="loading-box hidden">
       جاري تحميل التقرير...
     </section>
@@ -46,7 +48,8 @@ function buildBranchSalesContent() {
     <section class="inventory-report-card">
       <h2>أفضل المنتجات</h2>
       <p class="inventory-muted-text">
-        أعلى 50 منتج حسب صافي المبيعات. تصدير Excel يحتوي على كل المنتجات المباعة خلال الفترة المحددة.
+        أعلى 50 منتج حسب صافي المبيعات، مع نسبة مساهمة كل منتج من صافي إيراد الفترة المحددة.
+        تصدير Excel يحتوي على كل المنتجات المباعة.
       </p>
       <div id="productsTable"></div>
     </section>
@@ -60,23 +63,27 @@ function buildBranchSalesContent() {
 
 
 function ensureBranchSalesExportButton() {
-  if (document.getElementById("exportBranchSalesBtn")) return;
-
   const loadButton = document.getElementById("loadBtn") || document.getElementById("refreshBranchSalesBtn");
   const actionsContainer = loadButton?.parentElement || document.querySelector(".inventory-hero-actions");
 
   if (!actionsContainer) return;
 
-  const exportButton = document.createElement("button");
-  exportButton.id = "exportBranchSalesBtn";
-  exportButton.type = "button";
-  exportButton.className = "run-btn";
-  exportButton.textContent = "تصدير Excel";
-
-  if (loadButton?.nextSibling) {
-    actionsContainer.insertBefore(exportButton, loadButton.nextSibling);
-  } else {
+  if (!document.getElementById("exportBranchSalesBtn")) {
+    const exportButton = document.createElement("button");
+    exportButton.id = "exportBranchSalesBtn";
+    exportButton.type = "button";
+    exportButton.className = "run-btn report-export-action";
+    exportButton.textContent = "تصدير Excel";
     actionsContainer.appendChild(exportButton);
+  }
+
+  if (!document.getElementById("exportBranchSalesPdfBtn")) {
+    const pdfButton = document.createElement("button");
+    pdfButton.id = "exportBranchSalesPdfBtn";
+    pdfButton.type = "button";
+    pdfButton.className = "run-btn report-export-action report-pdf-action";
+    pdfButton.textContent = "تصدير PDF";
+    actionsContainer.appendChild(pdfButton);
   }
 }
 
@@ -88,6 +95,10 @@ function bindBranchSalesEvents() {
   document
     .getElementById("exportBranchSalesBtn")
     ?.addEventListener("click", downloadBranchSalesExcel);
+
+  document
+    .getElementById("exportBranchSalesPdfBtn")
+    ?.addEventListener("click", printBranchSalesPdf);
 
   document
     .getElementById("loadBtn")
@@ -417,7 +428,7 @@ function renderBranchSalesReport(data) {
   renderPeriodComparison(data.comparison || {});
   renderBranches(data.branches || []);
   renderCashiers(data.cashiers || []);
-  renderProducts(data.products || []);
+  renderProducts(data.products || [], summary);
   renderNotes(data.notes || []);
 }
 
@@ -715,9 +726,11 @@ function renderCashiers(rows) {
     });
 }
 
-function renderProducts(rows) {
+function renderProducts(rows, summary = {}) {
   const container = document.getElementById("productsTable");
   if (!container) return;
+
+  const totalNetRevenue = Number(summary.netSales || 0);
 
   container.innerHTML =
     buildPosBranchTable({
@@ -749,6 +762,14 @@ function renderProducts(rows) {
         {
           label: "صافي المبيعات",
           render: (row) => formatMoney(row.netSales)
+        },
+        {
+          label: "نسبة البيع من إجمالي الإيراد",
+          render: (row) => formatPercent(
+            Number.isFinite(Number(row.revenueSharePercent))
+              ? Number(row.revenueSharePercent)
+              : calculatePercent(row.netSales, totalNetRevenue)
+          )
         },
         {
           label: "قيمة الخصم",
@@ -872,6 +893,71 @@ function getFilenameFromContentDisposition(headerValue) {
   }
 
   return "";
+}
+
+function getSelectedOptionText(selectId, fallback = "-") {
+  const select = document.getElementById(selectId);
+  const text = select?.selectedOptions?.[0]?.textContent?.trim();
+  return text || fallback;
+}
+
+function buildBranchSalesPrintTitle() {
+  const dateFrom = document.getElementById("dateFrom")?.value || "";
+  const dateTo = document.getElementById("dateTo")?.value || "";
+  const period = dateFrom && dateTo ? `${dateFrom} - ${dateTo}` : "الفترة الحالية";
+  return `تحليل أداء المعارض - ${period}`;
+}
+
+function populateBranchSalesPrintHeader() {
+  const header = document.getElementById("branchSalesPrintHeader");
+  if (!header) return;
+
+  const dateFrom = document.getElementById("dateFrom")?.value || "-";
+  const dateTo = document.getElementById("dateTo")?.value || "-";
+
+  header.innerHTML = `
+    <div>
+      <span>Virginia Operations</span>
+      <h1>تحليل أداء المعارض</h1>
+    </div>
+    <dl>
+      <div><dt>الشركة</dt><dd>${escapeHtml(getSelectedOptionText("companySelect"))}</dd></div>
+      <div><dt>الفرع</dt><dd>${escapeHtml(getSelectedOptionText("branchCode"))}</dd></div>
+      <div><dt>الفترة</dt><dd>${escapeHtml(`${dateFrom} إلى ${dateTo}`)}</dd></div>
+    </dl>
+  `;
+}
+
+function printBranchSalesPdf() {
+  const validation = validateBranchSalesContext();
+
+  if (!validation.ok) {
+    showErrorMessage(validation.message);
+    return;
+  }
+
+  const productsTable = document.getElementById("productsTable");
+  if (!productsTable?.textContent?.trim()) {
+    showErrorMessage("حدّث التقرير أولًا قبل تصدير PDF.");
+    return;
+  }
+
+  populateBranchSalesPrintHeader();
+
+  const previousTitle = document.title;
+  document.title = buildBranchSalesPrintTitle();
+
+  const restoreTitle = () => {
+    document.title = previousTitle;
+    window.removeEventListener("afterprint", restoreTitle);
+  };
+
+  window.addEventListener("afterprint", restoreTitle);
+  window.print();
+
+  window.setTimeout(() => {
+    if (document.title !== previousTitle) restoreTitle();
+  }, 1500);
 }
 
 async function downloadBranchSalesExcel() {
