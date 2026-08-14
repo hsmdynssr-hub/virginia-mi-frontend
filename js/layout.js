@@ -9,6 +9,13 @@
   const scriptUrl = document.currentScript?.src || window.location.href;
   const assetUrl = (relativePath) => new URL(relativePath, scriptUrl).href;
 
+  if (!document.querySelector('meta[name="viewport"]')) {
+    const viewport = document.createElement("meta");
+    viewport.name = "viewport";
+    viewport.content = "width=device-width, initial-scale=1.0";
+    document.head.appendChild(viewport);
+  }
+
   function hasStylesheet(fragment) {
     return Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
       .some((link) => String(link.href || "").includes(fragment));
@@ -30,6 +37,58 @@
     document.head.appendChild(themeCss);
   }
 
+  if (!hasStylesheet("app-modern.css")) {
+    const modernCss = document.createElement("link");
+    modernCss.rel = "stylesheet";
+    modernCss.href = `${assetUrl("../css/app-modern.css")}?v=20260814-01`;
+    modernCss.dataset.miModernUi = "true";
+    document.head.appendChild(modernCss);
+  }
+
+  function loadLocalizationScripts() {
+    if (window.MI18n || document.querySelector('script[data-mi-i18n-loader="true"]')) {
+      window.MI18n?.refresh?.();
+      return;
+    }
+
+    const sources = [
+      assetUrl("../locales/ar.js"),
+      assetUrl("../locales/en.js"),
+      assetUrl("./i18n.js")
+    ];
+
+    const loadNext = (index) => {
+      if (index >= sources.length) {
+        window.MI18n?.refresh?.();
+        return;
+      }
+
+      const source = sources[index];
+      const existing = Array.from(document.scripts)
+        .find((script) => String(script.src || "").split("?")[0] === source.split("?")[0]);
+
+      if (existing) {
+        if (existing.dataset.miLoaded === "true") loadNext(index + 1);
+        else existing.addEventListener("load", () => loadNext(index + 1), { once: true });
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = `${source}?v=20260814-05`;
+      script.async = false;
+      script.dataset.miI18nLoader = "true";
+      script.addEventListener("load", () => {
+        script.dataset.miLoaded = "true";
+        loadNext(index + 1);
+      }, { once: true });
+      document.head.appendChild(script);
+    };
+
+    loadNext(0);
+  }
+
+  loadLocalizationScripts();
+
   const hasBootstrapJs = Array.from(document.scripts)
     .some((script) => String(script.src || "").includes("bootstrap.bundle.min.js"));
 
@@ -49,7 +108,7 @@ function enhanceLegacyReportUi(root = document) {
   const scope = root.querySelectorAll ? root : document;
 
   scope.querySelectorAll(
-    ".inventory-kpi-card, .report-kpi-card, .kpi-card, .cards-grid > .card"
+    ".inventory-kpi-card, .report-kpi-card, .kpi-card, .cards-grid > .card, .kpi-grid > article"
   ).forEach((card, index) => {
     if (card.dataset.miEnhanced === "true") return;
 
@@ -99,18 +158,24 @@ function enhanceLegacyReportUi(root = document) {
     });
 
   scope.querySelectorAll(
-    ".inventory-data-table, .data-table, .report-table, .table-wrap > table"
+    ".inventory-data-table, .data-table, .report-table, .table-wrap > table, .content table"
   ).forEach((table) => {
     table.classList.add("table", "table-hover", "table-striped", "align-middle", "mi-data-table");
   });
 
-  scope.querySelectorAll(".filters-grid select, .report-field select")
+  scope.querySelectorAll(
+    ".filters-grid select, .report-field select, .report-filters select, .filter-panel select, .content .control-row select"
+  )
     .forEach((select) => select.classList.add("form-select"));
 
-  scope.querySelectorAll(".filters-grid input, .report-field input")
+  scope.querySelectorAll(
+    ".filters-grid input, .report-field input, .report-filters input, .filter-panel input, .content .control-row input"
+  )
     .forEach((input) => input.classList.add("form-control"));
 
-  scope.querySelectorAll(".primary-btn, .run-btn, .report-btn-primary")
+  scope.querySelectorAll(
+    ".primary-btn, .run-btn, .report-btn-primary, .filter-actions button, .report-actions button"
+  )
     .forEach((button) => button.classList.add("btn", "btn-primary"));
 
   scope.querySelectorAll(".inventory-empty, .report-empty, .empty")
@@ -177,6 +242,7 @@ const REPORT_PAGE_MAP = {
   "customer-review-sms-dashboard": "customer.review_sms.view",
   "customer-review-sms-settings": "admin.users",
   "customer-review-sms-queue": "customer.review_sms.send",
+  "customer-review-sms-manual": "customer.review_sms.send",
   "customer-review-followups": "customer.review_sms.followup",
   "customer-review-coupons-dashboard": "customer.review_sms.view",
   production: "production.index",
@@ -244,6 +310,7 @@ const PAGES_WITHOUT_REPORT_TOOLBAR = new Set([
   "customer-review-sms-dashboard",
   "customer-review-sms-settings",
   "customer-review-sms-queue",
+  "customer-review-sms-manual",
   "customer-review-followups",
   "customer-review-coupons-dashboard",
   "production",
@@ -694,14 +761,7 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
             <span>🏠</span> لوحة الإدارة
           </a>
 
-          <div class="nav-group">📚 واجهات التقارير</div>
-          <a data-page="reports-executive" data-report-type-nav="executive" class="nav-link" href="../reports/executive.html">التقارير التنفيذية</a>
-          <a data-page="reports-management" data-report-type-nav="management" class="nav-link" href="../reports/management.html">التقارير الإدارية</a>
-          <a data-page="reports-operational" data-report-type-nav="operational" class="nav-link" href="../reports/operational.html">التقارير التشغيلية</a>
-
-          <div class="nav-group">⚙️ Administration</div>
-          <a data-page="admin-users" class="nav-link" href="../admin/users.html">إدارة المستخدمين</a>
-          <a data-page="admin-report-classification" class="nav-link" href="../admin/report-classification.html">تصنيف التقارير</a>
+          <div class="nav-group">💼 التشغيل الرئيسي</div>
 
           <div class="nav-accordion" data-accordion="branches">
             <button type="button" class="nav-accordion-head" data-accordion-toggle="branches">
@@ -715,7 +775,7 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
               <a data-page="branches-stock" class="nav-link" href="../branches/stock.html">مخزون الفروع</a>
               <a data-page="branches-inventory-count" class="nav-link" href="../branches/inventory-count.html">جرد الفرع اللحظي</a>
               <a data-page="branches-replenishment" class="nav-link" href="../branches/replenishment.html"> احتياجات الفروع واعاده الطلب</a>
-              <a data-page="branches-comparison" class="nav-link" href="../branches/comparison.html">مقارنة الفروع</a>
+              <a data-page="branches-comparison" class="nav-link" href="../branches/comparison.html" hidden>مقارنة الفروع</a>
             </div>
           </div>
 
@@ -733,7 +793,7 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
 
           <div class="nav-accordion" data-accordion="pos">
             <button type="button" class="nav-accordion-head" data-accordion-toggle="pos">
-              <span>POS نقاط البيع 🧾</span>
+              <span>المبيعات ونقاط البيع 🧾</span>
               <span class="nav-accordion-arrow">⌄</span>
             </button>
 
@@ -749,17 +809,18 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
 
           <div class="nav-accordion" data-accordion="Customers">
             <button type="button" class="nav-accordion-head" data-accordion-toggle="Customers">
-              <span>العملاء 👥 Customers</span>
+              <span>خدمة عملاء Virginia 💬</span>
               <span class="nav-accordion-arrow">⌄</span>
             </button>
 
             <div class="nav-accordion-body">
-              <a data-page="customer" class="nav-link" href="../customer/index.html">صفحة تقارير العملاء</a>
+              <a data-page="customer" class="nav-link" href="../customer/index.html">مركز خدمة العملاء</a>
               <a data-page="customer-pos-phones" class="nav-link" href="../customer/pos-phones.html">متابعة عملاء نقاط البيع</a>
               <a data-page="customer-service-pos-review" class="nav-link" href="../customer/service-pos-review.html">مراجعة خدمات نقاط البيع</a>
             
 
               <a data-page="customer-review-sms-queue" class="nav-link" href="../customer/review-sms-queue.html">تشغيل رسائل تقييم العملاء</a>
+              <a data-page="customer-review-sms-manual" class="nav-link" href="../customer/review-sms-manual.html">إرسال رسالة يدوية</a>
               <a data-page="customer-review-followups" class="nav-link" href="../customer/review-followups.html">متابعة المحايدين والغاضبين</a>
               <a data-page="customer-review-coupons-dashboard" class="nav-link" href="../customer/review-coupons-dashboard.html">الكوبونات والتقارير اليومية</a>
               <a data-page="customer-review-sms-dashboard" class="nav-link" href="../customer/review-sms-dashboard.html">الداش بورد الفني للرسائل</a>
@@ -767,7 +828,11 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
 </div>
           </div>
 
-          <div class="nav-accordion" data-accordion="Production">
+          <div class="nav-group" hidden>⚙️ الإدارة</div>
+          <a data-page="admin-users" class="nav-link" href="../admin/users.html" hidden>إدارة المستخدمين</a>
+          <a data-page="admin-roles" class="nav-link" href="../admin/roles.html" hidden>الأدوار والصلاحيات</a>
+
+          <div class="nav-accordion" data-accordion="Production" hidden>
             <button type="button" class="nav-accordion-head" data-accordion-toggle="Production">
               <span>الإنتاج والتصنيع 🏭 Production</span>
               <span class="nav-accordion-arrow">⌄</span>
@@ -781,7 +846,7 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
             </div>
           </div>
 
-          <div class="nav-accordion" data-accordion="Costing">
+          <div class="nav-accordion" data-accordion="Costing" hidden>
             <button type="button" class="nav-accordion-head" data-accordion-toggle="Costing">
               <span>مراقبة التكاليف 💰 Costing</span>
               <span class="nav-accordion-arrow">⌄</span>
@@ -792,7 +857,7 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
             </div>
           </div>
 
-          <div class="nav-accordion" data-accordion="Purchase">
+          <div class="nav-accordion" data-accordion="Purchase" hidden>
             <button type="button" class="nav-accordion-head" data-accordion-toggle="Purchase">
               <span>المشتريات والموردين 📦 Purchase</span>
               <span class="nav-accordion-arrow">⌄</span>
@@ -809,7 +874,7 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
             </div>
           </div>
 
-          <div class="nav-accordion" data-accordion="Inventory">
+          <div class="nav-accordion" data-accordion="Inventory" hidden>
             <button type="button" class="nav-accordion-head" data-accordion-toggle="Inventory">
               <span>المخزون والمواقع 🏬 Inventory</span>
               <span class="nav-accordion-arrow">⌄</span>
@@ -825,7 +890,7 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
             </div>
           </div>
 
-          <div class="nav-accordion" data-accordion="Forecast">
+          <div class="nav-accordion" data-accordion="Forecast" hidden>
             <button type="button" class="nav-accordion-head" data-accordion-toggle="Forecast">
               <span>التوقعات والتارجت 🎯 Forecast</span>
               <span class="nav-accordion-arrow">⌄</span>
@@ -839,7 +904,7 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
             </div>
           </div>
 
-          <div class="nav-accordion" data-accordion="ForecastPlanning">
+          <div class="nav-accordion" data-accordion="ForecastPlanning" hidden>
             <button type="button" class="nav-accordion-head" data-accordion-toggle="ForecastPlanning">
               <span>تخطيط الفوركاست 📈 Forecast Planning</span>
               <span class="nav-accordion-arrow">⌄</span>
@@ -851,13 +916,18 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
             </div>
           </div>
         </nav>
+
+        <div class="sidebar-footer">
+          <span><i></i> Virginia Operations · Odoo 18</span>
+        </div>
       </aside>
 
       <main class="main">
 
         <header class="topbar">
           <div class="page-heading">
-            <span class="page-pill">Executive Report</span>
+            <button type="button" class="mobile-menu-btn" data-mi-mobile-menu aria-label="فتح القائمة">☰</button>
+            <span class="page-pill">Virginia Operations</span>
             <h2>${title}</h2>
             <p>${subtitle}</p>
           </div>
@@ -872,7 +942,8 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
                 👤 ${getCurrentUser()?.fullName || getCurrentUser()?.username || "User"}
               </div>
 
-              <button class="export-btn" onclick="logout()">تسجيل الخروج</button>
+              <button type="button" class="mi-language-toggle" data-mi-language-toggle aria-label="تغيير اللغة">◎ <strong>EN</strong></button>
+              <button class="export-btn logout-btn" onclick="logout()">تسجيل الخروج</button>
             </div>
           </div>
         </header>
@@ -891,6 +962,36 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
   loadReportFiltersEngine(activePage);
   enhanceLegacyReportUi(document);
   observeLegacyReportUi();
+  setupMobileSidebar();
+  window.MI18n?.refresh?.();
+}
+
+function setupMobileSidebar() {
+  const button = document.querySelector("[data-mi-mobile-menu]");
+  const sidebar = document.querySelector(".sidebar");
+  if (!button || !sidebar || button.dataset.miBound === "true") return;
+
+  button.dataset.miBound = "true";
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    document.body.classList.toggle("mi-sidebar-open");
+  });
+
+  sidebar.addEventListener("click", (event) => {
+    if (window.innerWidth <= 820 && event.target.closest("a")) {
+      document.body.classList.remove("mi-sidebar-open");
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    if (
+      document.body.classList.contains("mi-sidebar-open") &&
+      !event.target.closest(".sidebar") &&
+      !event.target.closest("[data-mi-mobile-menu]")
+    ) {
+      document.body.classList.remove("mi-sidebar-open");
+    }
+  });
 }
 
 function kpiCard(label, value, hint = "") {

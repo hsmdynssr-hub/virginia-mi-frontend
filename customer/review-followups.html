@@ -3,191 +3,121 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>متابعة العملاء المحايدين والغاضبين</title>
-
+  <title>مركز رسائل Virginia — متابعات العملاء</title>
   <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.rtl.min.css" />
   <link rel="stylesheet" href="../css/bootstrap-theme.css" />
-  <link rel="stylesheet" href="./review-sms.css?v=sms-unified-ui-20260714" />
+  <link rel="stylesheet" href="./review-sms.css?v=sms-core-20260814" />
+  <link rel="stylesheet" href="./review-sms-internal.css?v=internal-followups-coupons-20260814-04" />
   <script src="../js/api.js" defer></script>
   <script src="../js/layout.js" defer></script>
-  <script src="./review-sms.js" defer></script>
+  <script src="./review-sms.js?v=sms-followups-20260814-04" defer></script>
 </head>
 
-<body data-page="followups" data-report-code="customer.review_sms.followup">
+<body class="crsms-internal-page crsms-followups-page" data-page="followups" data-report-code="customer.review_sms.followup">
   <main class="crsms-page">
+    <nav class="crsms-return-bar" aria-label="التنقل في مركز رسائل Virginia">
+      <a class="crsms-return-link main" href="../dashboard/index.html"><span>⌂</span><strong>المشروع الرئيسي</strong></a>
+      <a class="crsms-return-link" data-return-page="dashboard" href="./review-sms-dashboard.html"><span>◫</span><strong>نظرة عامة</strong></a>
+      <a class="crsms-return-link" data-return-page="queue" href="./review-sms-queue.html"><span>✉</span><strong>قائمة الإرسال</strong></a>
+      <a class="crsms-return-link" data-return-page="manual" href="./review-sms-manual.html"><span>＋</span><strong>إرسال يدوي</strong></a>
+      <a class="crsms-return-link active" data-return-page="followups" href="./review-followups.html"><span>☎</span><strong>المتابعات</strong></a>
+      <a class="crsms-return-link" data-return-page="coupons" href="./review-coupons-dashboard.html"><span>★</span><strong>المكافآت</strong></a>
+      <a class="crsms-return-link settings" href="./review-sms-settings.html"><span>⚙</span><strong>الإعدادات</strong></a>
+    </nav>
 
-    <section class="crsms-return-bar" aria-label="Review SMS navigation">
-      <a class="crsms-return-link main" data-return-page="dashboard-main" href="../dashboard/index.html">
-        <span>🏠</span>
-        <strong>الرجوع للمشروع الرئيسي</strong>
-      </a>
-
-      <a class="crsms-return-link" data-return-page="customer-home" href="./index.html">
-        <span>👥</span>
-        <strong>صفحة العملاء</strong>
-      </a>
-
-      <a class="crsms-return-link" data-return-page="queue" href="./review-sms-queue.html">
-        <span>🧾</span>
-        <strong>تشغيل الرسائل</strong>
-      </a>
-
-      <a class="crsms-return-link" href="./review-sms-manual.html">
-        <span>📱</span>
-        <strong>إرسال يدوي</strong>
-      </a>
-
-      <a class="crsms-return-link" data-return-page="followups" href="./review-followups.html">
-        <span>☎️</span>
-        <strong>المتابعات</strong>
-      </a>
-
-      <a class="crsms-return-link" data-return-page="dashboard" href="./review-sms-dashboard.html">
-        <span>📊</span>
-        <strong>الداش بورد الفني</strong>
-      </a>
-      <a class="crsms-return-link" href="./review-coupons-dashboard.html"><span>🎁</span><strong>الكوبونات</strong></a>
-      <a class="crsms-return-link" href="./review-sms-settings.html"><span>⚙️</span><strong>إعدادات الأدمن</strong></a>
-    </section>
-
-    <section class="crsms-header">
+    <header class="crsms-operation-hero crsms-followups-hero">
       <div>
-        <h1>متابعة العملاء المحايدين والغاضبين</h1>
-        <p>
-          صفحة تشغيلية لخدمة العملاء لمتابعة تقييمات 1 و 3 فقط، تغيير حالة المتابعة، ومراجعة أسباب عدم الرضا.
-        </p>
+        <span class="crsms-eyebrow">CUSTOMER RECOVERY WORKSPACE</span>
+        <h1>متابعة العملاء غير الراضين</h1>
+        <p>إدارة تقييمات «غير راضٍ» و«محايد»، توثيق التواصل، وتوزيع الحالات حتى الحل والإغلاق.</p>
       </div>
-
-      <div class="crsms-mode-badge" id="modeBadge">جاهز للفحص</div>
-    </section>
-
-    <section class="crsms-panel crsms-queue-nav">
-      <div class="crsms-mini-actions">
-        <a class="crsms-nav-link" href="./review-sms-dashboard.html">الداشبورد الفني</a>
-        <a class="crsms-nav-link" href="./review-sms-queue.html">صفحة تشغيل الفواتير</a>
+      <div class="crsms-operation-status">
+        <span>حالة الاتصال</span>
+        <div class="crsms-mode-badge" id="modeBadge">جاهز للفحص</div>
+        <button type="button" class="crsms-button ghost" data-followups-action="health"><span>✓</span> فحص النظام</button>
       </div>
-      <span>هذه الصفحة للمتابعة فقط. لا ترسل SMS ولا تغيّر إعدادات الإرسال.</span>
-    </section>
+    </header>
 
-    <section class="crsms-panel">
+    <section class="crsms-panel crsms-followups-filter-panel">
       <div class="crsms-section-title">
-        <h2>فلاتر المتابعة</h2>
-        <button type="button" class="crsms-secondary" data-followups-action="health">Health</button>
+        <div>
+          <span class="crsms-section-kicker">FOLLOW-UP FILTERS</span>
+          <h2>فلترة الحالات</h2>
+          <p>حدد الحالة والأولوية والفترة ثم حدّث قائمة المتابعات المسندة إليك.</p>
+        </div>
+        <span class="crsms-company-chip"><i></i> Virginia — متابعة فقط</span>
       </div>
 
-      <div class="crsms-form-grid">
-        <div class="crsms-field">
-          <label for="companyId">الشركة</label>
-          <input id="companyId" type="hidden" value="1" />
-          <input type="text" value="فيرجينيا — Company ID 1" readonly />
-        </div>
+      <input id="companyId" type="hidden" value="1" />
 
-        <div class="crsms-field">
-          <label for="limit">Limit</label>
-          <input id="limit" type="number" value="50" min="1" max="500" />
-        </div>
-
+      <div class="crsms-form-grid crsms-followups-filter-grid">
         <div class="crsms-field">
           <label for="followupStatusFilter">حالة المتابعة</label>
           <select id="followupStatusFilter">
-            <option value="">كل الحالات</option>
-            <option value="new">جديد</option>
-            <option value="in_progress">جاري المتابعة</option>
-            <option value="contacted">تم التواصل</option>
-            <option value="resolved">تم الحل</option>
-            <option value="closed">مغلق</option>
+            <option value="">كل الحالات</option><option value="new">جديد</option><option value="in_progress">جاري المتابعة</option>
+            <option value="contacted">تم التواصل</option><option value="resolved">تم الحل</option><option value="closed">مغلق</option>
           </select>
         </div>
-
         <div class="crsms-field">
           <label for="priorityFilter">الأولوية</label>
           <select id="priorityFilter">
-            <option value="">كل الأولويات</option>
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
+            <option value="">كل الأولويات</option><option value="high">عالية</option><option value="medium">متوسطة</option><option value="low">منخفضة</option>
           </select>
         </div>
-
         <div class="crsms-field">
           <label for="followupDateField">نوع التاريخ</label>
           <select id="followupDateField">
-            <option value="created_at">تاريخ إنشاء المتابعة</option>
-            <option value="updated_at">آخر تحديث</option>
-            <option value="contacted_at">تاريخ التواصل</option>
-            <option value="resolved_at">تاريخ الحل</option>
-            <option value="closed_at">تاريخ الإغلاق</option>
+            <option value="created_at">تاريخ إنشاء المتابعة</option><option value="updated_at">آخر تحديث</option>
+            <option value="contacted_at">تاريخ التواصل</option><option value="resolved_at">تاريخ الحل</option><option value="closed_at">تاريخ الإغلاق</option>
           </select>
         </div>
-
         <div class="crsms-field">
           <label for="followupDatePreset">الفترة</label>
           <select id="followupDatePreset">
-            <option value="custom">فترة مخصصة / كل الفترات</option>
-            <option value="today">اليوم</option>
-            <option value="yesterday">أمس</option>
-            <option value="last7">آخر 7 أيام</option>
-            <option value="thisMonth">هذا الشهر</option>
+            <option value="custom">كل الفترات / مخصص</option><option value="today">اليوم</option><option value="yesterday">أمس</option>
+            <option value="last7">آخر 7 أيام</option><option value="thisMonth">هذا الشهر</option>
           </select>
         </div>
-
-        <div class="crsms-field">
-          <label for="followupDateFrom">من تاريخ</label>
-          <input id="followupDateFrom" type="date" />
-        </div>
-
-        <div class="crsms-field">
-          <label for="followupDateTo">إلى تاريخ</label>
-          <input id="followupDateTo" type="date" />
-        </div>
+        <div class="crsms-field"><label for="followupDateFrom">من تاريخ</label><input id="followupDateFrom" type="date" /></div>
+        <div class="crsms-field"><label for="followupDateTo">إلى تاريخ</label><input id="followupDateTo" type="date" /></div>
+        <div class="crsms-field"><label for="limit">عدد النتائج</label><input id="limit" type="number" value="50" min="1" max="500" /></div>
+        <button type="button" class="crsms-button search crsms-followups-refresh" data-followups-action="followups"><span>↻</span> تحديث المتابعات</button>
       </div>
 
-      <div class="crsms-actions">
-        <button type="button" data-followups-action="followups">تحديث المتابعات</button>
-      </div>
-
-      <pre class="crsms-status" id="statusBox">جاهز. اضغط تحديث المتابعات.</pre>
+      <pre class="crsms-status" id="statusBox" aria-live="polite">جاهز. اضغط تحديث المتابعات.</pre>
     </section>
 
-    <section class="crsms-stats">
-      <article class="crsms-stat-card"><span>Follow-ups</span><strong id="followupTotal">-</strong></article>
-      <article class="crsms-stat-card"><span>New</span><strong id="followupNew">-</strong></article>
-      <article class="crsms-stat-card"><span>In Progress</span><strong id="followupInProgress">-</strong></article>
-      <article class="crsms-stat-card"><span>Contacted</span><strong id="followupContacted">-</strong></article>
-      <article class="crsms-stat-card"><span>Resolved</span><strong id="followupResolved">-</strong></article>
-      <article class="crsms-stat-card"><span>High Priority</span><strong id="followupHigh">-</strong></article>
+    <section class="crsms-section-heading">
+      <div><span>حالة فريق المتابعة</span><h2>ملخص الحالات الحالية</h2></div>
+      <small>المؤشرات تتغير حسب الفلاتر المحددة.</small>
     </section>
 
-    <section class="crsms-panel">
+    <section class="crsms-stats crsms-followups-stats" aria-label="مؤشرات المتابعات">
+      <article class="crsms-stat-card tone-purple"><div class="crsms-stat-head"><span>كل المتابعات</span><i>▦</i></div><strong id="followupTotal">-</strong><small>إجمالي الحالات</small></article>
+      <article class="crsms-stat-card tone-red"><div class="crsms-stat-head"><span>جديدة</span><i>＋</i></div><strong id="followupNew">-</strong><small>تحتاج بدء التواصل</small></article>
+      <article class="crsms-stat-card tone-amber"><div class="crsms-stat-head"><span>جاري المتابعة</span><i>↻</i></div><strong id="followupInProgress">-</strong><small>يعمل عليها الفريق</small></article>
+      <article class="crsms-stat-card tone-blue"><div class="crsms-stat-head"><span>تم التواصل</span><i>☎</i></div><strong id="followupContacted">-</strong><small>تم الوصول للعميل</small></article>
+      <article class="crsms-stat-card tone-green"><div class="crsms-stat-head"><span>تم الحل</span><i>✓</i></div><strong id="followupResolved">-</strong><small>حالات معالجة بنجاح</small></article>
+      <article class="crsms-stat-card tone-red"><div class="crsms-stat-head"><span>أولوية عالية</span><i>!</i></div><strong id="followupHigh">-</strong><small>تحتاج تدخلاً سريعًا</small></article>
+    </section>
+
+    <section class="crsms-panel crsms-followups-results-panel">
       <div class="crsms-section-title">
-        <h2>قائمة العملاء المحايدين والغاضبين</h2>
-        <span class="crsms-hint">المدير يرى ويوزع كل الحالات، والموظف يرى الحالات المسندة إليه فقط.</span>
+        <div>
+          <span class="crsms-section-kicker">CUSTOMER CASES</span>
+          <h2>حالات عدم الرضا</h2>
+          <p>المدير يرى ويوزع الحالات، والموظف يرى الحالات المسندة إليه فقط.</p>
+        </div>
+        <span class="crsms-selection-note"><i></i> حدّث الحالة بعد كل تواصل</span>
       </div>
 
       <div class="crsms-table-wrap">
         <table class="crsms-table crsms-followups-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>الأولوية</th>
-              <th>الحالة</th>
-              <th>التقييم</th>
-              <th>سبب عدم الرضا</th>
-              <th>ملاحظة العميل</th>
-              <th>الفرع</th>
-              <th>العميل</th>
-              <th>الموبايل</th>
-              <th>الفاتورة</th>
-              <th>القيمة</th>
-              <th>مسؤول المتابعة</th>
-              <th>ملاحظة الاتصال</th>
-              <th>إجراءات</th>
-            </tr>
-          </thead>
-          <tbody id="followupsBody">
-            <tr><td colspan="14">اضغط تحديث المتابعات.</td></tr>
-          </tbody>
+          <thead><tr>
+            <th>ID</th><th>الأولوية</th><th>الحالة</th><th>التقييم</th><th>سبب عدم الرضا</th><th>ملاحظة العميل</th><th>الفرع</th>
+            <th>العميل</th><th>الموبايل</th><th>الفاتورة</th><th>القيمة</th><th>مسؤول المتابعة</th><th>ملاحظة الاتصال</th><th>إجراءات</th>
+          </tr></thead>
+          <tbody id="followupsBody"><tr><td colspan="14">اضغط تحديث المتابعات لعرض الحالات.</td></tr></tbody>
         </table>
       </div>
     </section>

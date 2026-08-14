@@ -6,309 +6,324 @@
   <link rel="stylesheet" href="../css/style.css" />
 
   <style>
-    .dashboard-hero {
+    .dashboard-home-shell { display: grid; gap: 22px; }
+
+    .ops-overview {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(280px, .65fr);
+      gap: 16px;
+    }
+
+    .ops-welcome,
+    .ops-status-panel {
       position: relative;
       overflow: hidden;
-      border-radius: 28px;
-      padding: 34px 36px;
-      margin-bottom: 26px;
-      color: #ffffff;
-      background:
-        radial-gradient(circle at top left, rgba(20, 184, 166, 0.35), transparent 34%),
-        linear-gradient(135deg, #082f49 0%, #0f172a 58%, #111827 100%);
-      box-shadow: 0 22px 50px rgba(15, 23, 42, 0.18);
+      min-height: 228px;
+      border-radius: 24px;
+      box-shadow: 0 16px 42px rgba(25, 39, 72, .08);
     }
 
-    .dashboard-hero::after {
+    .ops-welcome {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 30px 32px;
+      border: 1px solid #dfe7f4;
+      background:
+        radial-gradient(circle at 0 0, rgba(45, 112, 235, .13), transparent 22rem),
+        linear-gradient(135deg, #ffffff 0%, #f7faff 58%, #edf5ff 100%);
+    }
+
+    .ops-welcome::after {
       content: "";
       position: absolute;
-      inset-inline-start: -70px;
-      top: -80px;
-      width: 240px;
-      height: 240px;
+      inset-inline-end: -55px;
+      bottom: -105px;
+      width: 245px;
+      height: 245px;
+      border: 38px solid rgba(37, 87, 214, .055);
       border-radius: 50%;
-      background: rgba(59, 130, 246, 0.25);
+      pointer-events: none;
     }
 
-    .dashboard-hero-inner {
+    .ops-eyebrow,
+    .ops-status-badge {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      gap: 7px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .04em;
+    }
+
+    .ops-eyebrow {
+      padding: 7px 10px;
+      color: #1f55c7;
+      border: 1px solid #d7e4ff;
+      background: #f1f6ff;
+    }
+
+    .ops-eyebrow::before,
+    .ops-status-badge::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #2fb887;
+      box-shadow: 0 0 0 4px rgba(47, 184, 135, .11);
+    }
+
+    .ops-welcome h2 {
+      position: relative;
+      z-index: 1;
+      max-width: 680px;
+      margin: 14px 0 8px;
+      color: #101c34;
+      font-size: clamp(25px, 3vw, 36px);
+      line-height: 1.35;
+      letter-spacing: -.035em;
+    }
+
+    .ops-welcome p {
+      position: relative;
+      z-index: 1;
+      max-width: 700px;
+      margin: 0;
+      color: #64728a;
+      font-size: 12px;
+      line-height: 1.9;
+    }
+
+    .ops-actions {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 20px;
+    }
+
+    .ops-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 40px;
+      padding: 0 15px;
+      border-radius: 11px;
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 800;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    .ops-action:hover { transform: translateY(-2px); }
+    .ops-action.primary { color: #fff; background: linear-gradient(135deg, #1c4bc0, #2865e5); box-shadow: 0 10px 20px rgba(37, 87, 214, .19); }
+    .ops-action.secondary { color: #1c2942; border: 1px solid #dce4f0; background: rgba(255, 255, 255, .86); }
+
+    .ops-status-panel {
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      color: #fff;
+      background:
+        radial-gradient(circle at 0 100%, rgba(21, 173, 163, .28), transparent 18rem),
+        linear-gradient(145deg, #12233f 0%, #0c182c 100%);
+    }
+
+    .ops-status-panel::after {
+      content: "";
+      position: absolute;
+      inset-inline-end: -62px;
+      top: -70px;
+      width: 190px;
+      height: 190px;
+      border: 1px solid rgba(255, 255, 255, .07);
+      border-radius: 50%;
+      box-shadow: 0 0 0 34px rgba(255, 255, 255, .018);
+    }
+
+    .ops-status-badge {
+      position: relative;
+      z-index: 1;
+      padding: 6px 9px;
+      color: #bcd1f1;
+      border: 1px solid rgba(255, 255, 255, .1);
+      background: rgba(255, 255, 255, .05);
+    }
+
+    .ops-status-panel h3 { position: relative; z-index: 1; margin: 15px 0 5px; color: #fff; font-size: 17px; }
+    .ops-status-panel > p { position: relative; z-index: 1; margin: 0; color: #8fa2bf; font-size: 10px; line-height: 1.7; }
+
+    .ops-status-grid {
       position: relative;
       z-index: 1;
       display: grid;
-      grid-template-columns: 1.5fr 1fr;
-      gap: 24px;
-      align-items: center;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+      margin-top: auto;
+      padding-top: 20px;
     }
 
-    .dashboard-eyebrow {
-      display: inline-flex;
-      width: fit-content;
-      padding: 7px 12px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.14);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      font-size: 12px;
-      font-weight: 800;
-      margin-bottom: 14px;
+    .ops-stat {
+      padding: 13px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 13px;
+      background: rgba(255, 255, 255, .045);
     }
 
-    .dashboard-hero h2 {
-      margin: 0 0 10px;
-      font-size: 32px;
-      line-height: 1.25;
-      letter-spacing: -0.5px;
-    }
-
-    .dashboard-hero p {
-      margin: 0;
-      max-width: 760px;
-      color: rgba(255, 255, 255, 0.82);
-      line-height: 1.8;
-      font-size: 15px;
-    }
-
-    .dashboard-stats {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(120px, 1fr));
-      gap: 12px;
-    }
-
-    .dashboard-stat {
-      border-radius: 20px;
-      padding: 16px;
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      backdrop-filter: blur(10px);
-    }
-
-    .dashboard-stat span {
-      display: block;
-      color: rgba(255, 255, 255, 0.72);
-      font-size: 12px;
-      margin-bottom: 8px;
-    }
-
-    .dashboard-stat strong {
-      display: block;
-      color: #ffffff;
-      font-size: 24px;
-      line-height: 1;
-    }
+    .ops-stat span { display: block; margin-bottom: 7px; color: #91a4c1; font-size: 9px; }
+    .ops-stat strong { display: block; color: #fff; font-size: 22px; line-height: 1; }
 
     .dashboard-section-title {
       display: flex;
-      align-items: center;
+      align-items: end;
       justify-content: space-between;
       gap: 16px;
-      margin: 18px 0;
+      padding: 0 3px;
     }
 
-    .dashboard-section-title h3 {
-      margin: 0;
-      font-size: 20px;
-      color: #0f172a;
-    }
-
-    .dashboard-section-title p {
-      margin: 0;
-      color: #64748b;
-      font-size: 13px;
-    }
+    .dashboard-section-title h3 { margin: 0 0 4px; color: #111d34; font-size: 19px; }
+    .dashboard-section-title p { margin: 0; color: #718097; font-size: 10px; }
+    .dashboard-section-count { display: inline-flex; align-items: center; gap: 5px; color: #54647d; font-size: 10px; font-weight: 800; }
+    .dashboard-section-count strong { color: #2157c9; font-size: 13px; }
 
     .dashboard-modules-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(260px, 1fr));
-      gap: 18px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 15px;
     }
 
     .dashboard-card {
+      --card-accent: #2c64dd;
+      --card-soft: #eff5ff;
       position: relative;
       overflow: hidden;
-      min-height: 315px;
-      padding: 22px;
-      border-radius: 26px;
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.92));
-      border: 1px solid rgba(148, 163, 184, 0.24);
-      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
-      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      min-height: 280px;
+      padding: 21px;
+      border: 1px solid #e1e7f0;
+      border-radius: 20px;
+      background: #fff;
+      box-shadow: 0 11px 30px rgba(25, 39, 72, .055);
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
     }
 
-    .dashboard-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.13);
-      border-color: rgba(37, 99, 235, 0.28);
+    .dashboard-card::before {
+      content: "";
+      position: absolute;
+      inset-inline: 0;
+      top: 0;
+      height: 4px;
+      background: var(--card-accent);
     }
 
-    .dashboard-card-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 14px;
-      margin-bottom: 16px;
-    }
+    .dashboard-card.tone-teal { --card-accent: #159b91; --card-soft: #eaf9f7; }
+    .dashboard-card.tone-amber { --card-accent: #d68b18; --card-soft: #fff7e9; }
+    .dashboard-card.tone-violet { --card-accent: #7658d9; --card-soft: #f3efff; }
+
+    .dashboard-card:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--card-accent) 30%, #e1e7f0); box-shadow: 0 18px 42px rgba(25, 39, 72, .1); }
+
+    .dashboard-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+    .dashboard-card-title { display: flex; align-items: center; gap: 12px; min-width: 0; }
 
     .dashboard-icon {
-      width: 54px;
-      height: 54px;
-      border-radius: 18px;
+      width: 47px;
+      height: 47px;
+      flex: 0 0 47px;
       display: grid;
       place-items: center;
-      font-size: 26px;
-      background: #eff6ff;
-      box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.08);
+      border-radius: 14px;
+      color: var(--card-accent);
+      background: var(--card-soft);
+      font-size: 21px;
     }
+
+    .dashboard-card h3 { margin: 0 0 4px; color: #142039; font-size: 16px; }
+    .dashboard-card-title small { color: #8a97aa; font-size: 8px; font-weight: 700; }
 
     .dashboard-badge {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      min-width: 76px;
-      padding: 7px 10px;
+      min-height: 27px;
+      padding: 0 9px;
       border-radius: 999px;
-      background: #ecfeff;
-      color: #0f766e;
-      font-size: 12px;
-      font-weight: 900;
-      border: 1px solid rgba(20, 184, 166, 0.16);
+      color: var(--card-accent);
+      background: var(--card-soft);
+      font-size: 8px;
+      font-weight: 800;
+      white-space: nowrap;
     }
+    .dashboard-badge strong { margin-inline-end: 3px; font-size: 10px; }
 
-    .dashboard-card h3 {
-      margin: 0 0 8px;
-      font-size: 20px;
-      color: #0f172a;
-    }
+    .dashboard-card > p { min-height: 41px; margin: 14px 0 15px; color: #68768c; font-size: 10px; line-height: 1.8; }
 
-    .dashboard-card p {
-      margin: 0 0 18px;
-      min-height: 54px;
-      color: #64748b;
-      line-height: 1.7;
-      font-size: 13px;
-    }
+    .dashboard-card-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 13px; }
+    .dashboard-links-label { color: #8a97aa; font-size: 8px; font-weight: 800; }
 
     .dashboard-module-main-link {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      width: fit-content;
-      margin-bottom: 14px;
-      padding: 9px 13px;
-      border-radius: 12px;
-      background: #0f172a;
-      color: #ffffff;
+      gap: 7px;
+      min-height: 34px;
+      padding: 0 11px;
+      border-radius: 9px;
+      color: #fff;
+      background: var(--card-accent);
       text-decoration: none;
-      font-size: 12px;
-      font-weight: 900;
+      font-size: 8px;
+      font-weight: 800;
     }
 
-    .dashboard-report-links {
-      display: grid;
-      gap: 8px;
-      margin-top: 8px;
-    }
+    .dashboard-module-main-link::after { content: "←"; }
+    html[dir="ltr"] .dashboard-module-main-link::after { content: "→"; }
+
+    .dashboard-report-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
 
     .dashboard-report-links a,
     .dashboard-report-links .disabled-report {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 13px;
-      background: #f1f5f9;
-      color: #0f172a;
+      gap: 8px;
+      min-height: 37px;
+      padding: 7px 10px;
+      border: 1px solid #e8edf4;
+      border-radius: 10px;
+      color: #344158;
+      background: #f8fafc;
       text-decoration: none;
-      font-size: 13px;
-      font-weight: 850;
-      transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+      font-size: 8px;
+      font-weight: 700;
+      transition: color .16s ease, background .16s ease, border-color .16s ease;
     }
 
-    .dashboard-report-links a::before {
-      content: "↗";
-      color: #2563eb;
-      font-weight: 900;
+    .dashboard-report-links a::after { content: "↗"; color: var(--card-accent); font-size: 11px; }
+    .dashboard-report-links a:hover { color: var(--card-accent); border-color: color-mix(in srgb, var(--card-accent) 25%, #e8edf4); background: var(--card-soft); }
+    .dashboard-report-links .disabled-report { opacity: .56; cursor: not-allowed; }
+
+    @media (max-width: 1180px) {
+      .ops-overview { grid-template-columns: 1fr; }
+      .ops-status-panel { min-height: 205px; }
     }
 
-    .dashboard-report-links a:hover {
-      background: linear-gradient(135deg, #2563eb, #0f766e);
-      color: #ffffff;
-      transform: translateX(-2px);
+    @media (max-width: 820px) {
+      .dashboard-modules-grid { grid-template-columns: 1fr; }
+      .ops-welcome { padding: 24px; }
+      .dashboard-report-links { grid-template-columns: 1fr; }
     }
 
-    .dashboard-report-links a:hover::before {
-      color: #ffffff;
-    }
-
-    .dashboard-report-links .disabled-report {
-      opacity: 0.58;
-      cursor: not-allowed;
-    }
-
-    .dashboard-report-links .disabled-report::before {
-      content: "⏳";
-    }
-
-    .report-portals-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(240px, 1fr));
-      gap: 18px;
-    }
-
-    .report-portal-card {
-      display: grid;
-      gap: 12px;
-      min-height: 210px;
-      padding: 24px;
-      border-radius: 24px;
-      color: #ffffff;
-      text-decoration: none;
-      box-shadow: 0 18px 42px rgba(15, 23, 42, .14);
-      transition: transform .18s ease, box-shadow .18s ease;
-    }
-
-    .report-portal-card:hover { transform: translateY(-5px); box-shadow: 0 25px 55px rgba(15, 23, 42, .2); }
-    .report-portal-card.executive { background: linear-gradient(135deg, #312e81, #1d4ed8); }
-    .report-portal-card.management { background: linear-gradient(135deg, #0f172a, #334155); }
-    .report-portal-card.operational { background: linear-gradient(135deg, #065f46, #0f766e); }
-    .report-portal-card span { font-size: 34px; }
-    .report-portal-card h3 { margin: 0; font-size: 23px; }
-    .report-portal-card p { margin: 0; color: rgba(255,255,255,.8); line-height: 1.7; }
-    .report-portal-card strong { margin-top: auto; }
-
-    @media (max-width: 1200px) {
-      .dashboard-modules-grid {
-        grid-template-columns: repeat(2, minmax(260px, 1fr));
-      }
-
-      .dashboard-hero-inner {
-        grid-template-columns: 1fr;
-      }
-
-      .report-portals-grid { grid-template-columns: 1fr; }
-    }
-
-    @media (max-width: 760px) {
-      .dashboard-modules-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .dashboard-hero {
-        padding: 24px;
-      }
-
-      .dashboard-hero h2 {
-        font-size: 24px;
-      }
-
-      .dashboard-stats {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 560px) {
+      .ops-actions { display: grid; grid-template-columns: 1fr; }
+      .dashboard-section-title { align-items: flex-start; flex-direction: column; }
+      .dashboard-card-top { align-items: center; }
     }
   </style>
 </head>
 <body>
   <script src="../js/api.js"></script>
-  <script src="../js/layout.js"></script>
+  <script src="../js/layout.js?v=20260814-04"></script>
 
   <script>
     const DASHBOARD_MODULES = [
@@ -343,13 +358,29 @@
             page: "branches-comparison",
             title: "مقارنة الفروع",
             href: "../branches/comparison.html",
+            hidden: true,
             disabled: true
           }
         ]
       },
 
       {
-        title: "نقاط البيع",
+        title: "المينو والأسعار",
+        icon: "📋",
+        description: "متابعة مينو المنتجات والأسعار وحالة التوفر والمخزون المعروض للبيع.",
+        indexPage: "menu-prices",
+        indexHref: "../menu/prices.html",
+        reports: [
+          {
+            page: "menu-prices",
+            title: "مينو الأسعار والمخزون",
+            href: "../menu/prices.html"
+          }
+        ]
+      },
+
+      {
+        title: "نقاط البيع والمبيعات",
         icon: "🧾",
         description: "نقاط البيع، الكاشير، المعارض، ساعات الذروة،.",
         indexPage: "pos",
@@ -384,9 +415,9 @@
       },
 
       {
-        title: "العملاء",
-        icon: "👥",
-        description: "أرقام عملاء نقاط البيع، خدمة العملاء، رسائل التقييم، ومتابعة العملاء غير الراضين.",
+        title: "خدمة عملاء Virginia",
+        icon: "💬",
+        description: "رسائل التقييم، متابعة العملاء غير الراضين، ومكافآت الشحن المجاني على Shopify.",
         indexPage: "customer",
         indexHref: "../customer/index.html",
         reports: [
@@ -407,6 +438,11 @@
             href: "../customer/review-sms-queue.html"
           },
           {
+            page: "customer-review-sms-manual",
+            title: "إرسال رسالة يدوية",
+            href: "../customer/review-sms-manual.html"
+          },
+          {
             page: "customer-review-followups",
             title: "متابعة العملاء الغاضبين",
             href: "../customer/review-followups.html"
@@ -417,9 +453,14 @@
             href: "../customer/review-sms-dashboard.html"
           },
           {
-            page: "customer-review-coupon",
-            title: "كوبون الشحن المجاني",
-            href: "../customer/review-coupon.html"
+            page: "customer-review-coupons-dashboard",
+            title: "مكافآت الشحن المجاني",
+            href: "../customer/review-coupons-dashboard.html"
+          },
+          {
+            page: "customer-review-sms-settings",
+            title: "إعدادات الرسائل",
+            href: "../customer/review-sms-settings.html"
           }]
       },
 
@@ -583,8 +624,16 @@
       }
     ];
 
+    const VISIBLE_MODULE_TITLES = new Set([
+      "ذكاء الفروع",
+      "المينو والأسعار",
+      "نقاط البيع والمبيعات",
+      "خدمة عملاء Virginia"
+    ]);
+
     function getAllowedReports(module) {
       return module.reports.filter((report) => {
+        if (report.hidden) return false;
         if (report.disabled) return hasPermission(report.page);
         return hasPermission(report.page);
       });
@@ -603,7 +652,7 @@
 
       return `
         <div class="dashboard-report-links">
-          ${reports.map((report) => {
+          ${reports.slice(0, 4).map((report) => {
             if (report.disabled) {
               return `
                 <div class="disabled-report" title="الصفحة غير موجودة بعد">
@@ -624,6 +673,7 @@
 
     function buildDashboardModules() {
       const allowedModules = DASHBOARD_MODULES
+        .filter((module) => VISIBLE_MODULE_TITLES.has(module.title))
         .map((module) => {
           const allowedReports = getAllowedReports(module);
 
@@ -661,31 +711,41 @@
         html: `
           <div class="dashboard-section-title">
             <div>
-              <h3>الأقسام التشغيلية</h3>
-              <p>كل قسم يحتوي على التقارير المتاحة حسب صلاحيات المستخدم.</p>
+              <h3>مساحات العمل الأساسية</h3>
+              <p>انتقل مباشرة إلى القسم أو اختر إحدى الوظائف السريعة.</p>
             </div>
+            <span class="dashboard-section-count"><strong>${allowedModules.length}</strong><span>مساحات عمل متاحة</span></span>
           </div>
 
           <div class="dashboard-modules-grid">
-            ${allowedModules.map((module) => {
+            ${allowedModules.map((module, index) => {
+              const tones = ["tone-blue", "tone-teal", "tone-amber", "tone-violet"];
               return `
-                <div class="dashboard-card">
+                <article class="dashboard-card ${tones[index % tones.length]}">
                   <div class="dashboard-card-top">
-                    <div class="dashboard-icon">${module.icon}</div>
+                    <div class="dashboard-card-title">
+                      <div class="dashboard-icon">${module.icon}</div>
+                      <div>
+                        <h3>${module.title}</h3>
+                        <small>مساحة تشغيل متخصصة</small>
+                      </div>
+                    </div>
                     <div class="dashboard-badge">
-                      ${module.allowedReports.length} تقارير
+                      <strong>${module.allowedReports.length}</strong><span>وظائف</span>
                     </div>
                   </div>
 
-                  <h3>${module.title}</h3>
                   <p>${module.description}</p>
 
-                  <a class="dashboard-module-main-link" href="${module.indexHref}">
-                    فتح صفحة القسم
-                  </a>
+                  <div class="dashboard-card-actions">
+                    <span class="dashboard-links-label">اختصارات سريعة</span>
+                    <a class="dashboard-module-main-link" href="${module.indexHref}">
+                      فتح القسم
+                    </a>
+                  </div>
 
                   ${buildReportLinks(module.allowedReports)}
-                </div>
+                </article>
               `;
             }).join("")}
           </div>
@@ -698,52 +758,44 @@
     const dashboard = buildDashboardModules();
 
     renderLayout(
-      "لوحة الإدارة",
-      "التقارير المتاحة حسب صلاحيات المستخدم",
+      "Virginia Operations Hub",
+      "الفروع والمينو والمبيعات وخدمة العملاء في واجهة تشغيل واحدة",
       "dashboard",
       `
-        <div class="dashboard-hero">
-          <div class="dashboard-hero-inner">
-            <div>
-              <span class="dashboard-eyebrow">Executive Intelligence</span>
-              <h2>Odoo Management Intelligence Agent</h2>
+        <div class="dashboard-home-shell">
+          <section class="ops-overview">
+            <div class="ops-welcome">
+              <span class="ops-eyebrow">منصة التشغيل اليومية</span>
+              <h2>كل ما تحتاجه لإدارة المبيعات وتجربة العميل في مكان واحد</h2>
               <p>
-                منصة ذكاء إداري فوق Odoo لعرض التقارير، التحليلات، المخاطر،
-                والتوصيات بصورة منظمة حسب كل إدارة.
+                ابدأ باختيار الشركة من أعلى الصفحة، ثم انتقل إلى الفروع أو المينو أو المبيعات أو رسائل خدمة العملاء مباشرة.
               </p>
-            </div>
 
-            <div class="dashboard-stats">
-              <div class="dashboard-stat">
-                <span>الأقسام المتاحة</span>
-                <strong>${dashboard.modulesCount}</strong>
-              </div>
-
-              <div class="dashboard-stat">
-                <span>التقارير المتاحة</span>
-                <strong>${dashboard.reportsCount}</strong>
+              <div class="ops-actions">
+                <a class="ops-action primary" href="../customer/review-sms-queue.html"><span aria-hidden="true">💬</span><span>تشغيل رسائل العملاء</span></a>
+                <a class="ops-action secondary" href="../menu/prices.html"><span aria-hidden="true">🧾</span><span>فتح المينو والأسعار</span></a>
               </div>
             </div>
-          </div>
-        </div>
 
-        <div class="dashboard-section-title">
-          <div>
-            <h3>اختر واجهة العمل</h3>
-            <p>لن تظهر للمستخدم إلا الواجهات التي تحتوي على تقارير ممنوحة له.</p>
-          </div>
-        </div>
+            <aside class="ops-status-panel">
+              <span class="ops-status-badge">Odoo Enterprise 18</span>
+              <h3>مركز عمليات فيرجينيا</h3>
+              <p>واجهة واحدة للفروع والمبيعات وخدمة العملاء.</p>
 
-        <div class="report-portals-grid">
-          <a data-report-type-nav="executive" class="report-portal-card executive" href="../reports/executive.html">
-            <span>📊</span><h3>التقارير التنفيذية</h3><p>مؤشرات الإدارة العليا والملخصات السريعة لاتخاذ القرار.</p><strong>فتح الواجهة ←</strong>
-          </a>
-          <a data-report-type-nav="management" class="report-portal-card management" href="../reports/management.html">
-            <span>📈</span><h3>التقارير الإدارية</h3><p>تحليل الأداء والمقارنات والرقابة على الإدارات.</p><strong>فتح الواجهة ←</strong>
-          </a>
-          <a data-report-type-nav="operational" class="report-portal-card operational" href="../reports/operational.html">
-            <span>⚙️</span><h3>التقارير التشغيلية</h3><p>العمل اليومي والمتابعة والتنفيذ داخل الأقسام.</p><strong>فتح الواجهة ←</strong>
-          </a>
+              <div class="ops-status-grid">
+                <div class="ops-stat">
+                  <span>مساحات العمل</span>
+                  <strong>${dashboard.modulesCount}</strong>
+                </div>
+                <div class="ops-stat">
+                  <span>الوظائف المتاحة</span>
+                  <strong>${dashboard.reportsCount}</strong>
+                </div>
+              </div>
+            </aside>
+          </section>
+
+          ${dashboard.html}
         </div>
       `
     );

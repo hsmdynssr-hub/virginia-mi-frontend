@@ -675,29 +675,31 @@
     return cleanApiBase(resolveDefaultApiBase());
   }
 
-  function getCustomerServiceApiBase() {
-    return getApiBaseFromDashboard().replace(/\/customer\/review-sms$/i, "") + "/customer/service-pos-review";
-  }
-
-  function getSettingsSessionToken() {
-    return sessionStorage.getItem("reviewSmsSettingsToken") || "";
-  }
-
   function settingsSessionHeaders(withJson = false) {
-    const token = getSettingsSessionToken();
-    return {
-      ...(withJson ? { "Content-Type": "application/json" } : {}),
-      ...(token ? { "x-cs-token": token } : {})
-    };
+    const headers = adminHeaders();
+    if (!withJson) delete headers["Content-Type"];
+    return headers;
   }
 
-  function setSettingsGate(isAuthenticated, user = null) {
-    const gate = byId("settingsLoginGate");
+  function getCurrentProjectUser() {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "{}");
+    } catch (_) {
+      return {};
+    }
+  }
+
+  function setSettingsGate(isAuthorized, user = null, message = "") {
+    const gate = byId("settingsAccessGate");
     const workspace = byId("settingsWorkspace");
-    if (gate) gate.hidden = Boolean(isAuthenticated);
-    if (workspace) workspace.hidden = !isAuthenticated;
+    if (gate) gate.hidden = Boolean(isAuthorized);
+    if (workspace) workspace.hidden = !isAuthorized;
     if (byId("settingsAdminName")) {
-      byId("settingsAdminName").textContent = user?.fullName || user?.username || "Admin";
+      byId("settingsAdminName").textContent =
+        user?.fullName || user?.full_name || user?.username || "Admin";
+    }
+    if (byId("settingsAccessMessage") && message) {
+      byId("settingsAccessMessage").textContent = message;
     }
   }
 
@@ -739,37 +741,6 @@
     setStatus("تم تحميل إعدادات منظومة الرسائل.");
   }
 
-  async function loginSettingsAdmin() {
-    const username = String(byId("settingsUsername")?.value || "").trim();
-    const password = String(byId("settingsPassword")?.value || "");
-    const button = byId("settingsLoginBtn");
-    if (!username || !password) {
-      setStatus("اكتب اسم المستخدم وكلمة المرور.");
-      return;
-    }
-    try {
-      if (button) { button.disabled = true; button.textContent = "جاري التحقق..."; }
-      const data = await requestJson(`${getCustomerServiceApiBase()}/internal-login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password })
-      });
-      if (data.user?.role !== "admin") {
-        throw new Error("هذه الصفحة متاحة لحساب الأدمن فقط.");
-      }
-      sessionStorage.setItem("reviewSmsSettingsToken", data.token);
-      if (byId("settingsPassword")) byId("settingsPassword").value = "";
-      setSettingsGate(true, data.user);
-      await loadAllAdminSettings();
-    } catch (error) {
-      sessionStorage.removeItem("reviewSmsSettingsToken");
-      setSettingsGate(false);
-      setStatus(`فشل دخول الأدمن: ${error.message}`);
-    } finally {
-      if (button) { button.disabled = false; button.textContent = "فتح الإعدادات"; }
-    }
-  }
-
   async function saveAllAdminSettings() {
     const button = byId("saveAllSettingsBtn");
     try {
@@ -788,50 +759,46 @@
     }
   }
 
-  async function logoutSettingsAdmin() {
-    const token = getSettingsSessionToken();
-    try {
-      if (token) {
-        await requestJson(`${getCustomerServiceApiBase()}/internal-logout`, {
-          method: "POST",
-          headers: settingsSessionHeaders(true),
-          body: JSON.stringify({ token })
-        });
-      }
-    } catch (error) {
-      console.warn(error);
-    }
-    sessionStorage.removeItem("reviewSmsSettingsToken");
-    setSettingsGate(false);
-    setStatus("تم تسجيل خروج الأدمن.");
-  }
+  async function authorizeSettingsFromProjectSession() {
+    const user = getCurrentProjectUser();
+    const headers = settingsSessionHeaders();
 
-  async function restoreSettingsSession() {
-    if (!getSettingsSessionToken()) return;
+    sessionStorage.removeItem("reviewSmsSettingsToken");
+
+    if (!headers.Authorization) {
+      setSettingsGate(
+        false,
+        user,
+        "لا توجد جلسة مشروع نشطة. سجّل الدخول من الصفحة الرئيسية أولًا."
+      );
+      setStatus("تسجيل دخول المشروع مطلوب لفتح الإعدادات.");
+      return;
+    }
+
+    setSettingsGate(false, user, "جاري التحقق من صلاحية حساب المشروع...");
+
     try {
-      const data = await requestJson(`${getCustomerServiceApiBase()}/me`, {
-        headers: settingsSessionHeaders()
-      });
-      if (data.user?.role !== "admin") throw new Error("Admin role is required");
-      setSettingsGate(true, data.user);
       await loadAllAdminSettings();
+      setSettingsGate(true, user);
     } catch (error) {
-      sessionStorage.removeItem("reviewSmsSettingsToken");
-      setSettingsGate(false);
+      setSettingsGate(
+        false,
+        user,
+        error.message === "Admin only"
+          ? "حساب المشروع الحالي لا يمتلك صلاحية Admin لإدارة الرسائل."
+          : `تعذر فتح الإعدادات: ${error.message}`
+      );
+      setStatus(`فشل التحقق من صلاحية المشروع: ${error.message}`);
     }
   }
 
   function initSettingsPage() {
-    setSettingsGate(false);
-    byId("settingsLoginBtn")?.addEventListener("click", loginSettingsAdmin);
-    byId("settingsPassword")?.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") loginSettingsAdmin();
-    });
+    const user = getCurrentProjectUser();
+    setSettingsGate(false, user, "جاري التحقق من صلاحية حساب المشروع...");
     byId("reloadAllSettingsBtn")?.addEventListener("click", loadAllAdminSettings);
     byId("saveAllSettingsBtn")?.addEventListener("click", saveAllAdminSettings);
-    byId("settingsLogoutBtn")?.addEventListener("click", logoutSettingsAdmin);
-    setStatus("سجّل دخول الأدمن لفتح الإعدادات.");
-    restoreSettingsSession();
+    setStatus("جاري استخدام جلسة تسجيل دخول المشروع...");
+    authorizeSettingsFromProjectSession();
   }
 
   function getAdminKey() {

@@ -3,56 +3,116 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>الداش بورد الفني — رسائل العملاء</title>
+  <title>مركز رسائل Virginia — لوحة المتابعة</title>
   <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.rtl.min.css" />
   <link rel="stylesheet" href="../css/bootstrap-theme.css" />
-  <link rel="stylesheet" href="./review-sms.css?v=sms-technical-dashboard-20260714" />
+  <link rel="stylesheet" href="./review-sms.css?v=sms-core-20260814" />
+  <link rel="stylesheet" href="./review-sms-internal.css?v=internal-dashboard-20260814-01" />
   <script src="../js/api.js" defer></script>
   <script src="../js/layout.js" defer></script>
-  <script src="./review-sms.js?v=sms-technical-dashboard-20260714" defer></script>
+  <script src="./review-sms.js?v=sms-dashboard-20260814-01" defer></script>
 </head>
-<body data-page="dashboard" data-report-code="customer.review_sms.view">
+<body class="crsms-internal-page crsms-dashboard-page" data-page="dashboard" data-report-code="customer.review_sms.view">
   <main class="crsms-page">
-    <section class="crsms-return-bar" aria-label="التنقل في منظومة الرسائل">
-      <a class="crsms-return-link main" href="../dashboard/index.html"><span>🏠</span><strong>المشروع الرئيسي</strong></a>
-      <a class="crsms-return-link active" href="./review-sms-dashboard.html"><span>📊</span><strong>الداش بورد الفني</strong></a>
-      <a class="crsms-return-link" href="./review-sms-queue.html"><span>✉️</span><strong>تشغيل الرسائل</strong></a>
-      <a class="crsms-return-link" href="./review-sms-manual.html"><span>📱</span><strong>إرسال يدوي</strong></a>
-      <a class="crsms-return-link" href="./review-followups.html"><span>☎️</span><strong>متابعة العملاء</strong></a>
-      <a class="crsms-return-link" href="./review-coupons-dashboard.html"><span>🎁</span><strong>الكوبونات</strong></a>
-      <a class="crsms-return-link" href="./review-sms-settings.html"><span>⚙️</span><strong>إعدادات الأدمن</strong></a>
-    </section>
+    <nav class="crsms-return-bar" aria-label="التنقل في مركز رسائل Virginia">
+      <a class="crsms-return-link main" href="../dashboard/index.html"><span>⌂</span><strong>المشروع الرئيسي</strong></a>
+      <a class="crsms-return-link active" data-return-page="dashboard" href="./review-sms-dashboard.html"><span>◫</span><strong>نظرة عامة</strong></a>
+      <a class="crsms-return-link" data-return-page="queue" href="./review-sms-queue.html"><span>✉</span><strong>قائمة الإرسال</strong></a>
+      <a class="crsms-return-link" data-return-page="manual" href="./review-sms-manual.html"><span>＋</span><strong>إرسال يدوي</strong></a>
+      <a class="crsms-return-link" data-return-page="followups" href="./review-followups.html"><span>☎</span><strong>المتابعات</strong></a>
+      <a class="crsms-return-link" data-return-page="coupons" href="./review-coupons-dashboard.html"><span>★</span><strong>المكافآت</strong></a>
+      <a class="crsms-return-link settings" href="./review-sms-settings.html"><span>⚙</span><strong>الإعدادات</strong></a>
+    </nav>
 
-    <section class="crsms-header">
-      <div><span class="crsms-eyebrow">CUSTOMER COMMUNICATION OVERVIEW</span><h1>الداش بورد الفني لمنظومة العملاء</h1><p>ملخص حالة الإرسال والتقييمات والمتابعات والكوبونات بدون تعديل الإعدادات.</p></div>
-      <div class="crsms-mode-badge" id="modeBadge">جاري فحص النظام</div>
-    </section>
+    <header class="crsms-dashboard-hero">
+      <div class="crsms-dashboard-hero-copy">
+        <div class="crsms-brand-row">
+          <span class="crsms-virginia-mark">V</span>
+          <div>
+            <span class="crsms-eyebrow">VIRGINIA CUSTOMER COMMUNICATION</span>
+            <h1>لوحة متابعة رسائل العملاء</h1>
+          </div>
+        </div>
+        <p>متابعة حالة الإرسال وتفاعل العملاء والتقييمات من شاشة تشغيل واحدة، بدون تعديل إعدادات النظام.</p>
+        <div class="crsms-dashboard-hero-actions">
+          <button type="button" class="crsms-button primary" data-action="refresh-all"><span>↻</span> تحديث البيانات</button>
+          <button type="button" class="crsms-button ghost" data-action="health"><span>✓</span> فحص الاتصال</button>
+        </div>
+      </div>
+
+      <aside class="crsms-system-card">
+        <div class="crsms-system-card-head">
+          <span>حالة النظام</span>
+          <div class="crsms-mode-badge" id="modeBadge">جاري الفحص</div>
+        </div>
+        <strong>Virginia فقط</strong>
+        <small>Company ID 1</small>
+        <p>الإرسال خاضع لمفتاح التشغيل وسياسة المستخدم من صفحة الإعدادات.</p>
+      </aside>
+    </header>
 
     <input id="companyId" type="hidden" value="1" />
     <input id="limit" type="hidden" value="100" />
 
-    <section class="crsms-panel crsms-queue-nav">
-      <strong>فيرجينيا — Company ID 1</strong>
-      <span>هذه الشاشة للمتابعة والقراءة فقط. تغيير التشغيل والسياسات متاح من إعدادات الأدمن.</span>
-      <div class="crsms-actions"><button type="button" data-action="refresh-all">تحديث الملخص</button><button type="button" class="crsms-secondary" data-action="health">فحص الاتصال</button></div>
-    </section>
-
-    <section class="crsms-stats crsms-technical-stats">
-      <article class="crsms-stat-card"><span>كل المعاملات</span><strong id="statTotal">-</strong><small>إجمالي سجلات الرسائل</small></article>
-      <article class="crsms-stat-card"><span>تم الإرسال</span><strong id="statSent">-</strong><small>رسائل وصلت للمزوّد</small></article>
-      <article class="crsms-stat-card"><span>فشل</span><strong id="statFailed">-</strong><small>تحتاج مراجعة فنية</small></article>
-      <article class="crsms-stat-card"><span>فتح الرابط</span><strong id="statOpened">-</strong><small>عملاء بدأوا التقييم</small></article>
-      <article class="crsms-stat-card"><span>اكتمل التقييم</span><strong id="statReviewed">-</strong><small>تقييمات مسجلة</small></article>
-      <article class="crsms-stat-card"><span>متوسط التقييم</span><strong id="statAvgRating">-</strong><small>مؤشر رضا العملاء</small></article>
-    </section>
-
-    <section class="crsms-panel">
-      <div class="crsms-section-title"><div><h2>آخر معاملات العملاء</h2><p>حالة الرسالة والعميل والفاتورة والتقييم في شاشة واحدة.</p></div><button type="button" class="crsms-secondary" data-action="logs">تحديث المعاملات</button></div>
-      <div class="crsms-table-wrap">
-        <table class="crsms-table"><thead><tr><th>ID</th><th>الحالة</th><th>Provider</th><th>الفرع</th><th>العميل</th><th>الموبايل</th><th>الفاتورة</th><th>القيمة</th><th>التقييم</th><th>رابط التقييم</th><th>تاريخ الإرسال</th></tr></thead><tbody id="logsBody"><tr><td colspan="11">جاري تحميل المعاملات...</td></tr></tbody></table>
+    <section class="crsms-section-heading">
+      <div>
+        <span>ملخص الأداء</span>
+        <h2>حركة الرسائل وتفاعل العملاء</h2>
       </div>
+      <a href="./review-sms-queue.html">الانتقال إلى قائمة الإرسال <b>←</b></a>
     </section>
-    <pre class="crsms-status" id="statusBox">جاري تحميل ملخص المنظومة.</pre>
+
+    <section class="crsms-stats crsms-technical-stats" aria-label="مؤشرات الرسائل">
+      <article class="crsms-stat-card tone-purple">
+        <div class="crsms-stat-head"><span>كل المعاملات</span><i>▦</i></div>
+        <strong id="statTotal">-</strong><small>إجمالي سجلات الرسائل</small>
+      </article>
+      <article class="crsms-stat-card tone-green">
+        <div class="crsms-stat-head"><span>تم الإرسال</span><i>✓</i></div>
+        <strong id="statSent">-</strong><small>قبلها مزود الخدمة</small>
+      </article>
+      <article class="crsms-stat-card tone-red">
+        <div class="crsms-stat-head"><span>فشل الإرسال</span><i>!</i></div>
+        <strong id="statFailed">-</strong><small>تحتاج إلى مراجعة فنية</small>
+      </article>
+      <article class="crsms-stat-card tone-blue">
+        <div class="crsms-stat-head"><span>فتح الرابط</span><i>↗</i></div>
+        <strong id="statOpened">-</strong><small>عملاء بدأوا التقييم</small>
+      </article>
+      <article class="crsms-stat-card tone-amber">
+        <div class="crsms-stat-head"><span>اكتمل التقييم</span><i>★</i></div>
+        <strong id="statReviewed">-</strong><small>تقييمات مسجلة بنجاح</small>
+      </article>
+      <article class="crsms-stat-card tone-cyan">
+        <div class="crsms-stat-head"><span>متوسط التقييم</span><i>◉</i></div>
+        <strong id="statAvgRating">-</strong><small>مؤشر رضا العملاء</small>
+      </article>
+    </section>
+
+    <section class="crsms-panel crsms-transactions-panel">
+      <div class="crsms-section-title">
+        <div>
+          <span class="crsms-section-kicker">LATEST ACTIVITY</span>
+          <h2>آخر معاملات العملاء</h2>
+          <p>حالة الرسالة والعميل والفاتورة والتقييم في سجل واحد.</p>
+        </div>
+        <button type="button" class="crsms-button secondary" data-action="logs"><span>↻</span> تحديث المعاملات</button>
+      </div>
+
+      <div class="crsms-table-wrap">
+        <table class="crsms-table">
+          <thead>
+            <tr>
+              <th>ID</th><th>الحالة</th><th>المزوّد</th><th>الفرع</th><th>العميل</th><th>الموبايل</th>
+              <th>الفاتورة</th><th>القيمة</th><th>التقييم</th><th>رابط التقييم</th><th>تاريخ الإرسال</th>
+            </tr>
+          </thead>
+          <tbody id="logsBody"><tr><td colspan="11">جاري تحميل المعاملات...</td></tr></tbody>
+        </table>
+      </div>
+
+      <pre class="crsms-status" id="statusBox" aria-live="polite">جاري تحميل ملخص المنظومة.</pre>
+    </section>
   </main>
 </body>
 </html>

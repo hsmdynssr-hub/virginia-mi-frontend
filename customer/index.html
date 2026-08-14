@@ -2,8 +2,282 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>Customer Reports</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Virginia Customer Care & Messaging</title>
   <link rel="stylesheet" href="../css/style.css" />
+
+  <style>
+    .care-home {
+      --care-ink: #10213f;
+      --care-muted: #66758f;
+      --care-brand: #6d28d9;
+      --care-brand-dark: #4c1d95;
+      display: grid;
+      gap: 22px;
+    }
+
+    .care-hero {
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.7fr);
+      gap: 24px;
+      align-items: center;
+      padding: 34px;
+      border-radius: 28px;
+      color: #fff;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(196, 181, 253, 0.34), transparent 30%),
+        linear-gradient(135deg, #4c1d95 0%, #6d28d9 48%, #312e81 100%);
+      box-shadow: 0 24px 55px rgba(76, 29, 149, 0.22);
+    }
+
+    .care-hero::after {
+      content: "";
+      position: absolute;
+      inset-inline-end: -85px;
+      bottom: -115px;
+      width: 280px;
+      height: 280px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 50%;
+      box-shadow: 0 0 0 42px rgba(255, 255, 255, 0.05);
+    }
+
+    .care-hero-copy,
+    .care-hero-panel {
+      position: relative;
+      z-index: 1;
+    }
+
+    .care-eyebrow,
+    .care-company-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .care-eyebrow {
+      padding: 8px 12px;
+      color: #ede9fe;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .care-hero h2 {
+      margin: 16px 0 10px;
+      font-size: clamp(27px, 3vw, 38px);
+      line-height: 1.25;
+    }
+
+    .care-hero p {
+      max-width: 720px;
+      margin: 0;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 15px;
+      line-height: 1.9;
+    }
+
+    .care-hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .care-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 17px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 13px;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.11);
+      font-weight: 900;
+      text-decoration: none;
+      transition: transform 0.18s ease, background 0.18s ease;
+    }
+
+    .care-button.primary {
+      color: var(--care-brand-dark);
+      background: #fff;
+    }
+
+    .care-button:hover {
+      color: inherit;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .care-button.primary:hover {
+      color: var(--care-brand-dark);
+      background: #f5f3ff;
+    }
+
+    .care-hero-panel {
+      display: grid;
+      gap: 12px;
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 22px;
+      background: rgba(15, 23, 42, 0.2);
+      backdrop-filter: blur(12px);
+    }
+
+    .care-company-badge {
+      padding: 7px 11px;
+      color: #d1fae5;
+      background: rgba(5, 150, 105, 0.2);
+      border: 1px solid rgba(167, 243, 208, 0.25);
+    }
+
+    .care-company-badge::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #34d399;
+      box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.14);
+    }
+
+    .care-hero-panel strong { font-size: 20px; }
+    .care-hero-panel small { color: rgba(255, 255, 255, 0.72); line-height: 1.7; }
+
+    .care-section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: end;
+    }
+
+    .care-section-head h3 { margin: 0 0 5px; color: var(--care-ink); font-size: 21px; }
+    .care-section-head p { margin: 0; color: var(--care-muted); font-size: 13px; }
+
+    .care-section-tag {
+      flex: 0 0 auto;
+      padding: 7px 11px;
+      border-radius: 999px;
+      color: var(--care-brand-dark);
+      background: #ede9fe;
+      font-size: 11px;
+      font-weight: 900;
+      text-decoration: none;
+    }
+
+    .care-cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .care-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 228px;
+      display: flex;
+      flex-direction: column;
+      padding: 22px;
+      border: 1px solid #e2e8f0;
+      border-radius: 22px;
+      color: inherit;
+      background: linear-gradient(180deg, #fff 0%, #fbfbff 100%);
+      box-shadow: 0 14px 35px rgba(15, 23, 42, 0.07);
+      text-decoration: none;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .care-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 4px;
+      background: var(--card-tone, var(--care-brand));
+    }
+
+    .care-card:hover {
+      color: inherit;
+      border-color: var(--card-tone, var(--care-brand));
+      box-shadow: 0 21px 46px rgba(15, 23, 42, 0.12);
+      transform: translateY(-4px);
+    }
+
+    .care-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .care-card-icon {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      color: var(--card-tone, var(--care-brand));
+      background: #f5f3ff;
+      font-size: 22px;
+    }
+
+    .care-card-state {
+      padding: 6px 9px;
+      border-radius: 999px;
+      color: var(--card-tone, var(--care-brand));
+      background: #f8fafc;
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .care-card h4 { margin: 18px 0 7px; color: var(--care-ink); font-size: 18px; }
+    .care-card p { margin: 0; color: var(--care-muted); font-size: 13px; line-height: 1.75; }
+
+    .care-card-link {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 18px;
+      color: var(--card-tone, var(--care-brand));
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .care-card-link b { font-size: 18px; transition: transform 0.18s ease; }
+    .care-card:hover .care-card-link b { transform: translateX(-4px); }
+
+    .care-flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      background: #e2e8f0;
+    }
+
+    .care-flow-step { padding: 18px; background: #fff; }
+    .care-flow-step span { display: block; margin-bottom: 8px; color: var(--care-brand); font-size: 11px; font-weight: 900; }
+    .care-flow-step strong { display: block; color: var(--care-ink); font-size: 14px; }
+    .care-flow-step small { display: block; margin-top: 5px; color: var(--care-muted); line-height: 1.6; }
+
+    @media (max-width: 1080px) {
+      .care-hero { grid-template-columns: 1fr; }
+      .care-cards { grid-template-columns: repeat(2, minmax(220px, 1fr)); }
+      .care-flow { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 680px) {
+      .care-hero { padding: 24px; border-radius: 22px; }
+      .care-cards, .care-flow { grid-template-columns: 1fr; }
+      .care-section-head { align-items: start; flex-direction: column; }
+    }
+  </style>
 </head>
 <body>
   <script src="../js/api.js"></script>
@@ -11,96 +285,90 @@
 
   <script>
     renderLayout(
-      "تقارير العملاء",
-      "كل تقارير العملاء وخدمة العملاء ورسائل التقييم وربط POS في مكان واحد",
+      "خدمة عملاء Virginia",
+      "إدارة التواصل والتقييمات والمتابعات ومكافآت العملاء من مكان واحد",
       "customer",
       `
-        <div class="reports-grid">
-          <a class="report-card" href="./pos-phones.html">
-            <span class="page-pill">POS Phones</span>
-            <h3>متابعة عملاء نقاط البيع</h3>
-            <p>
-              كل أرقام POS مع حالة الرسالة والتقييم والمتابعة والكوبون.
-            </p>
-          </a>
+        <div class="care-home">
+          <section class="care-hero">
+            <div class="care-hero-copy">
+              <span class="care-eyebrow">VIRGINIA CUSTOMER EXPERIENCE</span>
+              <h2>كل تواصل مع العميل واضح، متابع، وقابل للقياس</h2>
+              <p>
+                مركز تشغيل موحّد لرسائل التقييم، مراجعة بيانات فواتير نقاط البيع،
+                متابعة العملاء غير الراضين، وإدارة مكافأة الشحن المجاني على Shopify.
+              </p>
+              <div class="care-hero-actions">
+                <a class="care-button primary" href="./review-sms-queue.html">تشغيل قائمة الرسائل</a>
+                <a class="care-button" href="./review-followups.html">فتح المتابعات</a>
+                <a class="care-button" href="./review-sms-manual.html">إرسال يدوي</a>
+              </div>
+            </div>
 
-          <a class="report-card" href="./service-pos-review.html">
-            <span class="page-pill">Customer Service</span>
-            <h3>مراجعة خدمات نقاط البيع</h3>
-            <p>
-              بحث برقم العميل أو رقم الفاتورة، عرض تفاصيل الشراء،
-              تسجيل ملاحظات خدمة العملاء، ومراجعة المدير.
-            </p>
-          </a>
+            <aside class="care-hero-panel">
+              <span class="care-company-badge">Virginia فقط</span>
+              <strong>الإرسال تحت تحكم المستخدم</strong>
+              <small>
+                يمكن تشغيل خدمة الرسائل أو إيقافها من الإعدادات. لا يتم تشغيل
+                الرسائل أو التقييمات أو الكوبونات على شركة Cleopatra.
+              </small>
+            </aside>
+          </section>
 
+          <div class="care-section-head">
+            <div><h3>مساحات العمل</h3><p>كل كارت ينقلك مباشرة إلى المهمة المطلوبة بدون خطوات زائدة.</p></div>
+            <span class="care-section-tag">Virginia Operations</span>
+          </div>
 
-          <a class="report-card" href="./review-sms-queue.html">
-            <span class="page-pill">Review SMS</span>
-            <h3>تشغيل رسائل تقييم العملاء</h3>
-            <p>
-              اختيار فواتير POS الجاهزة للإرسال، التحكم في فترة الفواتير،
-              ومنع تكرار الإرسال لنفس رقم العميل في نفس اليوم.
-            </p>
-          </a>
+          <section class="care-cards" aria-label="مساحات عمل خدمة العملاء">
+            <a class="care-card" style="--card-tone:#6d28d9" href="./review-sms-queue.html">
+              <div class="care-card-top"><span class="care-card-icon">✉</span><span class="care-card-state">تشغيل</span></div>
+              <h4>رسائل تقييم العملاء</h4><p>مراجعة فواتير POS الجاهزة، تحديد الفترة، ثم إرسال رسائل التقييم بأمان.</p>
+              <span class="care-card-link">فتح قائمة الإرسال <b>←</b></span>
+            </a>
 
-          <a class="report-card" href="./review-followups.html">
-            <span class="page-pill">Follow-ups</span>
-            <h3>متابعة المحايدين والغاضبين</h3>
-            <p>
-              متابعة تقييمات 1 و 3، تغيير حالة المتابعة، مراجعة الأولويات،
-              وتجهيز التقرير التشغيلي لخدمة العملاء.
-            </p>
-          </a>
+            <a class="care-card" style="--card-tone:#2563eb" href="./pos-phones.html">
+              <div class="care-card-top"><span class="care-card-icon">⌕</span><span class="care-card-state">بيانات العملاء</span></div>
+              <h4>عملاء وفواتير نقاط البيع</h4><p>عرض رقم العميل والفاتورة والفرع وحالة الرسالة والتقييم في سجل موحّد.</p>
+              <span class="care-card-link">فتح سجل العملاء <b>←</b></span>
+            </a>
 
-          <a class="report-card" href="./review-sms-dashboard.html">
-            <span class="page-pill">Technical Control</span>
-            <h3>الداش بورد الفني للرسائل</h3>
-            <p>
-              ملخص حالة الإرسال والتقييمات والمتابعات والكوبونات والربط الفني.
-            </p>
-          </a>
+            <a class="care-card" style="--card-tone:#dc2626" href="./review-followups.html">
+              <div class="care-card-top"><span class="care-card-icon">☎</span><span class="care-card-state">أولوية</span></div>
+              <h4>متابعة غير الراضين</h4><p>إدارة الحالات الجديدة والجارية، توثيق التواصل، ومراجعة الحالات عالية الأولوية.</p>
+              <span class="care-card-link">فتح المتابعات <b>←</b></span>
+            </a>
 
-          <a class="report-card" href="./review-sms-settings.html">
-            <span class="page-pill">Admin Settings</span>
-            <h3>إعدادات منظومة الرسائل</h3>
-            <p>صفحة الأدمن المحمية للتحكم في التشغيل والعملاء والكوبونات.</p>
-          </a>
+            <a class="care-card" style="--card-tone:#d97706" href="./review-coupons-dashboard.html">
+              <div class="care-card-top"><span class="care-card-icon">★</span><span class="care-card-state">Shopify</span></div>
+              <h4>مكافأة الشحن المجاني</h4><p>متابعة كوبونات عملاء Virginia الذين اختاروا «راضٍ جدًا» وحالة إنشائها على Shopify.</p>
+              <span class="care-card-link">فتح لوحة الكوبونات <b>←</b></span>
+            </a>
 
-          <a class="report-card" href="./review-coupon.html">
-            <span class="page-pill">Coupon Preview</span>
-            <h3>كوبون الشحن المجاني</h3>
-            <p>
-              معاينة صفحة كوبون الشحن المجاني التي تظهر للعميل بعد التقييم
-              الإيجابي.
-            </p>
-          </a>
+            <a class="care-card" style="--card-tone:#0891b2" href="./review-sms-dashboard.html">
+              <div class="care-card-top"><span class="care-card-icon">◫</span><span class="care-card-state">مراقبة</span></div>
+              <h4>لوحة حالة المنظومة</h4><p>متابعة الإرسال والفشل وفتح الروابط والتقييمات وآخر معاملات العملاء.</p>
+              <span class="care-card-link">فتح لوحة المراقبة <b>←</b></span>
+            </a>
 
-          <a class="report-card" href="./vip.html">
-            <span class="page-pill">VIP</span>
-            <h3>VIP Customers</h3>
-            <p>
-              تحديد العملاء الأعلى قيمة، العملاء المتكررين، والعملاء المناسبين
-              لعروض خاصة أو متابعة مباشرة.
-            </p>
-          </a>
+            <a class="care-card" style="--card-tone:#475569" href="./review-sms-settings.html">
+              <div class="care-card-top"><span class="care-card-icon">⚙</span><span class="care-card-state">Admin</span></div>
+              <h4>الإعدادات والتحكم</h4><p>تشغيل أو إيقاف الخدمة وضبط سياسات الإرسال والكوبونات وصلاحيات التشغيل.</p>
+              <span class="care-card-link">فتح الإعدادات <b>←</b></span>
+            </a>
+          </section>
 
-          <a class="report-card" href="./migration.html">
-            <span class="page-pill">Migration</span>
-            <h3>Migration</h3>
-            <p>
-              تحليل انتقال العملاء بين قنوات البيع المختلفة مثل POS و Sales
-              لاكتشاف فرص النمو.
-            </p>
-          </a>
+          <div class="care-section-head">
+            <div><h3>رحلة العميل المعتمدة</h3><p>تسلسل واضح من الفاتورة حتى إغلاق المتابعة أو إصدار المكافأة.</p></div>
+            <a class="care-section-tag" href="./service-pos-review.html">مراجعة خدمة POS</a>
+          </div>
 
-          <a class="report-card" href="./rfm.html">
-            <span class="page-pill">RFM</span>
-            <h3>RFM Segmentation</h3>
-            <p>
-              تقسيم العملاء حسب الحداثة، التكرار، والقيمة لتحديد العملاء
-              النشطين والمعرضين للفقد.
-            </p>
-          </a>
+          <section class="care-flow" aria-label="رحلة تقييم العميل">
+            <div class="care-flow-step"><span>01</span><strong>فاتورة POS</strong><small>التأكد من العميل ورقم الهاتف والفرع.</small></div>
+            <div class="care-flow-step"><span>02</span><strong>رسالة التقييم</strong><small>إرسال اختياري وفق إعدادات Virginia.</small></div>
+            <div class="care-flow-step"><span>03</span><strong>رد العميل</strong><small>تسجيل التقييم وربطه بالفاتورة.</small></div>
+            <div class="care-flow-step"><span>04</span><strong>الإجراء المناسب</strong><small>متابعة عدم الرضا أو مكافأة الشحن المجاني.</small></div>
+          </section>
         </div>
       `
     );

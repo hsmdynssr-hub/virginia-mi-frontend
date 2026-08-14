@@ -3,100 +3,54 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>تشغيل فواتير تقييم العملاء SMS</title>
-
+  <title>مركز رسائل Virginia — قائمة الإرسال</title>
   <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.rtl.min.css" />
   <link rel="stylesheet" href="../css/bootstrap-theme.css" />
-  <link rel="stylesheet" href="./review-sms.css?v=sms-unified-ui-20260714" />
+  <link rel="stylesheet" href="./review-sms.css?v=sms-core-20260814" />
+  <link rel="stylesheet" href="./review-sms-internal.css?v=internal-queue-20260814-02" />
   <script src="../js/api.js" defer></script>
   <script src="../js/layout.js" defer></script>
-  <script src="./review-sms.js" defer></script>
+  <script src="./review-sms.js?v=sms-queue-20260814-02" defer></script>
 </head>
 
-<body data-page="queue" data-report-code="customer.review_sms.send">
+<body class="crsms-internal-page crsms-queue-page" data-page="queue" data-report-code="customer.review_sms.send">
   <main class="crsms-page">
+    <nav class="crsms-return-bar" aria-label="التنقل في مركز رسائل Virginia">
+      <a class="crsms-return-link main" href="../dashboard/index.html"><span>⌂</span><strong>المشروع الرئيسي</strong></a>
+      <a class="crsms-return-link" data-return-page="dashboard" href="./review-sms-dashboard.html"><span>◫</span><strong>نظرة عامة</strong></a>
+      <a class="crsms-return-link active" data-return-page="queue" href="./review-sms-queue.html"><span>✉</span><strong>قائمة الإرسال</strong></a>
+      <a class="crsms-return-link" data-return-page="manual" href="./review-sms-manual.html"><span>＋</span><strong>إرسال يدوي</strong></a>
+      <a class="crsms-return-link" data-return-page="followups" href="./review-followups.html"><span>☎</span><strong>المتابعات</strong></a>
+      <a class="crsms-return-link" data-return-page="coupons" href="./review-coupons-dashboard.html"><span>★</span><strong>المكافآت</strong></a>
+      <a class="crsms-return-link settings" href="./review-sms-settings.html"><span>⚙</span><strong>الإعدادات</strong></a>
+    </nav>
 
-    <section class="crsms-return-bar" aria-label="Review SMS navigation">
-      <a class="crsms-return-link main" data-return-page="dashboard-main" href="../dashboard/index.html">
-        <span>🏠</span>
-        <strong>الرجوع للمشروع الرئيسي</strong>
-      </a>
-
-      <a class="crsms-return-link" data-return-page="customer-home" href="./index.html">
-        <span>👥</span>
-        <strong>صفحة العملاء</strong>
-      </a>
-
-      <a class="crsms-return-link" data-return-page="queue" href="./review-sms-queue.html">
-        <span>🧾</span>
-        <strong>تشغيل الرسائل</strong>
-      </a>
-
-      <a class="crsms-return-link" href="./review-sms-manual.html">
-        <span>📱</span>
-        <strong>إرسال يدوي</strong>
-      </a>
-
-      <a class="crsms-return-link" data-return-page="followups" href="./review-followups.html">
-        <span>☎️</span>
-        <strong>المتابعات</strong>
-      </a>
-
-      <a class="crsms-return-link" data-return-page="dashboard" href="./review-sms-dashboard.html">
-        <span>📊</span>
-        <strong>الداش بورد الفني</strong>
-      </a>
-      <a class="crsms-return-link" href="./review-coupons-dashboard.html"><span>🎁</span><strong>الكوبونات</strong></a>
-      <a class="crsms-return-link" href="./review-sms-settings.html"><span>⚙️</span><strong>إعدادات الأدمن</strong></a>
-    </section>
-
-    <section class="crsms-header">
+    <header class="crsms-operation-hero">
       <div>
-        <h1>تشغيل فواتير تقييم العملاء SMS</h1>
-        <p>
-          صفحة تشغيلية منفصلة للبحث عن فواتير Odoo غير المرسلة، اختيار الفواتير الجاهزة، ثم إرسال الرسائل للمحدد فقط.
-        </p>
+        <span class="crsms-eyebrow">VIRGINIA SMS OPERATIONS</span>
+        <h1>قائمة فواتير رسائل التقييم</h1>
+        <p>ابحث أولًا عن فواتير Odoo المؤهلة، راجع النتائج، ثم اختر الفواتير الجاهزة فقط قبل تنفيذ الإرسال.</p>
       </div>
-
-      <div class="crsms-mode-badge" id="modeBadge">
-        جاهز للفحص
+      <div class="crsms-operation-status">
+        <span>حالة الاتصال</span>
+        <div class="crsms-mode-badge" id="modeBadge">جاهز للفحص</div>
+        <button type="button" class="crsms-button ghost" data-queue-action="health"><span>✓</span> فحص النظام</button>
       </div>
-    </section>
+    </header>
 
-    <section class="crsms-panel crsms-queue-nav">
-        <a class="crsms-nav-link" href="./review-sms-dashboard.html">الداش بورد الفني</a>
-      <span>تشغيل فيرجينيا فقط. سياسات العملاء وطريقة التشغيل تُحدد من صفحة إعدادات الأدمن.</span>
-    </section>
-
-    <section class="crsms-panel">
+    <section class="crsms-panel crsms-filter-panel">
       <div class="crsms-section-title">
-        <h2>بحث فواتير Odoo المرشحة للإرسال</h2>
-        <button type="button" class="crsms-secondary" data-queue-action="health">Health</button>
+        <div>
+          <span class="crsms-section-kicker">ODOO INVOICE FILTERS</span>
+          <h2>تحديد نطاق الفواتير</h2>
+          <p>قيم التشغيل الأساسية للقراءة فقط ويتم التحكم فيها من صفحة الإعدادات.</p>
+        </div>
+        <span class="crsms-company-chip"><i></i> Virginia — Company ID 1</span>
       </div>
 
-      <div class="crsms-form-grid">
-        <div class="crsms-field">
-          <label for="companyId">الشركة</label>
-          <input id="companyId" type="hidden" value="1" />
-          <input type="text" value="فيرجينيا — Company ID 1" readonly />
-        </div>
+      <input id="companyId" type="hidden" value="1" />
 
-        <div class="crsms-field">
-          <label for="threshold">الحد الأدنى للفاتورة</label>
-          <input id="threshold" type="number" value="1000" readonly />
-        </div>
-
-        <div class="crsms-field">
-          <label for="lookbackMinutes">فترة البحث بالدقائق</label>
-          <input id="lookbackMinutes" type="number" value="10080" readonly />
-        </div>
-
-        <div class="crsms-field">
-          <label for="limit">عدد الفواتير المطلوب فحصها</label>
-          <input id="limit" type="number" value="100" min="1" max="500" readonly />
-        </div>
-
+      <div class="crsms-form-grid crsms-queue-filter-grid">
         <div class="crsms-field">
           <label for="queueDatePreset">فترة الفواتير</label>
           <select id="queueDatePreset">
@@ -118,63 +72,92 @@
           <input id="queueDateTo" type="date" />
         </div>
 
-        <div class="crsms-field crsms-span-2">
+        <div class="crsms-field crsms-policy-field">
           <label for="repeatPolicy">سياسة تكرار رقم العميل</label>
           <select id="repeatPolicy" disabled>
-            <option value="same_day" selected>لا ترسل لنفس الرقم أكثر من مرة في نفس اليوم</option>
-            <option value="last_24h">لا ترسل لنفس الرقم أكثر من مرة خلال آخر 24 ساعة</option>
-            <option value="allow">السماح بإرسال أكثر من رسالة لنفس الرقم</option>
+            <option value="same_day" selected>رسالة واحدة لنفس الرقم في اليوم</option>
+            <option value="last_24h">رسالة واحدة خلال آخر 24 ساعة</option>
+            <option value="allow">السماح بأكثر من رسالة لنفس الرقم</option>
           </select>
         </div>
       </div>
 
-      <div class="crsms-actions">
-        <button type="button" data-queue-action="preview">بحث فقط بدون إرسال</button>
-        <button type="button" class="crsms-secondary" data-queue-action="select-ready">تحديد الجاهز</button>
-        <button type="button" class="crsms-secondary" data-queue-action="clear-selection">إلغاء التحديد</button>
-        <button type="button" class="crsms-secondary" data-queue-action="send-selected-dry-run">اختبار المحدد بدون SMS</button>
-        <button type="button" class="crsms-danger" data-queue-action="send-selected">إرسال للمحدد فقط</button>
+      <div class="crsms-readonly-settings" aria-label="إعدادات التشغيل الحالية">
+        <div class="crsms-field">
+          <label for="threshold">الحد الأدنى للفاتورة</label>
+          <input id="threshold" type="number" value="1000" readonly />
+        </div>
+        <div class="crsms-field">
+          <label for="lookbackMinutes">فترة البحث بالدقائق</label>
+          <input id="lookbackMinutes" type="number" value="10080" readonly />
+        </div>
+        <div class="crsms-field">
+          <label for="limit">حد الفواتير في البحث</label>
+          <input id="limit" type="number" value="100" min="1" max="500" readonly />
+        </div>
+        <a href="./review-sms-settings.html">تعديل القيم من الإعدادات <b>←</b></a>
       </div>
 
-      <pre class="crsms-status" id="statusBox">جاهز. اضغط بحث فقط بدون إرسال.</pre>
+      <div class="crsms-queue-command-bar">
+        <div class="crsms-command-primary">
+          <button type="button" class="crsms-button search" data-queue-action="preview"><span>⌕</span> بحث بدون إرسال</button>
+          <button type="button" class="crsms-button secondary" data-queue-action="select-ready">تحديد كل الجاهز</button>
+          <button type="button" class="crsms-button secondary" data-queue-action="clear-selection">إلغاء التحديد</button>
+        </div>
+        <div class="crsms-command-send">
+          <button type="button" class="crsms-button dry" data-queue-action="send-selected-dry-run">اختبار المحدد بدون SMS</button>
+          <button type="button" class="crsms-button danger" data-queue-action="send-selected"><span>✉</span> إرسال للمحدد فقط</button>
+        </div>
+      </div>
+
+      <pre class="crsms-status" id="statusBox" aria-live="polite">جاهز. اضغط بحث بدون إرسال.</pre>
     </section>
 
-    <section class="crsms-stats crsms-queue-stats">
-      <article class="crsms-stat-card"><span>Found in Odoo</span><strong id="queueFound">-</strong></article>
-      <article class="crsms-stat-card"><span>Ready</span><strong id="queueReady">-</strong></article>
-      <article class="crsms-stat-card"><span>Duplicates</span><strong id="queueDuplicates">-</strong></article>
-      <article class="crsms-stat-card"><span>Repeated Phone</span><strong id="queueRepeated">-</strong></article>
-      <article class="crsms-stat-card"><span>No Valid Phone</span><strong id="queueNoPhone">-</strong></article>
-      <article class="crsms-stat-card"><span>Selected</span><strong id="queueSelected">0</strong></article>
+    <section class="crsms-section-heading">
+      <div><span>نتيجة البحث</span><h2>ملخص أهلية الفواتير</h2></div>
+      <small>لن يتم إرسال أي رسالة قبل اختيار الصفوف والضغط على زر الإرسال.</small>
     </section>
 
-    <section class="crsms-panel">
+    <section class="crsms-stats crsms-queue-stats" aria-label="مؤشرات قائمة الإرسال">
+      <article class="crsms-stat-card tone-purple">
+        <div class="crsms-stat-head"><span>وجدت في Odoo</span><i>▦</i></div><strong id="queueFound">-</strong><small>إجمالي نتائج البحث</small>
+      </article>
+      <article class="crsms-stat-card tone-green">
+        <div class="crsms-stat-head"><span>جاهزة للإرسال</span><i>✓</i></div><strong id="queueReady">-</strong><small>يمكن تحديدها وإرسالها</small>
+      </article>
+      <article class="crsms-stat-card tone-blue">
+        <div class="crsms-stat-head"><span>فواتير مكررة</span><i>⧉</i></div><strong id="queueDuplicates">-</strong><small>سبق تسجيلها بالنظام</small>
+      </article>
+      <article class="crsms-stat-card tone-amber">
+        <div class="crsms-stat-head"><span>رقم متكرر</span><i>↻</i></div><strong id="queueRepeated">-</strong><small>موقوفة حسب السياسة</small>
+      </article>
+      <article class="crsms-stat-card tone-red">
+        <div class="crsms-stat-head"><span>بدون رقم صالح</span><i>!</i></div><strong id="queueNoPhone">-</strong><small>تحتاج تصحيح بيانات</small>
+      </article>
+      <article class="crsms-stat-card tone-cyan selected-card">
+        <div class="crsms-stat-head"><span>المحدد الآن</span><i>●</i></div><strong id="queueSelected">0</strong><small>سيُطبق عليه الإجراء</small>
+      </article>
+    </section>
+
+    <section class="crsms-panel crsms-queue-results-panel">
       <div class="crsms-section-title">
-        <h2>الفواتير المرشحة</h2>
-        <span class="crsms-hint">اختَر فقط الصفوف الجاهزة للإرسال. المكرر أو بدون رقم لن يكون قابلًا للاختيار.</span>
+        <div>
+          <span class="crsms-section-kicker">ELIGIBLE INVOICES</span>
+          <h2>الفواتير المرشحة</h2>
+          <p>الصفوف غير الجاهزة تظل للعرض والمراجعة فقط ولا يمكن تحديدها.</p>
+        </div>
+        <span class="crsms-selection-note"><i></i> اختر الصفوف الجاهزة فقط</span>
       </div>
 
       <div class="crsms-table-wrap">
         <table class="crsms-table crsms-queue-table">
           <thead>
             <tr>
-              <th>اختيار</th>
-              <th>Odoo ID</th>
-              <th>الفاتورة</th>
-              <th>تاريخ الفاتورة</th>
-              <th>العميل</th>
-              <th>الموبايل</th>
-              <th>الفرع</th>
-              <th>القيمة</th>
-              <th>الحالة</th>
-              <th>تفسير الحالة</th>
-              <th>أرقام محتملة</th>
-              <th>آخر إرسال لنفس الرقم</th>
+              <th>اختيار</th><th>Odoo ID</th><th>الفاتورة</th><th>تاريخ الفاتورة</th><th>العميل</th><th>الموبايل</th>
+              <th>الفرع</th><th>القيمة</th><th>الحالة</th><th>تفسير الحالة</th><th>أرقام محتملة</th><th>آخر إرسال لنفس الرقم</th>
             </tr>
           </thead>
-          <tbody id="queueBody">
-            <tr><td colspan="12">اضغط بحث فقط بدون إرسال.</td></tr>
-          </tbody>
+          <tbody id="queueBody"><tr><td colspan="12">اضغط بحث بدون إرسال لعرض الفواتير.</td></tr></tbody>
         </table>
       </div>
     </section>

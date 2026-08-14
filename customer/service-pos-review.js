@@ -261,6 +261,35 @@
     }
   }
 
+  function readMainProjectUser() {
+    try {
+      if (typeof window.getCurrentUser === "function") {
+        return window.getCurrentUser() || null;
+      }
+
+      const raw = localStorage.getItem("user");
+      return raw ? JSON.parse(raw) : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function buildMainSessionFallbackUser() {
+    const user = readMainProjectUser();
+
+    if (!getMainAuthToken() || !user || user.id === undefined || user.id === null) {
+      return null;
+    }
+
+    return {
+      id: user.id,
+      fullName: user.fullName || user.full_name || user.name || user.username || "مستخدم النظام",
+      username: user.username || `main.${user.id}`,
+      role: "agent",
+      isMainSessionFallback: true
+    };
+  }
+
   function isManagerUser() {
     return currentUser?.role === "manager" || currentUser?.role === "admin";
   }
@@ -505,6 +534,8 @@
   }
 
   async function verifySession() {
+    let sessionWarning = "";
+
     try {
       const data = await request("/me");
       currentUser = data.user;
@@ -512,10 +543,20 @@
     } catch (error) {
       localStorage.removeItem(CS_TOKEN_KEY);
       localStorage.removeItem(CS_USER_KEY);
-      currentUser = null;
+      currentUser = buildMainSessionFallbackUser();
+
+      if (currentUser) {
+        sessionWarning =
+          "تم فتح الصفحة بجلسة المشروع، لكن تعذر الاتصال بخدمة المتابعة.";
+        console.warn("Customer service session initialization failed", error.message);
+      }
     }
 
     updateUserUi();
+
+    if (sessionWarning) {
+      setMessage(sessionWarning, "error");
+    }
   }
 
   function buildSearchQuery() {

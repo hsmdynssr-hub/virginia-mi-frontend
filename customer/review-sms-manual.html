@@ -3,71 +3,109 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>إرسال رسالة تقييم يدوي</title>
+  <title>مركز رسائل Virginia — إرسال يدوي</title>
   <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.rtl.min.css" />
   <link rel="stylesheet" href="../css/bootstrap-theme.css" />
-  <link rel="stylesheet" href="./review-sms.css?v=sms-manual-send-20260716" />
+  <link rel="stylesheet" href="./review-sms.css?v=sms-core-20260814" />
+  <link rel="stylesheet" href="./review-sms-internal.css?v=internal-manual-20260814-03" />
   <script src="../js/api.js" defer></script>
   <script src="../js/layout.js" defer></script>
-  <script src="./review-sms.js?v=sms-manual-send-20260716" defer></script>
+  <script src="./review-sms.js?v=sms-manual-20260814-03" defer></script>
 </head>
-<body data-page="dashboard" data-report-code="customer.review_sms.send">
-  <main class="crsms-page">
-    <section class="crsms-return-bar" aria-label="التنقل في منظومة الرسائل">
-      <a class="crsms-return-link main" href="../dashboard/index.html"><span>🏠</span><strong>المشروع الرئيسي</strong></a>
-      <a class="crsms-return-link" href="./review-sms-dashboard.html"><span>📊</span><strong>الداش بورد الفني</strong></a>
-      <a class="crsms-return-link" href="./review-sms-queue.html"><span>✉️</span><strong>تشغيل الرسائل</strong></a>
-      <a class="crsms-return-link active" href="./review-sms-manual.html"><span>📱</span><strong>إرسال يدوي</strong></a>
-      <a class="crsms-return-link" href="./review-followups.html"><span>☎️</span><strong>متابعة العملاء</strong></a>
-      <a class="crsms-return-link" href="./review-coupons-dashboard.html"><span>🎁</span><strong>الكوبونات</strong></a>
-      <a class="crsms-return-link" href="./review-sms-settings.html"><span>⚙️</span><strong>إعدادات الأدمن</strong></a>
-    </section>
 
-    <section class="crsms-header">
+<body class="crsms-internal-page crsms-manual-page" data-page="dashboard" data-report-code="customer.review_sms.send">
+  <main class="crsms-page">
+    <nav class="crsms-return-bar" aria-label="التنقل في مركز رسائل Virginia">
+      <a class="crsms-return-link main" href="../dashboard/index.html"><span>⌂</span><strong>المشروع الرئيسي</strong></a>
+      <a class="crsms-return-link" data-return-page="dashboard" href="./review-sms-dashboard.html"><span>◫</span><strong>نظرة عامة</strong></a>
+      <a class="crsms-return-link" data-return-page="queue" href="./review-sms-queue.html"><span>✉</span><strong>قائمة الإرسال</strong></a>
+      <a class="crsms-return-link active" data-return-page="manual" href="./review-sms-manual.html"><span>＋</span><strong>إرسال يدوي</strong></a>
+      <a class="crsms-return-link" data-return-page="followups" href="./review-followups.html"><span>☎</span><strong>المتابعات</strong></a>
+      <a class="crsms-return-link" data-return-page="coupons" href="./review-coupons-dashboard.html"><span>★</span><strong>المكافآت</strong></a>
+      <a class="crsms-return-link settings" href="./review-sms-settings.html"><span>⚙</span><strong>الإعدادات</strong></a>
+    </nav>
+
+    <header class="crsms-operation-hero crsms-manual-hero">
       <div>
         <span class="crsms-eyebrow">MANUAL CUSTOMER MESSAGE</span>
         <h1>إرسال رسالة تقييم يدوي</h1>
-        <p>أدخل رقم العميل يدويًا لإرسال رابط التقييم بنفس سياسات الرسائل والكوبونات المعتمدة.</p>
+        <p>أرسل رابط التقييم إلى رقم واحد أو مجموعة أرقام باستخدام نفس سياسات الحماية والمكافآت المعتمدة لشركة Virginia.</p>
       </div>
-      <div class="crsms-mode-badge" id="modeBadge">جاري فحص النظام</div>
-    </section>
-
-    <section class="crsms-panel">
-      <div class="crsms-section-title">
-        <div>
-          <h2>بيانات العميل والرسالة</h2>
-          <p class="crsms-hint">يمكن إدخال رقم واحد أو عدة أرقام، كل رقم في سطر مستقل أو مفصول بفاصلة.</p>
-        </div>
-        <button type="button" class="crsms-secondary" data-action="health">فحص الاتصال</button>
+      <div class="crsms-operation-status">
+        <span>حالة الاتصال</span>
+        <div class="crsms-mode-badge" id="modeBadge">جاري الفحص</div>
+        <button type="button" class="crsms-button ghost" data-action="health"><span>✓</span> فحص النظام</button>
       </div>
+    </header>
 
-      <input id="companyId" type="hidden" value="1" />
-      <input id="limit" type="hidden" value="100" />
+    <input id="companyId" type="hidden" value="1" />
+    <input id="limit" type="hidden" value="100" />
 
-      <div class="crsms-form-grid">
-        <div class="crsms-field crsms-span-2">
-          <label for="manualPhones">رقم العميل *</label>
-          <textarea id="manualPhones" rows="4" inputmode="tel" placeholder="مثال: 01012345678" required></textarea>
+    <section class="crsms-manual-layout">
+      <article class="crsms-panel crsms-manual-form-card">
+        <div class="crsms-section-title">
+          <div>
+            <span class="crsms-section-kicker">MESSAGE RECIPIENTS</span>
+            <h2>بيانات العميل</h2>
+            <p>رقم الهاتف إلزامي، وباقي البيانات تساعد فريق خدمة العملاء في المتابعة.</p>
+          </div>
+          <span class="crsms-company-chip"><i></i> Virginia فقط</span>
         </div>
-        <div class="crsms-field">
-          <label for="manualCustomerName">اسم العميل</label>
-          <input id="manualCustomerName" type="text" placeholder="اختياري" />
+
+        <div class="crsms-manual-phone-field crsms-field">
+          <label for="manualPhones">أرقام العملاء <b>*</b></label>
+          <textarea id="manualPhones" rows="5" inputmode="tel" placeholder="01012345678&#10;01123456789" required></textarea>
+          <small>يمكن كتابة كل رقم في سطر مستقل أو فصل الأرقام بفاصلة.</small>
         </div>
-        <div class="crsms-field">
-          <label for="manualBranchName">الفرع</label>
-          <input id="manualBranchName" type="text" placeholder="اختياري" />
+
+        <div class="crsms-manual-details-grid">
+          <div class="crsms-field">
+            <label for="manualCustomerName">اسم العميل</label>
+            <input id="manualCustomerName" type="text" placeholder="اختياري" />
+          </div>
+          <div class="crsms-field">
+            <label for="manualBranchName">الفرع</label>
+            <input id="manualBranchName" type="text" placeholder="اختياري" />
+          </div>
         </div>
-        <div class="crsms-field crsms-span-2">
+
+        <div class="crsms-field crsms-manual-note-field">
           <label for="manualNote">ملاحظة داخلية</label>
-          <input id="manualNote" type="text" placeholder="لا تُرسل للعميل" />
+          <input id="manualNote" type="text" placeholder="تظهر لفريق العمل فقط ولا تُرسل إلى العميل" />
         </div>
-      </div>
 
-      <div class="crsms-actions">
-        <button type="button" class="crsms-secondary" data-action="manual-dry-run">اختبار بدون إرسال SMS</button>
-        <button type="button" class="crsms-danger" data-action="manual-send">إرسال الرسالة الآن</button>
-      </div>
-      <pre class="crsms-status" id="statusBox">جاهز للإرسال اليدوي — شركة فيرجينيا (Company ID 1).</pre>
+        <div class="crsms-manual-actions">
+          <button type="button" class="crsms-button dry" data-action="manual-dry-run">
+            <span>◇</span><span><b>اختبار بدون SMS</b><small>مراجعة الأرقام والنتيجة دون إرسال</small></span>
+          </button>
+          <button type="button" class="crsms-button danger" data-action="manual-send">
+            <span>✉</span><span><b>إرسال الرسالة الآن</b><small>تنفيذ إرسال حقيقي للأرقام الصحيحة</small></span>
+          </button>
+        </div>
+
+        <pre class="crsms-status" id="statusBox" aria-live="polite">جاهز للإرسال اليدوي — شركة Virginia.</pre>
+      </article>
+
+      <aside class="crsms-manual-side">
+        <section class="crsms-manual-guide">
+          <span class="crsms-guide-icon">✓</span>
+          <h2>مراجعة قبل الإرسال</h2>
+          <ol>
+            <li><b>تأكد من الرقم</b><small>استخدم رقم هاتف مصري صحيح.</small></li>
+            <li><b>نفّذ الاختبار أولًا</b><small>Dry Run لا يرسل رسالة للعميل.</small></li>
+            <li><b>راجع إعدادات التشغيل</b><small>قد يكون الإرسال الحقيقي متوقفًا من الإعدادات.</small></li>
+          </ol>
+        </section>
+
+        <section class="crsms-manual-warning">
+          <span>!</span>
+          <div><strong>الإرسال الحقيقي إجراء مباشر</strong><p>استخدمه بعد مراجعة الأرقام ونتيجة الاختبار فقط.</p></div>
+        </section>
+
+        <a class="crsms-manual-settings-link" href="./review-sms-settings.html">
+          <span>⚙</span><div><strong>إعدادات الرسائل</strong><small>مراجعة مفتاح التشغيل والسياسات</small></div><b>←</b>
+        </a>
+      </aside>
     </section>
   </main>
 </body>

@@ -3,92 +3,187 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>إعدادات منظومة رسائل العملاء</title>
+  <title>مركز رسائل Virginia — الإعدادات</title>
   <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.rtl.min.css" />
   <link rel="stylesheet" href="../css/bootstrap-theme.css" />
-  <link rel="stylesheet" href="./review-sms.css?v=sms-admin-settings-20260714" />
+  <link rel="stylesheet" href="./review-sms.css?v=sms-core-20260814" />
+  <link rel="stylesheet" href="./review-sms-internal.css?v=internal-settings-20260814-05" />
   <script src="../js/api.js" defer></script>
   <script src="../js/layout.js" defer></script>
-  <script src="./review-sms.js?v=sms-admin-settings-20260716-3" defer></script>
+  <script src="./review-sms.js?v=sms-settings-project-auth-20260814-05" defer></script>
 </head>
-<body data-page="settings" data-report-code="customer.review_sms.view">
+
+<body class="crsms-internal-page crsms-settings-page" data-page="settings" data-report-code="customer.review_sms.view">
   <main class="crsms-page">
-    <section class="crsms-return-bar" aria-label="التنقل في منظومة الرسائل">
-      <a class="crsms-return-link main" href="../dashboard/index.html"><span>🏠</span><strong>المشروع الرئيسي</strong></a>
-      <a class="crsms-return-link" href="./review-sms-dashboard.html"><span>📊</span><strong>الداش بورد الفني</strong></a>
-      <a class="crsms-return-link" href="./review-sms-queue.html"><span>✉️</span><strong>تشغيل الرسائل</strong></a>
-      <a class="crsms-return-link" href="./review-sms-manual.html"><span>📱</span><strong>إرسال يدوي</strong></a>
-      <a class="crsms-return-link" href="./review-followups.html"><span>☎️</span><strong>متابعة العملاء</strong></a>
-      <a class="crsms-return-link" href="./review-coupons-dashboard.html"><span>🎁</span><strong>الكوبونات</strong></a>
-      <a class="crsms-return-link active" href="./review-sms-settings.html"><span>⚙️</span><strong>إعدادات الأدمن</strong></a>
-    </section>
+    <nav class="crsms-return-bar" aria-label="التنقل في مركز رسائل Virginia">
+      <a class="crsms-return-link main" href="../dashboard/index.html"><span>⌂</span><strong>المشروع الرئيسي</strong></a>
+      <a class="crsms-return-link" data-return-page="dashboard" href="./review-sms-dashboard.html"><span>◫</span><strong>نظرة عامة</strong></a>
+      <a class="crsms-return-link" data-return-page="queue" href="./review-sms-queue.html"><span>✉</span><strong>قائمة الإرسال</strong></a>
+      <a class="crsms-return-link" data-return-page="manual" href="./review-sms-manual.html"><span>＋</span><strong>إرسال يدوي</strong></a>
+      <a class="crsms-return-link" data-return-page="followups" href="./review-followups.html"><span>☎</span><strong>المتابعات</strong></a>
+      <a class="crsms-return-link" data-return-page="coupons" href="./review-coupons-dashboard.html"><span>★</span><strong>المكافآت</strong></a>
+      <a class="crsms-return-link settings active" href="./review-sms-settings.html"><span>⚙</span><strong>الإعدادات</strong></a>
+    </nav>
 
-    <section class="crsms-header crsms-admin-header">
+    <header class="crsms-operation-hero crsms-settings-hero">
       <div>
-        <span class="crsms-eyebrow">ADMIN CONTROL CENTER</span>
+        <span class="crsms-eyebrow">VIRGINIA MESSAGING CONTROL</span>
         <h1>إعدادات منظومة رسائل العملاء</h1>
-        <p>مكان واحد للتحكم في الرسائل، اختيار العملاء، التشغيل، الكوبونات وربط Google وShopify.</p>
+        <p>تحكم آمن في إرسال الرسائل، قواعد اختيار العملاء، ومكافآت Shopify من خلال حساب المشروع الحالي.</p>
       </div>
-      <div class="crsms-mode-badge live">فيرجينيا · Company 1</div>
-    </section>
+      <div class="crsms-settings-hero-state">
+        <span class="crsms-company-chip"><i></i> Virginia — Company 1</span>
+        <small>الصلاحيات مرتبطة بتسجيل دخول المشروع</small>
+      </div>
+    </header>
 
-    <section id="settingsLoginGate" class="crsms-panel crsms-admin-login">
-      <div class="crsms-section-title"><div><h2>دخول الأدمن</h2><p>كلمة المرور لا تظهر ولا تُحفظ داخل أي صفحة.</p></div></div>
-      <div class="crsms-form-grid">
-        <div class="crsms-field"><label for="settingsUsername">اسم المستخدم</label><input id="settingsUsername" autocomplete="username" /></div>
-        <div class="crsms-field"><label for="settingsPassword">كلمة المرور</label><input id="settingsPassword" type="password" autocomplete="current-password" /></div>
+    <section id="settingsAccessGate" class="crsms-panel crsms-settings-access" aria-live="polite">
+      <div class="crsms-settings-access-icon" aria-hidden="true">⌁</div>
+      <div>
+        <span class="crsms-section-kicker">PROJECT SESSION</span>
+        <h2>التحقق من صلاحية حساب المشروع</h2>
+        <p id="settingsAccessMessage">جاري التحقق من صلاحية حساب المشروع...</p>
       </div>
-      <div class="crsms-actions"><button id="settingsLoginBtn" type="button">فتح الإعدادات</button></div>
+      <div class="crsms-settings-access-actions">
+        <a class="crsms-button secondary" href="../dashboard/index.html">العودة للمشروع</a>
+        <a class="crsms-button settings-login-link" href="../admin/login.html">تسجيل الدخول</a>
+      </div>
     </section>
 
     <div id="settingsWorkspace" hidden>
       <section class="crsms-settings-toolbar">
-        <div><span>جلسة الأدمن:</span> <strong id="settingsAdminName">-</strong></div>
-        <div class="crsms-actions">
-          <button id="reloadAllSettingsBtn" class="crsms-secondary" type="button">إعادة تحميل</button>
-          <button id="settingsLogoutBtn" class="crsms-danger" type="button">تسجيل الخروج</button>
+        <div class="crsms-session-card">
+          <span class="crsms-session-icon">✓</span>
+          <div><small>جلسة المشروع الموثّقة</small><strong id="settingsAdminName">Admin</strong></div>
         </div>
+        <div class="crsms-settings-toolbar-copy">
+          <strong>صلاحية Admin مفعّلة</strong>
+          <span>يتم التحقق من الصلاحية في الخادم قبل القراءة أو الحفظ.</span>
+        </div>
+        <button id="reloadAllSettingsBtn" class="crsms-button secondary" type="button"><span>↻</span> إعادة تحميل</button>
       </section>
 
-      <section class="crsms-panel crsms-settings-section accent-blue">
-        <div class="crsms-section-title"><div><span class="crsms-section-kicker">01 · الرسائل</span><h2>التشغيل والإرسال</h2><p>تحكم مركزي في حالة المنظومة وطريقة التشغيل.</p></div></div>
-        <div class="crsms-form-grid">
-          <div class="crsms-field"><label for="operationMode">نظام التشغيل</label><select id="operationMode"><option value="manual">يدوي</option><option value="automatic">أوتوماتيك</option></select></div>
-          <div class="crsms-field"><label>الشركة</label><input value="فيرجينيا — Company ID 1" readonly /></div>
-        </div>
-        <div class="crsms-toggle-grid">
-          <label class="crsms-toggle-card"><input id="smsSendingEnabled" type="checkbox" /><span><strong>تشغيل إرسال SMS</strong><small>المفتاح الرئيسي لكل عمليات الإرسال الحقيقي.</small></span></label>
-          <label class="crsms-toggle-card"><input id="manualSendEnabled" type="checkbox" /><span><strong>السماح بالتشغيل اليدوي</strong><small>للمدير من صفحة تشغيل الرسائل.</small></span></label>
-          <label class="crsms-toggle-card"><input id="autoScanEnabled" type="checkbox" /><span><strong>التشغيل الأوتوماتيك</strong><small>يتطلب تفعيل Scheduler في الاستضافة.</small></span></label>
-        </div>
-      </section>
+      <section class="crsms-settings-grid">
+        <article class="crsms-panel crsms-settings-section accent-blue">
+          <div class="crsms-settings-card-head">
+            <div class="crsms-settings-number">01</div>
+            <div>
+              <span class="crsms-section-kicker">MESSAGING CONTROL</span>
+              <h2>التشغيل والإرسال</h2>
+              <p>المفتاح الرئيسي وطريقة تشغيل منظومة رسائل Virginia.</p>
+            </div>
+          </div>
 
-      <section class="crsms-panel crsms-settings-section accent-green">
-        <div class="crsms-section-title"><div><span class="crsms-section-kicker">02 · العملاء</span><h2>اختيار العملاء والفواتير</h2><p>القواعد الافتراضية المستخدمة في البحث والتشغيل.</p></div></div>
-        <div class="crsms-form-grid">
-          <div class="crsms-field"><label for="threshold">الحد الأدنى لقيمة الشراء</label><input id="threshold" type="number" min="0" /></div>
-          <div class="crsms-field"><label for="lookbackMinutes">فترة البحث بالدقائق</label><input id="lookbackMinutes" type="number" min="1" /></div>
-          <div class="crsms-field"><label for="limit">الحد الأقصى للفحص</label><input id="limit" type="number" min="1" max="500" /></div>
-          <div class="crsms-field"><label for="repeatPolicy">سياسة تكرار العميل</label><select id="repeatPolicy"><option value="same_day">مرة واحدة في اليوم</option><option value="last_24h">مرة كل 24 ساعة</option><option value="allow">السماح بالتكرار</option></select></div>
-        </div>
-      </section>
+          <div class="crsms-form-grid crsms-settings-form-grid">
+            <div class="crsms-field">
+              <label for="operationMode">نظام التشغيل</label>
+              <select id="operationMode">
+                <option value="manual">يدوي</option>
+                <option value="automatic">أوتوماتيك</option>
+              </select>
+            </div>
+            <div class="crsms-field">
+              <label>الشركة النشطة</label>
+              <div class="crsms-readonly-company"><i></i><span>Virginia</span><small>Company ID 1</small></div>
+            </div>
+          </div>
 
-      <section class="crsms-panel crsms-settings-section accent-purple">
-        <div class="crsms-section-title"><div><span class="crsms-section-kicker">03 · الكوبونات</span><h2>المكافأة وShopify</h2><p>سياسة إصدار كوبون الشحن المجاني بعد التقييم.</p></div></div>
-        <div class="crsms-form-grid">
-          <div class="crsms-field"><label for="couponValidityMonths">مدة صلاحية الكوبون</label><select id="couponValidityMonths"><option value="1">شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="9">9 أشهر</option><option value="12">12 شهرًا</option></select></div>
-          <div class="crsms-field crsms-span-2"><label for="googleReviewUrl">رابط تقييم Google بعد ظهور الكوبون</label><input id="googleReviewUrl" type="url" placeholder="https://g.page/r/.../review" /></div>
-        </div>
-        <div class="crsms-toggle-grid"><label class="crsms-toggle-card"><input id="couponIssuingEnabled" type="checkbox" /><span><strong>تشغيل إصدار كوبونات Shopify</strong><small>الكوبون شخصي ومربوط برقم العميل طوال فترة الصلاحية.</small></span></label></div>
+          <div class="crsms-toggle-grid crsms-settings-toggle-grid">
+            <label class="crsms-toggle-card">
+              <input id="smsSendingEnabled" type="checkbox" />
+              <span><strong>تشغيل إرسال SMS</strong><small>المفتاح الرئيسي لكل عمليات الإرسال الحقيقي.</small></span>
+            </label>
+            <label class="crsms-toggle-card">
+              <input id="manualSendEnabled" type="checkbox" />
+              <span><strong>السماح بالتشغيل اليدوي</strong><small>التحكم من صفحة قائمة الإرسال.</small></span>
+            </label>
+            <label class="crsms-toggle-card">
+              <input id="autoScanEnabled" type="checkbox" />
+              <span><strong>التشغيل الأوتوماتيك</strong><small>يتطلب تفعيل Scheduler في الاستضافة.</small></span>
+            </label>
+          </div>
+        </article>
+
+        <article class="crsms-panel crsms-settings-section accent-green">
+          <div class="crsms-settings-card-head">
+            <div class="crsms-settings-number">02</div>
+            <div>
+              <span class="crsms-section-kicker">CUSTOMER SELECTION</span>
+              <h2>اختيار العملاء والفواتير</h2>
+              <p>القواعد الافتراضية المستخدمة في البحث ومنع التكرار.</p>
+            </div>
+          </div>
+
+          <div class="crsms-form-grid crsms-settings-form-grid customer-rules">
+            <div class="crsms-field">
+              <label for="threshold">الحد الأدنى لقيمة الشراء</label>
+              <div class="crsms-input-suffix"><input id="threshold" type="number" min="0" /><span>EGP</span></div>
+            </div>
+            <div class="crsms-field">
+              <label for="lookbackMinutes">فترة البحث</label>
+              <div class="crsms-input-suffix"><input id="lookbackMinutes" type="number" min="1" /><span>دقيقة</span></div>
+            </div>
+            <div class="crsms-field">
+              <label for="limit">الحد الأقصى للفحص</label>
+              <div class="crsms-input-suffix"><input id="limit" type="number" min="1" max="500" /><span>عميل</span></div>
+            </div>
+            <div class="crsms-field">
+              <label for="repeatPolicy">سياسة تكرار العميل</label>
+              <select id="repeatPolicy">
+                <option value="same_day">مرة واحدة في اليوم</option>
+                <option value="last_24h">مرة كل 24 ساعة</option>
+                <option value="allow">السماح بالتكرار</option>
+              </select>
+            </div>
+          </div>
+        </article>
+
+        <article class="crsms-panel crsms-settings-section accent-amber crsms-settings-reward-card">
+          <div class="crsms-settings-card-head">
+            <div class="crsms-settings-number">03</div>
+            <div>
+              <span class="crsms-section-kicker">SHOPIFY REWARD</span>
+              <h2>المكافأة وكوبون الشحن المجاني</h2>
+              <p>إصدار مكافأة شخصية لعملاء Virginia بعد التقييم الإيجابي.</p>
+            </div>
+          </div>
+
+          <div class="crsms-form-grid crsms-settings-form-grid reward-rules">
+            <div class="crsms-field">
+              <label for="couponValidityMonths">مدة صلاحية الكوبون</label>
+              <select id="couponValidityMonths">
+                <option value="1">شهر</option>
+                <option value="3">3 أشهر</option>
+                <option value="6">6 أشهر</option>
+                <option value="9">9 أشهر</option>
+                <option value="12">12 شهرًا</option>
+              </select>
+            </div>
+            <div class="crsms-field crsms-span-2">
+              <label for="googleReviewUrl">رابط تقييم Google بعد ظهور المكافأة</label>
+              <input id="googleReviewUrl" type="url" placeholder="https://g.page/r/.../review" />
+            </div>
+          </div>
+
+          <div class="crsms-toggle-grid crsms-settings-toggle-grid single">
+            <label class="crsms-toggle-card reward-toggle">
+              <input id="couponIssuingEnabled" type="checkbox" />
+              <span><strong>تشغيل إصدار كوبونات Shopify</strong><small>الكوبون شخصي ومربوط برقم العميل طوال فترة الصلاحية.</small></span>
+            </label>
+          </div>
+        </article>
       </section>
 
       <section class="crsms-panel crsms-save-panel">
-        <div><h2>حفظ الإعدادات</h2><p>تُطبق الإعدادات الجديدة على العمليات التالية بعد الحفظ.</p></div>
-        <button id="saveAllSettingsBtn" type="button">حفظ كل الإعدادات</button>
+        <div class="crsms-save-copy">
+          <span class="crsms-save-icon">✓</span>
+          <div><h2>اعتماد إعدادات منظومة الرسائل</h2><p>تُطبّق القيم الجديدة على العمليات التالية بعد الحفظ مباشرة.</p></div>
+        </div>
+        <button id="saveAllSettingsBtn" class="crsms-button settings-save" type="button"><span>✓</span> حفظ كل الإعدادات</button>
       </section>
     </div>
 
-    <pre class="crsms-status" id="statusBox">سجّل دخول الأدمن لفتح الإعدادات.</pre>
+    <pre class="crsms-status crsms-settings-status" id="statusBox" aria-live="polite">جاري استخدام جلسة تسجيل دخول المشروع...</pre>
   </main>
 </body>
 </html>

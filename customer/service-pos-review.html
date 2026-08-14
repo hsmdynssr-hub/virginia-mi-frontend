@@ -6,11 +6,40 @@
   <title>خدمة العملاء - مراجعة فواتير POS</title>
   <link rel="stylesheet" href="../css/style.css" />
   <link rel="stylesheet" href="../css/report-ui.css" />
+  <link rel="stylesheet" href="./service-pos-review.css?v=20260814-14" />
 </head>
-<body>
-  <main class="report-ui-page">
+<body class="service-pos-page">
+  <main class="report-ui-page service-pos-shell">
+    <nav class="service-page-toolbar" aria-label="أدوات الصفحة">
+      <a
+        class="service-home-button"
+        href="../dashboard/index.html"
+        aria-label="العودة إلى الرئيسية"
+        title="العودة إلى الرئيسية"
+      >
+        <span class="service-home-button-icon" aria-hidden="true">⌂</span>
+        <span>العودة إلى الرئيسية</span>
+      </a>
+
+      <div class="service-toolbar-actions">
+        <div id="csUserState" class="service-session-state">
+          <span class="page-pill">جلسة المشروع الرئيسية</span>
+        </div>
+
+        <button
+          type="button"
+          class="mi-language-toggle service-language-toggle"
+          data-mi-language-toggle
+          aria-label="تغيير اللغة"
+        >
+          <span aria-hidden="true">◎</span>
+          <strong>EN</strong>
+        </button>
+      </div>
+    </nav>
+
     <section class="inventory-hero-card">
-      <div>
+      <div class="service-hero-copy">
         <span class="inventory-hero-kicker">Customer Service</span>
         <h1>خدمة العملاء - مراجعة فواتير POS</h1>
         <p>
@@ -18,9 +47,7 @@
         </p>
       </div>
 
-      <div id="csUserState" class="inventory-hero-actions">
-        <span class="page-pill">جلسة المشروع الرئيسية</span>
-      </div>
+      <div class="service-hero-mark" aria-hidden="true">CS</div>
     </section>
 
     <section id="csMessage" class="error-box hidden"></section>
@@ -213,7 +240,7 @@
   </main>
 
   <script src="../js/api.js"></script>
-  <script src="../js/layout.js"></script>
-  <script src="./service-pos-review.js"></script>
+  <script src="../js/layout.js?v=20260814-14"></script>
+  <script src="./service-pos-review.js?v=20260814-04"></script>
 </body>
 </html>
