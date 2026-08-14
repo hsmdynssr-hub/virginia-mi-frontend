@@ -48,7 +48,7 @@
   if (!hasStylesheet("report-toolbar-fixed.css")) {
     const reportToolbarCss = document.createElement("link");
     reportToolbarCss.rel = "stylesheet";
-    reportToolbarCss.href = `${assetUrl("../css/report-toolbar-fixed.css")}?v=20260815-03`;
+    reportToolbarCss.href = `${assetUrl("../css/report-toolbar-fixed.css")}?v=20260815-05`;
     reportToolbarCss.dataset.miReportToolbar = "true";
     document.head.appendChild(reportToolbarCss);
   }
@@ -56,7 +56,7 @@
   if (!hasStylesheet("virginia-showcase.css")) {
     const showcaseCss = document.createElement("link");
     showcaseCss.rel = "stylesheet";
-    showcaseCss.href = `${assetUrl("../css/virginia-showcase.css")}?v=20260815-04`;
+    showcaseCss.href = `${assetUrl("../css/virginia-showcase.css")}?v=20260815-05`;
     showcaseCss.dataset.miVirginiaShowcase = "true";
     document.head.appendChild(showcaseCss);
   }
@@ -770,22 +770,40 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
     ? contentHtml
     : renderPermissionDenied(title || "هذا التقرير");
 
-    const reportToolbarHtml = shouldShowReportToolbar(activePage)
+  const showReportToolbar = shouldShowReportToolbar(activePage);
+
+  const reportToolbarHtml = showReportToolbar
   ? `
-    <section id="reportToolbar" class="topbar report-toolbar">
-      <div class="page-heading">
-        <span class="page-pill">Filters</span>
-        <h2>فلاتر التقرير</h2>
-        <p>اختر الفترة والفرع ثم حدّث التقرير أو صدّر النتائج</p>
+    <section id="reportToolbar" class="report-toolbar mi-unified-filter-toolbar">
+      <div class="mi-filter-intro">
+        <span>Filters</span>
+        <strong>فلتر التقرير</strong>
       </div>
 
       <div class="header-actions">
         <div class="filter-row">
-          <div class="date-preset-switcher" role="group" aria-label="الفترة الزمنية">
-            <button type="button" data-date-preset-button="today">اليوم</button>
-            <button type="button" data-date-preset-button="yesterday">أمس</button>
-            <button type="button" data-date-preset-button="thisMonth">هذا الشهر</button>
-            <button type="button" data-date-preset-button="custom">📅 مخصص</button>
+          <label class="context-field company-context-field">
+            <span>الشركة</span>
+            <select id="companySelect" class="control company-control">
+              <option value="">اختر الشركة</option>
+            </select>
+          </label>
+
+          <label id="branchScopeField" class="context-field branch-context-field">
+            <span>الفرع / النطاق</span>
+            <select id="branchCode" class="control branch-control" disabled>
+              <option value="">اختر الشركة أولًا</option>
+            </select>
+          </label>
+
+          <div class="context-field date-context-field">
+            <span>الفترة</span>
+            <div class="date-preset-switcher" role="group" aria-label="الفترة الزمنية">
+              <button type="button" data-date-preset-button="today">اليوم</button>
+              <button type="button" data-date-preset-button="yesterday">أمس</button>
+              <button type="button" data-date-preset-button="thisMonth">هذا الشهر</button>
+              <button type="button" data-date-preset-button="custom">📅 مخصص</button>
+            </div>
           </div>
 
           <select id="datePreset" class="date-preset-compat" aria-hidden="true" tabindex="-1">
@@ -800,19 +818,21 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
             <label><span>إلى</span><input class="control" type="date" id="dateTo" /></label>
           </div>
 
-          <label id="branchScopeField" class="context-field branch-context-field">
-            <span>الفرع / النطاق</span>
-            <select id="branchCode" class="control branch-control" disabled>
-              <option value="">اختر الشركة أولًا</option>
-            </select>
-          </label>
-
           <button class="run-btn" id="loadBtn">تحديث التقرير</button>
         </div>
       </div>
     </section>
   `
-  : "";
+  : `
+    <section class="mi-context-toolbar mi-context-toolbar-compact">
+      <label class="context-field company-context-field">
+        <span>الشركة</span>
+        <select id="companySelect" class="control company-control">
+          <option value="">اختر الشركة</option>
+        </select>
+      </label>
+    </section>
+  `;
 
   document.body.innerHTML = `
     <div class="app-shell">
@@ -1000,37 +1020,8 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
       </aside>
 
       <main class="main">
-
-        <header class="topbar">
-          <div class="page-heading">
-            <button type="button" class="mobile-menu-btn" data-mi-mobile-menu aria-label="فتح القائمة">☰</button>
-            <span class="page-pill">Virginia Operations</span>
-            <h2>${title}</h2>
-            <p>${subtitle}</p>
-          </div>
-
-          <div class="header-actions">
-            <div class="filter-row">
-              <select id="companySelect" class="control company-control">
-              <option value="">اختر الشركة</option>
-              </select>
-
-              <div class="user-chip">
-                👤 ${getCurrentUser()?.fullName || getCurrentUser()?.username || "User"}
-              </div>
-
-              <button type="button" class="mi-language-toggle" data-mi-language-toggle aria-label="تغيير اللغة">◎ <strong>EN</strong></button>
-              <button class="export-btn logout-btn" onclick="logout()">تسجيل الخروج</button>
-            </div>
-          </div>
-        </header>
-
-        <section
-          class="mi-virginia-showcase"
-          aria-hidden="true"
-          style="max-height:116px;overflow:hidden;position:relative"
-        >
-          <picture>
+        <section class="mi-page-hero">
+          <picture aria-hidden="true">
             <source
               media="(min-width: 900px)"
               srcset="../assets/virginia-showcase-1440.webp"
@@ -1041,11 +1032,29 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
               width="960"
               height="540"
               alt=""
-              loading="lazy"
+              loading="eager"
               decoding="async"
-              fetchpriority="low"
+              fetchpriority="high"
             />
           </picture>
+
+          <div class="mi-page-hero-shade" aria-hidden="true"></div>
+
+          <button type="button" class="mobile-menu-btn mi-hero-menu-btn" data-mi-mobile-menu aria-label="فتح القائمة">☰</button>
+
+          <div class="mi-hero-account-bar">
+            <div class="user-chip">
+              👤 ${getCurrentUser()?.fullName || getCurrentUser()?.username || "User"}
+            </div>
+            <button type="button" class="mi-language-toggle" data-mi-language-toggle aria-label="تغيير اللغة">◎ <strong>EN</strong></button>
+            <button class="export-btn logout-btn" onclick="logout()">تسجيل الخروج</button>
+          </div>
+
+          <div class="mi-hero-heading">
+            <span class="page-pill">Virginia Operations</span>
+            <h2>${title}</h2>
+            <p>${subtitle}</p>
+          </div>
         </section>
 
         ${reportToolbarHtml}
