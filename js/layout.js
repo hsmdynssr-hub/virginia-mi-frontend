@@ -56,7 +56,7 @@
   if (!hasStylesheet("virginia-showcase.css")) {
     const showcaseCss = document.createElement("link");
     showcaseCss.rel = "stylesheet";
-    showcaseCss.href = `${assetUrl("../css/virginia-showcase.css")}?v=20260815-05`;
+    showcaseCss.href = `${assetUrl("../css/virginia-showcase.css")}?v=20260815-06`;
     showcaseCss.dataset.miVirginiaShowcase = "true";
     document.head.appendChild(showcaseCss);
   }
@@ -497,8 +497,31 @@ function renderPermissionDenied(reportName = "هذا التقرير") {
   `;
 }
 
+const REPORT_TIMEZONE = "Africa/Cairo";
+
+function getReportCalendarDate(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: REPORT_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(date);
+
+  const values = Object.fromEntries(
+    parts
+      .filter((part) => ["year", "month", "day"].includes(part.type))
+      .map((part) => [part.type, Number(part.value)])
+  );
+
+  return new Date(Date.UTC(values.year, values.month - 1, values.day));
+}
+
 function toISODate(date) {
-  return date.toISOString().slice(0, 10);
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
 
 function applyDatePreset(preset) {
@@ -506,27 +529,27 @@ function applyDatePreset(preset) {
   const dateTo = document.getElementById("dateTo");
   const customDates = document.getElementById("customDates");
 
-  const today = new Date();
+  const today = getReportCalendarDate();
   const from = new Date(today);
   const to = new Date(today);
 
   if (preset === "today") {
     // today only
   } else if (preset === "yesterday") {
-    from.setDate(today.getDate() - 1);
-    to.setDate(today.getDate() - 1);
+    from.setUTCDate(today.getUTCDate() - 1);
+    to.setUTCDate(today.getUTCDate() - 1);
   } else if (preset === "last2") {
-    from.setDate(today.getDate() - 1);
+    from.setUTCDate(today.getUTCDate() - 1);
   } else if (preset === "last7") {
-    from.setDate(today.getDate() - 6);
+    from.setUTCDate(today.getUTCDate() - 6);
   } else if (preset === "last30") {
-    from.setDate(today.getDate() - 29);
+    from.setUTCDate(today.getUTCDate() - 29);
   } else if (preset === "thisMonth") {
-    from.setDate(1);
+    from.setUTCDate(1);
   } else if (preset === "last6CompleteMonths") {
-    to.setDate(1);
-    to.setDate(0);
-    from.setFullYear(to.getFullYear(), to.getMonth() - 5, 1);
+    to.setUTCDate(1);
+    to.setUTCDate(0);
+    from.setUTCFullYear(to.getUTCFullYear(), to.getUTCMonth() - 5, 1);
   } else if (preset === "custom") {
     if (customDates) customDates.hidden = false;
     syncDatePresetButtons(preset);

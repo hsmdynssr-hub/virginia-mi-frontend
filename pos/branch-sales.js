@@ -1,3 +1,5 @@
+const BRANCH_SALES_TIMEZONE = "Africa/Cairo";
+
 document.addEventListener("DOMContentLoaded", () => {
   renderLayout(
     "تحليل أداء المعارض",
@@ -27,6 +29,8 @@ function buildBranchSalesContent() {
         اختار الشركة ثم الفرع / النطاق، وبعدها اضغط <strong>تحديث التقرير</strong> لعرض البيانات.
       </p>
     </section>
+
+    <div id="branchSalesPeriodBar" class="branch-sales-period-bar hidden"></div>
 
     <section id="kpiGrid" class="inventory-kpi-grid"></section>
 
@@ -203,6 +207,8 @@ function showErrorMessage(message) {
 }
 
 function clearBranchSalesReport() {
+  document.getElementById("branchSalesPeriodBar")?.classList.add("hidden");
+
   [
     "kpiGrid",
     "periodComparisonGrid",
@@ -248,6 +254,8 @@ function getBranchSalesFilters(mode = "summary") {
     branchCode:
       document.getElementById("branchCode")?.value || "",
 
+    timezone: BRANCH_SALES_TIMEZONE,
+
     limit: isExport ? 100000 : 30000,
     linesLimit: isExport ? 250000 : 60000
   };
@@ -286,7 +294,7 @@ async function loadBranchSalesReport() {
     }
 
     hidePendingBox();
-    renderBranchSalesReport(response.data || {});
+    renderBranchSalesReport(response.data || {}, response.period || {});
   } catch (error) {
     console.error(error);
 
@@ -421,15 +429,34 @@ function renderBranchOptions(branchOptions = []) {
   select.value = exists ? currentValue : "all";
 }
 
-function renderBranchSalesReport(data) {
+function renderBranchSalesReport(data, period = {}) {
   const summary = data.summary || {};
 
+  renderAppliedPeriod(period);
   renderBranchSalesKpis(summary);
   renderPeriodComparison(data.comparison || {});
   renderBranches(data.branches || []);
   renderCashiers(data.cashiers || []);
   renderProducts(data.products || [], summary);
   renderNotes(data.notes || []);
+}
+
+function renderAppliedPeriod(period = {}) {
+  const container = document.getElementById("branchSalesPeriodBar");
+  if (!container) return;
+
+  const requested = period.requested || {};
+  const dateLabel = formatPeriodLabel(requested);
+  const timezoneLabel = period.timezone || BRANCH_SALES_TIMEZONE;
+
+  container.innerHTML = `
+    <strong>الفترة المطبقة:</strong>
+    <span>${escapeHtml(dateLabel)}</span>
+    <i aria-hidden="true"></i>
+    <strong>التوقيت:</strong>
+    <span>${escapeHtml(timezoneLabel)} — القاهرة</span>
+  `;
+  container.classList.remove("hidden");
 }
 
 function formatPeriodLabel(period = {}) {

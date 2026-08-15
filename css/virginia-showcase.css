@@ -303,6 +303,37 @@ html[dir="ltr"] .mi-hero-heading {
   width: 200px;
 }
 
+.branch-sales-period-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 0 0 14px;
+  padding: 9px 13px;
+  border: 1px solid #cfe1da;
+  border-radius: 12px;
+  color: #4f6072;
+  background: #f3faf7;
+  font-size: 11px;
+}
+
+.branch-sales-period-bar strong {
+  color: #19785f;
+  font-weight: 900;
+}
+
+.branch-sales-period-bar i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #95aa9f;
+}
+
+.branch-sales-period-bar.hidden {
+  display: none !important;
+}
+
 @keyframes miPageHeroPan {
   0% {
     transform: translate3d(0, -3%, 0) scale(1.01);
