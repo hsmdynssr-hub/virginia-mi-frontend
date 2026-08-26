@@ -280,10 +280,6 @@ const REPORT_PAGE_MAP = {
   inventory: "inventory.index",
   "inventory-executive-summary": "inventory.executive_summary",
   "inventory-historical-executive-summary": "inventory.historical_executive_summary",
-<<<<<<< HEAD
-=======
-  "inventory-movement-analysis-report": "inventory.historical_executive_summary",
->>>>>>> 843514a (Add inventory movement analysis report)
   "inventory-intermediate-control": "inventory.intermediate_control",
   "inventory-flow-control": "inventory.flow_control",
   "inventory-movement-intelligence": "inventory.movement_intelligence",
@@ -1008,10 +1004,6 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
               <a data-page="inventory-intermediate-control" class="nav-link" href="../inventory/intermediate-control.html">رقابة المخازن الوسيطة</a>
               <a data-page="inventory-executive-summary" class="nav-link" href="../inventory/executive-summary.html">ملخص المخزون التنفيذي</a>
               <a data-page="inventory-historical-executive-summary" class="nav-link" href="../inventory/historical-executive-summary.html">المخزون التنفيذي التاريخي</a>
-<<<<<<< HEAD
-=======
-              <a data-page="inventory-movement-analysis-report" class="nav-link" href="../inventory/movement-analysis-report.html">تحليل حركة الصنف</a>
->>>>>>> 843514a (Add inventory movement analysis report)
               <a data-page="inventory-flow-control" class="nav-link" href="../inventory/flow-control.html">تحكم حركة المخزون</a>
               <a data-page="inventory-movement-intelligence" class="nav-link" href="../inventory/movement-intelligence.html">تحليل حركة المخزون</a>
               <a data-page="inventory-reorder-risk" class="nav-link" href="../inventory/reorder-risk.html">تشغيل المخازن وإعادة الطلب</a>
