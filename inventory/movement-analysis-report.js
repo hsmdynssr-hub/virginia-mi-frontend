@@ -31,9 +31,18 @@ function buildMovementAnalysisContent() {
             <label class="form-label" for="productId">الصنف</label>
             <select id="productId" class="form-select"><option value="">كل الأصناف</option></select>
           </div>
-          <div class="col-12 col-md-6 col-xl-3">
-            <label class="form-label" for="locationId">الموقع المخزني</label>
-            <select id="locationId" class="form-select"><option value="">كل المواقع الداخلية</option></select>
+          <div class="col-12">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+              <label class="form-label mb-0">المواقع المخزنية</label>
+              <div class="d-flex gap-2">
+                <button type="button" class="btn btn-sm btn-outline-primary" id="selectAllLocationsBtn">تحديد الكل</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="clearLocationsBtn">إلغاء الكل</button>
+              </div>
+            </div>
+            <div id="locationCheckboxes" class="border rounded-3 p-3 bg-body-tertiary" style="max-height:220px; overflow:auto;">
+              <div class="text-muted small">اختار الشركة أولًا لتحميل المواقع.</div>
+            </div>
+            <div class="form-text mt-2">يمكن اختيار أكثر من موقع مخزني في نفس التقرير. عدم اختيار أي موقع = كل المواقع الداخلية.</div>
           </div>
         </div>
       </section>
@@ -71,17 +80,31 @@ function bindMovementEvents() {
     if (document.getElementById("companySelect")?.value) await loadMovementFiltersSafely();
   });
   document.getElementById("categoryId")?.addEventListener("change", filterProductOptions);
+  document.getElementById("selectAllLocationsBtn")?.addEventListener("click", () => {
+    document.querySelectorAll('input[name="movementLocation"]').forEach((checkbox) => { checkbox.checked = true; });
+    updateSelectedLocationsLabel();
+  });
+  document.getElementById("clearLocationsBtn")?.addEventListener("click", () => {
+    document.querySelectorAll('input[name="movementLocation"]').forEach((checkbox) => { checkbox.checked = false; });
+    updateSelectedLocationsLabel();
+  });
+  document.getElementById("locationCheckboxes")?.addEventListener("change", (event) => {
+    if (event.target?.matches?.('input[name="movementLocation"]')) updateSelectedLocationsLabel();
+  });
   document.getElementById("productSearch")?.addEventListener("keydown", (event) => {
     if (event.key === "Enter") refreshMovementReport();
   });
 }
 
 function resetMovementFilters() {
-  ["categoryId", "productId", "locationId"].forEach((id) => {
+  ["categoryId", "productId"].forEach((id) => {
     const el = document.getElementById(id);
-    if (el) el.innerHTML = `<option value="">${id === "categoryId" ? "كل الفئات" : id === "productId" ? "كل الأصناف" : "كل المواقع الداخلية"}</option>`;
+    if (el) el.innerHTML = `<option value="">${id === "categoryId" ? "كل الفئات" : "كل الأصناف"}</option>`;
   });
+  const locationBox = document.getElementById("locationCheckboxes");
+  if (locationBox) locationBox.innerHTML = '<div class="text-muted small">اختار الشركة أولًا لتحميل المواقع.</div>';
   window.movementFilterProducts = [];
+  window.movementFilterLocations = [];
 }
 
 function getMovementParams() {
@@ -92,7 +115,7 @@ function getMovementParams() {
     search: document.getElementById("productSearch")?.value?.trim() || "",
     categoryId: document.getElementById("categoryId")?.value || "",
     productId: document.getElementById("productId")?.value || "",
-    locationId: document.getElementById("locationId")?.value || ""
+    locationIds: getSelectedLocationIds().join(",")
   };
 }
 
@@ -115,8 +138,9 @@ async function loadMovementFilters() {
   if (!response?.success) throw new Error(response?.message || "فشل تحميل الفلاتر");
   const data = response.data || {};
   window.movementFilterProducts = Array.isArray(data.products) ? data.products : [];
+  window.movementFilterLocations = Array.isArray(data.locations) ? data.locations : [];
   fillSelect("categoryId", data.categories, "كل الفئات", (x) => x.id, (x) => x.name);
-  fillSelect("locationId", data.locations, "كل المواقع الداخلية", (x) => x.id, (x) => x.completeName || x.name);
+  renderLocationCheckboxes(window.movementFilterLocations);
   filterProductOptions();
 }
 
@@ -127,6 +151,48 @@ function fillSelect(id, rows, placeholder, valueFn, labelFn) {
   select.innerHTML = `<option value="">${escapeMovementHtml(placeholder)}</option>` +
     (Array.isArray(rows) ? rows : []).map((row) => `<option value="${escapeMovementHtml(valueFn(row))}">${escapeMovementHtml(labelFn(row))}</option>`).join("");
   if ([...select.options].some((o) => o.value === oldValue)) select.value = oldValue;
+}
+
+function renderLocationCheckboxes(rows) {
+  const container = document.getElementById("locationCheckboxes");
+  if (!container) return;
+
+  const locations = Array.isArray(rows) ? rows : [];
+  if (!locations.length) {
+    container.innerHTML = '<div class="text-muted small">لا توجد مواقع داخلية متاحة لهذه الشركة.</div>';
+    return;
+  }
+
+  container.innerHTML = `
+    <div id="selectedLocationsLabel" class="small fw-semibold mb-2">كل المواقع الداخلية</div>
+    <div class="row g-2">
+      ${locations.map((location) => `
+        <div class="col-12 col-md-6 col-xl-4">
+          <label class="form-check border rounded-2 p-2 h-100 bg-white">
+            <input class="form-check-input ms-2" type="checkbox" name="movementLocation" value="${escapeMovementHtml(location.id)}">
+            <span class="form-check-label">${escapeMovementHtml(location.completeName || location.name || location.id)}</span>
+          </label>
+        </div>
+      `).join("")}
+    </div>
+  `;
+  updateSelectedLocationsLabel();
+}
+
+function getSelectedLocationIds() {
+  return Array.from(document.querySelectorAll('input[name="movementLocation"]:checked'))
+    .map((checkbox) => Number(checkbox.value))
+    .filter((id) => Number.isInteger(id) && id > 0);
+}
+
+function updateSelectedLocationsLabel() {
+  const label = document.getElementById("selectedLocationsLabel");
+  if (!label) return;
+  const selected = getSelectedLocationIds();
+  const total = Array.isArray(window.movementFilterLocations) ? window.movementFilterLocations.length : 0;
+  label.textContent = selected.length
+    ? `تم اختيار ${selected.length} من ${total} موقع`
+    : "كل المواقع الداخلية";
 }
 
 function filterProductOptions() {
