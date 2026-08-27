@@ -5,7 +5,7 @@ let movementRequestId = 0;
 document.addEventListener("DOMContentLoaded", () => {
   renderLayout(
     "تحليل حركة الصنف",
-    "رصيد أول المدة، الإنتاج، تسويات الجرد، الصرف، ورصيد آخر المدة حسب الصنف أو الفئة.",
+    "رصيد أول المدة، الإنتاج، تسويات الجرد، التحويلات، الصرف، ورصيد آخر المدة حسب الصنف أو الفئة.",
     MOVEMENT_ANALYSIS_PAGE,
     buildMovementAnalysisContent()
   );
@@ -224,10 +224,17 @@ async function refreshMovementReport() {
 function renderMovementReport(data) {
   const summary = data.summary || {};
   const kpis = [
-    ["رصيد أول المدة", summary.openingQty], ["الكمية المصنعة", summary.manufacturedQty],
-    ["تسوية زيادة", summary.adjustmentInQty], ["تسوية نقص", summary.adjustmentOutQty],
-    ["صافي التسوية", summary.netAdjustmentQty], ["الكمية المصروفة", summary.issuedQty],
-    ["رصيد آخر المدة", summary.closingQty], ["عدد الأصناف", summary.productsCount, 0]
+    ["رصيد أول المدة", summary.openingQty],
+    ["الكمية المصنعة", summary.manufacturedQty],
+    ["تسوية زيادة", summary.adjustmentInQty],
+    ["تسوية نقص", summary.adjustmentOutQty],
+    ["تحويلات واردة", summary.transferInQty],
+    ["تحويلات صادرة", summary.transferOutQty],
+    ["وارد آخر", summary.otherIncomingQty],
+    ["الكمية المصروفة", summary.issuedQty],
+    ["رصيد آخر المدة", summary.closingQty],
+    ["فرق المطابقة", summary.reconciliationDifference],
+    ["عدد الأصناف", summary.productsCount, 0]
   ];
   document.getElementById("movementKpis").innerHTML = kpis.map(([label, value, digits]) => `
     <div class="col"><article class="mi-kpi-card h-100"><span class="mi-kpi-label">${label}</span><strong class="mi-kpi-value">${formatMovementNumber(value, digits ?? 3)}</strong></article></div>`).join("");
@@ -236,7 +243,11 @@ function renderMovementReport(data) {
   document.getElementById("movementTable").innerHTML = buildMovementTable(rows);
   const meta = document.getElementById("movementMeta");
   if (meta) {
-    meta.textContent = `تم تحليل ${formatMovementNumber(rows.length, 0)} صنف داخل ${formatMovementNumber(data.meta?.locationsCount || 0, 0)} موقع مخزني.`;
+    const expandedLocations = formatMovementNumber(data.meta?.locationsCount || 0, 0);
+    const selectedRoots = formatMovementNumber(data.meta?.selectedLocationRootsCount || 0, 0);
+    meta.textContent = data.meta?.selectedLocationRootsCount
+      ? `تم تحليل ${formatMovementNumber(rows.length, 0)} صنف. تم اختيار ${selectedRoots} موقع رئيسي، والحساب شمل ${expandedLocations} موقعًا داخليًا بعد احتساب المواقع التابعة.`
+      : `تم تحليل ${formatMovementNumber(rows.length, 0)} صنف داخل ${expandedLocations} موقع مخزني.`;
     meta.classList.remove("hidden");
   }
 }
@@ -244,10 +255,27 @@ function renderMovementReport(data) {
 function buildMovementTable(rows) {
   if (!rows.length) return '<div class="alert mi-empty-state py-4">لا توجد حركة أصناف داخل الفلاتر المختارة</div>';
   return `<div class="table-responsive"><table class="table table-hover table-striped align-middle mi-data-table">
-    <thead><tr><th>كود الصنف</th><th>الصنف</th><th>الفئة</th><th>الوحدة</th><th>رصيد أول المدة</th><th>مصنع</th><th>تسوية +</th><th>تسوية -</th><th>صافي التسوية</th><th>مصروف</th><th>رصيد آخر المدة</th></tr></thead>
+    <thead><tr>
+      <th>كود الصنف</th><th>الصنف</th><th>الفئة</th><th>الوحدة</th>
+      <th>رصيد أول المدة</th><th>مصنع</th><th>تسوية +</th><th>تسوية -</th>
+      <th>تحويل وارد</th><th>تحويل صادر</th><th>وارد آخر</th><th>مصروف</th>
+      <th>رصيد آخر المدة</th><th>فرق المطابقة</th>
+    </tr></thead>
     <tbody>${rows.map((r) => `<tr>
-      <td>${escapeMovementHtml(r.defaultCode || "-")}</td><td>${escapeMovementHtml(r.productName || "-")}</td><td>${escapeMovementHtml(r.categoryName || "-")}</td><td>${escapeMovementHtml(r.uomName || "-")}</td>
-      <td>${formatMovementNumber(r.openingQty)}</td><td>${formatMovementNumber(r.manufacturedQty)}</td><td>${formatMovementNumber(r.adjustmentInQty)}</td><td>${formatMovementNumber(r.adjustmentOutQty)}</td><td>${formatMovementNumber(r.netAdjustmentQty)}</td><td>${formatMovementNumber(r.issuedQty)}</td><td><strong>${formatMovementNumber(r.closingQty)}</strong></td>
+      <td>${escapeMovementHtml(r.defaultCode || "-")}</td>
+      <td>${escapeMovementHtml(r.productName || "-")}</td>
+      <td>${escapeMovementHtml(r.categoryName || "-")}</td>
+      <td>${escapeMovementHtml(r.uomName || "-")}</td>
+      <td>${formatMovementNumber(r.openingQty)}</td>
+      <td>${formatMovementNumber(r.manufacturedQty)}</td>
+      <td>${formatMovementNumber(r.adjustmentInQty)}</td>
+      <td>${formatMovementNumber(r.adjustmentOutQty)}</td>
+      <td>${formatMovementNumber(r.transferInQty)}</td>
+      <td>${formatMovementNumber(r.transferOutQty)}</td>
+      <td>${formatMovementNumber(r.otherIncomingQty)}</td>
+      <td>${formatMovementNumber(r.issuedQty)}</td>
+      <td><strong>${formatMovementNumber(r.closingQty)}</strong></td>
+      <td>${formatMovementNumber(r.reconciliationDifference)}</td>
     </tr>`).join("")}</tbody></table></div>`;
 }
 
