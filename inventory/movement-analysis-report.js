@@ -47,6 +47,24 @@ function buildMovementAnalysisContent() {
         </div>
       </section>
 
+      <section class="d-flex flex-wrap justify-content-end gap-2 mb-3">
+        <button type="button" class="btn btn-outline-secondary" id="locationTraceBtn">
+          🔎 تشخيص مواقع الصنف
+        </button>
+      </section>
+
+      <section id="locationTraceCard" class="mi-report-card mb-4 hidden">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+          <div>
+            <h2 class="mi-report-title mb-1">خريطة مواقع الصنف</h2>
+            <small class="text-muted">الرصيد الحالي من stock.quant والحركة التاريخية من stock.move.</small>
+          </div>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="closeLocationTraceBtn">إخفاء</button>
+        </div>
+        <div id="locationTraceMeta" class="alert alert-secondary hidden"></div>
+        <div id="locationTraceTable"></div>
+      </section>
+
       <section id="movementLoading" class="alert alert-warning d-flex align-items-center hidden" role="status">
         <span class="spinner-border spinner-border-sm mi-loading-spinner" aria-hidden="true"></span>
         جاري تحليل حركة الأصناف...
@@ -90,6 +108,10 @@ function bindMovementEvents() {
   });
   document.getElementById("locationCheckboxes")?.addEventListener("change", (event) => {
     if (event.target?.matches?.('input[name="movementLocation"]')) updateSelectedLocationsLabel();
+  });
+  document.getElementById("locationTraceBtn")?.addEventListener("click", loadLocationTrace);
+  document.getElementById("closeLocationTraceBtn")?.addEventListener("click", () => {
+    document.getElementById("locationTraceCard")?.classList.add("hidden");
   });
   document.getElementById("productSearch")?.addEventListener("keydown", (event) => {
     if (event.key === "Enter") refreshMovementReport();
@@ -199,6 +221,123 @@ function filterProductOptions() {
   const categoryId = Number(document.getElementById("categoryId")?.value || 0);
   const products = (window.movementFilterProducts || []).filter((p) => !categoryId || Number(p.categoryId) === categoryId);
   fillSelect("productId", products, "كل الأصناف", (p) => p.productId, (p) => `${p.defaultCode ? `[${p.defaultCode}] ` : ""}${p.productName}`);
+}
+
+
+async function loadLocationTrace() {
+  const companyId = document.getElementById("companySelect")?.value || "";
+  const productId = document.getElementById("productId")?.value || "";
+  const search = document.getElementById("productSearch")?.value?.trim() || "";
+  const dateFrom = document.getElementById("dateFrom")?.value || "";
+  const dateTo = document.getElementById("dateTo")?.value || "";
+
+  if (!companyId) {
+    showMovementError("اختار الشركة أولًا.");
+    return;
+  }
+
+  if (!productId && !search) {
+    showMovementError("اختار صنفًا أو اكتب كود الصنف قبل تشغيل تشخيص المواقع.");
+    return;
+  }
+
+  hideMovementError();
+
+  const button = document.getElementById("locationTraceBtn");
+  const card = document.getElementById("locationTraceCard");
+  const table = document.getElementById("locationTraceTable");
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "جاري تشخيص المواقع...";
+  }
+
+  if (card) card.classList.remove("hidden");
+  if (table) table.innerHTML = '<div class="alert alert-warning">جاري قراءة stock.quant و stock.move...</div>';
+
+  try {
+    const response = await apiGet(`${MOVEMENT_ANALYSIS_API}/location-trace`, {
+      companyId,
+      productId,
+      search,
+      dateFrom,
+      dateTo
+    });
+
+    if (!response?.success) throw new Error(response?.message || "فشل تشخيص مواقع الصنف");
+    renderLocationTrace(response.data || {});
+  } catch (error) {
+    if (table) table.innerHTML = "";
+    showMovementError(error.message || "فشل تشخيص مواقع الصنف");
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = "🔎 تشخيص مواقع الصنف";
+    }
+  }
+}
+
+function renderLocationTrace(data) {
+  const product = data.product || {};
+  const rows = Array.isArray(data.rows) ? data.rows : [];
+  const summary = data.summary || {};
+  const meta = document.getElementById("locationTraceMeta");
+  const table = document.getElementById("locationTraceTable");
+
+  if (meta) {
+    meta.innerHTML = `
+      <strong>${escapeMovementHtml(product.defaultCode || "-")} — ${escapeMovementHtml(product.productName || "-")}</strong>
+      <div class="mt-1">
+        الرصيد الحالي: ${formatMovementNumber(summary.totalCurrentQty)}
+        · المتاح: ${formatMovementNumber(summary.totalAvailableQty)}
+        · مواقع بها رصيد: ${formatMovementNumber(summary.locationsWithCurrentStock, 0)}
+        · مواقع بها حركة: ${formatMovementNumber(summary.locationsWithMovement, 0)}
+      </div>
+    `;
+    meta.classList.remove("hidden");
+  }
+
+  if (!table) return;
+
+  if (!rows.length) {
+    table.innerHTML = '<div class="alert mi-empty-state">لا توجد أرصدة حالية أو حركات منجزة للصنف داخل المواقع الداخلية.</div>';
+    return;
+  }
+
+  table.innerHTML = `
+    <div class="table-responsive">
+      <table class="table table-hover table-striped align-middle mi-data-table">
+        <thead>
+          <tr>
+            <th>Location ID</th>
+            <th>الموقع</th>
+            <th>الموقع الأب</th>
+            <th>الرصيد الحالي</th>
+            <th>محجوز</th>
+            <th>متاح</th>
+            <th>وارد خلال الفترة</th>
+            <th>صادر خلال الفترة</th>
+            <th>صافي الحركة</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map((row) => `
+            <tr>
+              <td>${escapeMovementHtml(row.locationId)}</td>
+              <td>${escapeMovementHtml(row.completeName || row.locationName || "-")}</td>
+              <td>${escapeMovementHtml(row.parentName || "-")}</td>
+              <td><strong>${formatMovementNumber(row.currentQty)}</strong></td>
+              <td>${formatMovementNumber(row.reservedQty)}</td>
+              <td>${formatMovementNumber(row.availableQty)}</td>
+              <td>${formatMovementNumber(row.incomingQty)}</td>
+              <td>${formatMovementNumber(row.outgoingQty)}</td>
+              <td>${formatMovementNumber(row.netMoveQty)}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
 }
 
 async function refreshMovementReport() {
