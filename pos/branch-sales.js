@@ -483,35 +483,51 @@ function renderPeriodComparison(comparison = {}) {
   const current = comparison.current || {};
   const previous = comparison.previous || {};
   const changes = comparison.changes || {};
+  const currentPeriodLabel = formatPeriodLabel(comparison.currentPeriod);
+  const previousPeriodLabel = formatPeriodLabel(comparison.previousPeriod);
 
   const cards = [
     {
       title: "إجمالي المبيعات — الفترة الحالية",
       value: formatMoney(current.grossSales || 0),
-      hint: formatPeriodLabel(comparison.currentPeriod),
+      hint: currentPeriodLabel,
       tone: "teal",
       icon: "💰"
     },
     {
       title: "صافي المبيعات — الفترة الحالية",
       value: formatMoney(current.netSales || 0),
-      hint: formatPeriodLabel(comparison.currentPeriod),
+      hint: currentPeriodLabel,
       tone: "success",
       icon: "✅"
     },
     {
+      title: "عدد الأوردرات — الفترة الحالية",
+      value: formatNumber(current.ordersCount || 0),
+      hint: currentPeriodLabel,
+      tone: "purple",
+      icon: "🧾"
+    },
+    {
       title: "إجمالي المبيعات — السنة السابقة",
       value: formatMoney(previous.grossSales || 0),
-      hint: formatPeriodLabel(comparison.previousPeriod),
-      tone: "purple",
-      icon: "🗓"
+      hint: previousPeriodLabel,
+      tone: "teal",
+      icon: "💰"
     },
     {
       title: "صافي المبيعات — السنة السابقة",
       value: formatMoney(previous.netSales || 0),
-      hint: formatPeriodLabel(comparison.previousPeriod),
+      hint: previousPeriodLabel,
+      tone: "success",
+      icon: "✅"
+    },
+    {
+      title: "عدد الأوردرات — السنة السابقة",
+      value: formatNumber(previous.ordersCount || 0),
+      hint: previousPeriodLabel,
       tone: "purple",
-      icon: "📅"
+      icon: "🧾"
     },
     {
       title: "تغير إجمالي المبيعات",
@@ -526,6 +542,13 @@ function renderPeriodComparison(comparison = {}) {
       hint: signedMoney(changes.netSales),
       tone: Number(changes.netSales || 0) >= 0 ? "success" : "danger",
       icon: "📉"
+    },
+    {
+      title: "تغير عدد الأوردرات",
+      value: signedPercent(changes.ordersCountPercent),
+      hint: `${Number(changes.ordersCount || 0) > 0 ? "+" : ""}${formatNumber(changes.ordersCount || 0)} أوردر`,
+      tone: Number(changes.ordersCount || 0) >= 0 ? "success" : "danger",
+      icon: "📊"
     }
   ];
 
@@ -546,7 +569,6 @@ function renderPeriodComparison(comparison = {}) {
     </div>
   `;
 }
-
 function renderBranchSalesKpis(summary) {
   const kpiGrid = document.getElementById("kpiGrid");
   if (!kpiGrid) return;
