@@ -30,11 +30,11 @@
       return "http://localhost:5050/api/customer/service-pos-review";
     }
 
-    if (host.includes("odoo-mi-api.vercel.app")) {
+    if (host.includes("api.mi.virginiaolive.com")) {
       return "/api/customer/service-pos-review";
     }
 
-    return "https://odoo-mi-api.vercel.app/api/customer/service-pos-review";
+    return "https://api.mi.virginiaolive.com/api/customer/service-pos-review";
   }
 
   const API_BASE = getCustomerServiceApiBase();
@@ -1315,11 +1315,11 @@
       return "http://localhost:5050/api/customer/review-sms";
     }
 
-    if (host.includes("odoo-mi-api.vercel.app")) {
+    if (host.includes("api.mi.virginiaolive.com")) {
       return "/api/customer/review-sms";
     }
 
-    return "https://odoo-mi-api.vercel.app/api/customer/review-sms";
+    return "https://api.mi.virginiaolive.com/api/customer/review-sms";
   }
 
   function getReviewSmsAdminKey() {

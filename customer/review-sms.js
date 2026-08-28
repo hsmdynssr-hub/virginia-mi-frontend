@@ -1,7 +1,7 @@
 (function () {
   const DEFAULT_LOCAL_API_BASE = "http://localhost:5050/api/customer/review-sms";
   const DEFAULT_PRODUCTION_API_BASE =
-    "https://odoo-mi-api.vercel.app/api/customer/review-sms";
+    "https://api.mi.virginiaolive.com/api/customer/review-sms";
 
   let selectedRating = null;
   let selectedQueueOrderIds = new Set();
@@ -1706,7 +1706,7 @@
   }
 
   function getReviewApiBase() {
-  return "https://odoo-mi-api.vercel.app/api/customer/review-sms";
+  return "https://api.mi.virginiaolive.com/api/customer/review-sms";
 }
 
   function showReviewError(message) {

@@ -229,7 +229,7 @@
       return "http://localhost:5050/api";
     }
 
-    return "https://odoo-mi-api.vercel.app/api";
+    return "https://api.mi.virginiaolive.com/api";
   }
 
   function setParamIfValue(params, key, value) {
