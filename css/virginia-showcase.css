@@ -678,3 +678,165 @@ html[data-mi-theme="colorful"] .mi-hero-menu-btn {
     transform-origin: top left;
   }
 }
+
+/* =========================================================
+   Unified compact project header
+   One visual size and one hierarchy across every report page.
+   ========================================================= */
+.mi-page-hero {
+  height:168px !important;
+  min-height:168px !important;
+  max-height:168px !important;
+  margin-bottom:14px !important;
+  border-radius:0 0 22px 22px !important;
+}
+
+.mi-page-hero img {
+  width:100% !important;
+  height:100% !important;
+  min-height:0 !important;
+  object-fit:cover !important;
+  object-position:center 48% !important;
+}
+
+.mi-hero-heading {
+  right:22px !important;
+  bottom:14px !important;
+  width:min(610px,calc(100% - 44px)) !important;
+  padding:10px 14px !important;
+  border-radius:14px !important;
+}
+
+.mi-hero-heading .page-pill {
+  margin-bottom:3px !important;
+  padding:3px 8px !important;
+  font-size:9px !important;
+}
+
+.mi-hero-heading h2 {
+  font-size:clamp(22px,2.35vw,34px) !important;
+  line-height:1.15 !important;
+}
+
+.mi-hero-heading p {
+  margin-top:4px !important;
+  font-size:12px !important;
+  line-height:1.45 !important;
+}
+
+.mi-page-hero .mi-hero-account-bar.mi-compact-account-tools {
+  top:10px !important;
+  left:14px !important;
+  transform:scale(.88);
+  transform-origin:top left;
+}
+
+html[data-mi-theme="colorful"] .mi-page-hero {
+  background:#4f612c !important;
+  box-shadow:0 15px 34px rgba(65,79,38,.20) !important;
+}
+
+html[data-mi-theme="colorful"] .mi-page-hero-shade {
+  background:
+    radial-gradient(circle at 13% 18%,rgba(113,131,63,.42),transparent 31%),
+    radial-gradient(circle at 82% 4%,rgba(195,154,59,.36),transparent 29%),
+    linear-gradient(104deg,rgba(42,55,23,.44),rgba(83,102,45,.22) 52%,rgba(151,124,53,.24)) !important;
+}
+
+html[data-mi-theme="colorful"] .mi-page-hero::before {
+  background:linear-gradient(120deg,rgba(197,162,74,.58),rgba(113,131,63,.22) 62%,transparent) !important;
+}
+
+html[data-mi-theme="colorful"] .mi-hero-heading {
+  border-color:rgba(255,255,255,.48) !important;
+  background:linear-gradient(120deg,rgba(45,59,25,.90),rgba(81,101,43,.82) 58%,rgba(151,124,53,.72)) !important;
+  box-shadow:0 12px 28px rgba(31,40,17,.20) !important;
+}
+
+html[data-mi-theme="colorful"] .mi-hero-heading::after {
+  background:linear-gradient(90deg,#d9bd68,#8fa052,#f0db96) !important;
+}
+
+html[data-mi-theme="colorful"] .mi-page-hero .mi-theme-switcher button.active,
+html[data-mi-theme="colorful"] .mi-page-hero .mi-theme-switcher button[aria-pressed="true"] {
+  color:#fff !important;
+  background:linear-gradient(135deg,#455727,#71833f 66%,#b18d38) !important;
+  box-shadow:0 5px 12px rgba(65,79,38,.24) !important;
+}
+
+/* Remove duplicated legacy titles below the shared header. */
+.app-shell .content :is(
+  .dashboard-hero,
+  .inventory-hero-card,
+  .report-hero,
+  .page-hero,
+  .report-banner,
+  .crsms-dashboard-hero,
+  .crsms-operation-hero,
+  .crsms-manual-hero,
+  .crsms-followups-hero,
+  .crsms-coupons-hero,
+  .crsms-settings-hero
+):not(:has(button,a,select,input)) {
+  display:none !important;
+}
+
+/* Legacy headers that contain useful actions become a compact action strip. */
+.app-shell .content :is(
+  .dashboard-hero,
+  .inventory-hero-card,
+  .report-hero,
+  .page-hero,
+  .report-banner,
+  .crsms-dashboard-hero,
+  .crsms-operation-hero,
+  .crsms-manual-hero,
+  .crsms-followups-hero,
+  .crsms-coupons-hero,
+  .crsms-settings-hero
+):has(button,a,select,input) {
+  min-height:0 !important;
+  margin:0 0 14px !important;
+  padding:12px 14px !important;
+  border:1px solid #dfe5cc !important;
+  border-radius:14px !important;
+  color:#263018 !important;
+  background:#fff !important;
+  box-shadow:0 9px 22px rgba(65,79,38,.07) !important;
+}
+
+.app-shell .content :is(
+  .dashboard-hero,
+  .inventory-hero-card,
+  .report-hero,
+  .page-hero,
+  .report-banner,
+  .crsms-dashboard-hero,
+  .crsms-operation-hero,
+  .crsms-manual-hero,
+  .crsms-followups-hero,
+  .crsms-coupons-hero,
+  .crsms-settings-hero
+):has(button,a,select,input) :is(h1,h2,h3,.crsms-brand-row,.crsms-eyebrow,.inventory-hero-kicker) {
+  display:none !important;
+}
+
+@media (max-width:820px) {
+  .mi-page-hero {
+    height:150px !important;
+    min-height:150px !important;
+    max-height:150px !important;
+    margin-bottom:12px !important;
+    border-radius:0 0 18px 18px !important;
+  }
+
+  .mi-hero-heading {
+    right:10px !important;
+    bottom:10px !important;
+    width:calc(100% - 20px) !important;
+    padding:9px 11px !important;
+  }
+
+  .mi-hero-heading h2 { font-size:21px !important; }
+  .mi-hero-heading p { font-size:10px !important; }
+}

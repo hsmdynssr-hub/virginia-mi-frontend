@@ -40,7 +40,7 @@
   if (!hasStylesheet("app-modern.css")) {
     const modernCss = document.createElement("link");
     modernCss.rel = "stylesheet";
-    modernCss.href = `${assetUrl("../css/app-modern.css")}?v=20260814-02`;
+    modernCss.href = `${assetUrl("../css/app-modern.css")}?v=olive-global-20260829-01`;
     modernCss.dataset.miModernUi = "true";
     document.head.appendChild(modernCss);
   }
@@ -56,7 +56,7 @@
   if (!hasStylesheet("virginia-showcase.css")) {
     const showcaseCss = document.createElement("link");
     showcaseCss.rel = "stylesheet";
-    showcaseCss.href = `${assetUrl("../css/virginia-showcase.css")}?v=20260815-06`;
+    showcaseCss.href = `${assetUrl("../css/virginia-showcase.css")}?v=unified-header-20260829-01`;
     showcaseCss.dataset.miVirginiaShowcase = "true";
     document.head.appendChild(showcaseCss);
   }
@@ -360,6 +360,17 @@ const PAGES_WITHOUT_REPORT_TOOLBAR = new Set([
   "forecast",
   "forecast-planning-achievement",
   "forecast-planning-feasibility"
+]);
+
+const STANDALONE_CUSTOMER_PAGES = new Set([
+  "customer-service-pos-review",
+  "customer-service-management-report",
+  "customer-review-sms-dashboard",
+  "customer-review-sms-settings",
+  "customer-review-sms-queue",
+  "customer-review-sms-manual",
+  "customer-review-followups",
+  "customer-review-coupons-dashboard"
 ]);
 
 function shouldShowReportToolbar(activePage) {
@@ -823,7 +834,9 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
 
   const showReportToolbar = shouldShowReportToolbar(activePage);
 
-  const reportToolbarHtml = showReportToolbar
+  const reportToolbarHtml = STANDALONE_CUSTOMER_PAGES.has(activePage)
+  ? ""
+  : showReportToolbar
   ? `
     <section id="reportToolbar" class="report-toolbar mi-unified-filter-toolbar">
       <div class="mi-filter-intro">
@@ -959,19 +972,19 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
             <div class="nav-accordion-body">
               <a data-page="customer" class="nav-link" href="../customer/index.html">مركز خدمة العملاء</a>
               <a data-page="customer-pos-phones" class="nav-link" href="../customer/pos-phones.html">متابعة عملاء نقاط البيع</a>
-              <a data-page="customer-service-pos-review" class="nav-link" href="../customer/service-pos-review.html">مراجعة خدمات نقاط البيع</a>
-              <a data-page="customer-service-management-report" class="nav-link" href="../customer/customer-service-management-report.html">تقرير إدارة خدمة العملاء</a>
+              <a data-page="customer-service-pos-review" class="nav-link" href="../customer/service-pos-review.html">سجل شكاوى وملاحظات العملاء</a>
+              <a data-page="customer-service-management-report" class="nav-link" href="../customer/customer-service-management-report.html">تقرير أداء خدمة العملاء</a>
               <a data-page="customer-vip" class="nav-link" href="../customer/vip.html">عملاء VIP</a>
               <a data-page="customer-migration" class="nav-link" href="../customer/migration.html">تحول قنوات العملاء</a>
               <a data-page="customer-rfm" class="nav-link" href="../customer/rfm.html">تحليل RFM</a>
             
 
-              <a data-page="customer-review-sms-queue" class="nav-link" href="../customer/review-sms-queue.html">تشغيل رسائل تقييم العملاء</a>
-              <a data-page="customer-review-sms-manual" class="nav-link" href="../customer/review-sms-manual.html">إرسال رسالة يدوية</a>
-              <a data-page="customer-review-followups" class="nav-link" href="../customer/review-followups.html">متابعة المحايدين والغاضبين</a>
-              <a data-page="customer-review-coupons-dashboard" class="nav-link" href="../customer/review-coupons-dashboard.html">الكوبونات والتقارير اليومية</a>
-              <a data-page="customer-review-sms-dashboard" class="nav-link" href="../customer/review-sms-dashboard.html">الداش بورد الفني للرسائل</a>
-              <a data-page="customer-review-sms-settings" class="nav-link" href="../customer/review-sms-settings.html">إعدادات منظومة الرسائل</a>
+              <a data-page="customer-review-sms-queue" class="nav-link" href="../customer/review-sms-queue.html">تشغيل رسائل التقييم</a>
+              <a data-page="customer-review-sms-manual" class="nav-link" href="../customer/review-sms-manual.html">الإرسال اليدوي للعملاء</a>
+              <a data-page="customer-review-followups" class="nav-link" href="../customer/review-followups.html">متابعة العملاء غير الراضين</a>
+              <a data-page="customer-review-coupons-dashboard" class="nav-link" href="../customer/review-coupons-dashboard.html">إدارة مكافآت الشحن المجاني</a>
+              <a data-page="customer-review-sms-dashboard" class="nav-link" href="../customer/review-sms-dashboard.html">متابعة تقييمات العملاء</a>
+              <a data-page="customer-review-sms-settings" class="nav-link" href="../customer/review-sms-settings.html">إعدادات رسائل التقييم</a>
 </div>
           </div>
 
@@ -1475,3 +1488,67 @@ function loadReportFiltersEngine(activePage) {
 
   document.body.appendChild(script);
 }
+
+function mountStandaloneCustomerPage() {
+  if (document.body?.dataset.miSidebarMounted === "true") return;
+
+  const pageConfig = {
+    "customer-service-pos-review": [
+      "سجل شكاوى وملاحظات العملاء",
+      "بحث الفواتير وتسجيل الملاحظات ومتابعة معالجة الحالات"
+    ],
+    "customer-service-management-report": [
+      "تقرير أداء خدمة العملاء",
+      "مؤشرات الشكاوى وسرعة المعالجة وأداء فريق خدمة العملاء"
+    ],
+    "customer-review-sms-dashboard": [
+      "متابعة تقييمات العملاء",
+      "متابعة الإرسال وتفاعل العملاء ونتائج التقييم"
+    ],
+    "customer-review-sms-queue": [
+      "تشغيل رسائل التقييم",
+      "اختيار الفواتير المؤهلة وتشغيل إرسال رسائل التقييم"
+    ],
+    "customer-review-sms-manual": [
+      "الإرسال اليدوي للعملاء",
+      "إرسال رسالة تقييم إلى عميل محدد بعد مراجعة بياناته"
+    ],
+    "customer-review-followups": [
+      "متابعة العملاء غير الراضين",
+      "متابعة الحالات التي تحتاج إلى تواصل ومعالجة"
+    ],
+    "customer-review-coupons-dashboard": [
+      "إدارة مكافآت الشحن المجاني",
+      "متابعة كوبونات العملاء ونتائج استخدامها"
+    ],
+    "customer-review-sms-settings": [
+      "إعدادات رسائل التقييم",
+      "التحكم في التشغيل والإرسال واختيار العملاء والمكافآت"
+    ]
+  };
+
+  const activePage = document.body?.dataset.activePage || (() => {
+    if (document.body?.classList.contains("service-pos-page")) return "customer-service-pos-review";
+    if (document.body?.classList.contains("cs-management-page")) return "customer-service-management-report";
+    const fileName = location.pathname.split("/").pop();
+    return {
+      "review-sms-dashboard.html": "customer-review-sms-dashboard",
+      "review-sms-queue.html": "customer-review-sms-queue",
+      "review-sms-manual.html": "customer-review-sms-manual",
+      "review-followups.html": "customer-review-followups",
+      "review-coupons-dashboard.html": "customer-review-coupons-dashboard",
+      "review-sms-settings.html": "customer-review-sms-settings"
+    }[fileName];
+  })();
+
+  if (!activePage || !pageConfig[activePage]) return;
+
+  const pageMain = document.querySelector("body > main");
+  if (!pageMain) return;
+
+  pageMain.querySelector(".crsms-return-bar, .service-page-toolbar, .cs-management-nav")?.remove();
+  document.body.dataset.miSidebarMounted = "true";
+  renderLayout(pageConfig[activePage][0], pageConfig[activePage][1], activePage, pageMain.outerHTML);
+}
+
+document.addEventListener("DOMContentLoaded", mountStandaloneCustomerPage);

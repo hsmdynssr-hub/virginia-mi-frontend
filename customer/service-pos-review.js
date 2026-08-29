@@ -643,6 +643,14 @@
       if (noteBtn) {
         noteBtn.addEventListener("click", () => saveNote(invoice));
       }
+
+      document
+        .querySelector(`[data-print-receipt="${invoice.posOrderId}"]`)
+        ?.addEventListener("click", () => printThermalReceipt(invoice));
+
+      document
+        .querySelector(`[data-download-odoo-pdf="${invoice.posOrderId}"]`)
+        ?.addEventListener("click", (event) => downloadOfficialOdooPdf(invoice, event.currentTarget));
     });
   }
 
@@ -662,7 +670,10 @@
       <article class="report-card">
         <div class="report-card-head">
           <div>
-            <h2>فاتورة: ${escapeHtml(invoice.invoiceRef || "-")}</h2>
+            <h2>
+              رقم الفاتورة: ${escapeHtml(invoice.invoiceRef || "-")}
+              <span class="muted">— رقم الطلب: ${escapeHtml(invoice.orderNumber || "-")}</span>
+            </h2>
             <p>
               ${escapeHtml(formatDate(invoice.dateOrder))}
               — العميل: ${escapeHtml(invoice.customerName || "-")}
@@ -670,9 +681,17 @@
             </p>
           </div>
 
-          <button class="run-btn" type="button" data-open-invoice="${escapeHtml(invoice.posOrderId)}">
-            تسجيل فتح الفاتورة
-          </button>
+          <div class="inventory-hero-actions">
+            <button class="run-btn" type="button" data-print-receipt="${escapeHtml(invoice.posOrderId)}">
+              طباعة إيصال 80mm
+            </button>
+            <button class="export-btn" type="button" data-download-odoo-pdf="${escapeHtml(invoice.posOrderId)}" ${invoice.accountMoveId ? "" : "disabled"}>
+              فاتورة Odoo PDF
+            </button>
+            <button class="run-btn" type="button" data-open-invoice="${escapeHtml(invoice.posOrderId)}">
+              تسجيل فتح الفاتورة
+            </button>
+          </div>
         </div>
 
         <div class="inventory-kpi-grid">
@@ -1634,6 +1653,79 @@
       setMessage("", "success");
     });
   }
+
+  function printThermalReceipt(invoice) {
+    const receiptWindow = window.open("", "_blank", "width=420,height=720");
+    if (!receiptWindow) {
+      setMessage("اسمح بالنوافذ المنبثقة حتى تعمل طباعة الإيصال.", "error");
+      return;
+    }
+
+    const rows = (invoice.lines || []).map((line) => `
+      <tr>
+        <td>${escapeHtml(line.productName || "-")}</td>
+        <td>${formatNumber(line.quantity || 0, 3)}</td>
+        <td>${formatMoney(line.lineTotal || 0)}</td>
+      </tr>
+    `).join("");
+
+    receiptWindow.document.write(`<!doctype html>
+      <html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>إيصال ${escapeHtml(invoice.invoiceRef || "")}</title>
+      <style>
+        @page{size:80mm auto;margin:3mm}*{box-sizing:border-box}body{width:74mm;margin:0 auto;color:#000;background:#fff;font-family:Tahoma,Arial,sans-serif;font-size:11px;line-height:1.45}h1{margin:0;text-align:center;font-size:18px}h2{margin:3px 0 10px;text-align:center;font-size:12px}.meta{border-block:1px dashed #000;padding:7px 0;margin:7px 0}.meta div{display:flex;justify-content:space-between;gap:8px}table{width:100%;border-collapse:collapse}th,td{padding:4px 2px;border-bottom:1px dashed #777;text-align:right}th:nth-child(2),td:nth-child(2){text-align:center}th:last-child,td:last-child{text-align:left}.total{display:flex;justify-content:space-between;margin-top:9px;padding-top:7px;border-top:2px solid #000;font-size:14px;font-weight:700}.footer{text-align:center;margin-top:12px;border-top:1px dashed #000;padding-top:8px}.no-print{width:100%;margin-top:12px;padding:8px;border:0;color:#fff;background:#4f612c;font-weight:700;cursor:pointer}@media print{.no-print{display:none}}
+      </style></head><body>
+      <h1>Virginia</h1><h2>إيصال مبيعات</h2>
+      <section class="meta">
+        <div><span>رقم الفاتورة</span><strong>${escapeHtml(invoice.invoiceRef || "-")}</strong></div>
+        <div><span>رقم الطلب</span><strong>${escapeHtml(invoice.orderNumber || "-")}</strong></div>
+        <div><span>التاريخ</span><strong>${escapeHtml(formatDate(invoice.dateOrder))}</strong></div>
+        <div><span>الفرع</span><strong>${escapeHtml(invoice.configName || invoice.branchCode || "-")}</strong></div>
+        <div><span>الكاشير</span><strong>${escapeHtml(invoice.cashierName || "-")}</strong></div>
+      </section>
+      <table><thead><tr><th>الصنف</th><th>الكمية</th><th>الإجمالي</th></tr></thead><tbody>${rows || '<tr><td colspan="3">لا توجد أصناف</td></tr>'}</tbody></table>
+      <div class="total"><span>الإجمالي</span><strong>${formatMoney(invoice.amountTotal || 0)}</strong></div>
+      <div class="footer">شكرًا لزيارتكم</div>
+      <button class="no-print" onclick="window.print()">طباعة الإيصال</button>
+      </body></html>`);
+    receiptWindow.document.close();
+    receiptWindow.focus();
+  }
+
+  async function downloadOfficialOdooPdf(invoice, button) {
+    const originalText = button?.textContent || "فاتورة Odoo PDF";
+    try {
+      if (button) {
+        button.disabled = true;
+        button.textContent = "جاري تجهيز PDF...";
+      }
+      const headers = {};
+      const token = getMainAuthToken();
+      if (token) headers.Authorization = `Bearer ${token}`;
+      const response = await fetch(`${API_BASE}/invoices/${encodeURIComponent(invoice.posOrderId)}/pdf`, { headers });
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        throw new Error(data?.message || data?.error || "تعذر تحميل فاتورة Odoo PDF");
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `odoo-invoice-${invoice.invoiceRef || invoice.posOrderId}.pdf`.replace(/[^a-zA-Z0-9_.-]+/g, "-");
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+      setMessage("تم تجهيز فاتورة Odoo PDF بنجاح.", "success");
+    } catch (error) {
+      setMessage(error.message, "error");
+    } finally {
+      if (button) {
+        button.disabled = !invoice.accountMoveId;
+        button.textContent = originalText;
+      }
+    }
+  }
+
 
   async function init() {
     defaultDates();
