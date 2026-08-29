@@ -1963,3 +1963,365 @@ body.crsms-internal-page.crsms-settings-page .crsms-settings-status {
   .crsms-settings-access-actions { display: grid; grid-template-columns: 1fr; }
   .crsms-settings-access-actions .crsms-button { width: 100%; text-align: center; }
 }
+
+/* ==========================================================================\n   2026-08 colorful system pass — customer review / SMS internal pages\n   Keeps the existing page logic intact while aligning the customer tools with\n   the bright MI visual system used by reports and POS pages.\n   ========================================================================== */
+
+:root[data-mi-theme="colorful"] body.crsms-internal-page {
+  --internal-bg: #f6fbfb;
+  --internal-surface: rgba(255, 255, 255, 0.94);
+  --internal-ink: #10243b;
+  --internal-muted: #687990;
+  --internal-border: #dbe7e9;
+  --internal-purple: #7c3aed;
+  --internal-purple-dark: #5b21b6;
+  --internal-green: #0f9f84;
+  --internal-blue: #2563eb;
+  --internal-amber: #f59e0b;
+  --internal-cyan: #0f9f9a;
+  background:
+    radial-gradient(circle at 7% 4%, rgba(18, 170, 160, 0.12), transparent 26rem),
+    radial-gradient(circle at 93% 10%, rgba(249, 115, 22, 0.10), transparent 24rem),
+    radial-gradient(circle at 70% 85%, rgba(168, 85, 247, 0.08), transparent 28rem),
+    linear-gradient(180deg, #fbfefe 0%, #f4f9fb 100%);
+}
+
+:root[data-mi-theme="colorful"] body.crsms-internal-page .crsms-return-bar {
+  border-color: rgba(202, 221, 223, 0.9);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 14px 36px rgba(21, 94, 117, 0.08);
+}
+
+:root[data-mi-theme="colorful"] body.crsms-internal-page .crsms-return-link.main {
+  border-color: transparent;
+  background: linear-gradient(120deg, #0f8f8a 0%, #19b7ad 34%, #6d5dfc 68%, #f97316 100%);
+  box-shadow: 0 10px 22px rgba(44, 128, 137, 0.20);
+}
+
+:root[data-mi-theme="colorful"] body.crsms-internal-page .crsms-return-link.active {
+  color: #0d766f;
+  border-color: #bfe7e2;
+  background: linear-gradient(135deg, #e8fbf8 0%, #f5f0ff 66%, #fff3e8 100%);
+}
+
+:root[data-mi-theme="colorful"] .crsms-dashboard-hero,
+:root[data-mi-theme="colorful"] .crsms-manual-hero,
+:root[data-mi-theme="colorful"] .crsms-operation-hero,
+:root[data-mi-theme="colorful"] .crsms-followups-hero,
+:root[data-mi-theme="colorful"] .crsms-coupons-hero,
+:root[data-mi-theme="colorful"] .crsms-settings-hero {
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255, 186, 73, 0.42), transparent 25%),
+    radial-gradient(circle at 88% 5%, rgba(255, 83, 171, 0.30), transparent 30%),
+    linear-gradient(125deg, #096b68 0%, #0fa9a0 27%, #2678d8 49%, #7c3aed 72%, #ee3f9b 88%, #f59e0b 116%) !important;
+  box-shadow: 0 24px 58px rgba(24, 107, 116, 0.18);
+}
+
+:root[data-mi-theme="colorful"] .crsms-dashboard-hero::before,
+:root[data-mi-theme="colorful"] .crsms-manual-hero::before,
+:root[data-mi-theme="colorful"] .crsms-operation-hero::before,
+:root[data-mi-theme="colorful"] .crsms-followups-hero::before,
+:root[data-mi-theme="colorful"] .crsms-coupons-hero::before,
+:root[data-mi-theme="colorful"] .crsms-settings-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(145deg, transparent 0 38%, rgba(255, 169, 57, 0.18) 39% 52%, transparent 53% 100%),
+    radial-gradient(circle at 72% 118%, rgba(255,255,255,0.14), transparent 32%);
+}
+
+:root[data-mi-theme="colorful"] .crsms-system-card,
+:root[data-mi-theme="colorful"] .crsms-session-card {
+  border-color: rgba(255,255,255,0.28);
+  background: rgba(7, 57, 70, 0.36);
+  backdrop-filter: blur(14px);
+}
+
+:root[data-mi-theme="colorful"] body.crsms-internal-page .crsms-button.primary,
+:root[data-mi-theme="colorful"] body.crsms-internal-page .crsms-button:not(.secondary):not(.danger):not(.ghost) {
+  border-color: transparent;
+  background: linear-gradient(120deg, #0e8f89 0%, #17afa6 45%, #6d4df4 100%);
+  box-shadow: 0 9px 22px rgba(29, 141, 146, 0.18);
+}
+
+:root[data-mi-theme="colorful"] body.crsms-internal-page .crsms-button.secondary {
+  color: #a44c00;
+  border-color: #ffd2a3;
+  background: linear-gradient(135deg, #fff8ef, #ffedd5);
+}
+
+:root[data-mi-theme="colorful"] .crsms-stat-card,
+:root[data-mi-theme="colorful"] .crsms-panel,
+:root[data-mi-theme="colorful"] .crsms-filter-panel,
+:root[data-mi-theme="colorful"] .crsms-followups-filter-panel,
+:root[data-mi-theme="colorful"] .crsms-manual-form-card,
+:root[data-mi-theme="colorful"] .crsms-save-panel,
+:root[data-mi-theme="colorful"] .crsms-toggle-card,
+:root[data-mi-theme="colorful"] .crsms-settings-reward-card {
+  position: relative;
+  overflow: hidden;
+  border-color: #d9e7e8 !important;
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    linear-gradient(120deg, rgba(15, 159, 154, .65), rgba(124, 58, 237, .50), rgba(249, 115, 22, .55)) border-box !important;
+  box-shadow: 0 14px 34px rgba(34, 92, 111, 0.07) !important;
+}
+
+:root[data-mi-theme="colorful"] .crsms-stat-card::before,
+:root[data-mi-theme="colorful"] .crsms-panel::before,
+:root[data-mi-theme="colorful"] .crsms-manual-form-card::before,
+:root[data-mi-theme="colorful"] .crsms-settings-reward-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, #0f9f9a, #21c7b7 28%, #7c3aed 62%, #ec4899 80%, #f59e0b);
+  opacity: 0.92;
+}
+
+:root[data-mi-theme="colorful"] .crsms-stat-card:nth-child(4n + 2)::before { background: linear-gradient(90deg, #f59e0b, #fb7185, #7c3aed); }
+:root[data-mi-theme="colorful"] .crsms-stat-card:nth-child(4n + 3)::before { background: linear-gradient(90deg, #0f766e, #22c55e, #38bdf8); }
+:root[data-mi-theme="colorful"] .crsms-stat-card:nth-child(4n + 4)::before { background: linear-gradient(90deg, #2563eb, #8b5cf6, #ec4899); }
+
+:root[data-mi-theme="colorful"] .crsms-stat-card:hover,
+:root[data-mi-theme="colorful"] .crsms-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 42px rgba(34, 92, 111, 0.11) !important;
+}
+
+:root[data-mi-theme="colorful"] .crsms-status,
+:root[data-mi-theme="colorful"] .crsms-operation-status,
+:root[data-mi-theme="colorful"] .crsms-settings-status,
+:root[data-mi-theme="colorful"] .crsms-shopify-status {
+  border-radius: 999px;
+}
+
+:root[data-mi-theme="colorful"] body.crsms-internal-page table thead th {
+  color: #174256;
+  background: linear-gradient(180deg, #effbf9 0%, #f8f5ff 58%, #fff8ed 100%);
+}
+
+:root[data-mi-theme="colorful"] body.crsms-internal-page table tbody tr:hover td {
+  background: linear-gradient(90deg, rgba(229, 250, 247, 0.68), rgba(249, 245, 255, 0.72), rgba(255, 247, 236, 0.58));
+}
+
+:root[data-mi-theme="dark"] body.crsms-internal-page {
+  --internal-bg: #101827;
+  --internal-surface: #172235;
+  --internal-ink: #eef5ff;
+  --internal-muted: #a8b5c8;
+  --internal-border: #2c3a50;
+  background: linear-gradient(180deg, #0d1522 0%, #121d2d 100%);
+}
+
+:root[data-mi-theme="dark"] body.crsms-internal-page .crsms-panel,
+:root[data-mi-theme="dark"] body.crsms-internal-page .crsms-stat-card,
+:root[data-mi-theme="dark"] body.crsms-internal-page .crsms-filter-panel,
+:root[data-mi-theme="dark"] body.crsms-internal-page .crsms-return-bar {
+  color: var(--internal-ink);
+  border-color: #2c3a50 !important;
+  background: #172235 !important;
+}
+
+/* === 08B STRONG COLORFUL IDENTITY === */
+body.crsms-internal-page {
+  --internal-petrol: #0f766e;
+  --internal-teal: #14b8a6;
+  --internal-orange: #f97316;
+  --internal-coral: #fb7185;
+  --internal-purple: #7c3aed;
+  --internal-pink: #db2777;
+  background:
+    radial-gradient(circle at 8% 10%, rgba(20,184,166,.17), transparent 26rem),
+    radial-gradient(circle at 92% 8%, rgba(249,115,22,.16), transparent 23rem),
+    radial-gradient(circle at 78% 76%, rgba(124,58,237,.11), transparent 26rem),
+    linear-gradient(180deg,#f8fffe 0%,#fff8f2 50%,#f8f5ff 100%) !important;
+}
+
+.crsms-dashboard-hero {
+  min-height: 230px;
+  border: 1px solid rgba(255,255,255,.42);
+  background:
+    radial-gradient(circle at 13% 20%, rgba(255,255,255,.23), transparent 25%),
+    radial-gradient(circle at 86% 18%, rgba(255,187,89,.42), transparent 22%),
+    linear-gradient(125deg,#0f766e 0%,#14b8a6 23%,#2563eb 46%,#7c3aed 69%,#db2777 84%,#f97316 100%) !important;
+  box-shadow: 0 24px 58px rgba(15,118,110,.22), 0 12px 32px rgba(124,58,237,.13);
+}
+.crsms-dashboard-hero::before {
+  content:"";
+  position:absolute;
+  inset:-35% auto auto -8%;
+  width:58%;
+  height:150%;
+  border-radius:50%;
+  background:linear-gradient(135deg,rgba(251,191,36,.55),rgba(249,115,22,.18));
+  transform:rotate(-13deg);
+  filter:blur(1px);
+}
+.crsms-dashboard-hero::after {
+  width:390px;
+  height:390px;
+  left:auto;
+  right:-125px;
+  bottom:-225px;
+  border:50px solid rgba(255,255,255,.09);
+  box-shadow:0 0 0 52px rgba(255,255,255,.045);
+}
+.crsms-dashboard-hero-copy > p { color:rgba(255,255,255,.92); }
+body.crsms-internal-page .crsms-eyebrow { color:#fff7ed; }
+
+body.crsms-internal-page .crsms-return-bar {
+  border-color:rgba(20,184,166,.22);
+  background:rgba(255,255,255,.94);
+  box-shadow:0 14px 35px rgba(15,118,110,.10);
+}
+body.crsms-internal-page .crsms-return-link.main {
+  border-color:transparent;
+  background:linear-gradient(110deg,#0f766e,#14b8a6 34%,#7c3aed 70%,#f97316) !important;
+  box-shadow:0 9px 22px rgba(20,184,166,.24);
+}
+body.crsms-internal-page .crsms-return-link.active {
+  color:#6d28d9;
+  border-color:#c4b5fd;
+  background:linear-gradient(135deg,#ecfeff,#f5f3ff 58%,#fff7ed);
+}
+
+body.crsms-internal-page :is(.crsms-stat-card,.crsms-panel,.crsms-card,.crsms-system-card,.crsms-metric-card) {
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(148,163,184,.22) !important;
+  background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(248,250,252,.94)) !important;
+  box-shadow:0 15px 36px rgba(30,41,59,.075) !important;
+}
+body.crsms-internal-page :is(.crsms-stat-card,.crsms-panel,.crsms-card,.crsms-system-card,.crsms-metric-card)::before {
+  content:"";
+  position:absolute;
+  top:0;
+  inset-inline:0;
+  height:4px;
+  background:linear-gradient(90deg,#0f766e,#14b8a6,#3b82f6,#7c3aed,#db2777,#f97316);
+}
+body.crsms-internal-page :is(.crsms-stat-card,.crsms-metric-card):nth-child(4n+1)::after,
+body.crsms-internal-page :is(.crsms-stat-card,.crsms-metric-card):nth-child(4n+2)::after,
+body.crsms-internal-page :is(.crsms-stat-card,.crsms-metric-card):nth-child(4n+3)::after,
+body.crsms-internal-page :is(.crsms-stat-card,.crsms-metric-card):nth-child(4n+4)::after {
+  content:""; position:absolute; width:95px; height:95px; border-radius:50%; top:-45px; inset-inline-end:-30px; opacity:.13;
+}
+body.crsms-internal-page :is(.crsms-stat-card,.crsms-metric-card):nth-child(4n+1)::after { background:#14b8a6; }
+body.crsms-internal-page :is(.crsms-stat-card,.crsms-metric-card):nth-child(4n+2)::after { background:#f97316; }
+body.crsms-internal-page :is(.crsms-stat-card,.crsms-metric-card):nth-child(4n+3)::after { background:#7c3aed; }
+body.crsms-internal-page :is(.crsms-stat-card,.crsms-metric-card):nth-child(4n+4)::after { background:#db2777; }
+
+body.crsms-internal-page .crsms-button.primary,
+body.crsms-internal-page button[type="submit"] {
+  border-color:transparent !important;
+  color:#fff !important;
+  background:linear-gradient(110deg,#0f766e,#14b8a6 38%,#7c3aed 74%,#f97316) !important;
+  box-shadow:0 9px 20px rgba(20,184,166,.20);
+}
+body.crsms-internal-page .crsms-button:hover { transform:translateY(-2px); }
+
+body.crsms-internal-page :is(table thead th,.crsms-table thead th) {
+  background:linear-gradient(180deg,#ecfeff,#f5f3ff 58%,#fff7ed) !important;
+  color:#334155 !important;
+  border-bottom-color:#cbd5e1 !important;
+}
+body.crsms-internal-page :is(.badge,.crsms-status,.status-badge) {
+  border-radius:999px !important;
+}
+
+/* =========================================================
+   Group 09 — Customer service final alignment
+   Stronger shared hero + tighter navigation/filter rhythm.
+   ========================================================= */
+html[data-mi-theme="colorful"] body.crsms-internal-page .crsms-followups-hero,
+html[data-mi-theme="colorful"] body.crsms-internal-page .crsms-operation-hero,
+html[data-mi-theme="colorful"] body.crsms-internal-page .crsms-manual-hero {
+  position:relative;
+  overflow:hidden;
+  border:0 !important;
+  color:#fff !important;
+  background:
+    radial-gradient(circle at 10% 120%, rgba(245,158,11,.70), transparent 31%),
+    radial-gradient(circle at 94% -15%, rgba(236,72,153,.55), transparent 34%),
+    linear-gradient(112deg,#0f766e 0%,#14b8a6 28%,#3977e8 49%,#7c3aed 70%,#db2777 86%,#f97316 100%) !important;
+  box-shadow:0 20px 44px rgba(15,118,110,.18) !important;
+}
+html[data-mi-theme="colorful"] body.crsms-internal-page :is(.crsms-followups-hero,.crsms-operation-hero,.crsms-manual-hero) :is(h1,h2,h3,strong) { color:#fff !important; }
+html[data-mi-theme="colorful"] body.crsms-internal-page :is(.crsms-followups-hero,.crsms-operation-hero,.crsms-manual-hero) p { color:rgba(255,255,255,.90) !important; }
+html[data-mi-theme="colorful"] body.crsms-internal-page :is(.crsms-followups-hero,.crsms-operation-hero,.crsms-manual-hero) .crsms-eyebrow { color:#fff7ed !important; }
+
+/* Make the customer-service top navigation read like a compact toolbar, not a second dashboard. */
+html[data-mi-theme="colorful"] body.crsms-internal-page .crsms-return-bar {
+  min-height:58px;
+  padding:7px 10px !important;
+  gap:6px !important;
+  border-radius:16px !important;
+}
+html[data-mi-theme="colorful"] body.crsms-internal-page .crsms-return-link {
+  min-height:38px !important;
+  padding:0 11px !important;
+  border-radius:11px !important;
+  font-size:11px !important;
+}
+html[data-mi-theme="colorful"] body.crsms-internal-page .crsms-return-link span {
+  width:25px !important;
+  height:25px !important;
+}
+
+/* Follow-up screen: less empty vertical space and clearer working surface. */
+html[data-mi-theme="colorful"] body.crsms-internal-page .crsms-followups-filter-panel {
+  padding:20px !important;
+  border-top:4px solid transparent !important;
+  border-image:linear-gradient(90deg,#0f766e,#14b8a6,#7c3aed,#db2777,#f97316) 1 !important;
+}
+html[data-mi-theme="colorful"] body.crsms-internal-page .crsms-form-grid.crsms-followups-filter-grid { gap:9px !important; }
+html[data-mi-theme="colorful"] body.crsms-internal-page .crsms-followups-refresh {
+  min-height:40px !important;
+  background:linear-gradient(110deg,#0f766e,#14b8a6 35%,#7c3aed 72%,#f97316) !important;
+}
+
+@media (max-width:720px) {
+  html[data-mi-theme="colorful"] body.crsms-internal-page .crsms-return-bar { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  html[data-mi-theme="colorful"] body.crsms-internal-page .crsms-return-link { padding:0 6px !important; font-size:10px !important; }
+}
+
+/* =========================================================
+   Group 09B — Dashboard system card contrast fix only
+   Keep the colorful hero unchanged; make the left status card readable.
+   ========================================================= */
+html[data-mi-theme="colorful"] body.crsms-internal-page .crsms-dashboard-hero .crsms-system-card {
+  border:1px solid rgba(255,255,255,.78) !important;
+  background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(248,250,252,.91)) !important;
+  box-shadow:0 18px 38px rgba(15,23,42,.16), inset 0 1px 0 rgba(255,255,255,.92) !important;
+  backdrop-filter:blur(16px) saturate(125%);
+}
+html[data-mi-theme="colorful"] body.crsms-internal-page .crsms-dashboard-hero .crsms-system-card-head {
+  color:#475569 !important;
+}
+html[data-mi-theme="colorful"] body.crsms-internal-page .crsms-dashboard-hero .crsms-system-card > strong {
+  color:#0f172a !important;
+}
+html[data-mi-theme="colorful"] body.crsms-internal-page .crsms-dashboard-hero .crsms-system-card > small {
+  color:#7c3aed !important;
+}
+html[data-mi-theme="colorful"] body.crsms-internal-page .crsms-dashboard-hero .crsms-system-card > p {
+  color:#64748b !important;
+}
+html[data-mi-theme="colorful"] body.crsms-internal-page .crsms-dashboard-hero .crsms-system-card .crsms-mode-badge {
+  color:#6d28d9 !important;
+  border-color:#c4b5fd !important;
+  background:linear-gradient(135deg,#f5f3ff,#ecfeff) !important;
+}
+html[data-mi-theme="colorful"] body.crsms-internal-page .crsms-dashboard-hero .crsms-system-card .crsms-mode-badge.live {
+  color:#047857 !important;
+  border-color:#6ee7b7 !important;
+  background:#ecfdf5 !important;
+}
+html[data-mi-theme="colorful"] body.crsms-internal-page .crsms-dashboard-hero .crsms-system-card .crsms-mode-badge.mock {
+  color:#b45309 !important;
+  border-color:#fcd34d !important;
+  background:#fffbeb !important;
+}

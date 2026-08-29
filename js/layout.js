@@ -40,7 +40,7 @@
   if (!hasStylesheet("app-modern.css")) {
     const modernCss = document.createElement("link");
     modernCss.rel = "stylesheet";
-    modernCss.href = `${assetUrl("../css/app-modern.css")}?v=20260814-01`;
+    modernCss.href = `${assetUrl("../css/app-modern.css")}?v=20260814-02`;
     modernCss.dataset.miModernUi = "true";
     document.head.appendChild(modernCss);
   }
@@ -116,6 +116,32 @@
     document.head.appendChild(bootstrapJs);
   }
 })();
+
+const MI_THEME_STORAGE_KEY = "mi-visual-theme";
+const MI_THEMES = ["light", "colorful", "dark"];
+
+function applyMiTheme(theme) {
+  const selected = MI_THEMES.includes(theme) ? theme : "colorful";
+  document.documentElement.dataset.miTheme = selected;
+  localStorage.setItem(MI_THEME_STORAGE_KEY, selected);
+
+  document.querySelectorAll("[data-mi-theme]").forEach((button) => {
+    const active = button.dataset.miTheme === selected;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", active ? "true" : "false");
+  });
+}
+
+function setupMiThemeSwitcher() {
+  const saved = localStorage.getItem(MI_THEME_STORAGE_KEY);
+  applyMiTheme(MI_THEMES.includes(saved) ? saved : "colorful");
+
+  document.querySelectorAll("[data-mi-theme]").forEach((button) => {
+    if (button.dataset.miThemeBound === "true") return;
+    button.dataset.miThemeBound = "true";
+    button.addEventListener("click", () => applyMiTheme(button.dataset.miTheme));
+  });
+}
 
 const MI_VISUAL_TONES = ["purple", "teal", "success", "warning"];
 const MI_VISUAL_ICONS = ["📊", "◆", "✓", "⚡", "💰", "📦", "↗", "⚠"];
@@ -248,6 +274,7 @@ const REPORT_PAGE_MAP = {
   customer: "customer.index",
   "customer-pos-phones": "customer.pos_phones",
   "customer-service-pos-review": "customer.service_pos_review",
+  "customer-service-management-report": "customer.service_management_report",
   "customer-vip": "customer.vip",
   "customer-migration": "customer.migration",
   "customer-rfm": "customer.rfm",
@@ -933,6 +960,7 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
               <a data-page="customer" class="nav-link" href="../customer/index.html">مركز خدمة العملاء</a>
               <a data-page="customer-pos-phones" class="nav-link" href="../customer/pos-phones.html">متابعة عملاء نقاط البيع</a>
               <a data-page="customer-service-pos-review" class="nav-link" href="../customer/service-pos-review.html">مراجعة خدمات نقاط البيع</a>
+              <a data-page="customer-service-management-report" class="nav-link" href="../customer/customer-service-management-report.html">تقرير إدارة خدمة العملاء</a>
               <a data-page="customer-vip" class="nav-link" href="../customer/vip.html">عملاء VIP</a>
               <a data-page="customer-migration" class="nav-link" href="../customer/migration.html">تحول قنوات العملاء</a>
               <a data-page="customer-rfm" class="nav-link" href="../customer/rfm.html">تحليل RFM</a>
@@ -1067,12 +1095,15 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
 
           <button type="button" class="mobile-menu-btn mi-hero-menu-btn" data-mi-mobile-menu aria-label="فتح القائمة">☰</button>
 
-          <div class="mi-hero-account-bar">
-            <div class="user-chip">
-              👤 ${getCurrentUser()?.fullName || getCurrentUser()?.username || "User"}
+          <div class="mi-hero-account-bar mi-compact-account-tools">
+            <div class="mi-theme-switcher" role="group" aria-label="نمط العرض">
+              <button type="button" data-mi-theme="light" aria-label="الوضع الفاتح" title="Light">☀<span class="mi-tool-label">Light</span></button>
+              <button type="button" data-mi-theme="colorful" aria-label="الوضع الملون" title="Colorful">✿<span class="mi-tool-label">Colorful</span></button>
+              <button type="button" data-mi-theme="dark" aria-label="الوضع الداكن" title="Dark">☾<span class="mi-tool-label">Dark</span></button>
             </div>
-            <button type="button" class="mi-language-toggle" data-mi-language-toggle aria-label="تغيير اللغة">◎ <strong>EN</strong></button>
-            <button class="export-btn logout-btn" onclick="logout()">تسجيل الخروج</button>
+            <div class="user-chip mi-user-icon" title="${getCurrentUser()?.fullName || getCurrentUser()?.username || "User"}" aria-label="المستخدم الحالي">👤</div>
+            <button type="button" class="mi-language-toggle" data-mi-language-toggle aria-label="تغيير اللغة" title="Language"><strong>EN</strong></button>
+            <button class="export-btn logout-btn mi-logout-icon" onclick="logout()" aria-label="تسجيل الخروج" title="تسجيل الخروج">↪</button>
           </div>
 
           <div class="mi-hero-heading">
@@ -1098,6 +1129,7 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
   enhanceLegacyReportUi(document);
   observeLegacyReportUi();
   setupMobileSidebar();
+  setupMiThemeSwitcher();
   window.MI18n?.refresh?.();
 }
 

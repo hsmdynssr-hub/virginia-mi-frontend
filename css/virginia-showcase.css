@@ -528,3 +528,153 @@ html[dir="ltr"] .mi-hero-heading {
     display: none !important;
   }
 }
+
+/* =========================================================
+   Group 02C — Colorful hero: keep Virginia image, remove dark cast,
+   and layer petrol + orange + violet/pink in one bright composition.
+   ========================================================= */
+html[data-mi-theme="colorful"] .mi-page-hero {
+  background: #0f8f91 !important;
+  box-shadow: 0 18px 42px rgba(15, 111, 114, .16) !important;
+}
+
+html[data-mi-theme="colorful"] .mi-page-hero img {
+  filter: saturate(1.08) brightness(1.12) contrast(.93) !important;
+}
+
+html[data-mi-theme="colorful"] .mi-page-hero-shade {
+  background:
+    radial-gradient(circle at 13% 18%, rgba(19,184,176,.56) 0 7%, transparent 30%),
+    radial-gradient(circle at 76% 2%, rgba(245,158,11,.58) 0 7%, transparent 27%),
+    radial-gradient(circle at 94% 82%, rgba(238,53,166,.40) 0 8%, transparent 29%),
+    linear-gradient(104deg,
+      rgba(8,83,88,.38) 0%,
+      rgba(15,143,145,.22) 24%,
+      rgba(22,119,232,.20) 46%,
+      rgba(109,53,232,.25) 69%,
+      rgba(213,43,197,.24) 84%,
+      rgba(245,124,31,.22) 100%) !important;
+}
+
+html[data-mi-theme="colorful"] .mi-page-hero::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  left: -7%;
+  bottom: -52%;
+  width: 49%;
+  height: 105%;
+  border-radius: 50%;
+  transform: rotate(-10deg);
+  background: linear-gradient(120deg, rgba(245,158,11,.78), rgba(255,122,24,.56) 46%, rgba(19,184,176,.12) 82%);
+  pointer-events: none;
+}
+
+html[data-mi-theme="colorful"] .mi-page-hero::after {
+  border-bottom-color: rgba(255,255,255,.48) !important;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.06), transparent);
+  box-shadow: inset 0 -18px 34px rgba(4,76,80,.10) !important;
+}
+
+html[data-mi-theme="colorful"] .mi-hero-heading {
+  border-color: rgba(255,255,255,.54) !important;
+  background:
+    linear-gradient(120deg, rgba(7,79,83,.88) 0%, rgba(12,105,108,.78) 36%, rgba(86,45,180,.72) 70%, rgba(208,58,143,.67) 100%) !important;
+  box-shadow: 0 16px 36px rgba(31, 63, 91, .18) !important;
+  backdrop-filter: blur(9px) saturate(1.08) !important;
+  -webkit-backdrop-filter: blur(9px) saturate(1.08) !important;
+}
+
+html[data-mi-theme="colorful"] .mi-hero-heading::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: 0;
+  width: 34%;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #13b8b0, #f59e0b, #ff7a18);
+}
+
+html[data-mi-theme="colorful"] .mi-hero-heading .page-pill {
+  border-color: rgba(255,216,125,.66) !important;
+  color: #fff4cf !important;
+  background: linear-gradient(110deg, rgba(15,111,114,.78), rgba(245,158,11,.70)) !important;
+}
+
+html[data-mi-theme="colorful"] .mi-page-hero .user-chip,
+html[data-mi-theme="colorful"] .mi-page-hero .mi-language-toggle {
+  border-color: rgba(255,255,255,.58) !important;
+  color: #173047 !important;
+  background: rgba(255,255,255,.88) !important;
+  box-shadow: 0 9px 24px rgba(12,79,83,.14) !important;
+}
+
+html[data-mi-theme="colorful"] .mi-page-hero .logout-btn {
+  border-color: rgba(255,185,171,.72) !important;
+  color: #fff !important;
+  background: linear-gradient(135deg, #b84255, #d65a40) !important;
+}
+
+html[data-mi-theme="colorful"] .mi-hero-menu-btn {
+  color: #0f6f72 !important;
+  border-color: rgba(15,111,114,.18) !important;
+  background: rgba(255,255,255,.90) !important;
+}
+
+/* Group 07 — move compact account/theme controls to the left edge of the hero. */
+.mi-page-hero .mi-hero-account-bar.mi-compact-account-tools {
+  top: 14px !important;
+  left: 18px !important;
+  right: auto !important;
+  direction: ltr !important;
+  gap: 5px !important;
+}
+
+.mi-page-hero .mi-compact-account-tools .mi-theme-switcher {
+  background: rgba(255, 255, 255, 0.76) !important;
+  border: 1px solid rgba(255, 255, 255, 0.72) !important;
+  box-shadow: 0 8px 18px rgba(11, 35, 47, 0.12) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.mi-page-hero .mi-compact-account-tools .mi-theme-switcher button {
+  border: 0 !important;
+  color: #315266 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  cursor: pointer;
+}
+
+.mi-page-hero .mi-compact-account-tools .mi-theme-switcher button.active,
+.mi-page-hero .mi-compact-account-tools .mi-theme-switcher button[aria-pressed="true"] {
+  color: #fff !important;
+  background: linear-gradient(135deg, #0f766e, #06b6d4 42%, #7c3aed 74%, #f97316) !important;
+  box-shadow: 0 5px 12px rgba(60, 72, 160, 0.18) !important;
+}
+
+.mi-page-hero .mi-compact-account-tools .user-chip,
+.mi-page-hero .mi-compact-account-tools .mi-language-toggle {
+  color: #173c4a !important;
+  border-color: rgba(255, 255, 255, 0.72) !important;
+  background: rgba(255, 255, 255, 0.82) !important;
+  box-shadow: 0 7px 16px rgba(11, 35, 47, 0.10) !important;
+}
+
+.mi-page-hero .mi-compact-account-tools .logout-btn {
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, 0.45) !important;
+  background: linear-gradient(135deg, #f97316, #ef4444) !important;
+  box-shadow: 0 7px 16px rgba(239, 68, 68, 0.16) !important;
+}
+
+@media (max-width: 720px) {
+  .mi-page-hero .mi-hero-account-bar.mi-compact-account-tools {
+    top: 10px !important;
+    left: 10px !important;
+    right: auto !important;
+    transform: scale(.92);
+    transform-origin: top left;
+  }
+}

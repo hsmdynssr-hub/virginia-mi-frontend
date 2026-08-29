@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تقرير إدارة خدمة العملاء</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/report-ui.css" />
+  <link rel="stylesheet" href="./customer-service-management-report.css?v=20260829-01" />
+</head>
+<body class="cs-management-page" data-report-code="customer.service_management_report">
+  <main class="cs-management-shell">
+    <nav class="cs-management-nav">
+      <a href="./service-pos-review.html">← خدمة العملاء</a>
+      <a href="../dashboard/index.html">الرئيسية</a>
+    </nav>
+
+    <header class="cs-management-hero">
+      <div><span>MANAGEMENT DASHBOARD</span><h1>تقرير إدارة خدمة العملاء</h1><p>رؤية موحدة للشكاوى، سرعة المعالجة، أداء الفريق، والمزامنة مع Odoo.</p></div>
+      <button id="exportManagementReportBtn" type="button">تصدير Excel للإدارة</button>
+    </header>
+
+    <section id="managementMessage" class="cs-management-message hidden"></section>
+
+    <section class="cs-management-filter-card">
+      <div class="cs-management-section-title"><h2>فلاتر التقرير</h2><p>حدد الفترة أو الحالة ثم حدّث النتائج.</p></div>
+      <div class="cs-management-filters">
+        <label>الشركة<select id="companyId"><option value="1">فيرجينيا</option><option value="2">كليوباترا</option></select></label>
+        <label>من تاريخ<input id="dateFrom" type="date" /></label>
+        <label>إلى تاريخ<input id="dateTo" type="date" /></label>
+        <label>النوع<select id="noteType"><option value="all">كل الأنواع</option><option value="complaint">شكوى</option><option value="inquiry">استفسار</option><option value="price_review">مراجعة سعر</option><option value="payment_issue">مشكلة دفع</option><option value="product_issue">مشكلة منتج</option><option value="other">أخرى</option></select></label>
+        <label>الحالة<select id="status"><option value="all">كل الحالات</option><option value="submitted">بانتظار المراجعة</option><option value="approved">تم التصديق</option><option value="returned">مرتجع</option><option value="closed">مغلق</option></select></label>
+        <label>رقم العميل<input id="customerPhone" type="text" placeholder="اختياري" /></label>
+        <label>رقم الفاتورة<input id="invoiceRef" type="text" placeholder="اختياري" /></label>
+        <button id="loadManagementReportBtn" type="button">تحديث التقرير</button>
+      </div>
+    </section>
+
+    <section id="managementKpis" class="cs-management-kpis"></section>
+
+    <section class="cs-management-table-card">
+      <div class="cs-management-section-title"><h2>تفاصيل الحالات</h2><p id="managementCount">لم يتم تحميل التقرير بعد.</p></div>
+      <div class="cs-management-table-wrap">
+        <table><thead><tr><th>#</th><th>التاريخ</th><th>النوع</th><th>الحالة</th><th>الفاتورة</th><th>العميل</th><th>الهاتف</th><th>الفرع</th><th>الموظف</th><th>التفاصيل</th><th>تعليق المدير</th><th>Odoo</th><th>ساعات المعالجة</th></tr></thead><tbody id="managementRows"><tr><td colspan="13">اضغط تحديث التقرير.</td></tr></tbody></table>
+      </div>
+    </section>
+  </main>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js?v=20260814-14"></script>
+  <script src="./customer-service-management-report.js?v=20260829-02"></script>
+</body>
+</html>

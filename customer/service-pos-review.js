@@ -1,7 +1,6 @@
 (function () {
   "use strict";
 
-  const CS_TOKEN_KEY = "customerServiceInternalToken";
   const CS_USER_KEY = "customerServiceInternalUser";
 
   let currentUser = null;
@@ -77,10 +76,6 @@
     }
 
     return "";
-  }
-
-  function getCsToken() {
-    return localStorage.getItem(CS_TOKEN_KEY) || "";
   }
 
   function getSelectedCompanyId(required = false) {
@@ -160,11 +155,6 @@
     const mainToken = getMainAuthToken();
     if (mainToken) {
       headers.Authorization = `Bearer ${mainToken}`;
-    }
-
-    const csToken = getCsToken();
-    if (csToken) {
-      headers["X-CS-Token"] = csToken;
     }
 
     const response = await fetch(`${API_BASE}${path}`, {
@@ -437,7 +427,6 @@
       body: JSON.stringify({ username, password })
     });
 
-    localStorage.setItem(CS_TOKEN_KEY, data.token);
     localStorage.setItem(CS_USER_KEY, JSON.stringify(data.user));
 
     currentUser = data.user;
@@ -516,14 +505,13 @@
       await request("/internal-logout", {
         method: "POST",
         body: JSON.stringify({
-          token: getCsToken()
+          token: ""
         })
       });
     } catch (error) {
       console.warn(error);
     }
 
-    localStorage.removeItem(CS_TOKEN_KEY);
     localStorage.removeItem(CS_USER_KEY);
 
     currentUser = null;
@@ -541,7 +529,6 @@
       currentUser = data.user;
       localStorage.setItem(CS_USER_KEY, JSON.stringify(data.user));
     } catch (error) {
-      localStorage.removeItem(CS_TOKEN_KEY);
       localStorage.removeItem(CS_USER_KEY);
       currentUser = buildMainSessionFallbackUser();
 

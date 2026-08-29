@@ -20,3 +20,20 @@
 .report-hub-empty { padding: 30px; text-align: center; border-radius: 18px; background: #fff; border: 1px dashed #94a3b8; color: #64748b; }
 @media (max-width: 1100px) { .report-hub-modules { grid-template-columns: repeat(2, minmax(240px, 1fr)); } }
 @media (max-width: 720px) { .report-hub-modules { grid-template-columns: 1fr; } .report-hub-hero h2 { font-size: 24px; } }
+
+/* Group 02B: petrol + orange balance */
+.report-hub-hero {
+  background:
+    radial-gradient(circle at 9% 18%, rgba(20,184,166,.92) 0 8%, transparent 27%),
+    radial-gradient(circle at 79% 5%, rgba(245,158,11,.88) 0 8%, transparent 24%),
+    linear-gradient(120deg, #0a5962 0%, #0f8f91 18%, #1677e8 40%, #6d35e8 65%, #d52bc5 84%, #f04b8f 100%) !important;
+}
+.report-hub-eyebrow { color: #ffd27a !important; }
+.report-hub-module:nth-child(4n+1) { border-top: 3px solid #0f8f91; }
+.report-hub-module:nth-child(4n+2) { border-top: 3px solid #f59e0b; }
+.report-hub-module:nth-child(4n+3) { border-top: 3px solid #7c3aed; }
+.report-hub-module:nth-child(4n+4) { border-top: 3px solid #ff7a18; }
+.report-hub-link:hover {
+  border-color: rgba(15,111,114,.22);
+  background: linear-gradient(100deg, rgba(20,184,166,.09), rgba(245,158,11,.08), rgba(124,58,237,.07)) !important;
+}

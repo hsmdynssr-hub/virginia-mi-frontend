@@ -864,3 +864,1273 @@ html[dir="ltr"] .mi-input-wrap > span {
   .mi-login-panel { padding: 16px !important; }
   .mi-login-card { padding: 24px 20px !important; }
 }
+
+/* =========================================================
+   Group 02B — Color balance: Orange + Petrol / Teal
+   Small visual-only pass. No report logic or table/chart JS.
+   ========================================================= */
+:root {
+  --mi-petrol: #0f6f72;
+  --mi-petrol-deep: #0a4f55;
+  --mi-teal-bright: #13b8b0;
+  --mi-orange: #f59e0b;
+  --mi-orange-2: #ff7a18;
+  --mi-coral: #fb7185;
+}
+
+/* Colorful hero surfaces: keep violet/pink but bring petrol + orange back in. */
+.report-hub-hero,
+.dashboard-hero,
+.care-hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 12% 20%, rgba(19,184,176,.95) 0 9%, transparent 28%),
+    radial-gradient(circle at 80% 5%, rgba(245,158,11,.88) 0 8%, transparent 23%),
+    radial-gradient(circle at 96% 78%, rgba(255,122,24,.50) 0 10%, transparent 28%),
+    linear-gradient(118deg,
+      #0a5962 0%,
+      #0f8f91 18%,
+      #1677e8 42%,
+      #6d35e8 66%,
+      #d52bc5 86%,
+      #f04b8f 100%) !important;
+}
+
+.report-hub-hero::before,
+.dashboard-hero::before,
+.care-hero::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: auto auto -52% -8%;
+  width: 52%;
+  aspect-ratio: 1.7 / 1;
+  border-radius: 50%;
+  transform: rotate(-12deg);
+  background: linear-gradient(120deg, rgba(255,176,32,.96), rgba(255,112,35,.76) 42%, rgba(19,184,176,.22) 80%);
+  filter: blur(.2px);
+  opacity: .9;
+}
+
+.report-hub-hero::after,
+.dashboard-hero::after,
+.care-hero::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 36%;
+  height: 145%;
+  top: -35%;
+  right: 12%;
+  border-radius: 48% 52% 62% 38%;
+  transform: rotate(22deg);
+  background: linear-gradient(155deg, rgba(15,111,114,.50), rgba(245,158,11,.34), rgba(217,43,197,.12));
+}
+
+/* Section accents: rotate between petrol and orange instead of blue/purple only. */
+.card h2::before,
+.card h3::before,
+.section-title::before,
+.panel-title::before {
+  background: linear-gradient(180deg, var(--mi-petrol), var(--mi-orange)) !important;
+}
+
+/* Common cards receive a soft mixed-color edge glow, while staying readable/white. */
+.dashboard-module-card,
+.care-card,
+.report-portal-card,
+.report-hub-module,
+.card {
+  border-color: rgba(15,111,114,.16) !important;
+}
+
+.dashboard-module-card:nth-child(4n+1),
+.care-card:nth-child(4n+1),
+.report-portal-card:nth-child(4n+1),
+.report-hub-module:nth-child(4n+1) {
+  box-shadow: 0 12px 30px rgba(15,111,114,.10), inset 0 3px 0 rgba(19,184,176,.78) !important;
+}
+.dashboard-module-card:nth-child(4n+2),
+.care-card:nth-child(4n+2),
+.report-portal-card:nth-child(4n+2),
+.report-hub-module:nth-child(4n+2) {
+  box-shadow: 0 12px 30px rgba(245,158,11,.10), inset 0 3px 0 rgba(245,158,11,.82) !important;
+}
+.dashboard-module-card:nth-child(4n+3),
+.care-card:nth-child(4n+3),
+.report-portal-card:nth-child(4n+3),
+.report-hub-module:nth-child(4n+3) {
+  box-shadow: 0 12px 30px rgba(109,53,232,.09), inset 0 3px 0 rgba(109,53,232,.72) !important;
+}
+.dashboard-module-card:nth-child(4n+4),
+.care-card:nth-child(4n+4),
+.report-portal-card:nth-child(4n+4),
+.report-hub-module:nth-child(4n+4) {
+  box-shadow: 0 12px 30px rgba(255,122,24,.10), inset 0 3px 0 rgba(255,122,24,.76) !important;
+}
+
+/* Buttons / pills: preserve primary purple, add warm petrol/orange alternatives. */
+.btn-success,
+.badge-success,
+.status-success {
+  background: linear-gradient(135deg, var(--mi-petrol), var(--mi-teal-bright)) !important;
+}
+
+.btn-warning,
+.badge-warning,
+.status-warning {
+  background: linear-gradient(135deg, var(--mi-orange), var(--mi-orange-2)) !important;
+}
+
+/* Active navigation keeps the colorful identity but gains a warm orange finish. */
+.sidebar .nav-link.active,
+.sidebar a.active,
+.nav-item.active > a {
+  background: linear-gradient(100deg, #6d35e8 0%, #c82bd1 52%, #f47b20 100%) !important;
+}
+
+/* Softer page atmosphere using petrol + orange tints. */
+body:not(.mi-login-page) {
+  background:
+    radial-gradient(circle at 8% 8%, rgba(19,184,176,.055), transparent 24%),
+    radial-gradient(circle at 90% 14%, rgba(245,158,11,.055), transparent 22%),
+    #f7f9fd !important;
+}
+
+/* =========================================================
+   Group 02C — Colorful mode only: bright sidebar + balanced shell
+   Dark mode remains untouched. Light mode remains neutral.
+   ========================================================= */
+html[data-mi-theme="colorful"] {
+  --mi-bg: #f7fbfd;
+  --mi-surface: #ffffff;
+  --mi-text: #153047;
+  --mi-muted: #64758a;
+  --mi-border: #dce9ed;
+  --mi-primary: #6d35e8;
+  --mi-primary-dark: #4d28b8;
+}
+
+html[data-mi-theme="colorful"] body:not(.mi-login-page) {
+  background:
+    radial-gradient(circle at 7% 5%, rgba(18, 184, 176, .10), transparent 26rem),
+    radial-gradient(circle at 91% 8%, rgba(245, 158, 11, .10), transparent 24rem),
+    radial-gradient(circle at 72% 42%, rgba(217, 43, 197, .045), transparent 30rem),
+    #f7fbfd !important;
+}
+
+html[data-mi-theme="colorful"] .sidebar {
+  color: #18344a !important;
+  border-inline-start: 1px solid rgba(15, 111, 114, .10) !important;
+  background:
+    radial-gradient(circle at 15% 5%, rgba(19, 184, 176, .14), transparent 30%),
+    radial-gradient(circle at 88% 94%, rgba(245, 158, 11, .12), transparent 32%),
+    linear-gradient(180deg, #ffffff 0%, #f7fcfc 54%, #fffaf4 100%) !important;
+  box-shadow: -8px 0 32px rgba(20, 67, 76, .08) !important;
+}
+
+html[dir="ltr"][data-mi-theme="colorful"] .sidebar {
+  box-shadow: 8px 0 32px rgba(20, 67, 76, .08) !important;
+}
+
+html[data-mi-theme="colorful"] .sidebar::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--mi-petrol), var(--mi-orange)) !important;
+}
+
+html[data-mi-theme="colorful"] .brand {
+  border-bottom-color: rgba(15, 111, 114, .12) !important;
+}
+
+html[data-mi-theme="colorful"] .brand-logo {
+  color: #fff !important;
+  background: linear-gradient(145deg, #0f8f91 0%, #13b8b0 42%, #f59e0b 100%) !important;
+  box-shadow: 0 10px 24px rgba(15, 111, 114, .18) !important;
+}
+
+html[data-mi-theme="colorful"] .brand h1 {
+  color: #153047 !important;
+}
+
+html[data-mi-theme="colorful"] .brand p,
+html[data-mi-theme="colorful"] .nav-group,
+html[data-mi-theme="colorful"] .sidebar-footer span {
+  color: #72869a !important;
+}
+
+html[data-mi-theme="colorful"] .nav-link,
+html[data-mi-theme="colorful"] .nav-accordion-head {
+  color: #52677c !important;
+}
+
+html[data-mi-theme="colorful"] .nav-link:hover,
+html[data-mi-theme="colorful"] .nav-accordion-head:hover {
+  color: #0b6266 !important;
+  border-color: rgba(15, 111, 114, .10) !important;
+  background: linear-gradient(100deg, rgba(19,184,176,.10), rgba(245,158,11,.07)) !important;
+}
+
+html[data-mi-theme="colorful"] .nav-link.active,
+html[data-mi-theme="colorful"] .sidebar a.active,
+html[data-mi-theme="colorful"] .nav-item.active > a {
+  color: #fff !important;
+  border-color: rgba(255,255,255,.24) !important;
+  background: linear-gradient(100deg, #0f7f83 0%, #13b8b0 28%, #6d35e8 59%, #d52bc5 79%, #f57c1f 100%) !important;
+  box-shadow: 0 10px 24px rgba(109, 53, 232, .18) !important;
+}
+
+html[data-mi-theme="colorful"] .nav-link.active::before {
+  background: #f59e0b !important;
+  box-shadow: 0 0 0 3px rgba(245,158,11,.14);
+}
+
+html[data-mi-theme="colorful"] .nav-accordion-arrow {
+  color: #73909b !important;
+}
+
+html[data-mi-theme="colorful"] .nav-accordion-body {
+  border-inline-start-color: rgba(15,111,114,.14) !important;
+}
+
+html[data-mi-theme="colorful"] .sidebar-footer {
+  border-top-color: rgba(15,111,114,.12) !important;
+}
+
+/* =========================================================
+   Group 03 — Filters, actions and report states
+   Visual-only. No report logic, tables or chart JS changed.
+   ========================================================= */
+html[data-mi-theme="colorful"] .report-toolbar,
+html[data-mi-theme="colorful"] .mi-unified-filter-toolbar {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(15,111,114,.15) !important;
+  background:
+    radial-gradient(circle at 4% 0%, rgba(19,184,176,.08), transparent 23%),
+    radial-gradient(circle at 96% 100%, rgba(245,158,11,.08), transparent 25%),
+    linear-gradient(180deg, #ffffff 0%, #fbfeff 100%) !important;
+  box-shadow: 0 12px 30px rgba(20,67,76,.07) !important;
+}
+
+html[data-mi-theme="colorful"] .report-toolbar::after,
+html[data-mi-theme="colorful"] .mi-unified-filter-toolbar::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  opacity: .72;
+  background: linear-gradient(90deg,
+    var(--mi-petrol) 0%,
+    var(--mi-teal-bright) 22%,
+    #3977e8 42%,
+    #6d35e8 61%,
+    #d52bc5 78%,
+    var(--mi-orange) 100%);
+}
+
+html[data-mi-theme="colorful"] .control,
+html[data-mi-theme="colorful"] .form-control,
+html[data-mi-theme="colorful"] .form-select,
+html[data-mi-theme="colorful"] input:not([type="checkbox"]):not([type="radio"]),
+html[data-mi-theme="colorful"] select {
+  border-color: #d9e7eb !important;
+  color: #28445a !important;
+  background: rgba(255,255,255,.96) !important;
+  box-shadow: 0 3px 11px rgba(15,111,114,.035) !important;
+}
+
+html[data-mi-theme="colorful"] .control:hover,
+html[data-mi-theme="colorful"] .form-control:hover,
+html[data-mi-theme="colorful"] .form-select:hover,
+html[data-mi-theme="colorful"] input:not([type="checkbox"]):not([type="radio"]):hover,
+html[data-mi-theme="colorful"] select:hover {
+  border-color: rgba(15,111,114,.34) !important;
+}
+
+html[data-mi-theme="colorful"] .control:focus,
+html[data-mi-theme="colorful"] .form-control:focus,
+html[data-mi-theme="colorful"] .form-select:focus,
+html[data-mi-theme="colorful"] input:not([type="checkbox"]):not([type="radio"]):focus,
+html[data-mi-theme="colorful"] select:focus {
+  border-color: var(--mi-teal-bright) !important;
+  box-shadow: 0 0 0 4px rgba(19,184,176,.11), 0 7px 18px rgba(15,111,114,.07) !important;
+  outline: none !important;
+}
+
+/* Date presets / segmented buttons become a soft multicolor control. */
+html[data-mi-theme="colorful"] .date-preset,
+html[data-mi-theme="colorful"] .preset-buttons,
+html[data-mi-theme="colorful"] .segmented-control {
+  border-color: #d8e6ea !important;
+  background: linear-gradient(100deg, rgba(19,184,176,.06), rgba(109,53,232,.04), rgba(245,158,11,.06)) !important;
+}
+
+html[data-mi-theme="colorful"] .date-preset button,
+html[data-mi-theme="colorful"] .preset-buttons button,
+html[data-mi-theme="colorful"] .segmented-control button {
+  color: #536b7e !important;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease !important;
+}
+
+html[data-mi-theme="colorful"] .date-preset button:hover,
+html[data-mi-theme="colorful"] .preset-buttons button:hover,
+html[data-mi-theme="colorful"] .segmented-control button:hover {
+  color: #0b6669 !important;
+  background: rgba(19,184,176,.08) !important;
+}
+
+html[data-mi-theme="colorful"] .date-preset button.active,
+html[data-mi-theme="colorful"] .preset-buttons button.active,
+html[data-mi-theme="colorful"] .segmented-control button.active,
+html[data-mi-theme="colorful"] .date-preset .active {
+  color: #fff !important;
+  border-color: transparent !important;
+  background: linear-gradient(115deg, var(--mi-petrol) 0%, #2784e8 38%, #6d35e8 72%, #d52bc5 100%) !important;
+  box-shadow: 0 8px 18px rgba(109,53,232,.18) !important;
+}
+
+/* Primary actions: petrol -> violet; secondary/export actions: orange -> coral. */
+html[data-mi-theme="colorful"] .run-btn,
+html[data-mi-theme="colorful"] .primary-btn,
+html[data-mi-theme="colorful"] .report-btn-primary,
+html[data-mi-theme="colorful"] button[type="submit"]:not(.logout-btn) {
+  border-color: transparent !important;
+  color: #fff !important;
+  background: linear-gradient(120deg, var(--mi-petrol) 0%, #207bdc 42%, #6d35e8 100%) !important;
+  box-shadow: 0 9px 20px rgba(48,91,177,.16) !important;
+}
+
+html[data-mi-theme="colorful"] .export-btn {
+  border-color: rgba(245,158,11,.22) !important;
+  color: #fff !important;
+  background: linear-gradient(120deg, #ee8d0b 0%, var(--mi-orange-2) 48%, var(--mi-coral) 100%) !important;
+  box-shadow: 0 9px 20px rgba(245,126,24,.16) !important;
+}
+
+html[data-mi-theme="colorful"] .run-btn:hover,
+html[data-mi-theme="colorful"] .primary-btn:hover,
+html[data-mi-theme="colorful"] .report-btn-primary:hover,
+html[data-mi-theme="colorful"] .export-btn:hover,
+html[data-mi-theme="colorful"] button[type="submit"]:not(.logout-btn):hover {
+  transform: translateY(-1px);
+  filter: saturate(1.08) brightness(1.02);
+}
+
+/* Report cards / unloaded states feel designed instead of silent grey blocks. */
+html[data-mi-theme="colorful"] .report-card,
+html[data-mi-theme="colorful"] .inventory-report-card,
+html[data-mi-theme="colorful"] .mi-report-card,
+html[data-mi-theme="colorful"] .panel {
+  border-color: rgba(15,111,114,.14) !important;
+  background:
+    radial-gradient(circle at 0 0, rgba(19,184,176,.035), transparent 28%),
+    radial-gradient(circle at 100% 100%, rgba(245,158,11,.035), transparent 28%),
+    #fff !important;
+  box-shadow: 0 13px 30px rgba(20,67,76,.055) !important;
+}
+
+html[data-mi-theme="colorful"] .empty,
+html[data-mi-theme="colorful"] .inventory-empty,
+html[data-mi-theme="colorful"] .report-empty,
+html[data-mi-theme="colorful"] .mi-empty-state {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(15,111,114,.15) !important;
+  color: #61788b !important;
+  background:
+    radial-gradient(circle at 5% 10%, rgba(19,184,176,.075), transparent 28%),
+    radial-gradient(circle at 94% 86%, rgba(245,158,11,.075), transparent 26%),
+    linear-gradient(135deg, #ffffff 0%, #fbfdff 55%, #fffaf4 100%) !important;
+  box-shadow: 0 10px 24px rgba(20,67,76,.045) !important;
+}
+
+html[data-mi-theme="colorful"] .empty::before,
+html[data-mi-theme="colorful"] .inventory-empty::before,
+html[data-mi-theme="colorful"] .report-empty::before,
+html[data-mi-theme="colorful"] .mi-empty-state::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  width: 5px;
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(180deg, var(--mi-petrol), var(--mi-teal-bright), #6d35e8, #d52bc5, var(--mi-orange));
+}
+
+html[data-mi-theme="colorful"] .page-pill,
+html[data-mi-theme="colorful"] .filter-label,
+html[data-mi-theme="colorful"] .eyebrow {
+  color: var(--mi-petrol) !important;
+}
+
+/* =========================================================
+   Group 04 — Colorful tables, rows and status badges
+   Visual only. No table/report JavaScript is changed.
+   ========================================================= */
+html[data-mi-theme="colorful"] .table-responsive,
+html[data-mi-theme="colorful"] .table-wrap,
+html[data-mi-theme="colorful"] .inventory-table-wrap,
+html[data-mi-theme="colorful"] .report-table-wrap,
+html[data-mi-theme="colorful"] .mi-table-scroll {
+  border-color: rgba(15,111,114,.14) !important;
+  background: #fff !important;
+  box-shadow: 0 13px 30px rgba(21,63,75,.055) !important;
+}
+
+html[data-mi-theme="colorful"] .table,
+html[data-mi-theme="colorful"] .data-table,
+html[data-mi-theme="colorful"] .report-table,
+html[data-mi-theme="colorful"] .inventory-data-table,
+html[data-mi-theme="colorful"] .mi-data-table {
+  --bs-table-striped-bg: rgba(19,184,176,.025) !important;
+  --bs-table-hover-bg: rgba(109,53,232,.045) !important;
+}
+
+html[data-mi-theme="colorful"] .table th,
+html[data-mi-theme="colorful"] .data-table th,
+html[data-mi-theme="colorful"] .report-table th,
+html[data-mi-theme="colorful"] .inventory-data-table th,
+html[data-mi-theme="colorful"] .mi-data-table th {
+  color: #294458 !important;
+  border-bottom-color: rgba(15,111,114,.12) !important;
+  background:
+    linear-gradient(90deg, rgba(15,111,114,.08) 0%, rgba(19,184,176,.055) 28%, rgba(109,53,232,.045) 62%, rgba(245,158,11,.06) 100%),
+    #fbfdff !important;
+}
+
+html[data-mi-theme="colorful"] .table tbody tr:nth-child(even) td,
+html[data-mi-theme="colorful"] .data-table tbody tr:nth-child(even) td,
+html[data-mi-theme="colorful"] .report-table tbody tr:nth-child(even) td,
+html[data-mi-theme="colorful"] .inventory-data-table tbody tr:nth-child(even) td,
+html[data-mi-theme="colorful"] .mi-data-table tbody tr:nth-child(even) td {
+  background: linear-gradient(90deg, rgba(19,184,176,.018), rgba(255,255,255,0) 48%, rgba(245,158,11,.018)) !important;
+}
+
+html[data-mi-theme="colorful"] .table tbody tr:hover td,
+html[data-mi-theme="colorful"] .data-table tbody tr:hover td,
+html[data-mi-theme="colorful"] .report-table tbody tr:hover td,
+html[data-mi-theme="colorful"] .inventory-data-table tbody tr:hover td,
+html[data-mi-theme="colorful"] .mi-data-table tbody tr:hover td {
+  background: linear-gradient(90deg, rgba(19,184,176,.075), rgba(109,53,232,.055) 55%, rgba(245,158,11,.07)) !important;
+}
+
+html[data-mi-theme="colorful"] .table td,
+html[data-mi-theme="colorful"] .data-table td,
+html[data-mi-theme="colorful"] .report-table td,
+html[data-mi-theme="colorful"] .inventory-data-table td,
+html[data-mi-theme="colorful"] .mi-data-table td {
+  border-bottom-color: #edf3f4 !important;
+  color: #30475a !important;
+}
+
+/* Shared status pills — clearer, happier and still business-readable. */
+html[data-mi-theme="colorful"] .badge,
+html[data-mi-theme="colorful"] .status-badge,
+html[data-mi-theme="colorful"] .pill {
+  border: 1px solid transparent !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.24) !important;
+}
+
+html[data-mi-theme="colorful"] .badge-success,
+html[data-mi-theme="colorful"] .status-success,
+html[data-mi-theme="colorful"] .pill-success,
+html[data-mi-theme="colorful"] .badge.bg-success {
+  color: #fff !important;
+  background: linear-gradient(120deg, #0f6f72 0%, #13b8b0 58%, #2cc58f 100%) !important;
+}
+
+html[data-mi-theme="colorful"] .badge-warning,
+html[data-mi-theme="colorful"] .status-warning,
+html[data-mi-theme="colorful"] .pill-warning,
+html[data-mi-theme="colorful"] .badge.bg-warning {
+  color: #fff !important;
+  background: linear-gradient(120deg, #e8950e 0%, #f47b20 58%, #ff596f 100%) !important;
+}
+
+html[data-mi-theme="colorful"] .badge-danger,
+html[data-mi-theme="colorful"] .status-danger,
+html[data-mi-theme="colorful"] .pill-danger,
+html[data-mi-theme="colorful"] .badge.bg-danger {
+  color: #fff !important;
+  background: linear-gradient(120deg, #e33d62 0%, #d52bc5 58%, #8a3de8 100%) !important;
+}
+
+html[data-mi-theme="colorful"] .badge-info,
+html[data-mi-theme="colorful"] .status-info,
+html[data-mi-theme="colorful"] .pill-info,
+html[data-mi-theme="colorful"] .badge.bg-info,
+html[data-mi-theme="colorful"] .badge-primary,
+html[data-mi-theme="colorful"] .status-primary {
+  color: #fff !important;
+  background: linear-gradient(120deg, #1685d8 0%, #5b50e8 58%, #a63de4 100%) !important;
+}
+
+html[data-mi-theme="colorful"] .badge-secondary,
+html[data-mi-theme="colorful"] .status-secondary,
+html[data-mi-theme="colorful"] .pill-secondary {
+  color: #496070 !important;
+  border-color: #d9e7ea !important;
+  background: linear-gradient(120deg, #f5fbfb, #fff8ef) !important;
+}
+
+/* Give first/last table edges a polished finish without changing layout. */
+html[data-mi-theme="colorful"] .table th:first-child,
+html[data-mi-theme="colorful"] .data-table th:first-child,
+html[data-mi-theme="colorful"] .report-table th:first-child,
+html[data-mi-theme="colorful"] .inventory-data-table th:first-child {
+  box-shadow: inset 4px 0 0 rgba(15,111,114,.55);
+}
+
+html[data-mi-theme="colorful"][dir="rtl"] .table th:first-child,
+html[data-mi-theme="colorful"][dir="rtl"] .data-table th:first-child,
+html[data-mi-theme="colorful"][dir="rtl"] .report-table th:first-child,
+html[data-mi-theme="colorful"][dir="rtl"] .inventory-data-table th:first-child {
+  box-shadow: inset -4px 0 0 rgba(15,111,114,.55);
+}
+
+/* =========================================================
+   Group 05 — Colorful analytics & chart surfaces
+   Visual only. Chart data / report JavaScript remains untouched.
+   ========================================================= */
+html[data-mi-theme="colorful"] .chart-card,
+html[data-mi-theme="colorful"] .chart-panel,
+html[data-mi-theme="colorful"] .analytics-card,
+html[data-mi-theme="colorful"] .analytics-panel,
+html[data-mi-theme="colorful"] .report-chart,
+html[data-mi-theme="colorful"] .chart-container,
+html[data-mi-theme="colorful"] .kpi-chart,
+html[data-mi-theme="colorful"] .dashboard-chart {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(15,111,114,.14) !important;
+  border-radius: 20px !important;
+  background:
+    radial-gradient(circle at 2% 4%, rgba(19,184,176,.08), transparent 24%),
+    radial-gradient(circle at 98% 8%, rgba(245,158,11,.09), transparent 23%),
+    radial-gradient(circle at 90% 96%, rgba(213,43,197,.055), transparent 25%),
+    linear-gradient(145deg,#fff 0%,#fbfeff 55%,#fffaf3 100%) !important;
+  box-shadow: 0 14px 34px rgba(24,69,78,.065) !important;
+}
+
+html[data-mi-theme="colorful"] .chart-card::before,
+html[data-mi-theme="colorful"] .chart-panel::before,
+html[data-mi-theme="colorful"] .analytics-card::before,
+html[data-mi-theme="colorful"] .analytics-panel::before,
+html[data-mi-theme="colorful"] .report-chart::before {
+  content: "";
+  position: absolute;
+  inset-inline: 18px;
+  top: 0;
+  height: 4px;
+  border-radius: 0 0 999px 999px;
+  background: linear-gradient(90deg,#0f6f72 0%,#13b8b0 22%,#1685d8 42%,#6d35e8 62%,#d52bc5 79%,#f47b20 100%);
+  opacity: .95;
+}
+
+html[data-mi-theme="colorful"] .chart-title,
+html[data-mi-theme="colorful"] .analytics-title,
+html[data-mi-theme="colorful"] .chart-card h2,
+html[data-mi-theme="colorful"] .chart-card h3,
+html[data-mi-theme="colorful"] .chart-panel h2,
+html[data-mi-theme="colorful"] .chart-panel h3 {
+  color: #173f4b !important;
+}
+
+html[data-mi-theme="colorful"] .chart-subtitle,
+html[data-mi-theme="colorful"] .analytics-subtitle,
+html[data-mi-theme="colorful"] .chart-note,
+html[data-mi-theme="colorful"] .chart-legend {
+  color: #657c8d !important;
+}
+
+/* Native progress / comparison bars used by several reports. */
+html[data-mi-theme="colorful"] progress {
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: #eaf2f3;
+  accent-color: #13b8b0;
+}
+
+html[data-mi-theme="colorful"] .progress,
+html[data-mi-theme="colorful"] .progress-track,
+html[data-mi-theme="colorful"] .bar-track {
+  overflow: hidden;
+  border-radius: 999px !important;
+  background: linear-gradient(90deg,#edf7f7,#f6f0ff,#fff5e8) !important;
+}
+
+html[data-mi-theme="colorful"] .progress-bar,
+html[data-mi-theme="colorful"] .bar-fill,
+html[data-mi-theme="colorful"] .metric-bar {
+  border-radius: 999px !important;
+  background: linear-gradient(90deg,#0f6f72 0%,#13b8b0 26%,#1685d8 47%,#6d35e8 68%,#d52bc5 84%,#f47b20 100%) !important;
+  box-shadow: 0 3px 10px rgba(109,53,232,.16);
+}
+
+/* Legend dots / swatches get the same visual language without changing chart data. */
+html[data-mi-theme="colorful"] .legend-item,
+html[data-mi-theme="colorful"] .chart-legend-item {
+  color: #425c6e !important;
+}
+
+html[data-mi-theme="colorful"] .chart-toolbar,
+html[data-mi-theme="colorful"] .analytics-toolbar {
+  border-color: rgba(15,111,114,.11) !important;
+  background: linear-gradient(90deg,rgba(19,184,176,.055),rgba(109,53,232,.035),rgba(245,158,11,.055)) !important;
+}
+
+/* Canvas/SVG stay clean and readable; surrounding card carries the color. */
+html[data-mi-theme="colorful"] canvas,
+html[data-mi-theme="colorful"] .chart-container svg,
+html[data-mi-theme="colorful"] .chart-panel svg,
+html[data-mi-theme="colorful"] .analytics-card svg {
+  filter: saturate(1.08);
+}
+
+/* =========================================================
+   Group 06 — Final polish, consistency & responsive finish
+   Visual-only pass. No report logic or chart data changes.
+   ========================================================= */
+html[data-mi-theme="colorful"] {
+  --mi-petrol: #0f6f72;
+  --mi-teal: #13b8b0;
+  --mi-blue: #1685d8;
+  --mi-violet: #6d35e8;
+  --mi-pink: #d52bc5;
+  --mi-orange: #f47b20;
+  --mi-ink: #173f4b;
+  --mi-muted: #657c8d;
+  --mi-line: rgba(15,111,114,.14);
+}
+
+html[data-mi-theme="colorful"] body {
+  background:
+    radial-gradient(circle at 8% 5%, rgba(19,184,176,.08), transparent 24rem),
+    radial-gradient(circle at 83% 10%, rgba(244,123,32,.07), transparent 22rem),
+    radial-gradient(circle at 62% 62%, rgba(109,53,232,.045), transparent 28rem),
+    #f7fbfc !important;
+}
+
+html[data-mi-theme="colorful"] :is(.card,.panel,.report-card,.content-card,.section-card,.filter-card,.summary-card) {
+  border-color: var(--mi-line) !important;
+  box-shadow: 0 12px 30px rgba(31,72,82,.055) !important;
+}
+
+html[data-mi-theme="colorful"] :is(input,select,textarea,.form-control,.form-select) {
+  border-color: #d6e4e8 !important;
+  background-color: rgba(255,255,255,.94) !important;
+  color: #294458 !important;
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+html[data-mi-theme="colorful"] :is(input,select,textarea,.form-control,.form-select):focus {
+  border-color: rgba(19,184,176,.68) !important;
+  box-shadow: 0 0 0 3px rgba(19,184,176,.12), 0 5px 15px rgba(109,53,232,.06) !important;
+  outline: none !important;
+}
+
+html[data-mi-theme="colorful"] :is(button,.btn,.action-btn,.toolbar-btn) {
+  transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+}
+
+html[data-mi-theme="colorful"] :is(button,.btn,.action-btn,.toolbar-btn):not(:disabled):hover {
+  transform: translateY(-1px);
+  filter: saturate(1.05);
+}
+
+html[data-mi-theme="colorful"] :is(.btn-primary,.primary-btn,.action-primary) {
+  border-color: transparent !important;
+  background: linear-gradient(115deg,var(--mi-petrol),var(--mi-teal) 28%,var(--mi-blue) 50%,var(--mi-violet) 74%,var(--mi-pink)) !important;
+  box-shadow: 0 8px 18px rgba(109,53,232,.16) !important;
+}
+
+html[data-mi-theme="colorful"] :is(.btn-warning,.warning-btn,.accent-orange) {
+  border-color: transparent !important;
+  color: #fff !important;
+  background: linear-gradient(115deg,#e8950e,var(--mi-orange),#ff596f) !important;
+}
+
+html[data-mi-theme="colorful"] :is(h1,h2,h3,.page-title,.section-title,.report-title) {
+  text-wrap: balance;
+}
+
+html[data-mi-theme="colorful"] :is(.text-muted,.muted,.subtitle,.page-subtitle,.section-subtitle) {
+  color: var(--mi-muted) !important;
+}
+
+/* A thin shared accent helps disconnected report blocks feel like one product. */
+html[data-mi-theme="colorful"] :is(.section-card,.report-card,.content-card,.summary-card):not(.no-color-accent) {
+  position: relative;
+}
+
+html[data-mi-theme="colorful"] :is(.section-card,.report-card,.content-card,.summary-card):not(.no-color-accent)::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 18px;
+  top: 0;
+  width: 74px;
+  height: 3px;
+  border-radius: 0 0 999px 999px;
+  background: linear-gradient(90deg,var(--mi-petrol),var(--mi-teal),var(--mi-violet),var(--mi-orange));
+  opacity: .72;
+  pointer-events: none;
+}
+
+/* Friendlier scrollbars on dense reports. */
+html[data-mi-theme="colorful"] * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(15,111,114,.34) rgba(15,111,114,.055);
+}
+html[data-mi-theme="colorful"] *::-webkit-scrollbar { width: 9px; height: 9px; }
+html[data-mi-theme="colorful"] *::-webkit-scrollbar-track { background: rgba(15,111,114,.045); }
+html[data-mi-theme="colorful"] *::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: linear-gradient(var(--mi-teal),var(--mi-violet),var(--mi-orange));
+  background-clip: padding-box;
+}
+
+/* Responsive cleanup: retain hierarchy while avoiding oversized decorative surfaces. */
+@media (max-width: 1100px) {
+  html[data-mi-theme="colorful"] :is(.card,.panel,.report-card,.content-card,.section-card,.filter-card,.summary-card,.chart-card,.chart-panel) {
+    border-radius: 17px !important;
+  }
+}
+
+@media (max-width: 820px) {
+  html[data-mi-theme="colorful"] body {
+    background:
+      radial-gradient(circle at 8% 3%, rgba(19,184,176,.07), transparent 18rem),
+      radial-gradient(circle at 92% 14%, rgba(244,123,32,.055), transparent 18rem),
+      #f7fbfc !important;
+  }
+
+  html[data-mi-theme="colorful"] :is(.filter-actions,.toolbar-actions,.report-actions,.action-row) {
+    gap: 8px !important;
+  }
+
+  html[data-mi-theme="colorful"] :is(.filter-actions,.toolbar-actions,.report-actions,.action-row) :is(button,.btn) {
+    min-height: 42px;
+  }
+
+  html[data-mi-theme="colorful"] :is(.table-responsive,.table-wrap,.inventory-table-wrap,.report-table-wrap,.mi-table-scroll) {
+    border-radius: 15px !important;
+  }
+}
+
+@media (max-width: 560px) {
+  html[data-mi-theme="colorful"] :is(.card,.panel,.report-card,.content-card,.section-card,.filter-card,.summary-card,.chart-card,.chart-panel) {
+    border-radius: 14px !important;
+    box-shadow: 0 8px 22px rgba(31,72,82,.05) !important;
+  }
+
+  html[data-mi-theme="colorful"] :is(input,select,textarea,.form-control,.form-select,button,.btn) {
+    min-height: 42px;
+  }
+
+  html[data-mi-theme="colorful"] :is(.section-card,.report-card,.content-card,.summary-card):not(.no-color-accent)::after {
+    inset-inline-start: 14px;
+    width: 54px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-mi-theme="colorful"] *,
+  html[data-mi-theme="colorful"] *::before,
+  html[data-mi-theme="colorful"] *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* Group 07 — consistent exports + compact account/theme tools */
+html[data-mi-theme="colorful"] .report-export-action:not(.report-pdf-action),
+html[data-mi-theme="colorful"] #exportBranchSalesBtn,
+html[data-mi-theme="colorful"] .excel-export-btn,
+html[data-mi-theme="colorful"] [data-export="excel"] {
+  border-color: #f59e0b !important;
+  color: #fff !important;
+  background: linear-gradient(135deg, #f59e0b 0%, #ff7a45 56%, #f05b78 100%) !important;
+  box-shadow: 0 8px 18px rgba(245, 158, 11, 0.20) !important;
+}
+
+html[data-mi-theme="colorful"] .report-export-action:not(.report-pdf-action):hover,
+html[data-mi-theme="colorful"] #exportBranchSalesBtn:hover,
+html[data-mi-theme="colorful"] .excel-export-btn:hover,
+html[data-mi-theme="colorful"] [data-export="excel"]:hover {
+  transform: translateY(-1px);
+  filter: saturate(1.06) brightness(1.02);
+  box-shadow: 0 10px 22px rgba(245, 158, 11, 0.26) !important;
+}
+
+.mi-compact-account-tools .mi-tool-label {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.mi-compact-account-tools .mi-theme-switcher {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 4px !important;
+  padding: 3px !important;
+  border-radius: 12px !important;
+}
+
+.mi-compact-account-tools .mi-theme-switcher button,
+.mi-compact-account-tools .user-chip,
+.mi-compact-account-tools .mi-language-toggle,
+.mi-compact-account-tools .logout-btn {
+  width: 34px !important;
+  min-width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 10px !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+}
+
+.mi-compact-account-tools .mi-language-toggle {
+  font-size: 9px !important;
+}
+
+.mi-compact-account-tools .mi-user-icon {
+  cursor: default;
+}
+
+.mi-compact-account-tools .mi-logout-icon {
+  font-size: 16px !important;
+}
+
+/* === DASHBOARD REPORT CARDS — stronger colorful identity === */
+html[data-mi-theme="colorful"] .reports-grid {
+  gap:20px !important;
+}
+html[data-mi-theme="colorful"] .reports-grid > .report-card {
+  position:relative;
+  overflow:hidden;
+  min-height:230px;
+  padding:24px 24px 26px !important;
+  border:1px solid rgba(148,163,184,.24) !important;
+  border-radius:24px !important;
+  background:linear-gradient(145deg,#ffffff 0%,#fbfdff 72%,#f8fafc 100%) !important;
+  box-shadow:0 16px 38px rgba(30,41,59,.08) !important;
+  transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease !important;
+}
+html[data-mi-theme="colorful"] .reports-grid > .report-card::before {
+  content:"";
+  position:absolute;
+  top:0; inset-inline:0;
+  height:6px;
+  background:var(--mi-card-gradient,linear-gradient(90deg,#0f766e,#14b8a6,#3b82f6,#7c3aed,#db2777,#f97316));
+}
+html[data-mi-theme="colorful"] .reports-grid > .report-card::after {
+  content:"";
+  position:absolute;
+  width:150px; height:150px;
+  border-radius:50%;
+  inset-inline-end:-55px; top:-62px;
+  background:var(--mi-card-orb,#14b8a6);
+  opacity:.12;
+  pointer-events:none;
+}
+html[data-mi-theme="colorful"] .reports-grid > .report-card:nth-child(6n+1) { --mi-card-gradient:linear-gradient(90deg,#0f766e,#14b8a6); --mi-card-orb:#14b8a6; }
+html[data-mi-theme="colorful"] .reports-grid > .report-card:nth-child(6n+2) { --mi-card-gradient:linear-gradient(90deg,#f59e0b,#f97316,#fb7185); --mi-card-orb:#f97316; }
+html[data-mi-theme="colorful"] .reports-grid > .report-card:nth-child(6n+3) { --mi-card-gradient:linear-gradient(90deg,#2563eb,#7c3aed); --mi-card-orb:#7c3aed; }
+html[data-mi-theme="colorful"] .reports-grid > .report-card:nth-child(6n+4) { --mi-card-gradient:linear-gradient(90deg,#db2777,#f97316); --mi-card-orb:#db2777; }
+html[data-mi-theme="colorful"] .reports-grid > .report-card:nth-child(6n+5) { --mi-card-gradient:linear-gradient(90deg,#0891b2,#2563eb,#7c3aed); --mi-card-orb:#0891b2; }
+html[data-mi-theme="colorful"] .reports-grid > .report-card:nth-child(6n+6) { --mi-card-gradient:linear-gradient(90deg,#16a34a,#14b8a6,#f59e0b); --mi-card-orb:#16a34a; }
+html[data-mi-theme="colorful"] .reports-grid > .report-card:hover {
+  transform:translateY(-6px) !important;
+  border-color:rgba(20,184,166,.32) !important;
+  box-shadow:0 24px 54px rgba(30,41,59,.13) !important;
+}
+html[data-mi-theme="colorful"] .reports-grid > .report-card .page-pill {
+  position:relative; z-index:1;
+  display:inline-flex;
+  width:max-content;
+  margin-bottom:16px !important;
+  padding:7px 11px !important;
+  border:1px solid rgba(20,184,166,.18) !important;
+  border-radius:999px !important;
+  color:#0f766e !important;
+  background:linear-gradient(135deg,#ecfeff,#f5f3ff 60%,#fff7ed) !important;
+  font-size:10px !important;
+  font-weight:900 !important;
+  letter-spacing:.06em;
+}
+html[data-mi-theme="colorful"] .reports-grid > .report-card h3 {
+  position:relative; z-index:1;
+  margin:0 0 12px !important;
+  color:#0f172a !important;
+  font-size:clamp(21px,2vw,29px) !important;
+  font-weight:950 !important;
+  line-height:1.14 !important;
+}
+html[data-mi-theme="colorful"] .reports-grid > .report-card p {
+  position:relative; z-index:1;
+  margin:0 !important;
+  color:#64748b !important;
+  font-size:15px !important;
+  font-weight:650 !important;
+  line-height:1.9 !important;
+}
+html[data-mi-theme="colorful"] .reports-grid > .report-card:nth-child(6n+2) .page-pill { color:#c2410c !important; border-color:#fed7aa !important; }
+html[data-mi-theme="colorful"] .reports-grid > .report-card:nth-child(6n+3) .page-pill { color:#6d28d9 !important; border-color:#ddd6fe !important; }
+html[data-mi-theme="colorful"] .reports-grid > .report-card:nth-child(6n+4) .page-pill { color:#be185d !important; border-color:#fbcfe8 !important; }
+
+@media (max-width:900px) {
+  html[data-mi-theme="colorful"] .reports-grid > .report-card { min-height:0; padding:20px !important; border-radius:20px !important; }
+}
+
+/* =========================================================
+   Group 09 — POS/report density pass
+   Tighten filters + unloaded states without touching logic.
+   ========================================================= */
+html[data-mi-theme="colorful"] :is(.report-toolbar,.mi-unified-filter-toolbar) {
+  padding-top:16px !important;
+  padding-bottom:16px !important;
+  border-radius:19px !important;
+}
+html[data-mi-theme="colorful"] :is(.report-toolbar,.mi-unified-filter-toolbar) :is(.control,.form-control,.form-select,select,input:not([type="checkbox"]):not([type="radio"])) {
+  min-height:39px !important;
+}
+html[data-mi-theme="colorful"] :is(.report-toolbar,.mi-unified-filter-toolbar) :is(button,.btn,.run-btn,.primary-btn,.export-btn,.report-btn-primary) {
+  min-height:39px !important;
+}
+html[data-mi-theme="colorful"] :is(.empty,.inventory-empty,.report-empty,.mi-empty-state) {
+  min-height:0 !important;
+  padding:20px 24px !important;
+  border-style:solid !important;
+  border-radius:18px !important;
+}
+html[data-mi-theme="colorful"] :is(.empty,.inventory-empty,.report-empty,.mi-empty-state) h1,
+html[data-mi-theme="colorful"] :is(.empty,.inventory-empty,.report-empty,.mi-empty-state) h2,
+html[data-mi-theme="colorful"] :is(.empty,.inventory-empty,.report-empty,.mi-empty-state) h3 { margin-top:0 !important; margin-bottom:7px !important; }
+html[data-mi-theme="colorful"] :is(.empty,.inventory-empty,.report-empty,.mi-empty-state) p { margin-bottom:0 !important; }
+
+/* KPI/dashboard cards: stronger hierarchy once data is loaded. */
+html[data-mi-theme="colorful"] :is(.kpi-card,.metric-card,.stat-card,.summary-card) {
+  isolation:isolate;
+}
+html[data-mi-theme="colorful"] :is(.kpi-card,.metric-card,.stat-card,.summary-card)::after {
+  content:"";
+  position:absolute;
+  z-index:-1;
+  width:90px;
+  height:90px;
+  inset-inline-end:-28px;
+  top:-38px;
+  border-radius:50%;
+  background:linear-gradient(135deg,rgba(20,184,166,.18),rgba(124,58,237,.14),rgba(249,115,22,.14));
+  pointer-events:none;
+}
+
+/* =========================================================
+   Group 10 — Real Dark Mode
+   Activated only by html[data-mi-theme="dark"].
+   ========================================================= */
+html[data-mi-theme="dark"] {
+  color-scheme: dark;
+  --mi-bg: #09131d;
+  --mi-surface: #101d29;
+  --mi-surface-2: #152534;
+  --mi-text: #eef6fb;
+  --mi-muted: #9db0c0;
+  --mi-border: rgba(164, 190, 207, .16);
+  --mi-primary: #8b5cf6;
+  --mi-primary-dark: #6d35e8;
+}
+
+html[data-mi-theme="dark"] body:not(.mi-login-page) {
+  color: var(--mi-text) !important;
+  background:
+    radial-gradient(circle at 7% 5%, rgba(20, 184, 176, .12), transparent 28rem),
+    radial-gradient(circle at 90% 8%, rgba(245, 124, 31, .10), transparent 24rem),
+    radial-gradient(circle at 70% 40%, rgba(139, 92, 246, .08), transparent 30rem),
+    #09131d !important;
+}
+
+html[data-mi-theme="dark"] .sidebar {
+  color: #e8f1f7 !important;
+  border-inline-start-color: rgba(255,255,255,.07) !important;
+  background:
+    radial-gradient(circle at 15% 5%, rgba(19,184,176,.12), transparent 31%),
+    radial-gradient(circle at 88% 94%, rgba(245,124,31,.08), transparent 32%),
+    linear-gradient(180deg, #0d1925 0%, #0a1520 100%) !important;
+  box-shadow: -8px 0 34px rgba(0,0,0,.28) !important;
+}
+
+html[dir="ltr"][data-mi-theme="dark"] .sidebar {
+  box-shadow: 8px 0 34px rgba(0,0,0,.28) !important;
+}
+
+html[data-mi-theme="dark"] .brand {
+  border-bottom-color: rgba(255,255,255,.08) !important;
+}
+html[data-mi-theme="dark"] .brand h1,
+html[data-mi-theme="dark"] .nav-link,
+html[data-mi-theme="dark"] .nav-accordion-head,
+html[data-mi-theme="dark"] .sidebar strong {
+  color: #dce8f1 !important;
+}
+html[data-mi-theme="dark"] .brand p,
+html[data-mi-theme="dark"] .nav-group,
+html[data-mi-theme="dark"] .sidebar-footer span {
+  color: #8ea4b6 !important;
+}
+html[data-mi-theme="dark"] .nav-link:hover,
+html[data-mi-theme="dark"] .nav-accordion-head:hover {
+  color: #fff !important;
+  background: rgba(255,255,255,.055) !important;
+  border-color: rgba(255,255,255,.08) !important;
+}
+html[data-mi-theme="dark"] .nav-link.active,
+html[data-mi-theme="dark"] .sidebar a.active,
+html[data-mi-theme="dark"] .nav-item.active > a {
+  color: #fff !important;
+  background: linear-gradient(100deg, #0f7f83 0%, #13b8b0 28%, #6d35e8 62%, #f57c1f 100%) !important;
+  box-shadow: 0 10px 26px rgba(0,0,0,.22) !important;
+}
+
+html[data-mi-theme="dark"] .report-shell,
+html[data-mi-theme="dark"] .report-page,
+html[data-mi-theme="dark"] .content,
+html[data-mi-theme="dark"] main {
+  color: var(--mi-text);
+}
+
+html[data-mi-theme="dark"] .card,
+html[data-mi-theme="dark"] .report-card,
+html[data-mi-theme="dark"] .summary-card,
+html[data-mi-theme="dark"] .kpi-card,
+html[data-mi-theme="dark"] .metric-card,
+html[data-mi-theme="dark"] .panel,
+html[data-mi-theme="dark"] .filter-card,
+html[data-mi-theme="dark"] .filters-card,
+html[data-mi-theme="dark"] .report-filters,
+html[data-mi-theme="dark"] .empty-state,
+html[data-mi-theme="dark"] .table-card,
+html[data-mi-theme="dark"] .chart-card,
+html[data-mi-theme="dark"] .analytics-card,
+html[data-mi-theme="dark"] .section-card {
+  color: #eaf3f8 !important;
+  border-color: rgba(164,190,207,.14) !important;
+  background: linear-gradient(145deg, rgba(20,35,49,.98), rgba(13,27,39,.98)) !important;
+  box-shadow: 0 16px 36px rgba(0,0,0,.20) !important;
+}
+
+html[data-mi-theme="dark"] h1,
+html[data-mi-theme="dark"] h2,
+html[data-mi-theme="dark"] h3,
+html[data-mi-theme="dark"] h4,
+html[data-mi-theme="dark"] h5,
+html[data-mi-theme="dark"] h6,
+html[data-mi-theme="dark"] .card-title,
+html[data-mi-theme="dark"] .section-title,
+html[data-mi-theme="dark"] .report-title {
+  color: #f4f8fb !important;
+}
+
+html[data-mi-theme="dark"] p,
+html[data-mi-theme="dark"] .muted,
+html[data-mi-theme="dark"] .text-muted,
+html[data-mi-theme="dark"] .subtitle,
+html[data-mi-theme="dark"] .helper-text,
+html[data-mi-theme="dark"] small {
+  color: #9db0c0 !important;
+}
+
+html[data-mi-theme="dark"] input,
+html[data-mi-theme="dark"] select,
+html[data-mi-theme="dark"] textarea,
+html[data-mi-theme="dark"] .form-control,
+html[data-mi-theme="dark"] .form-select {
+  color: #eef6fb !important;
+  border-color: rgba(164,190,207,.18) !important;
+  background-color: #0e1b27 !important;
+}
+html[data-mi-theme="dark"] input::placeholder,
+html[data-mi-theme="dark"] textarea::placeholder {
+  color: #71889b !important;
+}
+html[data-mi-theme="dark"] option {
+  color: #eef6fb;
+  background: #0e1b27;
+}
+
+html[data-mi-theme="dark"] table,
+html[data-mi-theme="dark"] .table {
+  color: #dbe7ef !important;
+  --bs-table-color: #dbe7ef;
+  --bs-table-bg: transparent;
+  --bs-table-border-color: rgba(164,190,207,.12);
+}
+html[data-mi-theme="dark"] thead th,
+html[data-mi-theme="dark"] .table thead th {
+  color: #f4f8fb !important;
+  border-color: rgba(164,190,207,.13) !important;
+  background: linear-gradient(100deg, rgba(15,127,131,.22), rgba(109,53,232,.20), rgba(245,124,31,.15)) !important;
+}
+html[data-mi-theme="dark"] tbody td,
+html[data-mi-theme="dark"] .table tbody td {
+  color: #d3e0e9 !important;
+  border-color: rgba(164,190,207,.10) !important;
+  background: rgba(12,25,36,.42) !important;
+}
+html[data-mi-theme="dark"] tbody tr:hover td,
+html[data-mi-theme="dark"] .table tbody tr:hover td {
+  background: rgba(19,184,176,.08) !important;
+}
+
+html[data-mi-theme="dark"] .mi-theme-switcher,
+html[data-mi-theme="dark"] .mi-utility-tools,
+html[data-mi-theme="dark"] .mi-toolbar-tools {
+  border-color: rgba(255,255,255,.10) !important;
+  background: rgba(8,18,27,.78) !important;
+  box-shadow: 0 10px 28px rgba(0,0,0,.20) !important;
+}
+html[data-mi-theme="dark"] [data-mi-theme],
+html[data-mi-theme="dark"] .mi-tool-btn {
+  color: #cddae4 !important;
+  border-color: rgba(255,255,255,.08) !important;
+  background: rgba(255,255,255,.055) !important;
+}
+html[data-mi-theme="dark"] [data-mi-theme].active,
+html[data-mi-theme="dark"] [data-mi-theme="dark"].active {
+  color: #fff !important;
+  background: linear-gradient(135deg, #0f8f91, #6d35e8) !important;
+  box-shadow: 0 8px 20px rgba(0,0,0,.24) !important;
+}
+
+/* Keep the colorful hero image, but make it read as a proper dark hero. */
+html[data-mi-theme="dark"] .report-hero,
+html[data-mi-theme="dark"] .hero,
+html[data-mi-theme="dark"] .page-hero,
+html[data-mi-theme="dark"] .report-banner {
+  box-shadow: 0 20px 44px rgba(0,0,0,.26) !important;
+  filter: saturate(.9) brightness(.78) !important;
+}
+
+/* Generic white/light blocks from legacy report CSS. */
+html[data-mi-theme="dark"] [style*="background: white"],
+html[data-mi-theme="dark"] [style*="background:#fff"],
+html[data-mi-theme="dark"] [style*="background: #fff"],
+html[data-mi-theme="dark"] [style*="background-color: white"],
+html[data-mi-theme="dark"] [style*="background-color:#fff"],
+html[data-mi-theme="dark"] [style*="background-color: #fff"] {
+  color: #eaf3f8 !important;
+  background: #101d29 !important;
+}
+
+/* =========================================================
+   Group 10B — Dark mode report surfaces fix
+   Fix legacy POS/report blocks that stayed white in dark mode.
+   ========================================================= */
+html[data-mi-theme="dark"] :is(
+  .report-toolbar,
+  .mi-unified-filter-toolbar,
+  .filters-panel,
+  .filter-panel,
+  .report-filter-panel,
+  .filter-shell,
+  .toolbar-card
+) {
+  color: #eaf3f8 !important;
+  border-color: rgba(164,190,207,.14) !important;
+  background:
+    radial-gradient(circle at 95% 0%, rgba(139,92,246,.10), transparent 32%),
+    linear-gradient(145deg, #142331 0%, #0d1b27 100%) !important;
+  box-shadow: 0 16px 36px rgba(0,0,0,.22) !important;
+}
+
+html[data-mi-theme="dark"] :is(
+  .empty,
+  .inventory-empty,
+  .report-empty,
+  .mi-empty-state,
+  .empty-state,
+  .no-data,
+  .no-data-state,
+  .report-placeholder
+) {
+  color: #eaf3f8 !important;
+  border-color: rgba(49,194,190,.30) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(49,194,190,.09), transparent 35%),
+    radial-gradient(circle at 0% 100%, rgba(139,92,246,.08), transparent 35%),
+    linear-gradient(145deg, #132230 0%, #0d1a26 100%) !important;
+  box-shadow: 0 14px 32px rgba(0,0,0,.18) !important;
+}
+
+html[data-mi-theme="dark"] :is(
+  .empty,
+  .inventory-empty,
+  .report-empty,
+  .mi-empty-state,
+  .empty-state,
+  .no-data,
+  .no-data-state,
+  .report-placeholder
+) :is(h1,h2,h3,h4,strong) {
+  color: #f5f9fc !important;
+}
+
+html[data-mi-theme="dark"] :is(
+  .empty,
+  .inventory-empty,
+  .report-empty,
+  .mi-empty-state,
+  .empty-state,
+  .no-data,
+  .no-data-state,
+  .report-placeholder
+) :is(p,span,small) {
+  color: #9fb3c3 !important;
+}
+
+html[data-mi-theme="dark"] :is(.date-preset,.preset-buttons,.period-buttons,.quick-periods) {
+  border-color: rgba(164,190,207,.15) !important;
+  background: #0e1b27 !important;
+}
+
+html[data-mi-theme="dark"] :is(.date-preset,.preset-buttons,.period-buttons,.quick-periods) button {
+  color: #aebfcd !important;
+  border-color: transparent !important;
+  background: transparent !important;
+}
+
+html[data-mi-theme="dark"] :is(.date-preset,.preset-buttons,.period-buttons,.quick-periods) button:hover {
+  color: #fff !important;
+  background: rgba(255,255,255,.06) !important;
+}
+
+html[data-mi-theme="dark"] :is(.date-preset,.preset-buttons,.period-buttons,.quick-periods) button.active,
+html[data-mi-theme="dark"] .date-preset .active {
+  color: #fff !important;
+  background: linear-gradient(135deg,#0f8f91,#6d35e8) !important;
+  box-shadow: 0 7px 18px rgba(0,0,0,.24) !important;
+}
+
+html[data-mi-theme="dark"] :is(.report-toolbar,.mi-unified-filter-toolbar) label,
+html[data-mi-theme="dark"] :is(.report-toolbar,.mi-unified-filter-toolbar) .label,
+html[data-mi-theme="dark"] :is(.report-toolbar,.mi-unified-filter-toolbar) .filter-label {
+  color: #aebfcd !important;
+}

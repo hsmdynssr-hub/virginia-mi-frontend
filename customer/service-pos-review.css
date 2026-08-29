@@ -622,3 +622,191 @@
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ==========================================================================\n   2026-08 colorful system pass — customer service POS review\n   ========================================================================== */
+
+:root[data-mi-theme="colorful"] .service-pos-page {
+  --cs-primary: #0f9f9a;
+  --cs-primary-dark: #0b6866;
+  --cs-primary-soft: #eafbf8;
+  --cs-navy: #14324a;
+  --cs-text: #17283c;
+  --cs-muted: #66778b;
+  --cs-line: #d9e7e9;
+  --cs-surface: rgba(255, 255, 255, 0.95);
+  --cs-bg: #f6fbfc;
+  --cs-shadow: 0 14px 36px rgba(29, 94, 111, 0.08);
+  background:
+    radial-gradient(circle at 5% 3%, rgba(15, 159, 154, 0.12), transparent 25rem),
+    radial-gradient(circle at 96% 8%, rgba(249, 115, 22, 0.10), transparent 22rem),
+    linear-gradient(180deg, #fbfefe 0%, #f4f9fb 100%) !important;
+}
+
+:root[data-mi-theme="colorful"] .service-pos-page .service-page-toolbar {
+  border-color: #d7e7e8;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 30px rgba(30, 96, 111, 0.07);
+}
+
+:root[data-mi-theme="colorful"] .service-pos-page .service-home-button {
+  color: #0d6d68;
+  border-color: #bce9e3;
+  background: linear-gradient(135deg, #ebfcf9, #f5f0ff);
+}
+
+:root[data-mi-theme="colorful"] .service-pos-page .service-home-button-icon,
+:root[data-mi-theme="colorful"] .service-pos-page .service-language-toggle span {
+  background: linear-gradient(135deg, #0f8f89, #20b9af 52%, #6d4df4);
+}
+
+:root[data-mi-theme="colorful"] .service-pos-page .inventory-hero-card {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(255,255,255,.36) !important;
+  background:
+    radial-gradient(circle at 9% 18%, rgba(255, 185, 73, 0.40), transparent 24%),
+    radial-gradient(circle at 90% 2%, rgba(241, 63, 160, 0.30), transparent 28%),
+    linear-gradient(123deg, #096d69 0%, #0fac9f 28%, #247bdc 50%, #7c3aed 72%, #eb3f99 88%, #f59e0b 116%) !important;
+  box-shadow: 0 24px 56px rgba(25, 108, 118, 0.18) !important;
+}
+
+:root[data-mi-theme="colorful"] .service-pos-page .inventory-hero-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(145deg, transparent 0 37%, rgba(255, 165, 51, 0.16) 38% 50%, transparent 51% 100%),
+    radial-gradient(circle at 70% 120%, rgba(255,255,255,.14), transparent 33%);
+}
+
+:root[data-mi-theme="colorful"] .service-pos-page .service-hero-mark {
+  border-color: rgba(255,255,255,.30);
+  background: rgba(5, 74, 78, 0.28);
+}
+
+:root[data-mi-theme="colorful"] .service-pos-page .report-card,
+:root[data-mi-theme="colorful"] .service-pos-page .inventory-report-card {
+  position: relative;
+  overflow: hidden;
+  border-color: #d9e7e8 !important;
+  background: rgba(255,255,255,.96) !important;
+  box-shadow: 0 14px 34px rgba(31, 90, 108, 0.075) !important;
+}
+
+:root[data-mi-theme="colorful"] .service-pos-page .report-card::before,
+:root[data-mi-theme="colorful"] .service-pos-page .inventory-report-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, #0f9f9a, #22c7b7 26%, #2563eb 48%, #7c3aed 67%, #ec4899 84%, #f59e0b);
+}
+
+:root[data-mi-theme="colorful"] .service-pos-page .report-card:hover,
+:root[data-mi-theme="colorful"] .service-pos-page .inventory-report-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 18px 42px rgba(31, 90, 108, 0.11) !important;
+}
+
+:root[data-mi-theme="colorful"] .service-pos-page .btn-primary,
+:root[data-mi-theme="colorful"] .service-pos-page button.primary,
+:root[data-mi-theme="colorful"] .service-pos-page .button-primary {
+  border-color: transparent !important;
+  background: linear-gradient(120deg, #0f8f89, #1cb7ad 48%, #6d4df4) !important;
+  box-shadow: 0 9px 20px rgba(28, 145, 148, 0.16) !important;
+}
+
+:root[data-mi-theme="colorful"] .service-pos-page table thead th {
+  color: #18475a;
+  background: linear-gradient(180deg, #effbf9 0%, #f7f4ff 58%, #fff7ea 100%) !important;
+}
+
+:root[data-mi-theme="colorful"] .service-pos-page table tbody tr:hover td {
+  background: linear-gradient(90deg, rgba(232, 250, 247, .7), rgba(249, 245, 255, .72), rgba(255, 248, 237, .58)) !important;
+}
+
+:root[data-mi-theme="dark"] .service-pos-page {
+  --cs-text: #eef5ff;
+  --cs-muted: #a8b6c7;
+  --cs-line: #2c3c52;
+  --cs-surface: #172338;
+  --cs-bg: #0f1827;
+  background: linear-gradient(180deg, #0c1523, #121d2e) !important;
+}
+
+:root[data-mi-theme="dark"] .service-pos-page .report-card,
+:root[data-mi-theme="dark"] .service-pos-page .inventory-report-card,
+:root[data-mi-theme="dark"] .service-pos-page .service-page-toolbar {
+  color: var(--cs-text) !important;
+  border-color: #2c3c52 !important;
+  background: #172338 !important;
+}
+
+/* === 08B STRONG COLORFUL IDENTITY === */
+.service-pos-page {
+  --cs-petrol:#0f766e;
+  --cs-teal:#14b8a6;
+  --cs-orange:#f97316;
+  --cs-purple:#7c3aed;
+  --cs-pink:#db2777;
+  background:
+    radial-gradient(circle at 4% 7%,rgba(20,184,166,.16),transparent 26rem),
+    radial-gradient(circle at 94% 7%,rgba(249,115,22,.15),transparent 22rem),
+    radial-gradient(circle at 78% 82%,rgba(124,58,237,.10),transparent 26rem),
+    linear-gradient(180deg,#f8fffe 0%,#fffaf4 53%,#f8f5ff 100%) !important;
+}
+.service-pos-page .service-page-toolbar {
+  border-color:rgba(20,184,166,.20);
+  box-shadow:0 13px 34px rgba(15,118,110,.09);
+}
+.service-pos-page .service-home-button-icon,
+.service-pos-page .service-language-toggle span {
+  background:linear-gradient(135deg,#0f766e,#14b8a6 42%,#7c3aed) !important;
+}
+.service-pos-page .inventory-hero-card {
+  min-height:220px;
+  border-color:rgba(255,255,255,.40) !important;
+  background:
+    radial-gradient(circle at 12% 18%,rgba(255,255,255,.22),transparent 26%),
+    radial-gradient(circle at 88% 15%,rgba(251,191,36,.40),transparent 22%),
+    linear-gradient(122deg,#0f766e 0%,#14b8a6 25%,#2563eb 47%,#7c3aed 69%,#db2777 84%,#f97316 100%) !important;
+  box-shadow:0 24px 58px rgba(15,118,110,.20),0 12px 30px rgba(124,58,237,.13) !important;
+}
+.service-pos-page .inventory-hero-card::before {
+  content:"";
+  position:absolute;
+  width:50%; height:170%; top:-42%; inset-inline-start:-10%;
+  border-radius:50%;
+  background:linear-gradient(135deg,rgba(251,191,36,.55),rgba(249,115,22,.14));
+  transform:rotate(-12deg);
+}
+.service-pos-page .inventory-hero-card p { color:rgba(255,255,255,.92) !important; }
+
+.service-pos-page :is(.report-card,.panel,.card,.service-stat-card,.service-summary-card) {
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(148,163,184,.22) !important;
+  background:linear-gradient(145deg,#ffffff,#fbfdff) !important;
+  box-shadow:0 15px 36px rgba(30,41,59,.075) !important;
+}
+.service-pos-page :is(.report-card,.panel,.card,.service-stat-card,.service-summary-card)::before {
+  content:"";
+  position:absolute;
+  top:0; inset-inline:0; height:4px;
+  background:linear-gradient(90deg,#0f766e,#14b8a6,#3b82f6,#7c3aed,#db2777,#f97316);
+}
+.service-pos-page :is(.report-card,.panel,.card):hover {
+  transform:translateY(-2px);
+  box-shadow:0 19px 42px rgba(30,41,59,.10) !important;
+}
+.service-pos-page :is(.btn-primary,.primary-button,button[type="submit"]) {
+  border-color:transparent !important;
+  background:linear-gradient(110deg,#0f766e,#14b8a6 38%,#7c3aed 74%,#f97316) !important;
+  color:#fff !important;
+  box-shadow:0 9px 20px rgba(20,184,166,.20) !important;
+}
+.service-pos-page table thead th {
+  background:linear-gradient(180deg,#ecfeff,#f5f3ff 58%,#fff7ed) !important;
+  color:#334155 !important;
+}
