@@ -2449,3 +2449,32 @@ html[data-mi-theme="colorful"] body.crsms-internal-page :is(.crsms-stat-card,.cr
 .crsms-select-all{margin-bottom:5px;border-bottom:1px solid #e8ecd9;border-radius:0!important;color:#4f612c!important}
 @media(max-width:1000px){.crsms-log-filters{grid-template-columns:repeat(2,minmax(160px,1fr))}.crsms-log-filter-actions{grid-column:1/-1}}
 @media(max-width:600px){.crsms-log-filters{grid-template-columns:1fr}.crsms-log-filter-actions,.crsms-custom-dates{grid-column:1}.crsms-custom-dates{grid-template-columns:1fr}}
+
+/* Stable filter popovers on desktop and mobile */
+body.crsms-filter-popover-open{overflow:hidden!important}
+body.crsms-filter-popover-open::after{content:"";position:fixed;inset:0;z-index:900;background:rgba(25,34,15,.28);backdrop-filter:blur(2px)}
+.crsms-log-filters{z-index:20;padding:18px;overflow:visible}
+.crsms-log-filters:has(.crsms-multi-filter[open]){z-index:1001}
+.crsms-multi-filter[open]{z-index:1000}
+.crsms-multi-filter[open] summary{border-color:#71833f;box-shadow:0 0 0 3px rgba(113,131,63,.13)}
+.crsms-multi-menu{z-index:1002;min-width:280px;padding:10px;border-radius:16px;box-shadow:0 24px 60px rgba(30,42,16,.28)}
+.crsms-multi-menu label{min-height:40px;padding:10px 12px}.crsms-multi-menu input{flex:0 0 18px;width:18px;height:18px}
+@media(min-width:721px){.crsms-multi-filter[open] .crsms-multi-menu{animation:crsmsFilterIn .15s ease-out}}
+@keyframes crsmsFilterIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+@media(max-width:720px){body.crsms-filter-popover-open::after{background:rgba(20,28,12,.48)}.crsms-multi-menu{z-index:1002;padding:14px;border-radius:20px}.crsms-multi-filter[open] summary{position:relative;z-index:1003}}
+
+/* Settings switches: explicit operational state */
+body.crsms-internal-page.crsms-settings-page .crsms-toggle-card{grid-template-columns:auto 1fr auto;border-color:#fecaca;background:#fff7f7}
+body.crsms-internal-page.crsms-settings-page .crsms-toggle-card::after{content:"متوقف";min-width:56px;padding:5px 9px;border-radius:999px;color:#b91c1c;background:#fee2e2;text-align:center;font-size:9px;font-weight:950}
+body.crsms-internal-page.crsms-settings-page .crsms-toggle-card input{border-color:#ef4444;background:#ef4444}
+body.crsms-internal-page.crsms-settings-page .crsms-toggle-card:has(input:checked){border-color:#86efac;background:#f0fdf4;box-shadow:0 8px 22px rgba(22,163,74,.08)}
+body.crsms-internal-page.crsms-settings-page .crsms-toggle-card:has(input:checked)::after{content:"يعمل";color:#166534;background:#dcfce7}
+body.crsms-internal-page.crsms-settings-page .crsms-toggle-card input:checked{border-color:#16a34a;background:#16a34a}
+@media(max-width:560px){body.crsms-internal-page.crsms-settings-page .crsms-toggle-card{grid-template-columns:auto 1fr}body.crsms-internal-page.crsms-settings-page .crsms-toggle-card::after{grid-column:2;justify-self:start}}
+
+/* Compact Shopify connection and manual compensation */
+.crsms-connection-pill{display:inline-flex;align-items:center;gap:9px;min-height:42px;padding:9px 14px;border:1px solid rgba(255,255,255,.45);border-radius:999px;color:#fff;background:rgba(255,255,255,.14);font-weight:900;cursor:pointer}.crsms-connection-pill i{width:10px;height:10px;border-radius:50%;background:#f59e0b;box-shadow:0 0 0 5px rgba(245,158,11,.18)}.crsms-connection-pill.connected{border-color:#86efac;background:#166534}.crsms-connection-pill.connected i{background:#4ade80;box-shadow:0 0 0 5px rgba(74,222,128,.2)}.crsms-connection-pill.disconnected{border-color:#fecaca;background:#b91c1c}.crsms-connection-pill.disconnected i{background:#fca5a5;box-shadow:0 0 0 5px rgba(252,165,165,.2)}
+.crsms-compensation-panel{margin-top:18px}.crsms-compensation-grid{display:grid;grid-template-columns:1.1fr 1.1fr .8fr 1.5fr auto;gap:12px;align-items:end}.crsms-compensation-grid>.crsms-button{min-height:44px;white-space:nowrap}
+.crsms-settings-compensation{margin-top:16px;padding:16px;border:1px dashed #c5a24a;border-radius:15px;background:#fffcf1}.crsms-settings-compensation h3{margin:0;color:#4f612c;font-size:15px}.crsms-settings-compensation>p{margin:5px 0 14px;color:#69725b;font-size:10px}
+@media(max-width:1100px){.crsms-compensation-grid{grid-template-columns:repeat(2,minmax(180px,1fr))}.crsms-compensation-grid>.crsms-button{grid-column:1/-1}}
+@media(max-width:620px){.crsms-compensation-grid{grid-template-columns:1fr}}

@@ -7,10 +7,10 @@
   <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.rtl.min.css" />
   <link rel="stylesheet" href="../css/bootstrap-theme.css" />
   <link rel="stylesheet" href="./review-sms.css?v=sms-core-20260814" />
-  <link rel="stylesheet" href="./review-sms-internal.css?v=olive-theme-20260829-01" />
+  <link rel="stylesheet" href="./review-sms-internal.css?v=customer-operations-20260830-01" />
   <script src="../js/api.js" defer></script>
   <script src="../js/layout.js" defer></script>
-  <script src="./review-sms.js?v=sms-coupons-20260814-04" defer></script>
+  <script src="./review-sms.js?v=customer-operations-20260830-01" defer></script>
 </head>
 
 <body class="crsms-internal-page crsms-coupons-page" data-page="coupon-dashboard" data-report-code="customer.review_sms.view">
@@ -30,14 +30,21 @@
         <h1>إدارة مكافآت الشحن المجاني</h1>
         <p>متابعة كوبونات Shopify المخصصة لعملاء Virginia الذين اختاروا «راضٍ جدًا»، وحالة الإصدار والانتهاء والمحاولات.</p>
       </div>
-      <div class="crsms-operation-status crsms-shopify-status">
-        <span>حالة Shopify</span>
-        <div class="crsms-mode-badge" id="shopifyStatusBadge">غير مفحوص</div>
-        <button type="button" class="crsms-button ghost" data-coupon-action="shopify-health"><span>✓</span> فحص الاتصال</button>
-      </div>
+      <button type="button" class="crsms-connection-pill unknown" id="shopifyStatusBadge" data-coupon-action="shopify-health"><i></i><span>فحص اتصال Shopify</span></button>
     </header>
 
     <input id="companyId" type="hidden" value="1" />
+
+    <section class="crsms-panel crsms-compensation-panel">
+      <div class="crsms-section-title"><div><span class="crsms-section-kicker">CUSTOMER COMPENSATION</span><h2>إنشاء كوبون تعويض للعميل</h2><p>ينشئ كوبون شحن مجاني شخصيًا على Shopify ويسجله في تقرير المكافآت.</p></div></div>
+      <div class="crsms-compensation-grid">
+        <div class="crsms-field"><label for="compensationPhone">رقم العميل</label><input id="compensationPhone" type="tel" placeholder="201xxxxxxxxx" /></div>
+        <div class="crsms-field"><label for="compensationName">اسم العميل</label><input id="compensationName" type="text" placeholder="اختياري" /></div>
+        <div class="crsms-field"><label for="compensationValidity">مدة الصلاحية</label><select id="compensationValidity"><option value="1">شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="9">9 أشهر</option><option value="12">12 شهرًا</option></select></div>
+        <div class="crsms-field"><label for="compensationReason">سبب التعويض</label><input id="compensationReason" type="text" placeholder="مثال: تأخر الطلب أو شكوى خدمة" /></div>
+        <button type="button" class="crsms-button reward" data-coupon-action="create-compensation">إنشاء كوبون الشحن المجاني</button>
+      </div>
+    </section>
 
     <section class="crsms-panel crsms-coupons-filter-panel">
       <div class="crsms-section-title">
@@ -81,6 +88,7 @@
       <article class="crsms-stat-card tone-red"><div class="crsms-stat-head"><span>فشل الإصدار</span><i>!</i></div><strong id="couponStatFailed">-</strong><small>تحتاج إعادة محاولة</small></article>
       <article class="crsms-stat-card tone-amber"><div class="crsms-stat-head"><span>منتهية</span><i>⌛</i></div><strong id="couponStatExpired">-</strong><small>تجاوزت تاريخ الصلاحية</small></article>
       <article class="crsms-stat-card tone-blue"><div class="crsms-stat-head"><span>عملاء Shopify جدد</span><i>＋</i></div><strong id="couponStatCustomers">-</strong><small>تم إنشاؤهم أثناء الإصدار</small></article>
+      <article class="crsms-stat-card tone-green"><div class="crsms-stat-head"><span>تعويضات خدمة العملاء</span><i>◎</i></div><strong id="couponStatCompensation">-</strong><small>كوبونات أُنشئت كتعويض مباشر</small></article>
     </section>
 
     <section class="crsms-panel crsms-coupons-results-panel">
@@ -96,10 +104,10 @@
       <div class="crsms-table-wrap">
         <table class="crsms-table crsms-coupons-table">
           <thead><tr>
-            <th>ID</th><th>الحالة</th><th>العميل</th><th>الموبايل</th><th>الفاتورة</th><th>الكوبون</th><th>المدة</th>
+            <th>ID</th><th>الحالة</th><th>المصدر</th><th>العميل</th><th>الموبايل</th><th>الفاتورة</th><th>الكوبون</th><th>معرّف Shopify</th><th>المدة</th>
             <th>البداية</th><th>الانتهاء</th><th>عميل Shopify</th><th>المحاولات</th><th>الخطأ</th><th>إجراء</th>
           </tr></thead>
-          <tbody id="couponsBody"><tr><td colspan="13">اضغط تحديث المكافآت لعرض السجل.</td></tr></tbody>
+          <tbody id="couponsBody"><tr><td colspan="15">اضغط تحديث المكافآت لعرض السجل.</td></tr></tbody>
         </table>
       </div>
     </section>

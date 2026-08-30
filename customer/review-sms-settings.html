@@ -7,10 +7,10 @@
   <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.rtl.min.css" />
   <link rel="stylesheet" href="../css/bootstrap-theme.css" />
   <link rel="stylesheet" href="./review-sms.css?v=sms-core-20260814" />
-  <link rel="stylesheet" href="./review-sms-internal.css?v=olive-theme-20260829-01" />
+  <link rel="stylesheet" href="./review-sms-internal.css?v=customer-operations-20260830-01" />
   <script src="../js/api.js" defer></script>
   <script src="../js/layout.js" defer></script>
-  <script src="./review-sms.js?v=sms-settings-project-auth-20260814-05" defer></script>
+  <script src="./review-sms.js?v=customer-operations-20260830-01" defer></script>
 </head>
 
 <body class="crsms-internal-page crsms-settings-page" data-page="settings" data-report-code="customer.review_sms.view">
@@ -169,6 +169,18 @@
               <input id="couponIssuingEnabled" type="checkbox" />
               <span><strong>تشغيل إصدار كوبونات Shopify</strong><small>الكوبون شخصي ومربوط برقم العميل طوال فترة الصلاحية.</small></span>
             </label>
+          </div>
+
+          <div class="crsms-settings-compensation">
+            <h3>كوبون تعويض مباشر</h3>
+            <p>لإنشاء كوبون شحن مجاني لعميل كتعويض خدمة، ويُسجل تلقائيًا في تقرير المكافآت.</p>
+            <div class="crsms-compensation-grid">
+              <div class="crsms-field"><label for="compensationPhone">رقم العميل</label><input id="compensationPhone" type="tel" placeholder="201xxxxxxxxx" /></div>
+              <div class="crsms-field"><label for="compensationName">اسم العميل</label><input id="compensationName" type="text" placeholder="اختياري" /></div>
+              <div class="crsms-field"><label for="compensationValidity">مدة الصلاحية</label><select id="compensationValidity"><option value="1">شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="9">9 أشهر</option><option value="12">12 شهرًا</option></select></div>
+              <div class="crsms-field"><label for="compensationReason">سبب التعويض</label><input id="compensationReason" type="text" placeholder="سبب مختصر للتوثيق" /></div>
+              <button id="createCompensationCouponBtn" type="button" class="crsms-button reward">إنشاء الكوبون</button>
+            </div>
           </div>
         </article>
       </section>

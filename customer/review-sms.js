@@ -209,6 +209,7 @@
         if (action === "load-coupons") loadCoupons();
         if (action === "load-today") setCouponTodayAndLoad();
         if (action === "export-coupons-excel") exportCouponsExcel();
+        if (action === "create-compensation") createCompensationCoupon(button);
       });
     });
 
@@ -286,18 +287,53 @@
       const badge = byId("shopifyStatusBadge");
 
       if (badge) {
-        badge.textContent = health.connected
-          ? `متصل: ${health.shopName || health.shop}`
-          : health.configured
-            ? "الإعدادات موجودة - الاتصال غير مؤكد"
-            : "Shopify غير مُعد";
-        badge.classList.toggle("live", Boolean(health.connected));
-        badge.classList.toggle("mock", !health.connected);
+        const text = health.connected
+          ? `Shopify متصل — ${health.shopName || health.shop}`
+          : health.configured ? "Shopify غير متصل" : "Shopify غير مُعد";
+        badge.innerHTML = `<i></i><span>${escapeHtml(text)}</span>`;
+        badge.classList.toggle("connected", Boolean(health.connected));
+        badge.classList.toggle("disconnected", !health.connected);
+        badge.classList.remove("unknown");
       }
-
-      setStatus({ message: "Shopify Health", ...health });
+      setStatus(health.connected ? "تم التأكد من اتصال Shopify." : "تعذر تأكيد اتصال Shopify.");
     } catch (error) {
+      const badge = byId("shopifyStatusBadge");
+      if (badge) {
+        badge.innerHTML = "<i></i><span>Shopify غير متصل</span>";
+        badge.classList.remove("connected", "unknown");
+        badge.classList.add("disconnected");
+      }
       setStatus(`Shopify Health Error: ${error.message}`);
+    }
+  }
+
+  async function createCompensationCoupon(button) {
+    const customerPhone = String(byId("compensationPhone")?.value || "").trim();
+    if (customerPhone.replace(/\D/g, "").length < 10) {
+      setStatus("اكتب رقم عميل صحيح قبل إنشاء كوبون التعويض.");
+      return;
+    }
+    const originalText = button?.textContent;
+    try {
+      if (button) { button.disabled = true; button.textContent = "جاري الإنشاء على Shopify..."; }
+      const data = await requestJson(`${getApiBaseFromDashboard()}/coupons/manual`, {
+        method: "POST",
+        headers: adminHeaders(),
+        body: JSON.stringify({
+          companyId: getCompanyIdOrNull(),
+          customerPhone,
+          customerName: String(byId("compensationName")?.value || "").trim(),
+          validityMonths: Number(byId("compensationValidity")?.value || 1),
+          compensationReason: String(byId("compensationReason")?.value || "").trim()
+        })
+      });
+      const coupon = data.data || {};
+      setStatus(`تم إنشاء كوبون التعويض: ${coupon.couponCode || "تم تسجيله"}${coupon.shopifyDiscountId ? ` — Shopify: ${coupon.shopifyDiscountId}` : ""}`);
+      await loadCoupons();
+    } catch (error) {
+      setStatus(`تعذر إنشاء كوبون التعويض: ${error.message}`);
+    } finally {
+      if (button) { button.disabled = false; button.textContent = originalText; }
     }
   }
 
@@ -385,6 +421,7 @@
     if (byId("couponStatActive")) byId("couponStatActive").textContent = stats.active ?? 0;
     if (byId("couponStatFailed")) byId("couponStatFailed").textContent = stats.failed ?? 0;
     if (byId("couponStatExpired")) byId("couponStatExpired").textContent = stats.expired ?? 0;
+    if (byId("couponStatCompensation")) byId("couponStatCompensation").textContent = stats.compensation ?? 0;
     if (byId("couponStatCustomers")) {
       byId("couponStatCustomers").textContent = stats.customers_created ?? 0;
     }
@@ -395,7 +432,7 @@
     if (!tbody) return;
 
     if (!rows.length) {
-      tbody.innerHTML = `<tr><td colspan="13">لا توجد كوبونات حسب الفلاتر.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="15">لا توجد كوبونات حسب الفلاتر.</td></tr>`;
       return;
     }
 
@@ -403,10 +440,12 @@
       <tr>
         <td>${escapeHtml(row.id)}</td>
         <td>${badge(row.status)} ${escapeHtml(getCouponStatusLabel(row.status))}</td>
+        <td>${escapeHtml(row.issueSource === "customer_service_compensation" ? "تعويض خدمة العملاء" : "مكافأة تقييم")}</td>
         <td>${escapeHtml(row.customerName || "-")}</td>
         <td>${escapeHtml(row.customerPhone || "-")}</td>
         <td>${escapeHtml(row.odooOrderName || "-")}</td>
         <td>${escapeHtml(row.couponCode || "-")}</td>
+        <td title="${escapeHtml(row.shopifyDiscountId || "")}">${escapeHtml(row.shopifyDiscountId || "-")}</td>
         <td>${escapeHtml(row.validityMonths)} شهر</td>
         <td>${escapeHtml(formatDate(row.startsAt))}</td>
         <td>${escapeHtml(formatDate(row.endsAt))}</td>
@@ -801,6 +840,7 @@
     setSettingsGate(false, user, "جاري التحقق من صلاحية حساب المشروع...");
     byId("reloadAllSettingsBtn")?.addEventListener("click", loadAllAdminSettings);
     byId("saveAllSettingsBtn")?.addEventListener("click", saveAllAdminSettings);
+    byId("createCompensationCouponBtn")?.addEventListener("click", (event) => createCompensationCoupon(event.currentTarget));
     setStatus("جاري استخدام جلسة تسجيل دخول المشروع...");
     authorizeSettingsFromProjectSession();
   }
@@ -1163,6 +1203,26 @@
     ["logsDateFrom", "logsDateTo"].forEach((id) => byId(id)?.addEventListener("change", updateLogFilterSummary));
     bindMultiFilter("logsStatusFilter");
     bindMultiFilter("logsRatingFilter");
+    const filterDetails = Array.from(document.querySelectorAll(".crsms-multi-filter"));
+    const syncPopoverState = () => {
+      document.body.classList.toggle("crsms-filter-popover-open", filterDetails.some((item) => item.open));
+    };
+    filterDetails.forEach((details) => details.addEventListener("toggle", () => {
+      if (details.open) filterDetails.forEach((item) => { if (item !== details) item.removeAttribute("open"); });
+      syncPopoverState();
+    }));
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest(".crsms-multi-filter")) {
+        filterDetails.forEach((item) => item.removeAttribute("open"));
+        syncPopoverState();
+      }
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        filterDetails.forEach((item) => item.removeAttribute("open"));
+        syncPopoverState();
+      }
+    });
     window.addEventListener("company-context-changed", async () => {
       await loadLogFilterOptions();
       applyLogFilters();
@@ -1174,6 +1234,7 @@
   async function applyLogFilters() {
     updateLogFilterSummary();
     document.querySelectorAll(".crsms-multi-filter[open]").forEach((details) => details.removeAttribute("open"));
+    document.body.classList.remove("crsms-filter-popover-open");
     await Promise.all([loadStats(), loadLogs()]);
   }
 
