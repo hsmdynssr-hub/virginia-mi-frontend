@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.rtl.min.css" />
   <link rel="stylesheet" href="../css/style.css" />
   <link rel="stylesheet" href="../css/bootstrap-theme.css" />
-  <link rel="stylesheet" href="../css/app-modern.css?v=20260814-01" />
+  <link rel="stylesheet" href="../css/app-modern.css?v=company-context-20260830-01" />
 </head>
 <body>
 
@@ -142,7 +142,7 @@
   <script src="../locales/ar.js?v=20260814-02"></script>
   <script src="../locales/en.js?v=20260814-02"></script>
   <script src="../js/i18n.js?v=20260814-02"></script>
-  <script src="../js/api.js"></script>
+  <script src="../js/api.js?v=company-context-20260830-01"></script>
 
   <script>
     async function login() {
@@ -174,8 +174,10 @@
 
         localStorage.setItem("token", response.token);
         localStorage.setItem("user", JSON.stringify(response.user));
+        localStorage.removeItem("companyId");
+        localStorage.removeItem("branchCode");
 
-        window.location.href = "../dashboard/index.html";
+        await chooseLoginCompany();
       } catch (error) {
         console.error(error);
         loginMessage.innerHTML = "حدث خطأ أثناء تسجيل الدخول";
@@ -183,6 +185,54 @@
         loginBtn.disabled = false;
         loginBtn.innerHTML = "دخول";
       }
+    }
+
+    async function chooseLoginCompany() {
+      const loginMessage = document.getElementById("loginMessage");
+      const loginCard = document.querySelector(".mi-login-card");
+      const response = await apiGet("/company-access/me");
+      const companies = response.data || response.companies || [];
+
+      if (!response.success || !Array.isArray(companies) || !companies.length) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        throw new Error("لا توجد شركة مسموحة لهذا الحساب. راجع مسؤول الصلاحيات.");
+      }
+
+      if (companies.length === 1) {
+        localStorage.setItem("companyId", String(companies[0].companyId));
+        window.location.href = "../dashboard/index.html";
+        return;
+      }
+
+      loginCard.classList.add("mi-company-login-step");
+      loginCard.innerHTML = `
+        <div class="mi-card-logo"><div class="mi-logo small"><span class="mi-logo-bars"></span></div></div>
+        <span class="mi-company-step-kicker">تم تسجيل الدخول بنجاح</span>
+        <h2>اختر نطاق العمل</h2>
+        <p class="mi-login-subtitle">سيُثبت الاختيار على جميع صفحات المشروع ويمكن تغييره لاحقًا من الهيدر.</p>
+        <div class="mi-login-company-options">
+          ${companies.map(company => `
+            <button type="button" data-login-company="${company.companyId}">
+              <span>${Number(company.companyId) === 1 ? "V" : "C"}</span>
+              <div><strong>${company.companyName}</strong><small>فتح تقارير الشركة</small></div>
+              <b>←</b>
+            </button>
+          `).join("")}
+        </div>
+        <p class="mi-login-company-note">حسابك يملك صلاحية الشركتين. الاختيار يحدد الشركة النشطة ولا يلغي أي صلاحية.</p>
+        <div id="loginMessage" class="mi-login-message"></div>
+      `;
+
+      loginCard.querySelectorAll("[data-login-company]").forEach(button => {
+        button.addEventListener("click", () => {
+          localStorage.setItem("companyId", String(button.dataset.loginCompany));
+          localStorage.removeItem("branchCode");
+          window.location.href = "../dashboard/index.html";
+        });
+      });
+
+      loginMessage.innerHTML = "";
     }
 
     document.addEventListener("keydown", function (event) {

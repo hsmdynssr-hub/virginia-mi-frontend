@@ -2307,3 +2307,113 @@ html[data-mi-theme="colorful"] [data-mi-theme="colorful"][aria-pressed="true"] {
   background:#667a35 !important;
   box-shadow:0 6px 16px rgba(79,97,44,.25) !important;
 }
+
+/* =========================================================
+   Global company context selection
+   ========================================================= */
+.mi-company-context-required { overflow:hidden !important; }
+
+.mi-company-context-gate {
+  position:fixed;
+  inset:0;
+  z-index:100000;
+  display:grid;
+  place-items:center;
+  padding:20px;
+  background:rgba(24,32,14,.58);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+
+.mi-company-context-dialog {
+  width:min(680px,100%);
+  padding:28px;
+  border:1px solid rgba(255,255,255,.72);
+  border-radius:24px;
+  color:#263018;
+  background:linear-gradient(145deg,#fff,#f7f9ed);
+  box-shadow:0 30px 80px rgba(23,31,12,.30);
+  text-align:center;
+}
+
+.mi-company-context-icon {
+  width:58px;
+  height:58px;
+  display:grid;
+  place-items:center;
+  margin:0 auto 12px;
+  border-radius:18px;
+  color:#fff;
+  background:linear-gradient(145deg,#455727,#71833f 65%,#b18d38);
+  box-shadow:0 10px 24px rgba(79,97,44,.22);
+  font-size:25px;
+}
+
+.mi-company-context-dialog small,
+.mi-company-step-kicker {
+  color:#71833f;
+  font-weight:900;
+}
+
+.mi-company-context-dialog h2 { margin:6px 0 8px; color:#263018; font-size:26px; }
+.mi-company-context-dialog p { margin:0; color:#69725b; line-height:1.7; }
+
+.mi-company-context-options,
+.mi-login-company-options {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin-top:22px;
+}
+
+.mi-company-context-options button,
+.mi-login-company-options button {
+  min-height:82px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:14px;
+  border:1px solid #dfe5cc;
+  border-radius:16px;
+  color:#354026;
+  background:#fff;
+  box-shadow:0 8px 20px rgba(65,79,38,.07);
+  cursor:pointer;
+  transition:.18s ease;
+}
+
+.mi-company-context-options button:hover,
+.mi-login-company-options button:hover {
+  color:#fff;
+  border-color:transparent;
+  background:linear-gradient(120deg,#455727,#71833f 68%,#a5893c);
+  box-shadow:0 12px 28px rgba(79,97,44,.22);
+  transform:translateY(-2px);
+}
+
+.mi-company-context-options button strong { font-size:17px; }
+.mi-company-context-options button span { display:block; font-size:11px; opacity:.78; }
+.mi-company-context-note { margin-top:15px !important; font-size:11px; }
+
+.mi-login-card.mi-company-login-step { text-align:center; }
+.mi-login-card.mi-company-login-step > h2 { margin:7px 0 !important; }
+
+.mi-login-company-options { grid-template-columns:1fr; }
+.mi-login-company-options button { justify-content:flex-start; text-align:right; }
+.mi-login-company-options button > span {
+  width:42px;height:42px;display:grid;place-items:center;flex:0 0 auto;
+  border-radius:13px;color:#fff;background:#667a35;font-size:20px;font-weight:900;
+}
+.mi-login-company-options button div { flex:1; }
+.mi-login-company-options button strong { display:block; font-size:15px; }
+.mi-login-company-options button small { display:block; margin-top:3px; color:#7a836b; }
+.mi-login-company-options button:hover small { color:rgba(255,255,255,.78); }
+.mi-login-company-options button b { font-size:20px; }
+.mi-login-company-note { margin:14px 0 0; color:#737b64; font-size:11px; line-height:1.6; }
+
+@media(max-width:620px){
+  .mi-company-context-dialog{padding:21px 16px;border-radius:19px}
+  .mi-company-context-options{grid-template-columns:1fr}
+  .mi-company-context-dialog h2{font-size:22px}
+}

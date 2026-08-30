@@ -40,7 +40,7 @@
   if (!hasStylesheet("app-modern.css")) {
     const modernCss = document.createElement("link");
     modernCss.rel = "stylesheet";
-    modernCss.href = `${assetUrl("../css/app-modern.css")}?v=olive-global-20260829-01`;
+    modernCss.href = `${assetUrl("../css/app-modern.css")}?v=company-context-20260830-01`;
     modernCss.dataset.miModernUi = "true";
     document.head.appendChild(modernCss);
   }
@@ -496,6 +496,8 @@ function guardPage(activePage) {
 function logout() {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
+  localStorage.removeItem("companyId");
+  localStorage.removeItem("branchCode");
   window.location.href = "../admin/login.html";
 }
 
@@ -730,8 +732,14 @@ async function applyCompanyAccessToDropdown() {
     `;
     localStorage.removeItem("companyId");
     localStorage.removeItem("branchCode");
+    syncCompanyContextGate([]);
     return;
   }
+
+  const savedCompanyId = String(localStorage.getItem("companyId") || "");
+  const allowedCompanyIds = new Set(
+    allowedCompanies.map(company => String(company.companyId))
+  );
 
   companySelect.innerHTML = `
     <option value="">اختر الشركة</option>
@@ -746,19 +754,17 @@ async function applyCompanyAccessToDropdown() {
     }
   `;
 
-  /*
-    مهم:
-    لا نختار الشركة تلقائيًا من localStorage.
-    كل صفحة تقرير لازم المستخدم يختار الشركة بنفسه.
-  */
-  companySelect.value = "";
-  localStorage.removeItem("companyId");
-
-  if (typeof setBranchCode === "function") {
-    setBranchCode("");
+  if (allowedCompanyIds.has(savedCompanyId)) {
+    companySelect.value = savedCompanyId;
+  } else if (allowedCompanies.length === 1) {
+    companySelect.value = String(allowedCompanies[0].companyId);
+    setCompanyId(companySelect.value);
   } else {
-    localStorage.removeItem("branchCode");
+    companySelect.value = "";
+    localStorage.removeItem("companyId");
   }
+
+  syncCompanyContextGate(allowedCompanies);
 
   companySelect.addEventListener("change", () => {
     const newCompanyId = setCompanyId(companySelect.value);
@@ -776,7 +782,64 @@ async function applyCompanyAccessToDropdown() {
         }
       })
     );
+
+    syncCompanyContextGate(allowedCompanies);
   });
+}
+
+function syncCompanyContextGate(allowedCompanies = []) {
+  const activeCompanyId = String(localStorage.getItem("companyId") || "");
+  const selectedCompany = allowedCompanies.find(
+    company => String(company.companyId) === activeCompanyId
+  );
+  let gate = document.getElementById("miCompanyContextGate");
+
+  if (selectedCompany) {
+    gate?.remove();
+    document.body.classList.remove("mi-company-context-required");
+    return;
+  }
+
+  if (!gate) {
+    gate = document.createElement("section");
+    gate.id = "miCompanyContextGate";
+    gate.className = "mi-company-context-gate";
+    document.body.appendChild(gate);
+  }
+
+  gate.innerHTML = `
+    <div class="mi-company-context-dialog" role="dialog" aria-modal="true" aria-labelledby="miCompanyGateTitle">
+      <span class="mi-company-context-icon">🏢</span>
+      <div>
+        <small>نطاق العمل الحالي</small>
+        <h2 id="miCompanyGateTitle">اختر الشركة قبل فتح التقارير</h2>
+        <p>سيُطبّق اختيارك تلقائيًا على المشروع كله، ويمكن تغييره لاحقًا من الهيدر.</p>
+      </div>
+      <div class="mi-company-context-options">
+        ${allowedCompanies.map(company => `
+          <button type="button" data-company-context-choice="${company.companyId}">
+            <strong>${company.companyName}</strong>
+            <span>الدخول إلى تقارير الشركة</span>
+          </button>
+        `).join("")}
+      </div>
+      ${allowedCompanies.length > 1 ? '<p class="mi-company-context-note">حسابك مصرح له بالشركتين؛ اختر الشركة النشطة الآن ويمكنك التبديل بينهما من الهيدر.</p>' : ""}
+    </div>
+  `;
+
+  gate.querySelectorAll("[data-company-context-choice]").forEach(button => {
+    button.addEventListener("click", () => {
+      const companyId = setCompanyId(button.dataset.companyContextChoice);
+      const companySelect = document.getElementById("companySelect");
+      if (companySelect) companySelect.value = companyId;
+      syncCompanyContextGate(allowedCompanies);
+      window.dispatchEvent(new CustomEvent("company-context-changed", {
+        detail: { companyId }
+      }));
+    });
+  });
+
+  document.body.classList.add("mi-company-context-required");
 }
 
 

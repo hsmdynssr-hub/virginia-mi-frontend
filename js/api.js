@@ -18,6 +18,7 @@ function getCompanyId() {
   const domValue =
     document.getElementById("companySelect")?.value ||
     document.getElementById("companyId")?.value ||
+    localStorage.getItem("companyId") ||
     "";
 
   return normalizeCompanyId(domValue);
