@@ -2468,3 +2468,28 @@ html[data-mi-theme="dark"] .mi-report-design-v2 .content table tbody tr:nth-chil
 html[data-mi-theme="dark"] .mi-report-design-v2 .content table tbody tr:hover td{color:#f7fbfd!important;background:#183241!important}
 html[data-mi-theme="light"] .mi-report-design-v2 .content table tbody tr:nth-child(even) td{background:#f8faf7!important}
 html[data-mi-theme="colorful"] .mi-report-design-v2 .content table tbody tr:nth-child(even) td{background:#f8faef!important}
+
+/* =========================================================
+   Final dual-theme contract — White / Dark only
+   ========================================================= */
+html[data-mi-theme="light"]{color-scheme:light;--mi-dual-bg:#f4f5f6;--mi-dual-surface:#fff;--mi-dual-surface-2:#f8f9fa;--mi-dual-text:#111827;--mi-dual-muted:#4b5563;--mi-dual-line:#dfe3e8}
+html[data-mi-theme="dark"]{color-scheme:dark;--mi-dual-bg:#080b10;--mi-dual-surface:#10151d;--mi-dual-surface-2:#171d27;--mi-dual-text:#f8fafc;--mi-dual-muted:#c2cad5;--mi-dual-line:#303846}
+html[data-mi-theme] body:not(.mi-login-page){color:var(--mi-dual-text)!important;background:var(--mi-dual-bg)!important}
+html[data-mi-theme] :is(.content,.main-content,.page-content){color:var(--mi-dual-text)}
+html[data-mi-theme] :is(.content,.main-content,.page-content) :is(h1,h2,h3,h4,h5,h6,strong,.title,.page-title,.section-title){color:var(--mi-dual-text)!important}
+html[data-mi-theme] :is(.content,.main-content,.page-content) :is(p,small,.muted,.text-muted,.subtitle,.hint,.helper-text){color:var(--mi-dual-muted)!important}
+html[data-mi-theme] :is(.panel,.card,.report-card,.table-card,.filter-panel,.filters-panel,.summary-panel,.kpi-card,.stat-card,.metric-card,.mi-report-card,.mi-kpi-card){color:var(--mi-dual-text)!important;border-color:var(--mi-dual-line)!important;background:var(--mi-dual-surface)!important}
+html[data-mi-theme] :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea,.form-control,.form-select){color:var(--mi-dual-text)!important;border-color:var(--mi-dual-line)!important;background:var(--mi-dual-surface)!important}
+html[data-mi-theme] :is(input,textarea)::placeholder{color:var(--mi-dual-muted)!important}
+html[data-mi-theme] :is(.table-wrap,.table-responsive,.report-table-wrap,.inventory-table-wrap,.mi-table-scroll){color:var(--mi-dual-text)!important;border-color:var(--mi-dual-line)!important;background:var(--mi-dual-surface)!important}
+html[data-mi-theme] table :is(th,td){color:var(--mi-dual-text)!important;border-color:var(--mi-dual-line)!important}
+html[data-mi-theme] table th{background:var(--mi-dual-surface-2)!important}
+html[data-mi-theme] table td{background:var(--mi-dual-surface)!important}
+html[data-mi-theme="dark"] table tbody tr:nth-child(even) td{background:#0c1118!important}
+html[data-mi-theme="dark"] table tbody tr:hover td{color:#fff!important;background:#202936!important}
+html[data-mi-theme="light"] table tbody tr:nth-child(even) td{background:#f7f8fa!important}
+html[data-mi-theme="light"] table tbody tr:hover td{color:#000!important;background:#eef1f4!important}
+html[data-mi-theme] body:is(.crsms-internal-page,.cs-management-page){color:var(--mi-dual-text)!important;background:var(--mi-dual-bg)!important}
+html[data-mi-theme] body:is(.crsms-internal-page,.cs-management-page) :is(.crsms-panel,.crsms-stat-card,.crsms-filter-panel,.crsms-followups-filter-panel,.crsms-manual-form-card,.crsms-save-panel,.crsms-toggle-card,.crsms-settings-reward-card,.crsms-return-bar,.crsms-log-filters,.crsms-compensation-panel,.crsms-settings-compensation,.cs-live-toolbar,.cs-report-tabs,.cs-management-filter-card,.cs-operations-section,.cs-management-table-card,.cs-kpi){color:var(--mi-dual-text)!important;border-color:var(--mi-dual-line)!important;background:var(--mi-dual-surface)!important}
+html[data-mi-theme] body:is(.crsms-internal-page,.cs-management-page) :is(h1,h2,h3,h4,strong){color:var(--mi-dual-text)!important}
+html[data-mi-theme] body:is(.crsms-internal-page,.cs-management-page) :is(p,small,.muted,.crsms-section-kicker,.cs-live-state span){color:var(--mi-dual-muted)!important}

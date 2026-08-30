@@ -40,7 +40,7 @@
   if (!hasStylesheet("app-modern.css")) {
     const modernCss = document.createElement("link");
     modernCss.rel = "stylesheet";
-    modernCss.href = `${assetUrl("../css/app-modern.css")}?v=theme-contract-20260830-02`;
+    modernCss.href = `${assetUrl("../css/app-modern.css")}?v=dual-theme-20260830-01`;
     modernCss.dataset.miModernUi = "true";
     document.head.appendChild(modernCss);
   }
@@ -56,7 +56,7 @@
   if (!hasStylesheet("virginia-showcase.css")) {
     const showcaseCss = document.createElement("link");
     showcaseCss.rel = "stylesheet";
-    showcaseCss.href = `${assetUrl("../css/virginia-showcase.css")}?v=theme-contract-20260830-02`;
+    showcaseCss.href = `${assetUrl("../css/virginia-showcase.css")}?v=dual-theme-20260830-01`;
     showcaseCss.dataset.miVirginiaShowcase = "true";
     document.head.appendChild(showcaseCss);
   }
@@ -118,10 +118,10 @@
 })();
 
 const MI_THEME_STORAGE_KEY = "mi-visual-theme";
-const MI_THEMES = ["light", "colorful", "dark"];
+const MI_THEMES = ["light", "dark"];
 
 function applyMiTheme(theme) {
-  const selected = MI_THEMES.includes(theme) ? theme : "colorful";
+  const selected = MI_THEMES.includes(theme) ? theme : "light";
   document.documentElement.dataset.miTheme = selected;
   localStorage.setItem(MI_THEME_STORAGE_KEY, selected);
 
@@ -134,7 +134,7 @@ function applyMiTheme(theme) {
 
 function setupMiThemeSwitcher() {
   const saved = localStorage.getItem(MI_THEME_STORAGE_KEY);
-  applyMiTheme(MI_THEMES.includes(saved) ? saved : "colorful");
+  applyMiTheme(MI_THEMES.includes(saved) ? saved : "light");
 
   document.querySelectorAll("[data-mi-theme]").forEach((button) => {
     if (button.dataset.miThemeBound === "true") return;
@@ -1175,7 +1175,6 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
           <div class="mi-hero-account-bar mi-compact-account-tools">
             <div class="mi-theme-switcher" role="group" aria-label="نمط العرض">
               <button type="button" data-mi-theme="light" aria-label="الوضع الفاتح" title="Light">☀<span class="mi-tool-label">Light</span></button>
-              <button type="button" data-mi-theme="colorful" aria-label="الوضع الملون" title="Colorful">✿<span class="mi-tool-label">Colorful</span></button>
               <button type="button" data-mi-theme="dark" aria-label="الوضع الداكن" title="Dark">☾<span class="mi-tool-label">Dark</span></button>
             </div>
             <div class="user-chip mi-user-icon" title="${getCurrentUser()?.fullName || getCurrentUser()?.username || "User"}" aria-label="المستخدم الحالي">👤</div>
