@@ -414,7 +414,9 @@ async function apiPost(path, body = {}) {
     cache: "no-store"
   });
 
-  return handleApiResponse(response);
+  const data = await handleApiResponse(response);
+  notifyCustomerServiceMutation(path);
+  return data;
 }
 
 async function apiPut(path, body = {}) {
@@ -429,7 +431,9 @@ async function apiPut(path, body = {}) {
     cache: "no-store"
   });
 
-  return handleApiResponse(response);
+  const data = await handleApiResponse(response);
+  notifyCustomerServiceMutation(path);
+  return data;
 }
 
 async function apiPatch(path, body = {}) {
@@ -444,7 +448,9 @@ async function apiPatch(path, body = {}) {
     cache: "no-store"
   });
 
-  return handleApiResponse(response);
+  const data = await handleApiResponse(response);
+  notifyCustomerServiceMutation(path);
+  return data;
 }
 
 async function apiDelete(path, body = null) {
@@ -466,7 +472,21 @@ async function apiDelete(path, body = null) {
 
   const response = await fetch(`${API_BASE_URL}${path}`, options);
 
-  return handleApiResponse(response);
+  const data = await handleApiResponse(response);
+  notifyCustomerServiceMutation(path);
+  return data;
+}
+
+function notifyCustomerServiceMutation(path = "") {
+  const value = String(path || "");
+  if (!value.includes("customer") && !value.includes("review")) return;
+  try {
+    const channel = new BroadcastChannel("mi-customer-service-live");
+    channel.postMessage({ path: value, at: Date.now() });
+    channel.close();
+  } catch (_) {
+    localStorage.setItem("mi-customer-service-live", String(Date.now()));
+  }
 }
 
 async function apiDownload(path, params = {}, filename = "download.xlsx") {

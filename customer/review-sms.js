@@ -656,6 +656,9 @@
         if (action === "save-settings") saveSettings();
         if (action === "stats") loadStats();
         if (action === "logs") loadLogs();
+        if (action === "export-logs-excel") exportLogsExcel(button);
+        if (action === "apply-log-filters") applyLogFilters();
+        if (action === "clear-log-filters") clearLogFilters();
         if (action === "followups") loadFollowups();
         if (action === "send-pending") sendPending();
         if (action === "dry-run") scanNow(true);
@@ -669,6 +672,7 @@
     setStatus("جاهز. اختر الشركة واضغط الزر المطلوب.");
     loadHealth();
     loadSettings();
+    initLogFilters();
   }
 
   function getApiBaseFromDashboard() {
@@ -1028,10 +1032,110 @@
     }
   }
 
-  async function loadStats() {
+  function checkedValues(containerId) {
+    return Array.from(document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`))
+      .map((input) => input.value);
+  }
+
+  function logFilterParams({ includeLimit = true } = {}) {
+    const params = new URLSearchParams();
+    if (includeLimit) params.set("limit", String(getLimitValue()));
+    const companyId = getCompanyIdOrNull();
+    if (companyId) params.set("companyId", String(companyId));
+    const dateFrom = byId("logsDateFrom")?.value;
+    const dateTo = byId("logsDateTo")?.value;
+    const statuses = checkedValues("logsStatusFilter");
+    const branchIds = checkedValues("logsBranchFilter");
+    const ratings = checkedValues("logsRatingFilter");
+    if (dateFrom) params.set("dateFrom", dateFrom);
+    if (dateTo) params.set("dateTo", dateTo);
+    if (statuses.length) params.set("statuses", statuses.join(","));
+    if (branchIds.length) params.set("branchIds", branchIds.join(","));
+    if (ratings.length) params.set("ratings", ratings.join(","));
+    return params;
+  }
+
+  function updateMultiFilterLabel(containerId, labelId, emptyLabel) {
+    const selected = Array.from(document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`));
+    const label = byId(labelId);
+    if (!label) return;
+    label.textContent = selected.length
+      ? selected.map((input) => input.closest("label")?.textContent.trim()).join("، ")
+      : emptyLabel;
+  }
+
+  function updateLogFilterSummary() {
+    updateMultiFilterLabel("logsStatusFilter", "logsStatusFilterLabel", "كل الحالات");
+    updateMultiFilterLabel("logsBranchFilter", "logsBranchFilterLabel", "كل الفروع");
+    updateMultiFilterLabel("logsRatingFilter", "logsRatingFilterLabel", "كل التقييمات");
+    const pieces = [];
+    if (byId("logsDateFrom")?.value) pieces.push(`من ${byId("logsDateFrom").value}`);
+    if (byId("logsDateTo")?.value) pieces.push(`إلى ${byId("logsDateTo").value}`);
+    const statuses = checkedValues("logsStatusFilter");
+    const branches = checkedValues("logsBranchFilter");
+    const ratings = checkedValues("logsRatingFilter");
+    if (statuses.length) pieces.push(`${statuses.length} حالة`);
+    if (branches.length) pieces.push(`${branches.length} فرع`);
+    if (ratings.length) pieces.push(`${ratings.length} تقييم`);
+    if (byId("logsFilterSummary")) {
+      byId("logsFilterSummary").textContent = pieces.length
+        ? `الفلاتر المطبقة: ${pieces.join(" · ")}`
+        : "عرض كل معاملات الشركة المختارة.";
+    }
+  }
+
+  async function loadLogFilterOptions() {
+    const container = byId("logsBranchOptions");
+    if (!container) return;
     try {
       const companyId = getCompanyIdOrNull();
-      const query = companyId ? `?companyId=${encodeURIComponent(companyId)}` : "";
+      const params = new URLSearchParams();
+      if (companyId) params.set("companyId", String(companyId));
+      const data = await requestJson(`${getApiBaseFromDashboard()}/logs/filter-options?${params}`, {
+        method: "GET",
+        headers: authHeaders()
+      });
+      const branches = data.data?.branches || [];
+      container.innerHTML = branches.length
+        ? branches.map((branch) => `<label><input type="checkbox" value="${escapeHtml(branch.branch_id)}" /> ${escapeHtml(getPublicBranchName(branch.branch_name))}</label>`).join("")
+        : '<span class="crsms-filter-loading">لا توجد فروع في السجل.</span>';
+      container.querySelectorAll("input[type='checkbox']").forEach((input) => {
+        input.addEventListener("change", updateLogFilterSummary);
+      });
+    } catch (error) {
+      container.innerHTML = `<span class="crsms-filter-loading">تعذر تحميل الفروع: ${escapeHtml(error.message)}</span>`;
+    }
+  }
+
+  function initLogFilters() {
+    if (!byId("logsDateFrom")) return;
+    document.querySelectorAll(".crsms-multi-filter input").forEach((input) => {
+      input.addEventListener("change", updateLogFilterSummary);
+    });
+    window.addEventListener("company-context-changed", async () => {
+      await loadLogFilterOptions();
+      applyLogFilters();
+    });
+    loadLogFilterOptions();
+    updateLogFilterSummary();
+  }
+
+  async function applyLogFilters() {
+    updateLogFilterSummary();
+    document.querySelectorAll(".crsms-multi-filter[open]").forEach((details) => details.removeAttribute("open"));
+    await Promise.all([loadStats(), loadLogs()]);
+  }
+
+  async function clearLogFilters() {
+    document.querySelectorAll(".crsms-log-filters input[type='checkbox']").forEach((input) => { input.checked = false; });
+    if (byId("logsDateFrom")) byId("logsDateFrom").value = "";
+    if (byId("logsDateTo")) byId("logsDateTo").value = "";
+    await applyLogFilters();
+  }
+
+  async function loadStats() {
+    try {
+      const query = `?${logFilterParams({ includeLimit: false })}`;
 
       const data = await requestJson(`${getApiBaseFromDashboard()}/stats${query}`, {
         method: "GET",
@@ -1109,14 +1213,7 @@
     if (!tbody) return;
 
     try {
-      const params = new URLSearchParams();
-      params.set("limit", String(getLimitValue()));
-
-      const status = byId("statusFilter")?.value;
-      if (status) params.set("status", status);
-
-      const companyId = getCompanyIdOrNull();
-      if (companyId) params.set("companyId", String(companyId));
+      const params = logFilterParams();
 
       const data = await requestJson(`${getApiBaseFromDashboard()}/logs?${params}`, {
         method: "GET",
@@ -1127,6 +1224,45 @@
       setStatus("تم تحديث الرسائل.");
     } catch (error) {
       setStatus(`Logs Error: ${error.message}`);
+    }
+  }
+
+  async function exportLogsExcel(button) {
+    const originalText = button?.innerHTML || "تصدير Excel";
+    try {
+      if (button) {
+        button.disabled = true;
+        button.textContent = "جاري تجهيز Excel...";
+      }
+
+      const params = logFilterParams();
+
+      const response = await fetch(
+        `${getApiBaseFromDashboard()}/logs/export/excel?${params}`,
+        { headers: authHeaders() }
+      );
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text.slice(0, 220) || "تعذر تصدير Excel");
+      }
+
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = `customer-message-operations-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(objectUrl);
+      setStatus("تم تصدير تقرير الرسائل إلى Excel.");
+    } catch (error) {
+      setStatus(`Export Excel Error: ${error.message}`);
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.innerHTML = originalText;
+      }
     }
   }
 

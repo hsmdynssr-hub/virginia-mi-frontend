@@ -7,10 +7,10 @@
   <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.rtl.min.css" />
   <link rel="stylesheet" href="../css/bootstrap-theme.css" />
   <link rel="stylesheet" href="./review-sms.css?v=sms-core-20260814" />
-  <link rel="stylesheet" href="./review-sms-internal.css?v=olive-theme-20260829-01" />
+  <link rel="stylesheet" href="./review-sms-internal.css?v=transaction-filters-20260830-01" />
   <script src="../js/api.js" defer></script>
   <script src="../js/layout.js" defer></script>
-  <script src="./review-sms.js?v=sms-dashboard-20260814-01" defer></script>
+  <script src="./review-sms.js?v=transaction-filters-20260830-01" defer></script>
 </head>
 <body class="crsms-internal-page crsms-dashboard-page" data-page="dashboard" data-report-code="customer.review_sms.view">
   <main class="crsms-page">
@@ -100,6 +100,44 @@
           <button type="button" class="crsms-button secondary" data-action="logs"><span>↻</span> تحديث المعاملات</button>
         </div>
       </div>
+
+      <section class="crsms-log-filters" aria-label="فلاتر معاملات العملاء">
+        <label class="crsms-log-date"><span>من تاريخ</span><input id="logsDateFrom" type="date" /></label>
+        <label class="crsms-log-date"><span>إلى تاريخ</span><input id="logsDateTo" type="date" /></label>
+
+        <details class="crsms-multi-filter" id="logsStatusFilter">
+          <summary><span>الحالة</span><strong id="logsStatusFilterLabel">كل الحالات</strong></summary>
+          <div class="crsms-multi-menu">
+            <label><input type="checkbox" value="pending" /> قيد الانتظار</label>
+            <label><input type="checkbox" value="sent" /> تم الإرسال</label>
+            <label><input type="checkbox" value="failed" /> فشل الإرسال</label>
+            <label><input type="checkbox" value="opened" /> فتح الرابط</label>
+            <label><input type="checkbox" value="reviewed" /> اكتمل التقييم</label>
+            <label><input type="checkbox" value="skipped" /> تم التجاوز</label>
+          </div>
+        </details>
+
+        <details class="crsms-multi-filter" id="logsBranchFilter">
+          <summary><span>الفرع</span><strong id="logsBranchFilterLabel">كل الفروع</strong></summary>
+          <div class="crsms-multi-menu" id="logsBranchOptions"><span class="crsms-filter-loading">جاري تحميل الفروع...</span></div>
+        </details>
+
+        <details class="crsms-multi-filter" id="logsRatingFilter">
+          <summary><span>التقييم</span><strong id="logsRatingFilterLabel">كل التقييمات</strong></summary>
+          <div class="crsms-multi-menu">
+            <label><input type="checkbox" value="5" /> راضٍ جدًا (5)</label>
+            <label><input type="checkbox" value="3" /> محايد (3)</label>
+            <label><input type="checkbox" value="1" /> غير راضٍ (1)</label>
+            <label><input type="checkbox" value="unrated" /> بدون تقييم</label>
+          </div>
+        </details>
+
+        <div class="crsms-log-filter-actions">
+          <button type="button" class="crsms-button primary" data-action="apply-log-filters">تطبيق الفلاتر</button>
+          <button type="button" class="crsms-button secondary" data-action="clear-log-filters">مسح</button>
+        </div>
+        <p id="logsFilterSummary" class="crsms-log-filter-summary">عرض كل معاملات الشركة المختارة.</p>
+      </section>
 
       <div class="crsms-table-wrap">
         <table class="crsms-table">

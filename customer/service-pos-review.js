@@ -179,6 +179,16 @@
       throw new Error(message);
     }
 
+    if (String(options.method || "GET").toUpperCase() !== "GET") {
+      try {
+        const liveChannel = new BroadcastChannel("mi-customer-service-live");
+        liveChannel.postMessage({ path, at: Date.now() });
+        liveChannel.close();
+      } catch (_) {
+        localStorage.setItem("mi-customer-service-live", String(Date.now()));
+      }
+    }
+
     return data;
   }
 
