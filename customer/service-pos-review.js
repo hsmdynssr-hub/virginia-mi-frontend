@@ -685,8 +685,8 @@
             <button class="run-btn" type="button" data-print-receipt="${escapeHtml(invoice.posOrderId)}">
               طباعة إيصال 80mm
             </button>
-            <button class="export-btn" type="button" data-download-odoo-pdf="${escapeHtml(invoice.posOrderId)}" ${invoice.accountMoveId ? "" : "disabled"}>
-              فاتورة Odoo PDF
+            <button class="export-btn" type="button" data-download-odoo-pdf="${escapeHtml(invoice.posOrderId)}">
+              ${invoice.accountMoveId ? "فاتورة Odoo PDF" : "فاتورة POS بصيغة PDF"}
             </button>
             <button class="run-btn" type="button" data-open-invoice="${escapeHtml(invoice.posOrderId)}">
               تسجيل فتح الفاتورة
@@ -1692,6 +1692,11 @@
   }
 
   async function downloadOfficialOdooPdf(invoice, button) {
+    if (!invoice.accountMoveId) {
+      printA4PosInvoice(invoice);
+      return;
+    }
+
     const originalText = button?.textContent || "فاتورة Odoo PDF";
     try {
       if (button) {
@@ -1720,10 +1725,54 @@
       setMessage(error.message, "error");
     } finally {
       if (button) {
-        button.disabled = !invoice.accountMoveId;
+        button.disabled = false;
         button.textContent = originalText;
       }
     }
+  }
+
+  function printA4PosInvoice(invoice) {
+    const invoiceWindow = window.open("", "_blank", "width=960,height=820");
+    if (!invoiceWindow) {
+      setMessage("اسمح بالنوافذ المنبثقة حتى تعمل فاتورة PDF.", "error");
+      return;
+    }
+
+    const rows = (invoice.lines || []).map((line, index) => `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${escapeHtml(line.productName || "-")}</td>
+        <td>${formatNumber(line.quantity || 0, 3)}</td>
+        <td>${formatMoney(line.unitPrice || 0)}</td>
+        <td>${formatMoney(line.lineTotal || 0)}</td>
+      </tr>
+    `).join("");
+
+    invoiceWindow.document.write(`<!doctype html>
+      <html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>فاتورة POS ${escapeHtml(invoice.invoiceRef || "")}</title>
+      <style>
+        @page{size:A4;margin:12mm}*{box-sizing:border-box}body{margin:0;color:#253018;background:#eef1e5;font-family:Tahoma,Arial,sans-serif;font-size:13px}.sheet{width:210mm;min-height:276mm;margin:14px auto;padding:14mm;background:#fff;box-shadow:0 12px 36px rgba(45,58,24,.16)}header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:14px;border-bottom:4px solid #667a35}.brand h1{margin:0;color:#4f612c;font-size:30px}.brand p{margin:4px 0 0;color:#788067}.title{text-align:left}.title h2{margin:0;color:#263018;font-size:24px}.title strong{display:block;margin-top:5px;color:#8b6b28}.meta{display:grid;grid-template-columns:repeat(2,1fr);gap:9px 26px;margin:18px 0;padding:14px;border:1px solid #dfe5cc;border-radius:12px;background:#fafbf5}.meta div{display:flex;justify-content:space-between;gap:10px}.meta span{color:#737b64}.meta strong{color:#263018}table{width:100%;border-collapse:collapse;margin-top:16px}th{padding:10px 8px;color:#fff;background:#5b6e31;text-align:right}td{padding:9px 8px;border-bottom:1px solid #e7eadc}th:first-child,td:first-child{width:42px;text-align:center}th:nth-child(3),td:nth-child(3){text-align:center}th:nth-child(4),td:nth-child(4),th:last-child,td:last-child{text-align:left}.summary{width:330px;margin:20px 0 0 auto;padding:14px;border:2px solid #667a35;border-radius:12px}.summary div{display:flex;justify-content:space-between}.summary strong{font-size:18px;color:#4f612c}.footer{margin-top:30px;padding-top:12px;border-top:1px dashed #aeb89a;color:#69725b;text-align:center}.actions{width:210mm;margin:0 auto 18px;display:flex;justify-content:center}.actions button{padding:11px 26px;border:0;border-radius:9px;color:#fff;background:#4f612c;font-weight:700;cursor:pointer}@media print{body{background:#fff}.sheet{width:auto;min-height:0;margin:0;padding:0;box-shadow:none}.actions{display:none}}
+      </style></head><body>
+      <main class="sheet">
+        <header><div class="brand"><h1>Virginia</h1><p>Virginia Olive</p></div><div class="title"><h2>فاتورة مبيعات POS</h2><strong>${escapeHtml(invoice.invoiceRef || "-")}</strong></div></header>
+        <section class="meta">
+          <div><span>رقم الطلب</span><strong>${escapeHtml(invoice.orderNumber || "-")}</strong></div>
+          <div><span>التاريخ</span><strong>${escapeHtml(formatDate(invoice.dateOrder))}</strong></div>
+          <div><span>العميل</span><strong>${escapeHtml(invoice.customerName || "عميل نقدي")}</strong></div>
+          <div><span>رقم العميل</span><strong>${escapeHtml(invoice.customerPhone || "-")}</strong></div>
+          <div><span>الفرع / POS</span><strong>${escapeHtml(invoice.configName || invoice.branchCode || "-")}</strong></div>
+          <div><span>الكاشير</span><strong>${escapeHtml(invoice.cashierName || "-")}</strong></div>
+          <div><span>طريقة السداد</span><strong>${escapeHtml(invoice.paymentSummary || "-")}</strong></div>
+          <div><span>مرجع Odoo</span><strong>${escapeHtml(invoice.orderReference || invoice.posOrderId || "-")}</strong></div>
+        </section>
+        <table><thead><tr><th>#</th><th>الصنف</th><th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th></tr></thead><tbody>${rows || '<tr><td colspan="5">لا توجد أصناف</td></tr>'}</tbody></table>
+        <section class="summary"><div><span>إجمالي الفاتورة</span><strong>${formatMoney(invoice.amountTotal || 0)}</strong></div></section>
+        <footer class="footer">تم إنشاء هذه النسخة من بيانات طلب نقطة البيع المسجلة في Odoo.</footer>
+      </main>
+      <div class="actions"><button onclick="window.print()">طباعة أو حفظ PDF</button></div>
+      </body></html>`);
+    invoiceWindow.document.close();
+    invoiceWindow.focus();
   }
 
 
