@@ -2417,3 +2417,27 @@ html[data-mi-theme="colorful"] [data-mi-theme="colorful"][aria-pressed="true"] {
   .mi-company-context-options{grid-template-columns:1fr}
   .mi-company-context-dialog h2{font-size:22px}
 }
+
+/* =========================================================
+   Unified report design system — shared by every layout page
+   ========================================================= */
+.mi-report-design-v2{--mi-report-ink:#263018;--mi-report-muted:#6f7861;--mi-report-line:#dfe5cc;--mi-report-soft:#f7f9ef;--mi-report-accent:#667a35;--mi-report-gold:#b18d38}
+.mi-report-design-v2 .content{color:var(--mi-report-ink);font-family:Tahoma,"Segoe UI",Arial,sans-serif;font-size:14px;line-height:1.65}
+.mi-report-design-v2 .content :is(h1,h2,h3,h4){color:var(--mi-report-ink);font-weight:900;letter-spacing:-.02em;line-height:1.3}
+.mi-report-design-v2 .content h1{font-size:clamp(25px,3vw,36px)}.mi-report-design-v2 .content h2{font-size:clamp(20px,2.2vw,28px)}.mi-report-design-v2 .content h3{font-size:17px}
+.mi-report-design-v2 .content :is(p,small,.muted,.subtitle,.hint){color:var(--mi-report-muted);line-height:1.7}
+.mi-report-design-v2 .content :is(.panel,.report-panel,.report-card,.inventory-report-card,.mi-report-card,.filter-panel,.filters-panel,.summary-panel,.table-card,.card){border:1px solid var(--mi-report-line)!important;border-radius:18px!important;background:linear-gradient(145deg,#fff,#fbfcf7)!important;box-shadow:0 12px 30px rgba(65,79,38,.07)!important}
+.mi-report-design-v2 .content :is(.panel,.report-panel,.report-card,.inventory-report-card,.mi-report-card,.filter-panel,.filters-panel,.summary-panel,.table-card){padding:20px}
+.mi-report-design-v2 .content :is(.filters-grid,.filter-grid,.report-filters,.controls-grid,.control-row){gap:12px}
+.mi-report-design-v2 .content :is(label,.field-label,.control-label){color:#4c583d;font-weight:850}
+.mi-report-design-v2 .content :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea,.form-control,.form-select){min-height:43px;border:1px solid #d8dfc3!important;border-radius:11px!important;color:#303a21!important;background:#fff!important;font-size:13px}
+.mi-report-design-v2 .content :is(button,.btn,.primary-btn,.run-btn,.report-btn-primary){min-height:42px;border-radius:11px;font-weight:900;transition:.18s ease}
+.mi-report-design-v2 .content :is(button,.btn):hover{transform:translateY(-1px)}
+.mi-report-design-v2 .content :is(.kpi-grid,.stats-grid,.summary-grid,.cards-grid,.metrics-grid){gap:14px}
+.mi-report-design-v2 .content :is(.kpi-card,.report-kpi-card,.inventory-kpi-card,.mi-kpi-card,.metric-card,.stat-card){min-height:112px;padding:17px!important;border:1px solid var(--mi-report-line)!important;border-radius:16px!important;background:linear-gradient(145deg,#fff,#fafbf5)!important;box-shadow:0 9px 23px rgba(65,79,38,.065)!important}
+.mi-report-design-v2 .content :is(.kpi-card,.report-kpi-card,.inventory-kpi-card,.mi-kpi-card,.metric-card,.stat-card) :is(strong,.value,.metric-value){color:#263018;font-size:clamp(24px,2.4vw,32px);font-weight:950}
+.mi-report-design-v2 .content :is(.table-wrap,.report-table-wrap,.inventory-table-wrap,.mi-table-scroll){border:1px solid var(--mi-report-line)!important;border-radius:14px!important;background:#fff;box-shadow:none!important}
+.mi-report-design-v2 .content table{font-size:12px}.mi-report-design-v2 .content table th{padding:12px 11px!important;color:#354026!important;background:linear-gradient(90deg,#edf2df,#faf8ef)!important;font-weight:900!important;white-space:nowrap}.mi-report-design-v2 .content table td{padding:11px!important;color:#3e4932!important;border-bottom-color:#edf0e3!important;vertical-align:middle}
+.mi-report-design-v2 .content :is(.status,.status-box,.report-status,.message-box,.alert){border-radius:12px;font-weight:750}
+@media(max-width:760px){.mi-report-design-v2 .content{font-size:13px}.mi-report-design-v2 .content :is(.panel,.report-panel,.report-card,.inventory-report-card,.mi-report-card,.filter-panel,.filters-panel,.summary-panel,.table-card){padding:14px}.mi-report-design-v2 .content :is(.kpi-grid,.stats-grid,.summary-grid,.cards-grid,.metrics-grid){grid-template-columns:repeat(2,minmax(0,1fr))!important}.mi-report-design-v2 .content table{font-size:11px}}
+@media(max-width:480px){.mi-report-design-v2 .content :is(.kpi-grid,.stats-grid,.summary-grid,.cards-grid,.metrics-grid){grid-template-columns:1fr!important}}

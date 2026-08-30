@@ -40,7 +40,7 @@
   if (!hasStylesheet("app-modern.css")) {
     const modernCss = document.createElement("link");
     modernCss.rel = "stylesheet";
-    modernCss.href = `${assetUrl("../css/app-modern.css")}?v=company-context-20260830-01`;
+    modernCss.href = `${assetUrl("../css/app-modern.css")}?v=unified-reports-20260830-01`;
     modernCss.dataset.miModernUi = "true";
     document.head.appendChild(modernCss);
   }
@@ -150,7 +150,7 @@ function enhanceLegacyReportUi(root = document) {
   const scope = root.querySelectorAll ? root : document;
 
   scope.querySelectorAll(
-    ".inventory-kpi-card, .report-kpi-card, .kpi-card, .cards-grid > .card, .kpi-grid > article"
+    ".inventory-kpi-card, .report-kpi-card, .kpi-card, .cards-grid > .card, .kpi-grid > article, .stats-grid > article, .summary-grid > article, .metric-card, .stat-card"
   ).forEach((card, index) => {
     if (card.dataset.miEnhanced === "true") return;
 
@@ -184,7 +184,7 @@ function enhanceLegacyReportUi(root = document) {
     card.querySelector("small")?.classList.add("mi-kpi-hint");
   });
 
-  scope.querySelectorAll(".inventory-report-card, .report-ui-page > .report-card, .panel")
+  scope.querySelectorAll(".inventory-report-card, .report-ui-page > .report-card, .panel, .report-panel, .filter-panel, .summary-panel, .table-card")
     .forEach((card) => card.classList.add("mi-report-card"));
 
   scope.querySelectorAll(
@@ -886,6 +886,7 @@ function initLayout(activePage) {
 }
 
 function renderLayout(title, subtitle, activePage, contentHtml) {
+  document.body.classList.add("mi-report-design-v2");
   const isAllowed = guardPage(activePage);
 
     window.ACTIVE_PAGE = activePage;

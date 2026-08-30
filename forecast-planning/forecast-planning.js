@@ -125,10 +125,11 @@ function fpShowDebug(data) {
 
   if (!box) return;
 
-  box.style.display = "block";
-  box.textContent = typeof data === "string"
+  const message = typeof data === "string"
     ? data
-    : JSON.stringify(data, null, 2);
+    : data?.message || data?.summary?.message || "تم تنفيذ العملية وتحديث بيانات التقرير.";
+  box.style.display = "block";
+  box.textContent = message;
 }
 
 function fpHideDebug() {

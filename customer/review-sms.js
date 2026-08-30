@@ -873,9 +873,25 @@
   function setStatus(message) {
     const box = byId("statusBox");
     if (!box) return;
-
-    box.textContent =
-      typeof message === "string" ? message : JSON.stringify(message, null, 2);
+    let text = "";
+    if (typeof message === "string") {
+      text = message;
+    } else if (message?.message) {
+      text = String(message.message);
+    } else if (message?.module || message?.settings) {
+      const settings = message.settings || {};
+      const live = message.liveSms === true ? "الإرسال الحقيقي يعمل" : message.liveSms === false ? "الإرسال الحقيقي متوقف" : "النظام متصل";
+      const auto = settings.autoScanEnabled === true ? "الفحص التلقائي يعمل" : settings.autoScanEnabled === false ? "الفحص التلقائي متوقف" : "";
+      text = [live, auto].filter(Boolean).join(" — ");
+    } else {
+      text = "تم تحديث البيانات بنجاح.";
+    }
+    const isError = /error|فشل|تعذر|غير متصل|خطأ/i.test(text);
+    const isSuccess = /تم |يعمل|متصل|نجاح|جاهز/i.test(text) && !isError;
+    box.classList.toggle("is-error", isError);
+    box.classList.toggle("is-success", isSuccess);
+    box.classList.toggle("is-info", !isError && !isSuccess);
+    box.textContent = text;
   }
 
   function getCompanyIdOrNull() {
