@@ -6,7 +6,7 @@
   <title>تقرير أداء خدمة العملاء</title>
   <link rel="stylesheet" href="../css/style.css" />
   <link rel="stylesheet" href="../css/report-ui.css" />
-  <link rel="stylesheet" href="./customer-service-management-report.css?v=live-operations-20260830-01" />
+  <link rel="stylesheet" href="./customer-service-management-report.css?v=management-workspace-20260830-01" />
 </head>
 <body class="cs-management-page" data-report-code="customer.service_management_report">
   <main class="cs-management-shell">
@@ -17,21 +17,26 @@
 
     <section id="managementMessage" class="cs-management-message hidden"></section>
 
-    <section class="cs-management-filter-card">
-      <div class="cs-management-section-title"><h2>فلاتر التقرير</h2><p>حدد الفترة أو الحالة ثم حدّث النتائج.</p></div>
+    <nav class="cs-report-tabs" aria-label="مسارات تقرير خدمة العملاء">
+      <button type="button" class="active" data-report-tab="complaints" aria-selected="true"><span>الشكاوى والمتابعة</span><b id="complaintsTabCount">0</b></button>
+      <button type="button" data-report-tab="responses" aria-selected="false"><span>ردود وتقييمات العملاء</span><b id="responsesTabCount">0</b></button>
+    </nav>
+
+    <details id="managementFilterDrawer" class="cs-management-filter-card cs-filter-drawer">
+      <summary><div><strong>فلاتر التقرير</strong><span id="managementFilterSummary">آخر 30 يومًا · كل الحالات</span></div><i>تعديل الفلاتر</i></summary>
       <div class="cs-management-filters">
         <input id="companyId" type="hidden" />
         <label>من تاريخ<input id="dateFrom" type="date" /></label>
         <label>إلى تاريخ<input id="dateTo" type="date" /></label>
-        <label>النوع<select id="noteType"><option value="all">كل الأنواع</option><option value="complaint">شكوى</option><option value="inquiry">استفسار</option><option value="price_review">مراجعة سعر</option><option value="payment_issue">مشكلة دفع</option><option value="product_issue">مشكلة منتج</option><option value="other">أخرى</option></select></label>
-        <label>الحالة<select id="status"><option value="all">كل الحالات</option><option value="submitted">بانتظار المراجعة</option><option value="approved">تم التصديق</option><option value="returned">مرتجع</option><option value="closed">مغلق</option></select></label>
+        <label class="complaint-only-filter">النوع<select id="noteType"><option value="all">كل الأنواع</option><option value="complaint">شكوى</option><option value="inquiry">استفسار</option><option value="price_review">مراجعة سعر</option><option value="payment_issue">مشكلة دفع</option><option value="product_issue">مشكلة منتج</option><option value="other">أخرى</option></select></label>
+        <label class="complaint-only-filter">الحالة<select id="status"><option value="all">كل الحالات</option><option value="submitted">بانتظار المراجعة</option><option value="approved">تم التصديق</option><option value="returned">مرتجع</option><option value="closed">مغلق</option></select></label>
         <label>رقم العميل<input id="customerPhone" type="text" placeholder="اختياري" /></label>
         <label>رقم الفاتورة<input id="invoiceRef" type="text" placeholder="اختياري" /></label>
         <button id="loadManagementReportBtn" type="button">تحديث التقرير</button>
       </div>
-    </section>
+    </details>
 
-    <section class="cs-operations-section cs-complaints-section">
+    <section class="cs-operations-section cs-complaints-section" data-report-panel="complaints" role="tabpanel">
       <div class="cs-operation-heading"><div><span>المسار التشغيلي الأول</span><h2>متابعة شكاوى وملاحظات العملاء</h2></div><a href="./service-pos-review.html">فتح شاشة التشغيل ←</a></div>
       <section id="managementKpis" class="cs-management-kpis"></section>
 
@@ -43,19 +48,19 @@
       </section>
     </section>
 
-    <section class="cs-operations-section cs-messages-section">
+    <section class="cs-operations-section cs-messages-section" data-report-panel="responses" role="tabpanel" hidden>
       <div class="cs-operation-heading"><div><span>المسار التشغيلي الثاني</span><h2>ردود وتقييمات العملاء</h2></div><a href="./review-sms-dashboard.html">فتح شاشة التشغيل ←</a></div>
       <section id="smsManagementKpis" class="cs-management-kpis"></section>
       <section class="cs-management-table-card">
         <div class="cs-management-section-title"><h2>آخر ردود العملاء المسجلة</h2><p id="smsManagementCount">لم يتم تحميل التقرير بعد.</p></div>
         <div class="cs-management-table-wrap">
-          <table><thead><tr><th>#</th><th>التاريخ</th><th>الحالة</th><th>الطلب</th><th>العميل</th><th>الهاتف</th><th>الفرع</th><th>القيمة</th><th>التقييم</th><th>تعليق العميل</th><th>المزود</th><th>الخطأ</th></tr></thead><tbody id="smsManagementRows"><tr><td colspan="12">جاري تحميل الرسائل...</td></tr></tbody></table>
+          <table><thead><tr><th>#</th><th>التاريخ</th><th>الحالة</th><th>الطلب</th><th>العميل</th><th>الهاتف</th><th>الفرع</th><th>القيمة</th><th>التقييم</th><th>سبب عدم الرضا</th><th>تعليق العميل</th><th>المزود</th><th>الخطأ</th></tr></thead><tbody id="smsManagementRows"><tr><td colspan="13">جاري تحميل الرسائل...</td></tr></tbody></table>
         </div>
       </section>
     </section>
   </main>
   <script src="../js/api.js"></script>
   <script src="../js/layout.js?v=20260814-14"></script>
-  <script src="./customer-service-management-report.js?v=customer-responses-20260830-03"></script>
+  <script src="./customer-service-management-report.js?v=management-workspace-20260830-01"></script>
 </body>
 </html>

@@ -2441,3 +2441,30 @@ html[data-mi-theme="colorful"] [data-mi-theme="colorful"][aria-pressed="true"] {
 .mi-report-design-v2 .content :is(.status,.status-box,.report-status,.message-box,.alert){border-radius:12px;font-weight:750}
 @media(max-width:760px){.mi-report-design-v2 .content{font-size:13px}.mi-report-design-v2 .content :is(.panel,.report-panel,.report-card,.inventory-report-card,.mi-report-card,.filter-panel,.filters-panel,.summary-panel,.table-card){padding:14px}.mi-report-design-v2 .content :is(.kpi-grid,.stats-grid,.summary-grid,.cards-grid,.metrics-grid){grid-template-columns:repeat(2,minmax(0,1fr))!important}.mi-report-design-v2 .content table{font-size:11px}}
 @media(max-width:480px){.mi-report-design-v2 .content :is(.kpi-grid,.stats-grid,.summary-grid,.cards-grid,.metrics-grid){grid-template-columns:1fr!important}}
+
+/* =========================================================
+   Final three-theme contract
+   Must remain last: prevents shared report rules crossing themes.
+   ========================================================= */
+html[data-mi-theme="light"]{color-scheme:light;--mi-contract-bg:#f6f8f4;--mi-contract-surface:#fff;--mi-contract-surface-2:#f9faf6;--mi-contract-text:#24311f;--mi-contract-muted:#697260;--mi-contract-line:#dce3d5}
+html[data-mi-theme="colorful"]{color-scheme:light;--mi-contract-bg:#f4f6e9;--mi-contract-surface:#fff;--mi-contract-surface-2:#fafbf5;--mi-contract-text:#263018;--mi-contract-muted:#69725b;--mi-contract-line:#dfe5cc}
+html[data-mi-theme="dark"]{color-scheme:dark;--mi-contract-bg:#09131d;--mi-contract-surface:#101d29;--mi-contract-surface-2:#152534;--mi-contract-text:#eaf3f8;--mi-contract-muted:#9db0c0;--mi-contract-line:rgba(164,190,207,.16)}
+
+html[data-mi-theme="light"] body.mi-report-design-v2:not(.mi-login-page){color:var(--mi-contract-text)!important;background:linear-gradient(180deg,#f8faf7,#f2f5ef)!important}
+html[data-mi-theme="colorful"] body.mi-report-design-v2:not(.mi-login-page){color:var(--mi-contract-text)!important;background:radial-gradient(circle at 8% 8%,rgba(121,139,70,.12),transparent 27rem),radial-gradient(circle at 92% 10%,rgba(197,162,74,.10),transparent 24rem),linear-gradient(180deg,#fafbf4,#f3f5e8)!important}
+html[data-mi-theme="dark"] body.mi-report-design-v2:not(.mi-login-page){color:var(--mi-contract-text)!important;background:radial-gradient(circle at 7% 5%,rgba(20,184,176,.10),transparent 28rem),radial-gradient(circle at 90% 8%,rgba(139,92,246,.08),transparent 25rem),#09131d!important}
+
+html[data-mi-theme] .mi-report-design-v2 .content{color:var(--mi-contract-text)!important}
+html[data-mi-theme] .mi-report-design-v2 .content :is(h1,h2,h3,h4,h5,h6,strong,.page-title,.section-title,.report-title){color:var(--mi-contract-text)!important}
+html[data-mi-theme] .mi-report-design-v2 .content :is(p,small,.muted,.text-muted,.subtitle,.hint,.helper-text){color:var(--mi-contract-muted)!important}
+html[data-mi-theme] .mi-report-design-v2 .content :is(.panel,.report-panel,.report-card,.inventory-report-card,.mi-report-card,.filter-panel,.filters-panel,.summary-panel,.table-card,.card,.kpi-card,.report-kpi-card,.inventory-kpi-card,.mi-kpi-card,.metric-card,.stat-card){color:var(--mi-contract-text)!important;border-color:var(--mi-contract-line)!important;background:linear-gradient(145deg,var(--mi-contract-surface),var(--mi-contract-surface-2))!important}
+html[data-mi-theme] .mi-report-design-v2 .content :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea,.form-control,.form-select){color:var(--mi-contract-text)!important;border-color:var(--mi-contract-line)!important;background:var(--mi-contract-surface)!important}
+html[data-mi-theme] .mi-report-design-v2 .content :is(input,textarea)::placeholder{color:var(--mi-contract-muted)!important}
+html[data-mi-theme] .mi-report-design-v2 .content :is(.table-wrap,.report-table-wrap,.inventory-table-wrap,.mi-table-scroll,.table-responsive){color:var(--mi-contract-text)!important;border-color:var(--mi-contract-line)!important;background:var(--mi-contract-surface)!important}
+html[data-mi-theme] .mi-report-design-v2 .content table{color:var(--mi-contract-text)!important;background:transparent!important}
+html[data-mi-theme] .mi-report-design-v2 .content table th{color:var(--mi-contract-text)!important;border-color:var(--mi-contract-line)!important;background:var(--mi-contract-surface-2)!important}
+html[data-mi-theme] .mi-report-design-v2 .content table td{color:var(--mi-contract-text)!important;border-color:var(--mi-contract-line)!important;background:var(--mi-contract-surface)!important}
+html[data-mi-theme="dark"] .mi-report-design-v2 .content table tbody tr:nth-child(even) td{background:#0d1a26!important}
+html[data-mi-theme="dark"] .mi-report-design-v2 .content table tbody tr:hover td{color:#f7fbfd!important;background:#183241!important}
+html[data-mi-theme="light"] .mi-report-design-v2 .content table tbody tr:nth-child(even) td{background:#f8faf7!important}
+html[data-mi-theme="colorful"] .mi-report-design-v2 .content table tbody tr:nth-child(even) td{background:#f8faef!important}

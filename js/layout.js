@@ -40,7 +40,7 @@
   if (!hasStylesheet("app-modern.css")) {
     const modernCss = document.createElement("link");
     modernCss.rel = "stylesheet";
-    modernCss.href = `${assetUrl("../css/app-modern.css")}?v=unified-reports-20260830-01`;
+    modernCss.href = `${assetUrl("../css/app-modern.css")}?v=theme-contract-20260830-02`;
     modernCss.dataset.miModernUi = "true";
     document.head.appendChild(modernCss);
   }
@@ -56,7 +56,7 @@
   if (!hasStylesheet("virginia-showcase.css")) {
     const showcaseCss = document.createElement("link");
     showcaseCss.rel = "stylesheet";
-    showcaseCss.href = `${assetUrl("../css/virginia-showcase.css")}?v=unified-header-20260829-01`;
+    showcaseCss.href = `${assetUrl("../css/virginia-showcase.css")}?v=theme-contract-20260830-02`;
     showcaseCss.dataset.miVirginiaShowcase = "true";
     document.head.appendChild(showcaseCss);
   }

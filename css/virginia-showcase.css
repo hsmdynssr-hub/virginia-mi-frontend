@@ -840,3 +840,19 @@ html[data-mi-theme="colorful"] .mi-page-hero .mi-theme-switcher button[aria-pres
   .mi-hero-heading h2 { font-size:21px !important; }
   .mi-hero-heading p { font-size:10px !important; }
 }
+
+/* Final header contract for Light / Colorful / Dark */
+html[data-mi-theme="light"] .mi-page-hero-shade{background:linear-gradient(90deg,rgba(7,25,20,.38),rgba(7,25,20,.12),rgba(255,255,255,.04))!important}
+html[data-mi-theme="colorful"] .mi-page-hero-shade{background:linear-gradient(90deg,rgba(32,49,16,.52),rgba(78,92,35,.18),rgba(181,145,49,.08))!important}
+html[data-mi-theme="dark"] .mi-page-hero img{filter:saturate(.72) brightness(.52)!important}
+html[data-mi-theme="dark"] .mi-page-hero-shade{background:linear-gradient(90deg,rgba(4,12,18,.84),rgba(6,18,25,.58),rgba(11,19,34,.48))!important}
+html[data-mi-theme="dark"] .mi-hero-heading{border-color:rgba(164,190,207,.22)!important;background:linear-gradient(110deg,rgba(7,20,27,.96),rgba(15,45,50,.91),rgba(34,31,66,.91))!important;box-shadow:0 16px 38px rgba(0,0,0,.34)!important}
+
+/* Standalone customer inner header becomes a compact operation strip. */
+.app-shell .content :is(.crsms-dashboard-hero,.crsms-operation-hero,.crsms-manual-hero,.crsms-followups-hero,.crsms-coupons-hero,.crsms-settings-hero):has(button,a,select,input){min-height:110px!important;height:auto!important;padding:14px 16px!important;overflow:visible!important}
+html[data-mi-theme="light"] .app-shell .content :is(.crsms-dashboard-hero,.crsms-operation-hero,.crsms-manual-hero,.crsms-followups-hero,.crsms-coupons-hero,.crsms-settings-hero):has(button,a,select,input){color:#20312f!important;border-color:#d8e4e1!important;background:linear-gradient(145deg,#fff,#f7faf9)!important}
+html[data-mi-theme="colorful"] .app-shell .content :is(.crsms-dashboard-hero,.crsms-operation-hero,.crsms-manual-hero,.crsms-followups-hero,.crsms-coupons-hero,.crsms-settings-hero):has(button,a,select,input){color:#263018!important;border-color:#dfe5cc!important;background:radial-gradient(circle at 10% 110%,rgba(214,185,105,.26),transparent 34%),linear-gradient(145deg,#fff,#fafbf5)!important}
+html[data-mi-theme="dark"] .app-shell .content :is(.crsms-dashboard-hero,.crsms-operation-hero,.crsms-manual-hero,.crsms-followups-hero,.crsms-coupons-hero,.crsms-settings-hero):has(button,a,select,input){color:#eaf3f8!important;border-color:rgba(164,190,207,.17)!important;background:radial-gradient(circle at 8% 110%,rgba(20,184,166,.10),transparent 36%),linear-gradient(145deg,#101d29,#152534)!important;box-shadow:0 14px 34px rgba(0,0,0,.22)!important}
+html[data-mi-theme="light"] .app-shell .content :is(.crsms-dashboard-hero,.crsms-operation-hero,.crsms-manual-hero,.crsms-followups-hero,.crsms-coupons-hero,.crsms-settings-hero):has(button,a,select,input) p{color:#687976!important}
+html[data-mi-theme="colorful"] .app-shell .content :is(.crsms-dashboard-hero,.crsms-operation-hero,.crsms-manual-hero,.crsms-followups-hero,.crsms-coupons-hero,.crsms-settings-hero):has(button,a,select,input) p{color:#69725b!important}
+html[data-mi-theme="dark"] .app-shell .content :is(.crsms-dashboard-hero,.crsms-operation-hero,.crsms-manual-hero,.crsms-followups-hero,.crsms-coupons-hero,.crsms-settings-hero):has(button,a,select,input) p{color:#9db0c0!important}
