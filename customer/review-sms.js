@@ -1033,8 +1033,34 @@
   }
 
   function checkedValues(containerId) {
-    return Array.from(document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`))
+    return Array.from(document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked:not([data-select-all])`))
       .map((input) => input.value);
+  }
+
+  function optionCheckboxes(containerId) {
+    return Array.from(document.querySelectorAll(`#${containerId} input[type="checkbox"]:not([data-select-all])`));
+  }
+
+  function localDateValue(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  function syncDatePreset() {
+    const preset = byId("logsDatePreset")?.value || "today";
+    const customDates = byId("logsCustomDates");
+    if (customDates) customDates.hidden = preset !== "custom";
+    if (preset === "custom") return;
+    const end = new Date();
+    const start = new Date(end);
+    if (preset === "yesterday") start.setDate(start.getDate() - 1);
+    if (preset === "last7") start.setDate(start.getDate() - 6);
+    if (preset === "last30") start.setDate(start.getDate() - 29);
+    if (preset === "yesterday") end.setDate(end.getDate() - 1);
+    if (byId("logsDateFrom")) byId("logsDateFrom").value = localDateValue(start);
+    if (byId("logsDateTo")) byId("logsDateTo").value = localDateValue(end);
   }
 
   function logFilterParams({ includeLimit = true } = {}) {
@@ -1056,12 +1082,34 @@
   }
 
   function updateMultiFilterLabel(containerId, labelId, emptyLabel) {
-    const selected = Array.from(document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`));
+    const options = optionCheckboxes(containerId);
+    const selected = options.filter((input) => input.checked);
     const label = byId(labelId);
     if (!label) return;
-    label.textContent = selected.length
+    label.textContent = selected.length && selected.length < options.length
       ? selected.map((input) => input.closest("label")?.textContent.trim()).join("، ")
       : emptyLabel;
+  }
+
+  function bindMultiFilter(containerId) {
+    const container = byId(containerId);
+    if (!container) return;
+    const selectAll = container.querySelector("[data-select-all]");
+    const options = optionCheckboxes(containerId);
+    if (selectAll) {
+      if (!options.some((item) => item.checked)) selectAll.checked = true;
+      selectAll.addEventListener("change", () => {
+        if (selectAll.checked) options.forEach((input) => { input.checked = false; });
+        updateLogFilterSummary();
+      });
+    }
+    options.forEach((input) => input.addEventListener("change", () => {
+      if (selectAll) {
+        selectAll.checked = !options.some((item) => item.checked);
+        selectAll.indeterminate = false;
+      }
+      updateLogFilterSummary();
+    }));
   }
 
   function updateLogFilterSummary() {
@@ -1069,8 +1117,8 @@
     updateMultiFilterLabel("logsBranchFilter", "logsBranchFilterLabel", "كل الفروع");
     updateMultiFilterLabel("logsRatingFilter", "logsRatingFilterLabel", "كل التقييمات");
     const pieces = [];
-    if (byId("logsDateFrom")?.value) pieces.push(`من ${byId("logsDateFrom").value}`);
-    if (byId("logsDateTo")?.value) pieces.push(`إلى ${byId("logsDateTo").value}`);
+    const periodLabel = byId("logsDatePreset")?.selectedOptions?.[0]?.textContent;
+    if (periodLabel) pieces.push(`الفترة: ${periodLabel}`);
     const statuses = checkedValues("logsStatusFilter");
     const branches = checkedValues("logsBranchFilter");
     const ratings = checkedValues("logsRatingFilter");
@@ -1097,11 +1145,9 @@
       });
       const branches = data.data?.branches || [];
       container.innerHTML = branches.length
-        ? branches.map((branch) => `<label><input type="checkbox" value="${escapeHtml(branch.branch_id)}" /> ${escapeHtml(getPublicBranchName(branch.branch_name))}</label>`).join("")
+        ? `<label class="crsms-select-all"><input type="checkbox" data-select-all /> اختيار الكل</label>${branches.map((branch) => `<label><input type="checkbox" value="${escapeHtml((branch.branch_ids || [branch.branch_id]).join(","))}" /> ${escapeHtml(getPublicBranchName(branch.branch_name))}</label>`).join("")}`
         : '<span class="crsms-filter-loading">لا توجد فروع في السجل.</span>';
-      container.querySelectorAll("input[type='checkbox']").forEach((input) => {
-        input.addEventListener("change", updateLogFilterSummary);
-      });
+      bindMultiFilter("logsBranchFilter");
     } catch (error) {
       container.innerHTML = `<span class="crsms-filter-loading">تعذر تحميل الفروع: ${escapeHtml(error.message)}</span>`;
     }
@@ -1109,9 +1155,14 @@
 
   function initLogFilters() {
     if (!byId("logsDateFrom")) return;
-    document.querySelectorAll(".crsms-multi-filter input").forEach((input) => {
-      input.addEventListener("change", updateLogFilterSummary);
+    syncDatePreset();
+    byId("logsDatePreset")?.addEventListener("change", () => {
+      syncDatePreset();
+      updateLogFilterSummary();
     });
+    ["logsDateFrom", "logsDateTo"].forEach((id) => byId(id)?.addEventListener("change", updateLogFilterSummary));
+    bindMultiFilter("logsStatusFilter");
+    bindMultiFilter("logsRatingFilter");
     window.addEventListener("company-context-changed", async () => {
       await loadLogFilterOptions();
       applyLogFilters();
@@ -1128,8 +1179,9 @@
 
   async function clearLogFilters() {
     document.querySelectorAll(".crsms-log-filters input[type='checkbox']").forEach((input) => { input.checked = false; });
-    if (byId("logsDateFrom")) byId("logsDateFrom").value = "";
-    if (byId("logsDateTo")) byId("logsDateTo").value = "";
+    document.querySelectorAll(".crsms-log-filters input[data-select-all]").forEach((input) => { input.checked = true; });
+    if (byId("logsDatePreset")) byId("logsDatePreset").value = "today";
+    syncDatePreset();
     await applyLogFilters();
   }
 

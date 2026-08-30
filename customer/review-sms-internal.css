@@ -2441,3 +2441,11 @@ html[data-mi-theme="colorful"] body.crsms-internal-page :is(.crsms-stat-card,.cr
 .crsms-log-filter-actions{display:flex;gap:7px}.crsms-log-filter-actions .crsms-button{min-height:43px;white-space:nowrap}.crsms-log-filter-summary{grid-column:1/-1;margin:0!important;padding-top:2px;color:#71833f!important;font-size:11px!important;font-weight:800}.crsms-log-filters:has(details[open]){z-index:30}
 @media(max-width:1200px){.crsms-log-filters{grid-template-columns:repeat(3,minmax(150px,1fr))}.crsms-log-filter-actions{grid-column:span 2}}
 @media(max-width:720px){.crsms-log-filters{grid-template-columns:1fr 1fr}.crsms-log-filter-actions{grid-column:1/-1}.crsms-log-filter-actions .crsms-button{flex:1}.crsms-multi-menu{position:fixed;top:50%;left:50%;right:auto;width:min(340px,calc(100% - 28px));max-height:60vh;transform:translate(-50%,-50%)}}
+
+/* Refined transaction filters: daily preset, custom range and grouped branches */
+.crsms-log-filters{grid-template-columns:repeat(4,minmax(165px,1fr)) auto}
+.crsms-log-period{display:grid;gap:6px}.crsms-log-period>span{color:#69725b;font-size:11px;font-weight:900}.crsms-log-period select{width:100%;min-height:43px;padding:8px 10px;border:1px solid #d9e0c5;border-radius:10px;color:#263018;font-weight:800;background:#fff}
+.crsms-custom-dates{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(190px,280px));gap:10px;padding:12px;border-radius:12px;background:#f5f7ed}.crsms-custom-dates[hidden]{display:none!important}
+.crsms-select-all{margin-bottom:5px;border-bottom:1px solid #e8ecd9;border-radius:0!important;color:#4f612c!important}
+@media(max-width:1000px){.crsms-log-filters{grid-template-columns:repeat(2,minmax(160px,1fr))}.crsms-log-filter-actions{grid-column:1/-1}}
+@media(max-width:600px){.crsms-log-filters{grid-template-columns:1fr}.crsms-log-filter-actions,.crsms-custom-dates{grid-column:1}.crsms-custom-dates{grid-template-columns:1fr}}
