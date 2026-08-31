@@ -2520,3 +2520,19 @@ html[data-mi-theme="dark"] body.crsms-internal-page .crsms-status.is-error{color
 
 /* Shopify coupon policy settings — 2026-08-31 */
 .crsms-coupon-policy-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:4px}.crsms-coupon-policy{padding:16px;border:1px solid rgba(165,132,44,.24);border-radius:16px;background:rgba(255,255,255,.54)}.crsms-coupon-policy-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.crsms-coupon-policy-head>div{display:grid;gap:3px}.crsms-coupon-policy-head span{font-size:15px;font-weight:800;color:#4f612c}.crsms-coupon-policy-head small{font-size:10px;color:#69725b}.crsms-policy-switch{display:flex;align-items:center;gap:7px;font-size:11px;white-space:nowrap}.crsms-policy-switch input{width:17px;height:17px}.crsms-coupon-policy .crsms-settings-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.crsms-coupon-policy .crsms-settings-toggle-grid{margin-top:12px}.crsms-coupon-common-settings{margin-top:16px;padding-top:16px;border-top:1px dashed rgba(165,132,44,.3)}[hidden]{display:none!important}@media(max-width:1050px){.crsms-coupon-policy-grid{grid-template-columns:1fr}}@media(max-width:620px){.crsms-coupon-policy .crsms-settings-form-grid{grid-template-columns:1fr}}
+
+
+/* Marketing-controlled review message template */
+.crsms-message-template-editor { margin-top: 22px; padding: 20px; border: 1px solid rgba(148,163,184,.28); border-radius: 18px; background: rgba(255,255,255,.55); }
+.crsms-message-template-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:14px; }
+.crsms-message-template-head h3 { margin:0 0 5px; }
+.crsms-message-template-head p { margin:0; opacity:.76; }
+.crsms-template-badge { white-space:nowrap; font-size:12px; font-weight:800; padding:6px 10px; border-radius:999px; border:1px solid rgba(148,163,184,.35); }
+#reviewMessageTemplate { width:100%; min-height:150px; resize:vertical; line-height:1.9; font-family:inherit; }
+.crsms-template-vars { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.crsms-template-var { border:1px solid rgba(148,163,184,.45); background:transparent; border-radius:999px; padding:7px 11px; cursor:pointer; font-family:inherit; font-weight:700; }
+.crsms-template-var:hover { transform:translateY(-1px); }
+.crsms-template-preview { margin-top:16px; padding:14px 16px; border-radius:14px; border:1px dashed rgba(148,163,184,.55); }
+.crsms-template-preview > strong { display:block; margin-bottom:8px; }
+.crsms-template-preview-body { white-space:pre-wrap; line-height:1.9; min-height:54px; }
+@media (max-width: 720px) { .crsms-message-template-head { flex-direction:column; } }

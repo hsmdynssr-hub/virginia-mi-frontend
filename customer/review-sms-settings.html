@@ -183,6 +183,33 @@
             </section>
           </div>
 
+
+          <div class="crsms-message-template-editor">
+            <div class="crsms-message-template-head">
+              <div>
+                <h3>صياغة رسالة طلب التقييم</h3>
+                <p>فريق التسويق يتحكم في نص الرسالة بالكامل. استخدم المتغيرات أدناه لإدخال بيانات العميل والطلب تلقائيًا.</p>
+              </div>
+              <span class="crsms-template-badge">Marketing Template</span>
+            </div>
+            <div class="crsms-field">
+              <label for="reviewMessageTemplate">نص الرسالة</label>
+              <textarea id="reviewMessageTemplate" rows="7" maxlength="2000" dir="rtl" placeholder="اكتب رسالة التقييم هنا..."></textarea>
+              <small>يجب أن تحتوي الرسالة على <code>{{review_link}}</code> حتى يصل العميل إلى صفحة التقييم.</small>
+            </div>
+            <div class="crsms-template-vars" aria-label="المتغيرات المتاحة">
+              <button type="button" class="crsms-template-var" data-template-var="{{customer_name}}">اسم العميل</button>
+              <button type="button" class="crsms-template-var" data-template-var="{{order_number}}">رقم الطلب</button>
+              <button type="button" class="crsms-template-var" data-template-var="{{branch_name}}">الفرع</button>
+              <button type="button" class="crsms-template-var" data-template-var="{{reward_text}}">وصف المكافأة</button>
+              <button type="button" class="crsms-template-var" data-template-var="{{review_link}}">رابط التقييم</button>
+            </div>
+            <div class="crsms-template-preview">
+              <strong>معاينة الرسالة</strong>
+              <div id="reviewMessagePreview" class="crsms-template-preview-body"></div>
+            </div>
+          </div>
+
           <div class="crsms-form-grid crsms-settings-form-grid reward-rules crsms-coupon-common-settings">
             <div class="crsms-field"><label for="couponCurrencyCode">عملة خصم المبلغ</label><input id="couponCurrencyCode" type="text" maxlength="3" value="EGP" placeholder="EGP" /></div>
             <div class="crsms-field crsms-span-2"><label for="googleReviewUrl">رابط تقييم Google بعد ظهور مكافأة التقييم</label><input id="googleReviewUrl" type="url" placeholder="https://g.page/r/.../review" /></div>

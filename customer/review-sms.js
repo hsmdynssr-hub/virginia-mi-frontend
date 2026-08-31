@@ -548,7 +548,7 @@
       claimButton.disabled = data.issuingEnabled === false;
       claimButton.textContent = data.issuingEnabled === false
         ? "إصدار الكوبونات متوقف مؤقتًا"
-        : "إصدار كوبون الشحن المجاني";
+        : "احصل على مكافأتك من التسوق عبر الإنترنت";
       hideCouponGoogleReviewLink();
     }
 
@@ -802,6 +802,10 @@
     if (byId("reviewCouponCurrencyLabel")) byId("reviewCouponCurrencyLabel").textContent = currency;
     if (byId("marketingCouponCurrencyLabel")) byId("marketingCouponCurrencyLabel").textContent = currency;
     if (byId("googleReviewUrl")) byId("googleReviewUrl").value = settings.googleReviewUrl || "";
+    if (byId("reviewMessageTemplate")) {
+      byId("reviewMessageTemplate").value = settings.reviewMessageTemplate || "";
+      updateReviewMessagePreview(settings);
+    }
     if (byId("compensationValidity")) byId("compensationValidity").value = String(settings.marketingCoupon?.validityMonths || 1);
   }
 
@@ -819,7 +823,8 @@
       reviewCoupon: collectCouponPolicyFromSettingsUi("review"),
       marketingCoupon: collectCouponPolicyFromSettingsUi("marketing"),
       couponCurrencyCode: currency,
-      googleReviewUrl: String(byId("googleReviewUrl")?.value || "").trim()
+      googleReviewUrl: String(byId("googleReviewUrl")?.value || "").trim(),
+      reviewMessageTemplate: String(byId("reviewMessageTemplate")?.value || "").trim()
     };
   }
 
@@ -882,6 +887,46 @@
     }
   }
 
+  function getReviewRewardPreviewText(settings = null) {
+    const type = byId("reviewCouponDiscountType")?.value || settings?.reviewCoupon?.discountType || "free_shipping";
+    if (type === "amount") {
+      const amount = Number(byId("reviewCouponDiscountValue")?.value || settings?.reviewCoupon?.discountValue || 0);
+      const currency = String(byId("couponCurrencyCode")?.value || settings?.couponCurrencyCode || "EGP").trim().toUpperCase();
+      return amount > 0 ? `خصم بقيمة ${amount} ${currency}` : "خصم بقيمة محددة";
+    }
+    return "مكافأة شحن مجاني";
+  }
+
+  function updateReviewMessagePreview(settings = null) {
+    const preview = byId("reviewMessagePreview");
+    const textarea = byId("reviewMessageTemplate");
+    if (!preview || !textarea) return;
+    let value = String(textarea.value || "");
+    const replacements = {
+      "{{customer_name}}": "أحمد محمد",
+      "{{order_number}}": "POS/2026/12345",
+      "{{branch_name}}": "فرع فيرجينيا",
+      "{{reward_text}}": getReviewRewardPreviewText(settings),
+      "{{review_link}}": "https://example.com/r/ABC123"
+    };
+    for (const [token, replacement] of Object.entries(replacements)) {
+      value = value.replaceAll(token, replacement);
+    }
+    preview.textContent = value || "ستظهر معاينة الرسالة هنا.";
+  }
+
+  function insertReviewTemplateVariable(token) {
+    const textarea = byId("reviewMessageTemplate");
+    if (!textarea) return;
+    const start = Number.isInteger(textarea.selectionStart) ? textarea.selectionStart : textarea.value.length;
+    const end = Number.isInteger(textarea.selectionEnd) ? textarea.selectionEnd : start;
+    textarea.value = `${textarea.value.slice(0, start)}${token}${textarea.value.slice(end)}`;
+    textarea.focus();
+    const cursor = start + token.length;
+    textarea.setSelectionRange(cursor, cursor);
+    updateReviewMessagePreview();
+  }
+
   function initSettingsPage() {
     const user = getCurrentProjectUser();
     setSettingsGate(false, user, "جاري التحقق من صلاحية حساب المشروع...");
@@ -893,10 +938,17 @@
       byId(`${prefix}CouponUnlimited`)?.addEventListener("change", () => syncCouponPolicyUi(prefix));
       syncCouponPolicyUi(prefix);
     }
+    byId("reviewMessageTemplate")?.addEventListener("input", () => updateReviewMessagePreview());
+    document.querySelectorAll("[data-template-var]").forEach((button) => {
+      button.addEventListener("click", () => insertReviewTemplateVariable(button.dataset.templateVar || ""));
+    });
+    byId("reviewCouponDiscountType")?.addEventListener("change", () => updateReviewMessagePreview());
+    byId("reviewCouponDiscountValue")?.addEventListener("input", () => updateReviewMessagePreview());
     byId("couponCurrencyCode")?.addEventListener("input", (event) => {
       const currency = String(event.currentTarget.value || "EGP").trim().toUpperCase();
       if (byId("reviewCouponCurrencyLabel")) byId("reviewCouponCurrencyLabel").textContent = currency || "EGP";
       if (byId("marketingCouponCurrencyLabel")) byId("marketingCouponCurrencyLabel").textContent = currency || "EGP";
+      updateReviewMessagePreview();
     });
     setStatus("جاري استخدام جلسة تسجيل دخول المشروع...");
     authorizeSettingsFromProjectSession();
@@ -2089,7 +2141,7 @@
             alreadyReviewedBox.innerHTML = `
               <strong>تم تسجيل تقييمك بالفعل. شكراً لك ❤️</strong>
               <a class="crsms-coupon-link" href="./review-coupon.html?token=${encodeURIComponent(token)}">
-                فتح كوبون الشحن المجاني 🎁
+                احصل على مكافأتك من التسوق عبر الإنترنت 🎁
               </a>
             `;
           } else {
@@ -2178,7 +2230,7 @@
     <strong>شكراً لتقييمك ❤️</strong>
     <p>فيرجينيا دايمًا معاك</p>
     <a class="crsms-coupon-link" href="./review-coupon.html?token=${encodeURIComponent(token)}">
-      احصل على كوبون الشحن المجاني 🎁
+      احصل على مكافأتك من التسوق عبر الإنترنت 🎁
     </a>
   `;
 } else {
