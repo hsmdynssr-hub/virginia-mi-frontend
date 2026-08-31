@@ -328,7 +328,7 @@
         })
       });
       const coupon = data.data || {};
-      setStatus(`تم إنشاء كوبون التعويض: ${coupon.couponCode || "تم تسجيله"}${coupon.shopifyDiscountId ? ` — Shopify: ${coupon.shopifyDiscountId}` : ""}`);
+      setStatus(`تم إنشاء الكوبون التسويقي: ${coupon.couponCode || "تم تسجيله"}${coupon.shopifyDiscountId ? ` — Shopify: ${coupon.shopifyDiscountId}` : ""}`);
       await loadCoupons();
     } catch (error) {
       setStatus(`تعذر إنشاء كوبون التعويض: ${error.message}`);
@@ -746,6 +746,41 @@
     }
   }
 
+  function applyCouponPolicyToSettingsUi(prefix, policy = {}) {
+    const discountType = policy.discountType === "amount" ? "amount" : "free_shipping";
+    if (byId(`${prefix}CouponEnabled`)) byId(`${prefix}CouponEnabled`).checked = Boolean(policy.enabled);
+    if (byId(`${prefix}CouponDiscountType`)) byId(`${prefix}CouponDiscountType`).value = discountType;
+    if (byId(`${prefix}CouponDiscountValue`)) byId(`${prefix}CouponDiscountValue`).value = policy.discountValue ?? "";
+    if (byId(`${prefix}CouponValidityMonths`)) byId(`${prefix}CouponValidityMonths`).value = String(policy.validityMonths || 1);
+    if (byId(`${prefix}CouponUsageLimit`)) byId(`${prefix}CouponUsageLimit`).value = String(policy.usageLimit ?? 1);
+    if (byId(`${prefix}CouponUnlimited`)) byId(`${prefix}CouponUnlimited`).checked = Boolean(policy.unlimited || policy.usageLimit == null);
+    if (byId(`${prefix}CouponOncePerCustomer`)) byId(`${prefix}CouponOncePerCustomer`).checked = Boolean(policy.oncePerCustomer);
+    syncCouponPolicyUi(prefix);
+  }
+
+  function collectCouponPolicyFromSettingsUi(prefix) {
+    const unlimited = Boolean(byId(`${prefix}CouponUnlimited`)?.checked);
+    const discountType = byId(`${prefix}CouponDiscountType`)?.value === "amount" ? "amount" : "free_shipping";
+    return {
+      enabled: Boolean(byId(`${prefix}CouponEnabled`)?.checked),
+      discountType,
+      discountValue: discountType === "amount" ? Number(byId(`${prefix}CouponDiscountValue`)?.value || 0) : 0,
+      usageLimit: Math.max(1, Number(byId(`${prefix}CouponUsageLimit`)?.value || 1)),
+      unlimited,
+      oncePerCustomer: Boolean(byId(`${prefix}CouponOncePerCustomer`)?.checked),
+      validityMonths: Number(byId(`${prefix}CouponValidityMonths`)?.value || 1)
+    };
+  }
+
+  function syncCouponPolicyUi(prefix) {
+    const type = byId(`${prefix}CouponDiscountType`)?.value || "free_shipping";
+    const amountField = byId(`${prefix}CouponAmountField`);
+    if (amountField) amountField.hidden = type !== "amount";
+    const usage = byId(`${prefix}CouponUsageLimit`);
+    const unlimited = Boolean(byId(`${prefix}CouponUnlimited`)?.checked);
+    if (usage) usage.disabled = unlimited;
+  }
+
   function applyAllSettings(settings = {}) {
     if (byId("operationMode")) byId("operationMode").value = settings.operationMode || "manual";
     if (byId("smsSendingEnabled")) byId("smsSendingEnabled").checked = Boolean(settings.smsSendingEnabled);
@@ -755,12 +790,23 @@
     if (byId("lookbackMinutes")) byId("lookbackMinutes").value = settings.customerLookbackMinutes ?? 10080;
     if (byId("limit")) byId("limit").value = settings.customerScanLimit ?? 100;
     if (byId("repeatPolicy")) byId("repeatPolicy").value = settings.customerRepeatPolicy || "same_day";
-    if (byId("couponIssuingEnabled")) byId("couponIssuingEnabled").checked = Boolean(settings.couponIssuingEnabled);
-    if (byId("couponValidityMonths")) byId("couponValidityMonths").value = String(settings.couponValidityMonths || 1);
+    applyCouponPolicyToSettingsUi("review", settings.reviewCoupon || {
+      enabled: settings.couponIssuingEnabled,
+      validityMonths: settings.couponValidityMonths || 1,
+      discountType: "free_shipping",
+      usageLimit: 1
+    });
+    applyCouponPolicyToSettingsUi("marketing", settings.marketingCoupon || {});
+    const currency = String(settings.couponCurrencyCode || "EGP").toUpperCase();
+    if (byId("couponCurrencyCode")) byId("couponCurrencyCode").value = currency;
+    if (byId("reviewCouponCurrencyLabel")) byId("reviewCouponCurrencyLabel").textContent = currency;
+    if (byId("marketingCouponCurrencyLabel")) byId("marketingCouponCurrencyLabel").textContent = currency;
     if (byId("googleReviewUrl")) byId("googleReviewUrl").value = settings.googleReviewUrl || "";
+    if (byId("compensationValidity")) byId("compensationValidity").value = String(settings.marketingCoupon?.validityMonths || 1);
   }
 
   function collectAllSettings() {
+    const currency = String(byId("couponCurrencyCode")?.value || "EGP").trim().toUpperCase();
     return {
       operationMode: byId("operationMode")?.value || "manual",
       smsSendingEnabled: Boolean(byId("smsSendingEnabled")?.checked),
@@ -770,8 +816,9 @@
       customerLookbackMinutes: Number(byId("lookbackMinutes")?.value || 1),
       customerScanLimit: Number(byId("limit")?.value || 100),
       customerRepeatPolicy: byId("repeatPolicy")?.value || "same_day",
-      couponIssuingEnabled: Boolean(byId("couponIssuingEnabled")?.checked),
-      couponValidityMonths: Number(byId("couponValidityMonths")?.value || 1),
+      reviewCoupon: collectCouponPolicyFromSettingsUi("review"),
+      marketingCoupon: collectCouponPolicyFromSettingsUi("marketing"),
+      couponCurrencyCode: currency,
       googleReviewUrl: String(byId("googleReviewUrl")?.value || "").trim()
     };
   }
@@ -841,6 +888,16 @@
     byId("reloadAllSettingsBtn")?.addEventListener("click", loadAllAdminSettings);
     byId("saveAllSettingsBtn")?.addEventListener("click", saveAllAdminSettings);
     byId("createCompensationCouponBtn")?.addEventListener("click", (event) => createCompensationCoupon(event.currentTarget));
+    for (const prefix of ["review", "marketing"]) {
+      byId(`${prefix}CouponDiscountType`)?.addEventListener("change", () => syncCouponPolicyUi(prefix));
+      byId(`${prefix}CouponUnlimited`)?.addEventListener("change", () => syncCouponPolicyUi(prefix));
+      syncCouponPolicyUi(prefix);
+    }
+    byId("couponCurrencyCode")?.addEventListener("input", (event) => {
+      const currency = String(event.currentTarget.value || "EGP").trim().toUpperCase();
+      if (byId("reviewCouponCurrencyLabel")) byId("reviewCouponCurrencyLabel").textContent = currency || "EGP";
+      if (byId("marketingCouponCurrencyLabel")) byId("marketingCouponCurrencyLabel").textContent = currency || "EGP";
+    });
     setStatus("جاري استخدام جلسة تسجيل دخول المشروع...");
     authorizeSettingsFromProjectSession();
   }

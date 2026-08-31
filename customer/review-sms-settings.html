@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="./review-sms-internal.css?v=dual-theme-20260830-01" />
   <script src="../js/api.js" defer></script>
   <script src="../js/layout.js" defer></script>
-  <script src="./review-sms.js?v=unified-reports-20260830-01" defer></script>
+  <script src="./review-sms.js?v=coupon-policy-ui-20260831-01" defer></script>
 </head>
 
 <body class="crsms-internal-page crsms-settings-page" data-page="settings" data-report-code="customer.review_sms.view">
@@ -141,45 +141,62 @@
           <div class="crsms-settings-card-head">
             <div class="crsms-settings-number">03</div>
             <div>
-              <span class="crsms-section-kicker">SHOPIFY REWARD</span>
-              <h2>المكافأة وكوبون الشحن المجاني</h2>
-              <p>إصدار مكافأة شخصية لعملاء Virginia بعد التقييم الإيجابي.</p>
+              <span class="crsms-section-kicker">SHOPIFY COUPONS</span>
+              <h2>سياسات كوبونات Shopify</h2>
+              <p>إعداد مستقل لمكافأة التقييم والكوبون التسويقي اليدوي: شحن مجاني أو خصم مبلغ، وعدد الاستخدامات والصلاحية.</p>
             </div>
           </div>
 
-          <div class="crsms-form-grid crsms-settings-form-grid reward-rules">
-            <div class="crsms-field">
-              <label for="couponValidityMonths">مدة صلاحية الكوبون</label>
-              <select id="couponValidityMonths">
-                <option value="1">شهر</option>
-                <option value="3">3 أشهر</option>
-                <option value="6">6 أشهر</option>
-                <option value="9">9 أشهر</option>
-                <option value="12">12 شهرًا</option>
-              </select>
-            </div>
-            <div class="crsms-field crsms-span-2">
-              <label for="googleReviewUrl">رابط تقييم Google بعد ظهور المكافأة</label>
-              <input id="googleReviewUrl" type="url" placeholder="https://g.page/r/.../review" />
-            </div>
+          <div class="crsms-coupon-policy-grid">
+            <section class="crsms-coupon-policy" data-policy="review">
+              <div class="crsms-coupon-policy-head">
+                <div><span>مكافأة التقييم</span><small>تُصدر تلقائيًا بعد التقييم المؤهل.</small></div>
+                <label class="crsms-policy-switch"><input id="reviewCouponEnabled" type="checkbox" /><strong>مفعّل</strong></label>
+              </div>
+              <div class="crsms-form-grid crsms-settings-form-grid">
+                <div class="crsms-field"><label for="reviewCouponDiscountType">نوع الخصم</label><select id="reviewCouponDiscountType"><option value="free_shipping">شحن مجاني</option><option value="amount">خصم مبلغ</option></select></div>
+                <div class="crsms-field" id="reviewCouponAmountField"><label for="reviewCouponDiscountValue">قيمة الخصم</label><div class="crsms-input-suffix"><input id="reviewCouponDiscountValue" type="number" min="0" step="0.01" /><span id="reviewCouponCurrencyLabel">EGP</span></div></div>
+                <div class="crsms-field"><label for="reviewCouponValidityMonths">مدة الصلاحية</label><select id="reviewCouponValidityMonths"><option value="1">شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="9">9 أشهر</option><option value="12">12 شهرًا</option></select></div>
+                <div class="crsms-field"><label for="reviewCouponUsageLimit">عدد الاستخدامات الإجمالي</label><input id="reviewCouponUsageLimit" type="number" min="1" step="1" value="1" /></div>
+              </div>
+              <div class="crsms-toggle-grid crsms-settings-toggle-grid">
+                <label class="crsms-toggle-card"><input id="reviewCouponUnlimited" type="checkbox" /><span><strong>استخدامات غير محدودة</strong><small>يعطل حد الاستخدام الإجمالي.</small></span></label>
+                <label class="crsms-toggle-card"><input id="reviewCouponOncePerCustomer" type="checkbox" /><span><strong>استخدام واحد لكل عميل</strong><small>يمنع العميل نفسه من استخدام الكود أكثر من مرة.</small></span></label>
+              </div>
+            </section>
+
+            <section class="crsms-coupon-policy" data-policy="marketing">
+              <div class="crsms-coupon-policy-head">
+                <div><span>الكوبون التسويقي اليدوي</span><small>مستقل عن التعويضات المالية وخدمة العملاء.</small></div>
+                <label class="crsms-policy-switch"><input id="marketingCouponEnabled" type="checkbox" /><strong>مفعّل</strong></label>
+              </div>
+              <div class="crsms-form-grid crsms-settings-form-grid">
+                <div class="crsms-field"><label for="marketingCouponDiscountType">نوع الخصم</label><select id="marketingCouponDiscountType"><option value="free_shipping">شحن مجاني</option><option value="amount">خصم مبلغ</option></select></div>
+                <div class="crsms-field" id="marketingCouponAmountField"><label for="marketingCouponDiscountValue">قيمة الخصم</label><div class="crsms-input-suffix"><input id="marketingCouponDiscountValue" type="number" min="0" step="0.01" /><span id="marketingCouponCurrencyLabel">EGP</span></div></div>
+                <div class="crsms-field"><label for="marketingCouponValidityMonths">مدة الصلاحية</label><select id="marketingCouponValidityMonths"><option value="1">شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="9">9 أشهر</option><option value="12">12 شهرًا</option></select></div>
+                <div class="crsms-field"><label for="marketingCouponUsageLimit">عدد الاستخدامات الإجمالي</label><input id="marketingCouponUsageLimit" type="number" min="1" step="1" value="1" /></div>
+              </div>
+              <div class="crsms-toggle-grid crsms-settings-toggle-grid">
+                <label class="crsms-toggle-card"><input id="marketingCouponUnlimited" type="checkbox" /><span><strong>استخدامات غير محدودة</strong><small>يعطل حد الاستخدام الإجمالي.</small></span></label>
+                <label class="crsms-toggle-card"><input id="marketingCouponOncePerCustomer" type="checkbox" /><span><strong>استخدام واحد لكل عميل</strong><small>يطبق Shopify حدًا منفصلًا لكل عميل.</small></span></label>
+              </div>
+            </section>
           </div>
 
-          <div class="crsms-toggle-grid crsms-settings-toggle-grid single">
-            <label class="crsms-toggle-card reward-toggle">
-              <input id="couponIssuingEnabled" type="checkbox" />
-              <span><strong>تشغيل إصدار كوبونات Shopify</strong><small>الكوبون شخصي ومربوط برقم العميل طوال فترة الصلاحية.</small></span>
-            </label>
+          <div class="crsms-form-grid crsms-settings-form-grid reward-rules crsms-coupon-common-settings">
+            <div class="crsms-field"><label for="couponCurrencyCode">عملة خصم المبلغ</label><input id="couponCurrencyCode" type="text" maxlength="3" value="EGP" placeholder="EGP" /></div>
+            <div class="crsms-field crsms-span-2"><label for="googleReviewUrl">رابط تقييم Google بعد ظهور مكافأة التقييم</label><input id="googleReviewUrl" type="url" placeholder="https://g.page/r/.../review" /></div>
           </div>
 
           <div class="crsms-settings-compensation">
-            <h3>كوبون تعويض مباشر</h3>
-            <p>لإنشاء كوبون شحن مجاني لعميل كتعويض خدمة، ويُسجل تلقائيًا في تقرير المكافآت.</p>
+            <h3>إنشاء كوبون تسويقي يدوي</h3>
+            <p>أداة تسويق مستقلة عن دورة التعويضات المالية. يتم إنشاء الكوبون وفق سياسة «الكوبون التسويقي اليدوي» أعلاه.</p>
             <div class="crsms-compensation-grid">
-              <div class="crsms-field"><label for="compensationPhone">رقم العميل</label><input id="compensationPhone" type="tel" placeholder="201xxxxxxxxx" /></div>
+              <div class="crsms-field"><label for="compensationPhone">رقم العميل / مرجع الكود</label><input id="compensationPhone" type="tel" placeholder="201xxxxxxxxx" /></div>
               <div class="crsms-field"><label for="compensationName">اسم العميل</label><input id="compensationName" type="text" placeholder="اختياري" /></div>
-              <div class="crsms-field"><label for="compensationValidity">مدة الصلاحية</label><select id="compensationValidity"><option value="1">شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="9">9 أشهر</option><option value="12">12 شهرًا</option></select></div>
-              <div class="crsms-field"><label for="compensationReason">سبب التعويض</label><input id="compensationReason" type="text" placeholder="سبب مختصر للتوثيق" /></div>
-              <button id="createCompensationCouponBtn" type="button" class="crsms-button reward">إنشاء الكوبون</button>
+              <div class="crsms-field"><label for="compensationValidity">مدة الصلاحية لهذا الكوبون</label><select id="compensationValidity"><option value="1">شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="9">9 أشهر</option><option value="12">12 شهرًا</option></select></div>
+              <div class="crsms-field"><label for="compensationReason">سبب / حملة التسويق</label><input id="compensationReason" type="text" placeholder="مثال: حملة عملاء أغسطس" /></div>
+              <button id="createCompensationCouponBtn" type="button" class="crsms-button reward">إنشاء كوبون تسويقي</button>
             </div>
           </div>
         </article>
