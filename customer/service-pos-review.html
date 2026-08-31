@@ -6,7 +6,7 @@
   <title>سجل شكاوى وملاحظات العملاء</title>
   <link rel="stylesheet" href="../css/style.css" />
   <link rel="stylesheet" href="../css/report-ui.css" />
-  <link rel="stylesheet" href="./service-pos-review.css?v=20260814-14" />
+  <link rel="stylesheet" href="./service-pos-review.css?v=20260831-15" />
 </head>
 <body class="service-pos-page">
   <main class="report-ui-page service-pos-shell">
@@ -116,6 +116,53 @@
       </section>
 
       <section id="results"></section>
+
+
+      <section id="compensationPanel" class="report-card hidden">
+        <div class="report-card-head">
+          <div>
+            <h2>دورة التعويضات المالية</h2>
+            <p>متابعة طلبات التعويض من خدمة العملاء إلى المراقبة ثم المحاسبة والتحويل.</p>
+          </div>
+          <span id="compensationRoleBadge" class="page-pill">Workflow</span>
+        </div>
+
+        <div class="report-filter-grid">
+          <label class="report-field">
+            الحالة
+            <select id="compensationStatus" class="report-select">
+              <option value="all">كل الحالات</option>
+              <option value="pending_monitor_review">بانتظار المراقبة</option>
+              <option value="monitor_rejected">غير مستحق - المراقبة</option>
+              <option value="pending_accounting_approval">بانتظار المحاسبة</option>
+              <option value="accounting_rejected">مرفوض محاسبيًا</option>
+              <option value="odoo_posting">جاري إنشاء قيد Odoo</option>
+              <option value="awaiting_payment">بانتظار التحويل</option>
+              <option value="paid">تم الدفع</option>
+              <option value="failed">خطأ يحتاج مراجعة</option>
+            </select>
+          </label>
+          <label class="report-field">
+            هاتف العميل
+            <input id="compensationPhone" class="report-input" type="text" placeholder="اختياري" />
+          </label>
+          <label class="report-field">
+            حد النتائج
+            <select id="compensationLimit" class="report-select">
+              <option value="50">50</option>
+              <option value="100" selected>100</option>
+              <option value="300">300</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="inventory-hero-actions">
+          <button id="loadCompensationsBtn" class="run-btn" type="button">تحميل حالات التعويض</button>
+          <button id="loadCompensationReportBtn" class="export-btn hidden" type="button">التقرير المالي</button>
+        </div>
+        <div id="compensationSummary" class="inventory-kpi-grid hidden"></div>
+        <div id="compensationContent" class="report-section-gap"></div>
+      </section>
 
       <section id="reviewFollowupsPanel" class="report-card">
         <div class="report-card-head">

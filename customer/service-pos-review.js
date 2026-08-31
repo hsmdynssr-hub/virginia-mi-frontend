@@ -294,11 +294,25 @@
     return currentUser?.role === "manager" || currentUser?.role === "admin";
   }
 
+  function canCreateCompensation() {
+    return ["agent", "manager", "admin"].includes(currentUser?.role);
+  }
+
+  function canMonitorCompensation() {
+    return ["monitor", "manager", "admin"].includes(currentUser?.role);
+  }
+
+  function canAccountCompensation() {
+    return ["accountant", "manager", "admin"].includes(currentUser?.role);
+  }
+
   function isAdminUser() {
     return currentUser?.role === "admin";
   }
 
   function roleLabel(role) {
+    if (role === "monitor") return "مراقب / مراجعة كاميرات";
+    if (role === "accountant") return "محاسب";
     if (role === "manager") return "مدير خدمة العملاء";
     if (role === "admin") return "Admin";
     return "موظف خدمة عملاء";
@@ -373,12 +387,15 @@
     const workArea = el("workArea");
     const state = el("csUserState");
     const managerPanel = el("managerPanel");
+    const compensationPanel = el("compensationPanel");
+    const compensationReportBtn = el("loadCompensationReportBtn");
 
     if (setupNeedsBootstrap) {
       showElement(bootstrapCard);
       hideElement(loginCard);
       hideElement(workArea);
       hideElement(managerPanel);
+      hideElement(compensationPanel);
       removeUserManagementPanel();
 
       if (state) {
@@ -397,6 +414,7 @@
       hideElement(loginCard);
       hideElement(workArea);
       hideElement(managerPanel);
+      hideElement(compensationPanel);
       removeUserManagementPanel();
 
       if (state) {
@@ -411,6 +429,14 @@
 
     hideElement(loginCard);
     showElement(workArea);
+    showElement(compensationPanel);
+    if (compensationReportBtn) {
+      if (canAccountCompensation()) showElement(compensationReportBtn);
+      else hideElement(compensationReportBtn);
+    }
+    if (el("compensationRoleBadge")) {
+      el("compensationRoleBadge").textContent = roleLabel(currentUser.role);
+    }
 
     if (state) {
       state.innerHTML = `
@@ -655,6 +681,10 @@
       }
 
       document
+        .querySelector(`[data-save-compensation="${invoice.posOrderId}"]`)
+        ?.addEventListener("click", () => saveComplaintAndRequestCompensation(invoice));
+
+      document
         .querySelector(`[data-print-receipt="${invoice.posOrderId}"]`)
         ?.addEventListener("click", () => printThermalReceipt(invoice));
 
@@ -770,10 +800,28 @@
             <textarea id="noteText-${escapeHtml(invoice.posOrderId)}" class="report-input" placeholder="اكتب نتيجة المكالمة أو مراجعة العميل..."></textarea>
           </label>
 
+          <div class="report-filter-grid compensation-request-fields ${canCreateCompensation() ? "" : "hidden"}">
+            <label class="report-field">
+              نوع مشكلة التعويض
+              <select id="compIssueType-${escapeHtml(invoice.posOrderId)}" class="report-select">
+                <option value="missing_product">منتج لم يستلمه العميل</option>
+                <option value="price_difference">فرق سعر</option>
+                <option value="payment_difference">فرق / خطأ دفع</option>
+                <option value="wrong_product">منتج خاطئ</option>
+                <option value="quality_issue">مشكلة جودة</option>
+                <option value="other">أخرى</option>
+              </select>
+            </label>
+            <label class="report-field">
+              مبلغ مقترح (اختياري)
+              <input id="compRequestedAmount-${escapeHtml(invoice.posOrderId)}" class="report-input" type="number" min="0" step="0.01" placeholder="المراقب يحدد المبلغ النهائي" />
+            </label>
+          </div>
           <div class="inventory-hero-actions">
             <button class="run-btn" type="button" data-save-note="${escapeHtml(invoice.posOrderId)}">
               حفظ وإرسال للمدير
             </button>
+            ${canCreateCompensation() ? `<button class="export-btn" type="button" data-save-compensation="${escapeHtml(invoice.posOrderId)}">حفظ الشكوى وطلب مراجعة تعويض</button>` : ""}
           </div>
         </section>
       </article>
@@ -1046,6 +1094,8 @@
             الدور
             <select id="newCsRole" class="report-select">
               <option value="agent">موظف خدمة عملاء</option>
+              <option value="monitor">مراقب / كاميرات</option>
+              <option value="accountant">محاسب</option>
               <option value="manager">مدير خدمة عملاء</option>
               <option value="admin">Admin</option>
             </select>
@@ -1072,7 +1122,9 @@
             الدور
             <select id="csUsersRoleFilter" class="report-select">
               <option value="all">كل الأدوار</option>
-              <option value="agent">موظف</option>
+              <option value="agent">موظف خدمة عملاء</option>
+              <option value="monitor">مراقب / كاميرات</option>
+              <option value="accountant">محاسب</option>
               <option value="manager">مدير</option>
               <option value="admin">Admin</option>
             </select>
@@ -1216,7 +1268,9 @@
                 <td>${escapeHtml(user.username || "-")}</td>
                 <td>
                   <select class="report-select" data-cs-user-role="${escapeHtml(user.id)}">
-                    <option value="agent" ${user.role === "agent" ? "selected" : ""}>موظف</option>
+                    <option value="agent" ${user.role === "agent" ? "selected" : ""}>موظف خدمة عملاء</option>
+                    <option value="monitor" ${user.role === "monitor" ? "selected" : ""}>مراقب / كاميرات</option>
+                    <option value="accountant" ${user.role === "accountant" ? "selected" : ""}>محاسب</option>
                     <option value="manager" ${user.role === "manager" ? "selected" : ""}>مدير</option>
                     <option value="admin" ${user.role === "admin" ? "selected" : ""}>Admin</option>
                   </select>
@@ -1632,6 +1686,317 @@
   }
 
 
+
+  function compensationStatusLabel(status) {
+    const labels = {
+      pending_monitor_review: "بانتظار مراجعة المراقبة",
+      monitor_rejected: "غير مستحق - المراقبة",
+      pending_accounting_approval: "بانتظار اعتماد المحاسبة",
+      accounting_rejected: "مرفوض محاسبيًا",
+      odoo_posting: "جاري إنشاء قيد Odoo",
+      awaiting_payment: "بانتظار التحويل",
+      paid: "تم الدفع",
+      failed: "خطأ يحتاج مراجعة",
+      cancelled: "ملغي"
+    };
+    return labels[status] || status || "-";
+  }
+
+  function compensationIssueLabel(type) {
+    const labels = {
+      missing_product: "منتج لم يستلمه العميل",
+      price_difference: "فرق سعر",
+      payment_difference: "فرق / خطأ دفع",
+      wrong_product: "منتج خاطئ",
+      quality_issue: "مشكلة جودة",
+      other: "أخرى"
+    };
+    return labels[type] || type || "-";
+  }
+
+  async function saveComplaintAndRequestCompensation(invoice) {
+    if (!canCreateCompensation()) {
+      setMessage("ليس لديك صلاحية إنشاء طلب تعويض.", "error");
+      return;
+    }
+    const noteText = el(`noteText-${invoice.posOrderId}`)?.value?.trim() || "";
+    const issueType = el(`compIssueType-${invoice.posOrderId}`)?.value || "other";
+    const requestedRaw = el(`compRequestedAmount-${invoice.posOrderId}`)?.value;
+    if (!noteText) {
+      setMessage("اكتب تفاصيل الشكوى وسبب طلب التعويض أولًا.", "error");
+      return;
+    }
+    try {
+      const companyId = invoice.companyId || getSelectedCompanyId(true);
+      const noteData = await request("/notes", {
+        method: "POST",
+        body: JSON.stringify({
+          companyId,
+          branchCode: invoice.branchCode || invoice.configName || null,
+          customerPhone: invoice.customerPhone || null,
+          customerName: invoice.customerName || null,
+          odooPartnerId: invoice.partnerId || null,
+          posOrderId: invoice.posOrderId || null,
+          invoiceRef: invoice.invoiceRef || null,
+          posReference: invoice.posReference || null,
+          invoiceDate: invoice.dateOrder || null,
+          noteType: "complaint",
+          noteText
+        })
+      });
+      const noteId = noteData?.note?.id;
+      if (!noteId) throw new Error("لم يتم استلام رقم الشكوى من السيرفر.");
+      await request(`/notes/${noteId}/submit`, { method: "PATCH", body: JSON.stringify({}) });
+      const compData = await request("/compensations", {
+        method: "POST",
+        body: JSON.stringify({
+          noteId,
+          companyId,
+          branchCode: invoice.branchCode || invoice.configName || null,
+          customerPhone: invoice.customerPhone || null,
+          customerName: invoice.customerName || null,
+          odooPartnerId: invoice.partnerId || null,
+          posOrderId: invoice.posOrderId || null,
+          invoiceRef: invoice.invoiceRef || null,
+          reason: noteText,
+          issueType,
+          requestedAmount: requestedRaw === "" || requestedRaw == null ? null : Number(requestedRaw),
+          currencyCode: "EGP"
+        })
+      });
+      const compId = compData?.compensation?.id;
+      setMessage(`تم تسجيل الشكوى رقم ${noteId} وطلب التعويض رقم ${compId}. الحالة الآن بانتظار المراقبة.`, "success");
+      if (el(`noteText-${invoice.posOrderId}`)) el(`noteText-${invoice.posOrderId}`).value = "";
+      await loadCompensations();
+    } catch (error) {
+      setMessage(error.message, "error");
+    }
+  }
+
+  async function loadCompensations() {
+    const content = el("compensationContent");
+    if (!content || !currentUser) return;
+    content.innerHTML = `<div class="inventory-empty">جاري تحميل حالات التعويض...</div>`;
+    try {
+      const params = new URLSearchParams();
+      const status = el("compensationStatus")?.value || "all";
+      const phone = el("compensationPhone")?.value?.trim() || "";
+      const companyId = getSelectedCompanyId(false);
+      if (status !== "all") params.set("status", status);
+      if (phone) params.set("customerPhone", phone);
+      if (companyId) params.set("companyId", companyId);
+      params.set("limit", el("compensationLimit")?.value || "100");
+      const data = await request(`/compensations?${params.toString()}`);
+      renderCompensations(data.compensations || []);
+    } catch (error) {
+      content.innerHTML = `<div class="inventory-empty">${escapeHtml(error.message)}</div>`;
+    }
+  }
+
+  function renderCompensations(rows) {
+    const content = el("compensationContent");
+    if (!content) return;
+    if (!rows.length) {
+      content.innerHTML = `<div class="inventory-empty">لا توجد حالات تعويض مطابقة.</div>`;
+      return;
+    }
+    content.innerHTML = `<div class="compensation-list">${rows.map(renderCompensationCard).join("")}</div>`;
+    rows.forEach((row) => bindCompensationCard(row));
+  }
+
+  function renderCompensationCard(row) {
+    const monitorActions = canMonitorCompensation() && row.status === "pending_monitor_review" ? `
+      <section class="compensation-action-box">
+        <h4>قرار المراقبة / الكاميرات</h4>
+        <div class="report-filter-grid">
+          <label class="report-field">المبلغ المستحق<input id="monitorAmount-${row.id}" class="report-input" type="number" min="0" step="0.01" placeholder="EGP" /></label>
+          <label class="report-field">تعليق المراجعة<input id="monitorComment-${row.id}" class="report-input" type="text" placeholder="نتيجة مراجعة الواقعة" /></label>
+          <label class="report-field">فيديو / إثبات<input id="monitorFile-${row.id}" class="report-input" type="file" accept="video/*,image/*,.pdf" /></label>
+        </div>
+        <div class="inventory-hero-actions">
+          <button class="run-btn" data-monitor-approve="${row.id}" type="button">مستحق واعتماد المبلغ</button>
+          <button class="export-btn" data-monitor-reject="${row.id}" type="button">غير مستحق</button>
+        </div>
+      </section>` : "";
+
+    const accountingActions = canAccountCompensation() && row.status === "pending_accounting_approval" ? `
+      <section class="compensation-action-box">
+        <h4>اعتماد المحاسبة</h4>
+        <label class="report-field">تعليق المحاسب<input id="accountingComment-${row.id}" class="report-input" type="text" placeholder="ملاحظة الاعتماد أو الرفض" /></label>
+        <div class="inventory-hero-actions">
+          <button class="run-btn" data-accounting-approve="${row.id}" type="button">موافق وإنشاء قيد Odoo</button>
+          <button class="export-btn" data-accounting-reject="${row.id}" type="button">رفض</button>
+        </div>
+      </section>` : "";
+
+    const paymentActions = canAccountCompensation() && row.status === "awaiting_payment" ? `
+      <section class="compensation-action-box">
+        <h4>تأكيد التحويل للعميل</h4>
+        <div class="report-filter-grid">
+          <label class="report-field">المبلغ المدفوع<input id="paidAmount-${row.id}" class="report-input" type="number" min="0" step="0.01" value="${escapeHtml(row.monitorAmount || "")}" /></label>
+          <label class="report-field">طريقة التحويل<input id="paymentMethod-${row.id}" class="report-input" type="text" placeholder="تحويل بنكي / كاش / ..." /></label>
+          <label class="report-field">مرجع التحويل<input id="paymentRef-${row.id}" class="report-input" type="text" placeholder="رقم العملية" /></label>
+          <label class="report-field">إثبات التحويل<input id="paymentFile-${row.id}" class="report-input" type="file" accept="image/*,.pdf" /></label>
+        </div>
+        <label class="report-field">ملاحظة<input id="paymentComment-${row.id}" class="report-input" type="text" /></label>
+        <div class="inventory-hero-actions"><button class="run-btn" data-payment-confirm="${row.id}" type="button">تم التحويل وإغلاق الحالة</button></div>
+      </section>` : "";
+
+    const retryAction = canAccountCompensation() && (row.status === "failed" || row.odooPostingStatus === "failed") ? `<button class="export-btn" data-retry-odoo="${row.id}" type="button">إعادة محاولة قيد Odoo</button>` : "";
+
+    return `<article class="compensation-card" data-compensation-card="${row.id}">
+      <div class="compensation-card-head">
+        <div><strong>تعويض #${escapeHtml(row.id)}</strong><span class="compensation-status status-${escapeHtml(row.status)}">${escapeHtml(compensationStatusLabel(row.status))}</span></div>
+        <small>${escapeHtml(formatDate(row.requestedAt))}</small>
+      </div>
+      <div class="compensation-meta-grid">
+        <div><span>العميل</span><strong>${escapeHtml(row.customerName || "-")}</strong><small>${escapeHtml(row.customerPhone || "-")}</small></div>
+        <div><span>الفاتورة</span><strong>${escapeHtml(row.invoiceRef || "-")}</strong><small>شكوى #${escapeHtml(row.noteId || "-")}</small></div>
+        <div><span>المشكلة</span><strong>${escapeHtml(compensationIssueLabel(row.issueType))}</strong><small>${escapeHtml(row.reason || "-")}</small></div>
+        <div><span>المبلغ المعتمد</span><strong>${row.monitorAmount != null ? formatMoney(row.monitorAmount) : "لم يحدد بعد"}</strong><small>${escapeHtml(row.monitorReviewedByName || "-")}</small></div>
+        <div><span>Odoo</span><strong>${escapeHtml(row.odooPostingStatus || "pending")}</strong><small>${escapeHtml(row.odooMoveName || row.odooPostingError || "-")}</small></div>
+        <div><span>الدفع</span><strong>${escapeHtml(row.paymentStatus || "not_ready")}</strong><small>${row.paidAmount != null ? formatMoney(row.paidAmount) : "-"}</small></div>
+      </div>
+      <div class="inventory-hero-actions compensation-card-tools">
+        <button class="export-btn" data-view-compensation="${row.id}" type="button">التفاصيل والتتبع</button>${retryAction}
+      </div>
+      ${monitorActions}${accountingActions}${paymentActions}
+      <div id="compensationDetails-${row.id}" class="compensation-details hidden"></div>
+    </article>`;
+  }
+
+  function bindCompensationCard(row) {
+    document.querySelector(`[data-view-compensation="${row.id}"]`)?.addEventListener("click", () => loadCompensationDetails(row.id));
+    document.querySelector(`[data-monitor-approve="${row.id}"]`)?.addEventListener("click", () => submitMonitorReview(row.id, "eligible"));
+    document.querySelector(`[data-monitor-reject="${row.id}"]`)?.addEventListener("click", () => submitMonitorReview(row.id, "not_eligible"));
+    document.querySelector(`[data-accounting-approve="${row.id}"]`)?.addEventListener("click", () => submitAccounting(row.id, "approved"));
+    document.querySelector(`[data-accounting-reject="${row.id}"]`)?.addEventListener("click", () => submitAccounting(row.id, "rejected"));
+    document.querySelector(`[data-payment-confirm="${row.id}"]`)?.addEventListener("click", () => confirmCompensationPayment(row.id));
+    document.querySelector(`[data-retry-odoo="${row.id}"]`)?.addEventListener("click", () => retryCompensationOdoo(row.id));
+  }
+
+  async function uploadCompensationAttachment(id, file, type) {
+    if (!file) return null;
+    const headers = { "Content-Type": file.type || "application/octet-stream", "X-File-Name": encodeURIComponent(file.name), "X-Attachment-Type": type };
+    const token = getMainAuthToken();
+    if (token) headers.Authorization = `Bearer ${token}`;
+    const response = await fetch(`${API_BASE}/compensations/${encodeURIComponent(id)}/attachments`, { method: "POST", headers, body: file });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) throw new Error(data?.message || data?.error || "تعذر رفع المرفق.");
+    return data?.attachment || null;
+  }
+
+  async function submitMonitorReview(id, decision) {
+    try {
+      const amount = el(`monitorAmount-${id}`)?.value;
+      const comment = el(`monitorComment-${id}`)?.value?.trim() || "";
+      const file = el(`monitorFile-${id}`)?.files?.[0] || null;
+      if (file) await uploadCompensationAttachment(id, file, "camera_video");
+      await request(`/compensations/${id}/monitor-review`, { method: "PATCH", body: JSON.stringify({ decision, amount: decision === "eligible" ? Number(amount) : null, comment }) });
+      setMessage(decision === "eligible" ? "تم اعتماد الاستحقاق وتحويل الحالة للمحاسبة." : "تم تسجيل أن العميل غير مستحق للتعويض.", "success");
+      await loadCompensations();
+    } catch (error) { setMessage(error.message, "error"); }
+  }
+
+  async function submitAccounting(id, decision) {
+    try {
+      const comment = el(`accountingComment-${id}`)?.value?.trim() || "";
+      await request(`/compensations/${id}/accounting-decision`, { method: "PATCH", body: JSON.stringify({ decision, comment }) });
+      setMessage(decision === "approved" ? "تم اعتماد المحاسبة ومعالجة قيد Odoo." : "تم رفض التعويض محاسبيًا.", "success");
+      await loadCompensations();
+    } catch (error) { setMessage(error.message, "error"); }
+  }
+
+  async function confirmCompensationPayment(id) {
+    try {
+      const file = el(`paymentFile-${id}`)?.files?.[0] || null;
+      if (file) await uploadCompensationAttachment(id, file, "payment_proof");
+      await request(`/compensations/${id}/payment`, { method: "PATCH", body: JSON.stringify({
+        paidAmount: Number(el(`paidAmount-${id}`)?.value || 0),
+        paymentMethod: el(`paymentMethod-${id}`)?.value?.trim() || "",
+        paymentReference: el(`paymentRef-${id}`)?.value?.trim() || "",
+        comment: el(`paymentComment-${id}`)?.value?.trim() || ""
+      }) });
+      setMessage("تم تسجيل التحويل وإغلاق حالة التعويض.", "success");
+      await loadCompensations();
+    } catch (error) { setMessage(error.message, "error"); }
+  }
+
+  async function retryCompensationOdoo(id) {
+    try {
+      await request(`/compensations/${id}/retry-odoo`, { method: "POST", body: JSON.stringify({}) });
+      setMessage("تمت إعادة محاولة معالجة قيد Odoo.", "success");
+      await loadCompensations();
+    } catch (error) { setMessage(error.message, "error"); }
+  }
+
+  async function loadCompensationDetails(id) {
+    const box = el(`compensationDetails-${id}`);
+    if (!box) return;
+    if (!box.classList.contains("hidden")) { hideElement(box); return; }
+    showElement(box);
+    box.innerHTML = `<div class="inventory-empty">جاري تحميل التتبع...</div>`;
+    try {
+      const data = await request(`/compensations/${id}`);
+      const row = data.compensation || {};
+      const attachments = row.attachments || [];
+      const events = data.events || [];
+      box.innerHTML = `
+        <h4>المرفقات</h4>
+        <div class="compensation-attachments">${attachments.length ? attachments.map(a => `<button class="compensation-attachment" type="button" data-open-comp-attachment="${a.id}" data-comp-request="${id}" data-comp-name="${escapeHtml(a.originalName || "attachment")}">${escapeHtml(a.originalName || a.type || "مرفق")}<small>${escapeHtml(a.type)} — ${escapeHtml(formatDate(a.uploadedAt))}</small></button>`).join("") : '<span class="inventory-muted-text">لا توجد مرفقات.</span>'}</div>
+        <h4>سجل التتبع</h4>
+        <div class="compensation-timeline">${events.length ? events.map(e => `<div class="compensation-event"><span></span><div><strong>${escapeHtml(e.type)}</strong><small>${escapeHtml(e.actorName || "النظام")} — ${escapeHtml(formatDate(e.createdAt))}</small>${e.amount != null ? `<b>${formatMoney(e.amount)}</b>` : ""}${e.comment ? `<p>${escapeHtml(e.comment)}</p>` : ""}</div></div>`).join("") : '<span class="inventory-muted-text">لا توجد أحداث بعد.</span>'}</div>`;
+      box.querySelectorAll("[data-open-comp-attachment]").forEach((button) => {
+        button.addEventListener("click", () => openCompensationAttachment(button.dataset.compRequest, button.dataset.openCompAttachment, button.dataset.compName));
+      });
+    } catch (error) { box.innerHTML = `<div class="inventory-empty">${escapeHtml(error.message)}</div>`; }
+  }
+
+  async function openCompensationAttachment(requestId, attachmentId, name) {
+    try {
+      const headers = {};
+      const token = getMainAuthToken();
+      if (token) headers.Authorization = `Bearer ${token}`;
+      const response = await fetch(`${API_BASE}/compensations/${encodeURIComponent(requestId)}/attachments/${encodeURIComponent(attachmentId)}`, { headers });
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        throw new Error(data?.message || "تعذر فتح المرفق.");
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const win = window.open(url, "_blank");
+      if (!win) {
+        const a = document.createElement("a");
+        a.href = url; a.download = name || "attachment"; document.body.appendChild(a); a.click(); a.remove();
+      }
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch (error) { setMessage(error.message, "error"); }
+  }
+
+  async function loadCompensationFinancialReport() {
+    if (!canAccountCompensation()) return;
+    const content = el("compensationContent");
+    try {
+      const params = new URLSearchParams();
+      const companyId = getSelectedCompanyId(false);
+      if (companyId) params.set("companyId", companyId);
+      if (el("dateFrom")?.value) params.set("dateFrom", el("dateFrom").value);
+      if (el("dateTo")?.value) params.set("dateTo", el("dateTo").value);
+      const data = await request(`/compensations/report/financial?${params.toString()}`);
+      const sum = data.summary || {};
+      const summary = el("compensationSummary");
+      if (summary) {
+        showElement(summary);
+        summary.innerHTML = `
+          <div class="inventory-kpi-card"><span>إجمالي الحالات</span><strong>${formatNumber(sum.total_cases || 0)}</strong><small>كل طلبات التعويض</small></div>
+          <div class="inventory-kpi-card"><span>المبالغ المعتمدة</span><strong>${formatMoney(sum.approved_amount || 0)}</strong><small>اعتماد المراقبة</small></div>
+          <div class="inventory-kpi-card"><span>تم دفعه</span><strong>${formatMoney(sum.paid_amount || 0)}</strong><small>تحويلات مؤكدة</small></div>
+          <div class="inventory-kpi-card"><span>معلق للدفع</span><strong>${formatMoney(sum.awaiting_payment_amount || 0)}</strong><small>${formatNumber(sum.awaiting_payment || 0)} حالة</small></div>`;
+      }
+      renderCompensations(data.rows || []);
+    } catch (error) { if (content) content.innerHTML = `<div class="inventory-empty">${escapeHtml(error.message)}</div>`; }
+  }
+
   function bindEvents() {
     document.addEventListener("click", async (event) => {
       if (event.target?.id === "bootstrapBtn") {
@@ -1645,6 +2010,8 @@
     el("clearBtn")?.addEventListener("click", clearSearch);
     el("loadNotesBtn")?.addEventListener("click", loadNotes);
     el("loadActivityBtn")?.addEventListener("click", loadActivity);
+    el("loadCompensationsBtn")?.addEventListener("click", loadCompensations);
+    el("loadCompensationReportBtn")?.addEventListener("click", loadCompensationFinancialReport);
     bindReviewFollowupEvents();
 
     el("loginPassword")?.addEventListener("keydown", (event) => {
@@ -1797,6 +2164,7 @@
 
     if (currentUser) {
       await autoSearchFromUrlAfterLogin();
+      await loadCompensations();
     }
   }
 

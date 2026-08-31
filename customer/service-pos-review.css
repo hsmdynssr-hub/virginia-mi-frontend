@@ -810,3 +810,40 @@
   background:linear-gradient(180deg,#ecfeff,#f5f3ff 58%,#fff7ed) !important;
   color:#334155 !important;
 }
+
+/* Financial compensation workflow */
+.service-pos-page .compensation-request-fields { margin-top: 14px !important; }
+.service-pos-page .compensation-list { display: grid; gap: 14px; }
+.service-pos-page .compensation-card { border: 1px solid #dfe6f0; border-radius: 16px; padding: 16px; background: #fbfcfe; }
+.service-pos-page .compensation-card-head { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:14px; }
+.service-pos-page .compensation-card-head > div { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.service-pos-page .compensation-card-head strong { color:var(--cs-navy); font-size:15px; }
+.service-pos-page .compensation-card-head small { color:var(--cs-muted); }
+.service-pos-page .compensation-status { display:inline-flex; align-items:center; min-height:28px; padding:0 9px; border-radius:999px; background:#eef3fb; color:#38506f; font-size:10px; font-weight:900; }
+.service-pos-page .status-paid { background:#e8f7ef; color:#147347; }
+.service-pos-page .status-monitor_rejected,.service-pos-page .status-accounting_rejected,.service-pos-page .status-failed { background:#fff0f0; color:#a83232; }
+.service-pos-page .status-awaiting_payment,.service-pos-page .status-pending_accounting_approval { background:#fff7df; color:#8b6618; }
+.service-pos-page .compensation-meta-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+.service-pos-page .compensation-meta-grid > div { display:grid; gap:3px; padding:11px; border:1px solid #e7ecf3; border-radius:12px; background:#fff; min-width:0; }
+.service-pos-page .compensation-meta-grid span { color:var(--cs-muted); font-size:9px; font-weight:800; }
+.service-pos-page .compensation-meta-grid strong { color:var(--cs-text); font-size:12px; overflow-wrap:anywhere; }
+.service-pos-page .compensation-meta-grid small { color:#78869b; font-size:9px; overflow-wrap:anywhere; }
+.service-pos-page .compensation-card-tools { margin-top:12px; }
+.service-pos-page .compensation-action-box { margin-top:14px; padding:14px; border:1px dashed #cad6e7; border-radius:14px; background:#fff; }
+.service-pos-page .compensation-action-box h4,.service-pos-page .compensation-details h4 { margin:0 0 10px; color:var(--cs-navy); font-size:13px; }
+.service-pos-page .compensation-details { margin-top:14px; padding:14px; border-top:1px solid #e4eaf2; background:#fff; border-radius:12px; }
+.service-pos-page .compensation-attachments { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+.service-pos-page .compensation-attachment { display:grid; gap:2px; padding:8px 10px; border:1px solid #d9e4f4; border-radius:10px; color:var(--cs-primary-dark); background:var(--cs-primary-soft); text-decoration:none; font-size:10px; font-weight:800; }
+.service-pos-page .compensation-attachment small { color:var(--cs-muted); font-weight:600; }
+.service-pos-page .compensation-timeline { display:grid; gap:0; }
+.service-pos-page .compensation-event { display:grid; grid-template-columns:18px 1fr; gap:9px; min-height:58px; }
+.service-pos-page .compensation-event > span { position:relative; width:9px; height:9px; margin-top:5px; border-radius:50%; background:var(--cs-primary); }
+.service-pos-page .compensation-event > span::after { content:""; position:absolute; top:12px; bottom:-48px; inset-inline-start:4px; width:1px; background:#d9e2ee; }
+.service-pos-page .compensation-event:last-child > span::after { display:none; }
+.service-pos-page .compensation-event div { display:grid; gap:3px; padding-bottom:12px; }
+.service-pos-page .compensation-event strong { color:var(--cs-text); font-size:11px; }
+.service-pos-page .compensation-event small { color:var(--cs-muted); font-size:9px; }
+.service-pos-page .compensation-event b { color:#1d6d4c; font-size:11px; }
+.service-pos-page .compensation-event p { margin:0; color:#536179; font-size:10px; }
+@media (max-width: 900px) { .service-pos-page .compensation-meta-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (max-width: 620px) { .service-pos-page .compensation-meta-grid { grid-template-columns:1fr; } .service-pos-page .compensation-card-head { align-items:flex-start; flex-direction:column; } }
