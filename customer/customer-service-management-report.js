@@ -13,7 +13,35 @@
   function fmtDate(v){if(!v)return"-";const d=new Date(v);return Number.isNaN(d.getTime())?v:d.toLocaleString("ar-EG")}
   const money=(v)=>`${Number(v||0).toLocaleString("ar-EG",{maximumFractionDigits:2})} ج`;
   function kpis(id,cards){$(id).innerHTML=cards.map(([l,v,c,s=""])=>`<article class="cs-kpi" style="--tone:${c}"><span>${esc(l)}</span><strong>${esc(v??0)}${esc(s)}</strong></article>`).join("")}
-  function complaints(r){const s=r.summary||{};kpis("managementKpis",[["إجمالي الحالات",s.total,"#667a35"],["الشكاوى",s.complaints,"#dc2626"],["الحالات المفتوحة",s.open,"#d97706"],["بانتظار المراجعة",s.pendingReview,"#8b6b28"],["المغلقة",s.closed,"#15803d"],["متأخرة +48 ساعة",s.overdue,"#ea580c"],["فشل مزامنة Odoo",s.odooSyncFailed,"#be123c"],["متوسط الحل",s.avgResolutionHours,"#0f766e"," س"]]);const rows=r.rows||[];$("complaintsTabCount").textContent=rows.length;$("managementCount").textContent=`عدد الحالات المعروضة: ${rows.length}`;$("managementRows").innerHTML=rows.map(x=>`<tr><td>${esc(x.id)}</td><td>${esc(fmtDate(x.createdAt))}</td><td><span class="cs-badge">${esc(x.noteTypeLabel)}</span></td><td>${esc(x.statusLabel)}</td><td>${esc(x.invoiceRef||"-")}</td><td>${esc(x.customerName||"-")}</td><td>${esc(x.customerPhone||"-")}</td><td>${esc(x.branchCode||"-")}</td><td>${esc(x.employeeName||"-")}</td><td>${esc(x.noteText||"-")}</td><td>${esc(x.managerComment||"-")}</td><td>${esc(x.odooSyncStatus||"-")}</td><td>${esc(x.resolutionHours??"-")}</td></tr>`).join("")||'<tr><td colspan="13">لا توجد حالات مطابقة.</td></tr>'}
+  function complaints(r){
+    const s=r.summary||{};
+    kpis("managementKpis",[
+      ["إجمالي الحالات",s.total,"#667a35"],
+      ["الشكاوى",s.complaints,"#dc2626"],
+      ["بانتظار المدير",s.pendingReview,"#8b6b28"],
+      ["بانتظار الكاميرات",s.pendingMonitor,"#d97706"],
+      ["لدى المحاسب",s.pendingAccounting,"#2563eb"],
+      ["بانتظار الصرف",s.awaitingPayment,"#7c3aed"],
+      ["تم دفعه",s.paidFinancial,"#15803d"],
+      ["غير مستحق بالكاميرات",s.rejectedAfterCamera,"#be123c"],
+      ["مفتوحة",s.open,"#ea580c"],
+      ["متأخرة +48 ساعة",s.overdue,"#c2410c"]
+    ]);
+    const rows=r.rows||[];
+    $("complaintsTabCount").textContent=rows.length;
+    $("managementCount").textContent=`عدد الحالات المعروضة: ${rows.length}`;
+    $("managementRows").innerHTML=rows.map(x=>`<tr>
+      <td>${esc(x.id)}</td><td>${esc(fmtDate(x.createdAt))}</td><td><span class="cs-badge">${esc(x.noteTypeLabel)}</span></td>
+      <td><strong>${esc(x.statusLabel)}</strong><small style="display:block">${esc(x.baseStatusLabel||"")}</small></td>
+      <td>${esc(x.invoiceRef||"-")}</td><td>${esc(x.customerName||"-")}</td><td>${esc(x.customerPhone||"-")}</td><td>${esc(x.branchCode||"-")}</td>
+      <td>${esc(x.employeeName||"-")}</td><td>${esc(x.noteText||"-")}</td><td>${esc(x.managerComment||"-")}</td>
+      <td>${esc(x.financialTicketId||"-")}</td>
+      <td>${esc(x.monitorDecision==="eligible"?`مستحق${x.monitorAmount!=null?` — ${money(x.monitorAmount)}`:""}`:x.monitorDecision==="not_eligible"?"غير مستحق":"-")}</td>
+      <td>${esc(x.accountingDecision||"-")}</td>
+      <td>${esc(x.financialOdooMoveName||x.financialOdooPostingStatus||"-")}</td>
+      <td>${esc(x.paymentStatus==="paid"?`تم الدفع${x.paidAmount!=null?` — ${money(x.paidAmount)}`:""}`:(x.paymentStatus||"-"))}</td>
+      <td>${esc(x.resolutionHours??"-")}</td></tr>`).join("")||'<tr><td colspan="17">لا توجد حالات مطابقة.</td></tr>';
+  }
   function messages(r){const s=r.smsSummary||{};kpis("smsManagementKpis",[["إجمالي الرسائل",s.total,"#667a35"],["تم الإرسال",s.sent,"#0f766e"],["إجمالي ردود العملاء",s.reviewed,"#2563eb"],["معدل الرد",s.responseRate,"#7c3aed","%"],["راضٍ جدًا",s.satisfied,"#15803d"],["محايد",s.neutral,"#b4862f"],["غير راضٍ",s.unhappy,"#be123c"],["متوسط التقييم",s.avgRating,"#0369a1"]]);const rows=r.smsRows||[];$("responsesTabCount").textContent=rows.length;$("smsManagementCount").textContent=`عدد ردود العملاء المعروضة: ${rows.length}`;$("smsManagementRows").innerHTML=rows.map(x=>`<tr><td>${esc(x.id)}</td><td>${esc(fmtDate(x.reviewedAt||x.createdAt))}</td><td><span class="cs-badge cs-status-${esc(x.status)}">${esc(x.statusLabel)}</span></td><td>${esc(x.invoiceRef||"-")}</td><td>${esc(x.customerName||"-")}</td><td>${esc(x.customerPhone||"-")}</td><td>${esc(x.branchName||"-")}</td><td>${esc(money(x.amountTotal))}</td><td>${esc(x.rating??"-")}</td><td>${esc(x.dissatisfactionReasonLabel||"-")}</td><td>${esc(x.reviewComment||"-")}</td><td>${esc(x.provider||"-")}</td><td>${esc(x.errorMessage||"-")}</td></tr>`).join("")||'<tr><td colspan="13">لا توجد ردود عملاء مطابقة.</td></tr>'}
   function filterSummary(){const from=$("dateFrom")?.value||"—",to=$("dateTo")?.value||"—",type=$("noteType")?.selectedOptions?.[0]?.textContent||"كل الأنواع",status=$("status")?.selectedOptions?.[0]?.textContent||"كل الحالات";$("managementFilterSummary").textContent=activeTab==="complaints"?`${from} إلى ${to} · ${type} · ${status}`:`${from} إلى ${to} · ردود العملاء`}
   function activateTab(tab){activeTab=tab==="responses"?"responses":"complaints";localStorage.setItem(TAB_STORAGE_KEY,activeTab);document.querySelectorAll("[data-report-tab]").forEach(button=>{const selected=button.dataset.reportTab===activeTab;button.classList.toggle("active",selected);button.setAttribute("aria-selected",String(selected))});document.querySelectorAll("[data-report-panel]").forEach(panel=>{panel.hidden=panel.dataset.reportPanel!==activeTab});document.querySelectorAll(".complaint-only-filter").forEach(field=>{field.hidden=activeTab!=="complaints"});filterSummary()}

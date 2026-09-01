@@ -847,3 +847,412 @@
 .service-pos-page .compensation-event p { margin:0; color:#536179; font-size:10px; }
 @media (max-width: 900px) { .service-pos-page .compensation-meta-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media (max-width: 620px) { .service-pos-page .compensation-meta-grid { grid-template-columns:1fr; } .service-pos-page .compensation-card-head { align-items:flex-start; flex-direction:column; } }
+
+
+/* Financial review gate — complaint stays with the manager until explicitly approved. */
+.service-pos-page .financial-review-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 14px 0;
+  padding: 14px 16px;
+  border: 1px solid #d8e3f5;
+  border-radius: 16px;
+  background: #f7faff;
+  cursor: pointer;
+}
+
+.service-pos-page .financial-review-toggle input {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  accent-color: var(--cs-primary);
+}
+
+.service-pos-page .financial-review-toggle span {
+  display: grid;
+  gap: 4px;
+}
+
+.service-pos-page .financial-review-toggle strong {
+  color: var(--cs-navy);
+  font-size: 13px;
+}
+
+.service-pos-page .financial-review-toggle small {
+  color: var(--cs-muted);
+  line-height: 1.7;
+}
+
+.service-pos-page .financial-review-fields {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px dashed #bfd0ee;
+  border-radius: 16px;
+  background: #fbfdff;
+}
+
+.service-pos-page .financial-review-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.service-pos-page .financial-review-badge.pending {
+  color: #8a5a00;
+  background: #fff7df;
+  border: 1px solid #f1d78e;
+}
+
+.service-pos-page .financial-review-badge.approved {
+  color: #11633f;
+  background: #eaf9f1;
+  border: 1px solid #b9e8cf;
+}
+
+.service-pos-page .financial-review-badge.rejected {
+  color: #9f2837;
+  background: #fff0f2;
+  border: 1px solid #f1c5cc;
+}
+
+.service-pos-page .financial-review-link {
+  display: inline-block;
+  margin-top: 6px;
+  color: var(--cs-primary-dark);
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.service-pos-page .financial-review-retry {
+  display: block;
+  min-height: 32px !important;
+  margin-top: 7px;
+  padding: 0 9px !important;
+  font-size: 10px !important;
+}
+
+.financial-review-page .financial-review-flow-note {
+  margin: 0 0 16px;
+  padding: 13px 15px;
+  border: 1px solid #cfe0f8;
+  border-radius: 15px;
+  color: #29486f;
+  background: #f5f9ff;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.financial-review-page .financial-review-access-denied {
+  padding: 24px;
+  border: 1px solid #f0c6cc;
+  border-radius: 18px;
+  color: #8d2533;
+  background: #fff5f6;
+  text-align: center;
+  font-weight: 800;
+}
+
+.financial-review-meta {
+  display: block;
+  margin-top: 6px;
+  line-height: 1.5;
+  opacity: .82;
+}
+
+
+/* Global customer-service notifications: always visible while working deep in the page. */
+.service-pos-page .cs-global-note {
+  position: fixed !important;
+  top: 14px !important;
+  left: 50% !important;
+  z-index: 100000 !important;
+  display: flex !important;
+  width: min(760px, calc(100vw - 32px)) !important;
+  min-height: 52px !important;
+  margin: 0 !important;
+  padding: 13px 48px 13px 16px !important;
+  border-radius: 16px !important;
+  box-shadow: 0 14px 42px rgba(15, 23, 42, .20) !important;
+  transform: translateX(-50%) !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  line-height: 1.7 !important;
+}
+
+.service-pos-page .cs-global-note.hidden {
+  display: none !important;
+}
+
+.service-pos-page .cs-global-note--error {
+  border: 1px solid #efb7c0 !important;
+  color: #972638 !important;
+  background: #fff4f6 !important;
+}
+
+.service-pos-page .cs-global-note--success {
+  border: 1px solid #b8dfc9 !important;
+  color: #17653c !important;
+  background: #f0fbf5 !important;
+}
+
+.service-pos-page .cs-global-note__text {
+  display: block;
+}
+
+.service-pos-page .cs-global-note__close {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  color: inherit;
+  background: rgba(255, 255, 255, .72);
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 28px;
+}
+
+.service-pos-page .cs-field-invalid {
+  border-color: #d94a5f !important;
+  outline: 2px solid rgba(217, 74, 95, .14) !important;
+  background: #fffafb !important;
+}
+
+.service-pos-page .cs-field-error {
+  display: block;
+  margin-top: 7px;
+  color: #a72e40;
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+  .service-pos-page .cs-global-note {
+    top: 8px !important;
+    width: calc(100vw - 16px) !important;
+    min-height: 48px !important;
+    padding: 11px 42px 11px 12px !important;
+    border-radius: 13px !important;
+    font-size: 12px !important;
+  }
+}
+
+/* Financial review V13 — compact operational table + expandable ticket workspace */
+.financial-review-page .financial-review-quickbar {
+  display: grid;
+  grid-template-columns: minmax(240px, 1.4fr) minmax(190px, .9fr) auto auto;
+  gap: 10px;
+  align-items: end;
+  margin: 0 0 12px;
+  padding: 12px;
+  border: 1px solid #e0e8f2;
+  border-radius: 16px;
+  background: #fbfdff;
+}
+.financial-review-page .financial-review-quickbar > label,
+.financial-review-page .financial-review-date-presets,
+.financial-review-page .financial-review-view-toggle {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.financial-review-page .financial-review-quickbar > label > span,
+.financial-review-page .financial-review-date-presets > span,
+.financial-review-page .financial-review-view-toggle > span {
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 900;
+}
+.financial-review-page .financial-review-date-presets > div,
+.financial-review-page .financial-review-view-toggle > div {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.financial-review-page [data-date-preset],
+.financial-review-page [data-view-mode] {
+  min-height: 38px;
+  padding: 0 11px;
+  border: 1px solid #d8e2ef;
+  border-radius: 10px;
+  color: #475569;
+  background: #fff;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 900;
+}
+.financial-review-page [data-date-preset].active,
+.financial-review-page [data-view-mode].active {
+  border-color: #2f64d6;
+  color: #fff;
+  background: #2f64d6;
+  box-shadow: 0 7px 16px rgba(47,100,214,.15);
+}
+.financial-review-page .financial-review-toolbar-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 10px;
+}
+.financial-review-page .financial-review-toolbar-row .inventory-hero-actions { margin: 0; }
+.financial-review-page .financial-review-advanced-filters {
+  margin: 0 0 12px;
+  border: 1px solid #e5eaf1;
+  border-radius: 13px;
+  background: #fff;
+}
+.financial-review-page .financial-review-advanced-filters > summary {
+  padding: 10px 13px;
+  color: #536179;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 900;
+}
+.financial-review-page .financial-review-advanced-filters .report-filter-grid {
+  padding: 0 12px 12px;
+}
+.financial-review-page .financial-review-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #dfe6ef;
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 5px 16px rgba(15,23,42,.035);
+}
+.financial-review-page .financial-review-table {
+  width: 100%;
+  min-width: 1080px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.financial-review-page .financial-review-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 10px 9px;
+  border-bottom: 1px solid #dbe5f0;
+  color: #475569 !important;
+  background: #f5f8fc !important;
+  text-align: right;
+  font-size: 10px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+.financial-review-page .financial-review-table td {
+  padding: 10px 9px;
+  border-bottom: 1px solid #edf1f5;
+  color: #334155;
+  vertical-align: middle;
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+.financial-review-page .financial-review-table tbody tr {
+  cursor: pointer;
+  transition: background .15s ease, box-shadow .15s ease;
+}
+.financial-review-page .financial-review-table tbody tr:hover,
+.financial-review-page .financial-review-table tbody tr:focus {
+  outline: none;
+  background: #f6f9ff;
+  box-shadow: inset -3px 0 0 #2f64d6;
+}
+.financial-review-page .financial-review-table tbody tr:last-child td { border-bottom: 0; }
+.financial-review-page .financial-review-table td strong,
+.financial-review-page .financial-review-table td small { display: block; }
+.financial-review-page .financial-review-table td strong {
+  color: #17233b;
+  font-size: 10.5px;
+  font-weight: 900;
+}
+.financial-review-page .financial-review-table td small {
+  margin-top: 3px;
+  color: #8190a5;
+  font-size: 8.5px;
+  line-height: 1.45;
+}
+.financial-review-page .financial-review-stage {
+  display: inline-flex;
+  min-height: 27px;
+  padding: 0 8px;
+  border: 1px solid #d9e3ef;
+  border-radius: 999px;
+  color: #38506f;
+  background: #f3f7fb;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+.financial-review-page .financial-review-stage.stage-pending_monitor_review { color:#245b91; background:#edf6ff; border-color:#cae2fb; }
+.financial-review-page .financial-review-stage.stage-pending_accounting_approval,
+.financial-review-page .financial-review-stage.stage-odoo_posting,
+.financial-review-page .financial-review-stage.stage-awaiting_payment { color:#856317; background:#fff8e6; border-color:#f2dfac; }
+.financial-review-page .financial-review-stage.stage-paid { color:#15704a; background:#ecf9f2; border-color:#c5e8d5; }
+.financial-review-page .financial-review-ticket-workspace {
+  margin-top: 14px;
+  padding: 12px;
+  border: 2px solid #d5e1f1;
+  border-radius: 18px;
+  background: linear-gradient(180deg,#f8fbff,#fff);
+  box-shadow: 0 12px 28px rgba(15,23,42,.07);
+  scroll-margin-top: 84px;
+}
+.financial-review-page .financial-review-ticket-workspace-head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 2px 3px 10px;
+  border-bottom: 1px solid #e3e9f1;
+}
+.financial-review-page .financial-review-ticket-workspace-head > div {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.financial-review-page .financial-review-ticket-workspace-head strong { color:#17233b; font-size:14px; }
+.financial-review-page .financial-review-ticket-workspace-head span { color:#64748b; font-size:10px; font-weight:850; }
+.financial-review-page .financial-review-ticket-workspace-head button {
+  min-height: 34px;
+  padding: 0 11px;
+  border: 1px solid #d8e2ee;
+  border-radius: 10px;
+  color:#536179;
+  background:#fff;
+  cursor:pointer;
+  font-size:10px;
+  font-weight:900;
+}
+.financial-review-page .financial-review-ticket-workspace .compensation-card {
+  border: 0;
+  padding: 4px;
+  background: transparent;
+}
+@media (max-width: 1100px) {
+  .financial-review-page .financial-review-quickbar { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 680px) {
+  .financial-review-page .financial-review-quickbar { grid-template-columns: 1fr; }
+  .financial-review-page .financial-review-toolbar-row { align-items: stretch; flex-direction: column; }
+  .financial-review-page .financial-review-toolbar-row .inventory-hero-actions { justify-content: stretch; }
+  .financial-review-page .financial-review-toolbar-row .inventory-hero-actions button { flex: 1; }
+}

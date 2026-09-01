@@ -6,7 +6,8 @@
   <title>تقرير أداء خدمة العملاء</title>
   <link rel="stylesheet" href="../css/style.css" />
   <link rel="stylesheet" href="../css/report-ui.css" />
-  <link rel="stylesheet" href="./customer-service-management-report.css?v=management-workspace-20260830-01" />
+  <link rel="stylesheet" href="./customer-service-management-report.css?v=financial-workflow-20260831-03" />
+  <script src="../js/notifications.js?v=20260901-global-01"></script>
 </head>
 <body class="cs-management-page" data-report-code="customer.service_management_report">
   <main class="cs-management-shell">
@@ -29,7 +30,22 @@
         <label>من تاريخ<input id="dateFrom" type="date" /></label>
         <label>إلى تاريخ<input id="dateTo" type="date" /></label>
         <label class="complaint-only-filter">النوع<select id="noteType"><option value="all">كل الأنواع</option><option value="complaint">شكوى</option><option value="inquiry">استفسار</option><option value="price_review">مراجعة سعر</option><option value="payment_issue">مشكلة دفع</option><option value="product_issue">مشكلة منتج</option><option value="other">أخرى</option></select></label>
-        <label class="complaint-only-filter">الحالة<select id="status"><option value="all">كل الحالات</option><option value="submitted">بانتظار المراجعة</option><option value="approved">تم التصديق</option><option value="returned">مرتجع</option><option value="closed">مغلق</option></select></label>
+        <label class="complaint-only-filter">الحالة الحالية<select id="status">
+          <option value="all">كل الحالات</option>
+          <option value="submitted">بانتظار مراجعة المدير - غير مالي</option>
+          <option value="pending_manager_approval">طلب مالي بانتظار موافقة المدير</option>
+          <option value="pending_monitor_review">بانتظار مراجعة الكاميرات</option>
+          <option value="monitor_rejected">غير مستحق بعد مراجعة الكاميرات</option>
+          <option value="pending_accounting_approval">تم تأكيد الاستحقاق - لدى المحاسب</option>
+          <option value="accounting_rejected">مرفوض محاسبيًا</option>
+          <option value="odoo_posting">جاري قيد Odoo</option>
+          <option value="awaiting_payment">بانتظار الصرف النقدي</option>
+          <option value="paid">تم الدفع وإغلاق التعويض</option>
+          <option value="failed">تعثر قيد Odoo</option>
+          <option value="approved">تم التصديق - غير مالي</option>
+          <option value="returned">مرتجع</option>
+          <option value="closed">مغلق</option>
+        </select></label>
         <label>رقم العميل<input id="customerPhone" type="text" placeholder="اختياري" /></label>
         <label>رقم الفاتورة<input id="invoiceRef" type="text" placeholder="اختياري" /></label>
         <button id="loadManagementReportBtn" type="button">تحديث التقرير</button>
@@ -43,7 +59,7 @@
       <section class="cs-management-table-card">
         <div class="cs-management-section-title"><h2>تفاصيل الحالات</h2><p id="managementCount">لم يتم تحميل التقرير بعد.</p></div>
         <div class="cs-management-table-wrap">
-          <table><thead><tr><th>#</th><th>التاريخ</th><th>النوع</th><th>الحالة</th><th>الفاتورة</th><th>العميل</th><th>الهاتف</th><th>الفرع</th><th>الموظف</th><th>التفاصيل</th><th>تعليق المدير</th><th>Odoo</th><th>ساعات المعالجة</th></tr></thead><tbody id="managementRows"><tr><td colspan="13">جاري تحميل الحالات...</td></tr></tbody></table>
+          <table><thead><tr><th>#</th><th>التاريخ</th><th>النوع</th><th>الحالة الحالية</th><th>الفاتورة</th><th>العميل</th><th>الهاتف</th><th>الفرع</th><th>الموظف</th><th>التفاصيل</th><th>تعليق المدير</th><th>تذكرة المالية</th><th>مراجعة الكاميرات</th><th>المحاسب</th><th>قيد Odoo</th><th>الصرف</th><th>ساعات المعالجة</th></tr></thead><tbody id="managementRows"><tr><td colspan="17">جاري تحميل الحالات...</td></tr></tbody></table>
         </div>
       </section>
     </section>
@@ -61,6 +77,6 @@
   </main>
   <script src="../js/api.js"></script>
   <script src="../js/layout.js?v=20260814-14"></script>
-  <script src="./customer-service-management-report.js?v=management-workspace-20260830-01"></script>
+  <script src="./customer-service-management-report.js?v=financial-workflow-20260831-03"></script>
 </body>
 </html>

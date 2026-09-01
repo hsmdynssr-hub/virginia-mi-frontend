@@ -55,31 +55,67 @@
   }
 
   function getMainAuthToken() {
+    if (typeof window.getAuthToken === "function") {
+      return window.getAuthToken() || "";
+    }
     if (typeof window.getToken === "function") {
-      const sharedToken = window.getToken();
-      if (sharedToken) return sharedToken;
+      return window.getToken() || "";
     }
-    const keys = [
-      "authToken",
-      "token",
-      "accessToken",
-      "jwt",
-      "appToken",
-      "odooMiToken",
-      "miToken",
-      "adminToken"
-    ];
+    const token = String(localStorage.getItem("token") || "").trim();
+    return token && token !== "dev-bypass-token" ? token : "";
+  }
 
-    for (const key of keys) {
-      const value = localStorage.getItem(key);
-      if (value) return value;
+  function getStoredCompanyId() {
+    try {
+      if (typeof window.getCompanyId === "function") {
+        const companyId = String(window.getCompanyId() || "").trim();
+        if (companyId) return companyId;
+      }
+    } catch (_) {}
+
+    return String(localStorage.getItem("companyId") || "").trim();
+  }
+
+  function syncComplaintCompanySelector(companyId = "") {
+    const normalizedCompanyId = String(companyId || getStoredCompanyId() || "").trim();
+    const companyField = el("companyId");
+
+    if (companyField && normalizedCompanyId) {
+      const optionExists = Array.from(companyField.options || []).some(
+        (option) => String(option.value) === normalizedCompanyId
+      );
+      if (optionExists) companyField.value = normalizedCompanyId;
     }
 
-    return "";
+    return normalizedCompanyId;
+  }
+
+  function persistComplaintCompany(companyId) {
+    const normalizedCompanyId = String(companyId || "").trim();
+
+    if (typeof window.setCompanyId === "function") {
+      window.setCompanyId(normalizedCompanyId);
+    } else if (normalizedCompanyId) {
+      localStorage.setItem("companyId", normalizedCompanyId);
+    } else {
+      localStorage.removeItem("companyId");
+    }
+
+    const headerCompany = el("companySelect");
+    if (headerCompany && headerCompany.value !== normalizedCompanyId) {
+      headerCompany.value = normalizedCompanyId;
+    }
+
+    return normalizedCompanyId;
   }
 
   function getSelectedCompanyId(required = false) {
-    const companyId = el("companyId")?.value || el("companySelect")?.value || "";
+    const companyId =
+      String(el("companyId")?.value || "").trim() ||
+      String(el("companySelect")?.value || "").trim() ||
+      getStoredCompanyId();
+
+    if (companyId) syncComplaintCompanySelector(companyId);
 
     if (required && !companyId) {
       throw new Error("لازم تختار الشركة قبل تنفيذ العملية.");
@@ -89,17 +125,62 @@
   }
 
   function setMessage(message, type = "success") {
-    const box = el("csMessage");
-    if (!box) return;
-
     if (!message) {
-      box.textContent = "";
-      box.className = "error-box hidden";
+      window.MINotifications?.dismiss?.("mi-customer-service-message");
+      const box = el("csMessage");
+      if (box) {
+        box.replaceChildren();
+        box.className = "cs-global-note hidden";
+      }
       return;
     }
 
+    if (window.MINotifications) {
+      const method = type === "error" ? "error" : type === "warning" ? "warning" : "success";
+      window.MINotifications[method]?.(message, {
+        id: "mi-customer-service-message"
+      });
+      return;
+    }
+
+    const box = el("csMessage");
+    if (!box) return;
     box.textContent = message;
-    box.className = type === "error" ? "error-box" : "loading-box";
+    box.className = `cs-global-note ${type === "error" ? "cs-global-note--error" : "cs-global-note--success"}`;
+  }
+
+  function clearFieldError(input) {
+    if (!input) return;
+    if (window.MINotifications?.clearField) {
+      window.MINotifications.clearField(input);
+      return;
+    }
+    input.classList.remove("cs-field-invalid");
+    input.removeAttribute("aria-invalid");
+    const field = input.closest?.(".report-field");
+    field?.querySelector?.(".cs-field-error")?.remove();
+  }
+
+  function setFieldError(input, message) {
+    if (!input) return;
+    if (window.MINotifications?.fieldError) {
+      window.MINotifications.fieldError(input, message, {
+        noteId: "mi-customer-service-validation"
+      });
+      return;
+    }
+
+    clearFieldError(input);
+    input.classList.add("cs-field-invalid");
+    input.setAttribute("aria-invalid", "true");
+    const field = input.closest?.(".report-field");
+    if (field) {
+      const note = document.createElement("small");
+      note.className = "cs-field-error";
+      note.textContent = message;
+      field.appendChild(note);
+    }
+    input.scrollIntoView?.({ behavior: "smooth", block: "center" });
   }
 
   function formatMoney(value) {
@@ -144,6 +225,33 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
+  }
+
+
+  function findDataElement(selector, datasetKey, value) {
+    const expected = String(value ?? "");
+    return Array.from(document.querySelectorAll(selector)).find(
+      (node) => String(node.dataset?.[datasetKey] ?? "") === expected
+    ) || null;
+  }
+
+  function syncFinancialReviewRequestUi(invoiceId) {
+    const checkbox = findDataElement("[data-financial-review-toggle]", "financialReviewToggle", invoiceId);
+    const fields = el(`financialReviewFields-${invoiceId}`);
+    const noteType = el(`noteType-${invoiceId}`);
+    const saveButton = findDataElement("[data-save-note]", "saveNote", invoiceId);
+    const enabled = Boolean(checkbox?.checked);
+
+    if (fields) {
+      fields.classList.toggle("hidden", !enabled);
+      fields.setAttribute("aria-hidden", enabled ? "false" : "true");
+    }
+    if (enabled && noteType) noteType.value = "complaint";
+    if (saveButton) {
+      saveButton.textContent = enabled
+        ? "حفظ الشكوى وإرسالها للمدير"
+        : "حفظ وإرسال للمدير";
+    }
   }
 
   async function request(path, options = {}) {
@@ -219,6 +327,9 @@
 
     if (companyId && el("companyId")) {
       el("companyId").value = companyId;
+      persistComplaintCompany(companyId);
+    } else {
+      syncComplaintCompanySelector();
     }
 
     if (invoiceRef && el("invoiceRef")) {
@@ -299,11 +410,11 @@
   }
 
   function canMonitorCompensation() {
-    return ["monitor", "manager", "admin"].includes(currentUser?.role);
+    return ["monitor", "admin"].includes(currentUser?.role);
   }
 
   function canAccountCompensation() {
-    return ["accountant", "manager", "admin"].includes(currentUser?.role);
+    return ["accountant", "admin"].includes(currentUser?.role);
   }
 
   function isAdminUser() {
@@ -387,6 +498,7 @@
     const workArea = el("workArea");
     const state = el("csUserState");
     const managerPanel = el("managerPanel");
+    const complaintTrackingPanel = el("complaintTrackingPanel");
     const compensationPanel = el("compensationPanel");
     const compensationReportBtn = el("loadCompensationReportBtn");
 
@@ -395,6 +507,7 @@
       hideElement(loginCard);
       hideElement(workArea);
       hideElement(managerPanel);
+      hideElement(complaintTrackingPanel);
       hideElement(compensationPanel);
       removeUserManagementPanel();
 
@@ -414,6 +527,7 @@
       hideElement(loginCard);
       hideElement(workArea);
       hideElement(managerPanel);
+      hideElement(complaintTrackingPanel);
       hideElement(compensationPanel);
       removeUserManagementPanel();
 
@@ -429,6 +543,8 @@
 
     hideElement(loginCard);
     showElement(workArea);
+    if (["agent", "manager", "admin"].includes(currentUser.role)) showElement(complaintTrackingPanel);
+    else hideElement(complaintTrackingPanel);
     showElement(compensationPanel);
     if (compensationReportBtn) {
       if (canAccountCompensation()) showElement(compensationReportBtn);
@@ -675,14 +791,14 @@
         openBtn.addEventListener("click", () => logOpenInvoice(invoice));
       }
 
-      const noteBtn = document.querySelector(`[data-save-note="${invoice.posOrderId}"]`);
-      if (noteBtn) {
-        noteBtn.addEventListener("click", () => saveNote(invoice));
+      // Bind save directly on every freshly rendered invoice card.
+      // A capture-phase delegated fallback also exists in bindEvents().
+      const saveBtn = findDataElement("[data-save-note]", "saveNote", invoice.posOrderId);
+      if (saveBtn && !saveBtn.dataset.saveBound) {
+        saveBtn.dataset.saveBound = "1";
+        saveBtn.addEventListener("click", (event) => handleSaveNoteClick(saveBtn, event));
       }
-
-      document
-        .querySelector(`[data-save-compensation="${invoice.posOrderId}"]`)
-        ?.addEventListener("click", () => saveComplaintAndRequestCompensation(invoice));
+      syncFinancialReviewRequestUi(invoice.posOrderId);
 
       document
         .querySelector(`[data-print-receipt="${invoice.posOrderId}"]`)
@@ -800,9 +916,18 @@
             <textarea id="noteText-${escapeHtml(invoice.posOrderId)}" class="report-input" placeholder="اكتب نتيجة المكالمة أو مراجعة العميل..."></textarea>
           </label>
 
-          <div class="report-filter-grid compensation-request-fields ${canCreateCompensation() ? "" : "hidden"}">
+          ${canCreateCompensation() ? `
+          <label class="financial-review-toggle">
+            <input type="checkbox" data-financial-review-toggle="${escapeHtml(invoice.posOrderId)}" />
+            <span>
+              <strong>يتطلب مراجعة وتحقق مالي</strong>
+              <small>يتم تسجيل الطلب مع الشكوى، ولا ينتقل للمراجعة المالية إلا بعد موافقة المدير المختص.</small>
+            </span>
+          </label>
+
+          <div id="financialReviewFields-${escapeHtml(invoice.posOrderId)}" class="report-filter-grid financial-review-fields hidden" aria-hidden="true">
             <label class="report-field">
-              نوع مشكلة التعويض
+              موضوع المراجعة المالية
               <select id="compIssueType-${escapeHtml(invoice.posOrderId)}" class="report-select">
                 <option value="missing_product">منتج لم يستلمه العميل</option>
                 <option value="price_difference">فرق سعر</option>
@@ -813,15 +938,14 @@
               </select>
             </label>
             <label class="report-field">
-              مبلغ مقترح (اختياري)
-              <input id="compRequestedAmount-${escapeHtml(invoice.posOrderId)}" class="report-input" type="number" min="0" step="0.01" placeholder="المراقب يحدد المبلغ النهائي" />
+              مبلغ محل المراجعة (اختياري)
+              <input id="compRequestedAmount-${escapeHtml(invoice.posOrderId)}" class="report-input" type="number" min="0" step="0.01" placeholder="المبلغ النهائي يحدده مسار المراجعة" />
             </label>
-          </div>
+          </div>` : ""}
           <div class="inventory-hero-actions">
             <button class="run-btn" type="button" data-save-note="${escapeHtml(invoice.posOrderId)}">
               حفظ وإرسال للمدير
             </button>
-            ${canCreateCompensation() ? `<button class="export-btn" type="button" data-save-compensation="${escapeHtml(invoice.posOrderId)}">حفظ الشكوى وطلب مراجعة تعويض</button>` : ""}
           </div>
         </section>
       </article>
@@ -842,11 +966,35 @@
   }
 
   async function saveNote(invoice) {
-    const noteType = el(`noteType-${invoice.posOrderId}`)?.value || "general";
-    const noteText = el(`noteText-${invoice.posOrderId}`)?.value?.trim() || "";
+    const financialReviewRequested = Boolean(
+      findDataElement("[data-financial-review-toggle]", "financialReviewToggle", invoice.posOrderId)?.checked
+    );
+    const selectedNoteType = el(`noteType-${invoice.posOrderId}`)?.value || "general";
+    const noteType = financialReviewRequested ? "complaint" : selectedNoteType;
+    const noteTextInput = el(`noteText-${invoice.posOrderId}`);
+    const amountInput = el(`compRequestedAmount-${invoice.posOrderId}`);
+    clearFieldError(noteTextInput);
+    clearFieldError(amountInput);
 
-    if (!noteText) {
-      setMessage("اكتب نص الملاحظة أولًا.", "error");
+    const plainNoteText = noteTextInput?.value?.trim() || "";
+
+    if (!plainNoteText) {
+      const message = "اكتب نص الملاحظة أولًا.";
+      setMessage(message, "error");
+      setFieldError(noteTextInput, message);
+      return;
+    }
+
+    const issueType = el(`compIssueType-${invoice.posOrderId}`)?.value || "other";
+    const requestedRaw = amountInput?.value;
+    const requestedAmount = requestedRaw === "" || requestedRaw === null || requestedRaw === undefined
+      ? null
+      : Number(requestedRaw);
+
+    if (financialReviewRequested && requestedAmount !== null && (!Number.isFinite(requestedAmount) || requestedAmount < 0)) {
+      const message = "مبلغ المراجعة المالية غير صالح.";
+      setMessage(message, "error");
+      setFieldError(amountInput, message);
       return;
     }
 
@@ -863,10 +1011,14 @@
           odooPartnerId: invoice.partnerId || null,
           posOrderId: invoice.posOrderId || null,
           invoiceRef: invoice.invoiceRef || null,
+          orderNumber: invoice.orderNumber || null,
           posReference: invoice.posReference || null,
           invoiceDate: invoice.dateOrder || null,
           noteType,
-          noteText
+          noteText: plainNoteText,
+          financialReviewRequested,
+          financialReviewIssueType: financialReviewRequested ? issueType : null,
+          financialReviewRequestedAmount: financialReviewRequested ? requestedAmount : null
         })
       });
 
@@ -881,12 +1033,110 @@
         body: JSON.stringify({})
       });
 
-      setMessage(`تم حفظ الملاحظة رقم ${noteId} وإرسالها للمدير.`, "success");
+      setMessage(
+        financialReviewRequested
+          ? `تم تسجيل الشكوى رقم ${noteId}. طلب المراجعة المالية الآن بانتظار موافقة المدير المختص، ولم يتم تحويله للمراقبة بعد.`
+          : `تم حفظ الملاحظة رقم ${noteId} وإرسالها للمدير.`,
+        "success"
+      );
 
       const textarea = el(`noteText-${invoice.posOrderId}`);
-      if (textarea) textarea.value = "";
+      if (textarea) {
+        textarea.value = "";
+        clearFieldError(textarea);
+      }
+      clearFieldError(el(`compRequestedAmount-${invoice.posOrderId}`));
+      const checkbox = findDataElement("[data-financial-review-toggle]", "financialReviewToggle", invoice.posOrderId);
+      if (checkbox) checkbox.checked = false;
+      syncFinancialReviewRequestUi(invoice.posOrderId);
+      if (financialReviewRequested) await loadComplaintTracking();
     } catch (error) {
       setMessage(error.message, "error");
+    }
+  }
+
+  function noteBaseStatusLabel(status) {
+    const labels = { draft: "مسودة", submitted: "بانتظار موافقة المدير", approved: "تم تصديق المدير", returned: "مرتجع لخدمة العملاء", closed: "مغلق" };
+    return labels[status] || status || "-";
+  }
+
+  function financialWorkflowStatusLabel(status) {
+    const labels = {
+      draft: "طلب مالي في مسودة الشكوى",
+      pending_manager_approval: "بانتظار موافقة المدير المختص",
+      approved_pending_financial_ticket: "تم التصديق - بانتظار فتح تذكرة المراجعة",
+      pending_monitor_review: "بانتظار مراجعة الكاميرات",
+      monitor_rejected: "غير مستحق بعد مراجعة الكاميرات",
+      pending_accounting_approval: "تم تأكيد الاستحقاق - لدى المحاسب",
+      accounting_rejected: "مرفوض محاسبيًا",
+      odoo_posting: "بدأت إجراءات الصرف - جاري قيد Odoo",
+      awaiting_payment: "تم قيد Odoo - بانتظار الصرف النقدي",
+      paid: "تم الدفع وإغلاق التعويض",
+      failed: "تعثر قيد Odoo - لدى المحاسب",
+      cancelled: "ملغي",
+      returned_to_customer_service: "مرتجع لخدمة العملاء",
+      closed_without_financial_review: "مغلق دون استكمال المراجعة المالية"
+    };
+    return labels[status] || status || "-";
+  }
+
+  function effectiveFinancialStatus(note, ticket = null) {
+    if (!note?.financialReviewRequested) return null;
+    if (ticket?.status) return ticket.status;
+    if (note.financialWorkflowStatus) return note.financialWorkflowStatus;
+    if (note.status === "approved") return "approved_pending_financial_ticket";
+    if (note.status === "returned") return "returned_to_customer_service";
+    if (note.status === "closed") return "closed_without_financial_review";
+    if (note.status === "draft") return "draft";
+    return "pending_manager_approval";
+  }
+
+  async function loadComplaintTracking() {
+    const content = el("complaintTrackingContent");
+    if (!content || !currentUser || ["monitor", "accountant"].includes(currentUser.role)) return;
+    content.innerHTML = `<div class="inventory-empty">جاري تحميل حالات الشكاوى...</div>`;
+    try {
+      const params = new URLSearchParams();
+      const companyId = getSelectedCompanyId(false);
+      if (companyId) params.set("companyId", companyId);
+      params.set("status", "all");
+      params.set("limit", "300");
+      const data = await request(`/notes?${params.toString()}`);
+      const notes = (data.notes || []).filter((note) => note.noteType === "complaint");
+      if (!notes.length) {
+        content.innerHTML = `<div class="inventory-empty">لا توجد شكاوى مسجلة ضمن النطاق الحالي.</div>`;
+        return;
+      }
+      content.innerHTML = `<div class="inventory-table-wrap"><table class="inventory-data-table report-table">
+        <thead><tr><th>#</th><th>التاريخ</th><th>الفاتورة</th><th>العميل</th><th>حالة المدير</th><th>الحالة الحالية</th><th>تذكرة المالية</th><th>نتيجة الكاميرات</th><th>Odoo</th><th>الصرف</th></tr></thead>
+        <tbody>${notes.map((note) => {
+          const status = effectiveFinancialStatus(note);
+          const monitorText = note.financialMonitorDecision === "eligible" ? `مستحق${note.financialMonitorAmount != null ? ` — ${formatMoney(note.financialMonitorAmount)}` : ""}` : note.financialMonitorDecision === "not_eligible" ? "غير مستحق" : "-";
+          const odooText = note.financialOdooMoveName || note.financialOdooPostingStatus || "-";
+          const paymentText = note.financialPaymentStatus === "paid" ? `تم الدفع${note.financialPaidAmount != null ? ` — ${formatMoney(note.financialPaidAmount)}` : ""}` : (note.financialPaymentStatus || "-");
+          return `<tr><td>${escapeHtml(note.id)}</td><td>${escapeHtml(formatDate(note.createdAt))}</td><td>${escapeHtml(note.invoiceRef || "-")}</td><td>${escapeHtml(note.customerName || note.customerPhone || "-")}</td><td>${escapeHtml(noteBaseStatusLabel(note.status))}</td><td><strong>${escapeHtml(status ? financialWorkflowStatusLabel(status) : noteBaseStatusLabel(note.status))}</strong></td><td>${note.financialTicketId ? `<a class="financial-review-link" href="./financial-review.html?ticket=${encodeURIComponent(note.financialTicketId)}&companyId=${encodeURIComponent(note.companyId || "")}">#${escapeHtml(note.financialTicketId)}</a>` : "-"}</td><td>${escapeHtml(monitorText)}</td><td>${escapeHtml(odooText)}</td><td>${escapeHtml(paymentText)}</td></tr>`;
+        }).join("")}</tbody></table></div>`;
+    } catch (error) {
+      content.innerHTML = `<div class="inventory-empty">${escapeHtml(error.message)}</div>`;
+    }
+  }
+
+  async function loadFinancialTicketIndex(companyId) {
+    try {
+      const params = new URLSearchParams();
+      if (companyId) params.set("companyId", companyId);
+      params.set("limit", "300");
+      const data = await request(`/compensations?${params.toString()}`);
+      const index = new Map();
+      (data.compensations || []).forEach((row) => {
+        if (row.noteId !== null && row.noteId !== undefined) {
+          index.set(String(row.noteId), row);
+        }
+      });
+      return index;
+    } catch (error) {
+      console.warn("Could not load financial review ticket index", error.message);
+      return new Map();
     }
   }
 
@@ -905,7 +1155,10 @@
       params.set("status", status);
       params.set("limit", "300");
 
-      const data = await request(`/notes?${params.toString()}`);
+      const [data, financialTicketIndex] = await Promise.all([
+        request(`/notes?${params.toString()}`),
+        loadFinancialTicketIndex(companyId)
+      ]);
 
       const notes = data.notes || [];
 
@@ -925,25 +1178,29 @@
                 <th>العميل</th>
                 <th>الفاتورة</th>
                 <th>الملاحظة</th>
+                <th>المراجعة المالية</th>
                 <th>تعليق المدير</th>
                 <th>إجراء</th>
               </tr>
             </thead>
             <tbody>
-              ${notes.map(renderManagerNoteRow).join("")}
+              ${notes.map((note) => renderManagerNoteRow(note, financialTicketIndex.get(String(note.id)))).join("")}
             </tbody>
           </table>
         </div>
       `;
 
       notes.forEach((note) => {
+        const existingTicket = financialTicketIndex.get(String(note.id)) || null;
         const approveBtn = document.querySelector(`[data-approve-note="${note.id}"]`);
         const returnBtn = document.querySelector(`[data-return-note="${note.id}"]`);
         const closeBtn = document.querySelector(`[data-close-note="${note.id}"]`);
+        const retryFinancialBtn = document.querySelector(`[data-create-financial-ticket="${note.id}"]`);
 
-        if (approveBtn) approveBtn.addEventListener("click", () => managerAction(note.id, "approve"));
-        if (returnBtn) returnBtn.addEventListener("click", () => managerAction(note.id, "return"));
-        if (closeBtn) closeBtn.addEventListener("click", () => managerAction(note.id, "close"));
+        if (approveBtn) approveBtn.addEventListener("click", () => managerAction(note, "approve", existingTicket));
+        if (returnBtn) returnBtn.addEventListener("click", () => managerAction(note, "return", existingTicket));
+        if (closeBtn) closeBtn.addEventListener("click", () => managerAction(note, "close", existingTicket));
+        if (retryFinancialBtn) retryFinancialBtn.addEventListener("click", () => retryFinancialReviewTicket(note));
       });
     } catch (error) {
       content.innerHTML = "";
@@ -951,11 +1208,56 @@
     }
   }
 
-  function renderManagerNoteRow(note) {
+  function renderManagerNoteRow(note, existingTicket = null) {
+    const financialRequest = note.financialReviewRequested
+      ? {
+          issueType: note.financialReviewIssueType || "other",
+          requestedAmount: note.financialReviewRequestedAmount
+        }
+      : null;
+    let financialCell = `<span class="inventory-muted-text">لا يوجد طلب مالي</span>`;
+    const financialMeta = financialRequest
+      ? `<small class="financial-review-meta">${escapeHtml(compensationIssueLabel(financialRequest.issueType))}${financialRequest.requestedAmount !== null && financialRequest.requestedAmount !== undefined ? ` — ${formatMoney(financialRequest.requestedAmount)}` : " — المبلغ غير محدد"}</small>`
+      : "";
+
+    if (financialRequest) {
+      if (existingTicket) {
+        const liveStatus = effectiveFinancialStatus(note, existingTicket);
+        financialCell = `
+          <span class="financial-review-badge approved">${escapeHtml(financialWorkflowStatusLabel(liveStatus))}</span>
+          <a class="financial-review-link" href="./financial-review.html?ticket=${encodeURIComponent(existingTicket.id)}&companyId=${encodeURIComponent(note.companyId || "")}">تذكرة #${escapeHtml(existingTicket.id)}</a>
+          ${financialMeta}
+          ${existingTicket.monitorDecision === "eligible" && existingTicket.monitorAmount != null ? `<small class="financial-review-meta">المراقب أكد: ${formatMoney(existingTicket.monitorAmount)}</small>` : ""}
+          ${existingTicket.odooMoveName ? `<small class="financial-review-meta">قيد Odoo: ${escapeHtml(existingTicket.odooMoveName)}</small>` : ""}
+        `;
+      } else if (note.status === "approved") {
+        financialCell = `
+          <span class="financial-review-badge pending">تمت الموافقة ولم تُنشأ التذكرة</span>
+          ${financialMeta}
+          <button class="export-btn financial-review-retry" type="button" data-create-financial-ticket="${escapeHtml(note.id)}">إعادة إرسال للمراجعة المالية</button>
+        `;
+      } else if (note.status === "returned" || note.status === "closed") {
+        financialCell = `<span class="financial-review-badge rejected">لم يتم النقل</span>${financialMeta}`;
+      } else {
+        financialCell = `<span class="financial-review-badge pending">بانتظار موافقة المدير</span>${financialMeta}`;
+      }
+    }
+
+    const approveLabel = financialRequest && !existingTicket
+      ? "تصديق ونقل للمراجعة المالية"
+      : "تصديق";
+    const managerActions = existingTicket
+      ? `<span class="inventory-muted-text">انتقلت للمسار المالي — متابعة فقط</span>`
+      : `<div class="inventory-hero-actions">
+          <button class="run-btn" type="button" data-approve-note="${escapeHtml(note.id)}">${approveLabel}</button>
+          <button class="run-btn" type="button" data-return-note="${escapeHtml(note.id)}">إرجاع</button>
+          <button class="run-btn" type="button" data-close-note="${escapeHtml(note.id)}">إغلاق</button>
+        </div>`;
+
     return `
       <tr>
         <td>${escapeHtml(note.id)}</td>
-        <td>${escapeHtml(note.status)}</td>
+        <td>${escapeHtml(noteBaseStatusLabel(note.status))}</td>
         <td>${escapeHtml(note.createdByName || note.createdBy || "-")}</td>
         <td>
           ${escapeHtml(note.customerName || "-")}
@@ -964,31 +1266,61 @@
         </td>
         <td>${escapeHtml(note.invoiceRef || "-")}</td>
         <td>${escapeHtml(note.noteText || "-")}</td>
+        <td>${financialCell}</td>
         <td>
           <textarea id="managerComment-${escapeHtml(note.id)}" class="report-input" placeholder="تعليق المدير"></textarea>
         </td>
-        <td>
-          <div class="inventory-hero-actions">
-            <button class="run-btn" type="button" data-approve-note="${escapeHtml(note.id)}">تصديق</button>
-            <button class="run-btn" type="button" data-return-note="${escapeHtml(note.id)}">إرجاع</button>
-            <button class="run-btn" type="button" data-close-note="${escapeHtml(note.id)}">إغلاق</button>
-          </div>
-        </td>
+        <td>${managerActions}</td>
       </tr>
     `;
   }
 
-  async function managerAction(noteId, action) {
-    const managerComment = el(`managerComment-${noteId}`)?.value?.trim() || "";
+  async function retryFinancialReviewTicket(note) {
+    if (!note.financialReviewRequested) {
+      setMessage("هذه الشكوى لا تحتوي على طلب مراجعة مالية.", "error");
+      return;
+    }
 
     try {
-      await request(`/notes/${noteId}/${action}`, {
+      const data = await request(`/notes/${encodeURIComponent(note.id)}/financial-review-ticket`, {
+        method: "POST",
+        body: JSON.stringify({})
+      });
+      const ticketId = data?.compensation?.id;
+      if (!ticketId) throw new Error("لم يتم استلام رقم تذكرة المراجعة المالية.");
+      setMessage(`تم إنشاء/استعادة تذكرة المراجعة المالية رقم ${ticketId}. الحالة الآن بانتظار المراقبة.`, "success");
+      await loadNotes();
+      await loadComplaintTracking();
+    } catch (error) {
+      setMessage(error.message, "error");
+    }
+  }
+
+  async function managerAction(note, action, existingTicket = null) {
+    const noteId = note.id;
+    const managerComment = el(`managerComment-${noteId}`)?.value?.trim() || "";
+    const financialReviewRequested = Boolean(note.financialReviewRequested);
+
+    try {
+      const data = await request(`/notes/${noteId}/${action}`, {
         method: "PATCH",
         body: JSON.stringify({ managerComment })
       });
 
-      setMessage("تم تنفيذ إجراء المدير.", "success");
+      if (action === "approve" && financialReviewRequested) {
+        const ticketId = data?.financialReviewTicket?.id || existingTicket?.id || null;
+        if (ticketId) {
+          setMessage(`تم تصديق الشكوى وإنشاء/تأكيد تذكرة المراجعة المالية رقم ${ticketId}. الحالة الآن بانتظار المراقبة.`, "success");
+        } else if (data?.financialReviewTicketError) {
+          setMessage(`تم تصديق الشكوى، لكن تعذر إنشاء تذكرة المراجعة المالية: ${data.financialReviewTicketError}. استخدم زر إعادة الإرسال من حالة «تم التصديق».`, "error");
+        } else {
+          setMessage("تم تصديق الشكوى. يمكن إعادة إرسالها للمراجعة المالية من حالة «تم التصديق» إذا لم تظهر التذكرة.", "success");
+        }
+      } else {
+        setMessage("تم تنفيذ إجراء المدير.", "success");
+      }
       await loadNotes();
+      await loadComplaintTracking();
     } catch (error) {
       setMessage(error.message, "error");
     }
@@ -1691,11 +2023,11 @@
     const labels = {
       pending_monitor_review: "بانتظار مراجعة المراقبة",
       monitor_rejected: "غير مستحق - المراقبة",
-      pending_accounting_approval: "بانتظار اعتماد المحاسبة",
+      pending_accounting_approval: "تم تأكيد الاستحقاق - لدى المحاسب",
       accounting_rejected: "مرفوض محاسبيًا",
-      odoo_posting: "جاري إنشاء قيد Odoo",
-      awaiting_payment: "بانتظار التحويل",
-      paid: "تم الدفع",
+      odoo_posting: "بدأت إجراءات الصرف - جاري قيد Odoo",
+      awaiting_payment: "تم قيد Odoo - بانتظار الصرف",
+      paid: "تم الدفع وإغلاق التعويض",
       failed: "خطأ يحتاج مراجعة",
       cancelled: "ملغي"
     };
@@ -1712,65 +2044,6 @@
       other: "أخرى"
     };
     return labels[type] || type || "-";
-  }
-
-  async function saveComplaintAndRequestCompensation(invoice) {
-    if (!canCreateCompensation()) {
-      setMessage("ليس لديك صلاحية إنشاء طلب تعويض.", "error");
-      return;
-    }
-    const noteText = el(`noteText-${invoice.posOrderId}`)?.value?.trim() || "";
-    const issueType = el(`compIssueType-${invoice.posOrderId}`)?.value || "other";
-    const requestedRaw = el(`compRequestedAmount-${invoice.posOrderId}`)?.value;
-    if (!noteText) {
-      setMessage("اكتب تفاصيل الشكوى وسبب طلب التعويض أولًا.", "error");
-      return;
-    }
-    try {
-      const companyId = invoice.companyId || getSelectedCompanyId(true);
-      const noteData = await request("/notes", {
-        method: "POST",
-        body: JSON.stringify({
-          companyId,
-          branchCode: invoice.branchCode || invoice.configName || null,
-          customerPhone: invoice.customerPhone || null,
-          customerName: invoice.customerName || null,
-          odooPartnerId: invoice.partnerId || null,
-          posOrderId: invoice.posOrderId || null,
-          invoiceRef: invoice.invoiceRef || null,
-          posReference: invoice.posReference || null,
-          invoiceDate: invoice.dateOrder || null,
-          noteType: "complaint",
-          noteText
-        })
-      });
-      const noteId = noteData?.note?.id;
-      if (!noteId) throw new Error("لم يتم استلام رقم الشكوى من السيرفر.");
-      await request(`/notes/${noteId}/submit`, { method: "PATCH", body: JSON.stringify({}) });
-      const compData = await request("/compensations", {
-        method: "POST",
-        body: JSON.stringify({
-          noteId,
-          companyId,
-          branchCode: invoice.branchCode || invoice.configName || null,
-          customerPhone: invoice.customerPhone || null,
-          customerName: invoice.customerName || null,
-          odooPartnerId: invoice.partnerId || null,
-          posOrderId: invoice.posOrderId || null,
-          invoiceRef: invoice.invoiceRef || null,
-          reason: noteText,
-          issueType,
-          requestedAmount: requestedRaw === "" || requestedRaw == null ? null : Number(requestedRaw),
-          currencyCode: "EGP"
-        })
-      });
-      const compId = compData?.compensation?.id;
-      setMessage(`تم تسجيل الشكوى رقم ${noteId} وطلب التعويض رقم ${compId}. الحالة الآن بانتظار المراقبة.`, "success");
-      if (el(`noteText-${invoice.posOrderId}`)) el(`noteText-${invoice.posOrderId}`).value = "";
-      await loadCompensations();
-    } catch (error) {
-      setMessage(error.message, "error");
-    }
   }
 
   async function loadCompensations() {
@@ -1807,31 +2080,31 @@
   function renderCompensationCard(row) {
     const monitorActions = canMonitorCompensation() && row.status === "pending_monitor_review" ? `
       <section class="compensation-action-box">
-        <h4>قرار المراقبة / الكاميرات</h4>
+        <h4>مراجعة الكاميرات وتأكيد حقيقة الشكوى</h4>
         <div class="report-filter-grid">
           <label class="report-field">المبلغ المستحق<input id="monitorAmount-${row.id}" class="report-input" type="number" min="0" step="0.01" placeholder="EGP" /></label>
           <label class="report-field">تعليق المراجعة<input id="monitorComment-${row.id}" class="report-input" type="text" placeholder="نتيجة مراجعة الواقعة" /></label>
           <label class="report-field">فيديو / إثبات<input id="monitorFile-${row.id}" class="report-input" type="file" accept="video/*,image/*,.pdf" /></label>
         </div>
         <div class="inventory-hero-actions">
-          <button class="run-btn" data-monitor-approve="${row.id}" type="button">مستحق واعتماد المبلغ</button>
+          <button class="run-btn" data-monitor-approve="${row.id}" type="button">تأكيد الاستحقاق وتحويل للمحاسب</button>
           <button class="export-btn" data-monitor-reject="${row.id}" type="button">غير مستحق</button>
         </div>
       </section>` : "";
 
     const accountingActions = canAccountCompensation() && row.status === "pending_accounting_approval" ? `
       <section class="compensation-action-box">
-        <h4>اعتماد المحاسبة</h4>
+        <h4>إجراءات المحاسب المالي</h4>
         <label class="report-field">تعليق المحاسب<input id="accountingComment-${row.id}" class="report-input" type="text" placeholder="ملاحظة الاعتماد أو الرفض" /></label>
         <div class="inventory-hero-actions">
-          <button class="run-btn" data-accounting-approve="${row.id}" type="button">موافق وإنشاء قيد Odoo</button>
+          <button class="run-btn" data-accounting-approve="${row.id}" type="button">بدء إجراءات الصرف وإنشاء قيد Odoo</button>
           <button class="export-btn" data-accounting-reject="${row.id}" type="button">رفض</button>
         </div>
       </section>` : "";
 
     const paymentActions = canAccountCompensation() && row.status === "awaiting_payment" ? `
       <section class="compensation-action-box">
-        <h4>تأكيد التحويل للعميل</h4>
+        <h4>تأكيد الصرف النقدي للعميل</h4>
         <div class="report-filter-grid">
           <label class="report-field">المبلغ المدفوع<input id="paidAmount-${row.id}" class="report-input" type="number" min="0" step="0.01" value="${escapeHtml(row.monitorAmount || "")}" /></label>
           <label class="report-field">طريقة التحويل<input id="paymentMethod-${row.id}" class="report-input" type="text" placeholder="تحويل بنكي / كاش / ..." /></label>
@@ -1839,7 +2112,7 @@
           <label class="report-field">إثبات التحويل<input id="paymentFile-${row.id}" class="report-input" type="file" accept="image/*,.pdf" /></label>
         </div>
         <label class="report-field">ملاحظة<input id="paymentComment-${row.id}" class="report-input" type="text" /></label>
-        <div class="inventory-hero-actions"><button class="run-btn" data-payment-confirm="${row.id}" type="button">تم التحويل وإغلاق الحالة</button></div>
+        <div class="inventory-hero-actions"><button class="run-btn" data-payment-confirm="${row.id}" type="button">تأكيد الصرف وإغلاق الحالة</button></div>
       </section>` : "";
 
     const retryAction = canAccountCompensation() && (row.status === "failed" || row.odooPostingStatus === "failed") ? `<button class="export-btn" data-retry-odoo="${row.id}" type="button">إعادة محاولة قيد Odoo</button>` : "";
@@ -1893,7 +2166,7 @@
       const file = el(`monitorFile-${id}`)?.files?.[0] || null;
       if (file) await uploadCompensationAttachment(id, file, "camera_video");
       await request(`/compensations/${id}/monitor-review`, { method: "PATCH", body: JSON.stringify({ decision, amount: decision === "eligible" ? Number(amount) : null, comment }) });
-      setMessage(decision === "eligible" ? "تم اعتماد الاستحقاق وتحويل الحالة للمحاسبة." : "تم تسجيل أن العميل غير مستحق للتعويض.", "success");
+      setMessage(decision === "eligible" ? "تم تأكيد الاستحقاق بعد مراجعة الكاميرات وتحويل الحالة للمحاسب المالي." : "تم تسجيل أن العميل غير مستحق للتعويض.", "success");
       await loadCompensations();
     } catch (error) { setMessage(error.message, "error"); }
   }
@@ -1902,7 +2175,7 @@
     try {
       const comment = el(`accountingComment-${id}`)?.value?.trim() || "";
       await request(`/compensations/${id}/accounting-decision`, { method: "PATCH", body: JSON.stringify({ decision, comment }) });
-      setMessage(decision === "approved" ? "تم اعتماد المحاسبة ومعالجة قيد Odoo." : "تم رفض التعويض محاسبيًا.", "success");
+      setMessage(decision === "approved" ? "بدأ المحاسب إجراءات الصرف وتمت معالجة قيد Odoo المرتبط بالشكوى وشريك العميل." : "تم رفض التعويض محاسبيًا.", "success");
       await loadCompensations();
     } catch (error) { setMessage(error.message, "error"); }
   }
@@ -1917,7 +2190,7 @@
         paymentReference: el(`paymentRef-${id}`)?.value?.trim() || "",
         comment: el(`paymentComment-${id}`)?.value?.trim() || ""
       }) });
-      setMessage("تم تسجيل التحويل وإغلاق حالة التعويض.", "success");
+      setMessage("تم تسجيل الصرف وإغلاق حالة التعويض، والحالة محدثة في سجل خدمة العملاء.", "success");
       await loadCompensations();
     } catch (error) { setMessage(error.message, "error"); }
   }
@@ -1997,17 +2270,70 @@
     } catch (error) { if (content) content.innerHTML = `<div class="inventory-empty">${escapeHtml(error.message)}</div>`; }
   }
 
+  async function handleSaveNoteClick(saveButton, event) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+
+    if (!saveButton || saveButton.disabled) return false;
+
+    const invoiceId = String(saveButton.dataset.saveNote || "");
+    const invoice = lastInvoices.find((item) => String(item?.posOrderId ?? "") === invoiceId);
+
+    if (!invoice) {
+      setMessage("تعذر تحديد الفاتورة المرتبطة بزر الحفظ. أعد البحث عن الفاتورة وحاول مرة أخرى.", "error");
+      console.error("[CustomerService] Save invoice not found", { invoiceId, lastInvoices });
+      return false;
+    }
+
+    const originalText = saveButton.textContent;
+    saveButton.disabled = true;
+    saveButton.textContent = "جاري الحفظ...";
+    setMessage("جاري حفظ الشكوى وإرسالها للمدير...", "success");
+    console.info("[CustomerService] Save complaint click", { invoiceId });
+
+    try {
+      await saveNote(invoice);
+    } catch (error) {
+      console.error("[CustomerService] Save complaint failed", error);
+      setMessage(error?.message || "تعذر حفظ الشكوى.", "error");
+    } finally {
+      saveButton.disabled = false;
+      syncFinancialReviewRequestUi(invoice.posOrderId);
+      if (saveButton.textContent === "جاري الحفظ...") {
+        saveButton.textContent = originalText;
+      }
+    }
+    return false;
+  }
+
   function bindEvents() {
+    // Capture phase guarantees the save click is seen even if another widget
+    // stops bubbling later in the DOM tree. Direct per-card binding is kept
+    // as a second safety net for dynamically rendered invoice cards.
     document.addEventListener("click", async (event) => {
       if (event.target?.id === "bootstrapBtn") {
         await bootstrapManager();
+        return;
       }
+
+      const saveButton = event.target?.closest?.("[data-save-note]");
+      if (saveButton) {
+        await handleSaveNoteClick(saveButton, event);
+        return;
+      }
+    }, true);
+
+    document.addEventListener("change", (event) => {
+      const toggle = event.target?.closest?.("[data-financial-review-toggle]");
+      if (!toggle) return;
+      syncFinancialReviewRequestUi(toggle.dataset.financialReviewToggle);
     });
 
     el("loginBtn")?.addEventListener("click", login);
     el("logoutBtn")?.addEventListener("click", logout);
     el("searchBtn")?.addEventListener("click", searchInvoices);
     el("clearBtn")?.addEventListener("click", clearSearch);
+    el("loadComplaintTrackingBtn")?.addEventListener("click", loadComplaintTracking);
     el("loadNotesBtn")?.addEventListener("click", loadNotes);
     el("loadActivityBtn")?.addEventListener("click", loadActivity);
     el("loadCompensationsBtn")?.addEventListener("click", loadCompensations);
@@ -2027,6 +2353,17 @@
     });
 
     el("companyId")?.addEventListener("change", () => {
+      const companyId = persistComplaintCompany(el("companyId")?.value || "");
+      setMessage("", "success");
+
+      window.dispatchEvent(new CustomEvent("company-context-changed", {
+        detail: { companyId }
+      }));
+    });
+
+    window.addEventListener("company-context-changed", (event) => {
+      const companyId = String(event?.detail?.companyId || getStoredCompanyId() || "").trim();
+      syncComplaintCompanySelector(companyId);
       setMessage("", "success");
     });
   }
@@ -2157,14 +2494,36 @@
     defaultDates();
     applyUrlParamsToFilters();
     bindEvents();
+    syncComplaintCompanySelector();
+
+    // The shared layout loads company permissions asynchronously. Re-sync once it
+    // has populated the header selector so the complaint page always mirrors
+    // the persisted project-wide company context after refresh/navigation.
+    setTimeout(() => syncComplaintCompanySelector(), 0);
+    setTimeout(() => syncComplaintCompanySelector(), 500);
 
     setupNeedsBootstrap = false;
 
     await verifySession();
 
+    const refreshComplaintState = () => {
+      if (!currentUser) return;
+      loadComplaintTracking();
+      if (isManagerUser()) loadNotes();
+    };
+    window.addEventListener("storage", (event) => {
+      if (event.key === "mi-customer-service-live") refreshComplaintState();
+    });
+    if ("BroadcastChannel" in window) {
+      try {
+        const channel = new BroadcastChannel("mi-customer-service-live");
+        channel.addEventListener("message", refreshComplaintState);
+      } catch (_) {}
+    }
+
     if (currentUser) {
       await autoSearchFromUrlAfterLogin();
-      await loadCompensations();
+      if (["agent", "manager", "admin"].includes(currentUser.role)) await loadComplaintTracking();
     }
   }
 

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>المراجعة والتحقق المالي</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/report-ui.css" />
+  <link rel="stylesheet" href="./service-pos-review.css?v=20260901-financial-table-01" />
+  <script src="../js/notifications.js?v=20260901-global-01"></script>
+</head>
+<body class="service-pos-page financial-review-page" data-active-page="customer-financial-review">
+  <main class="report-ui-page service-pos-shell">
+    <nav class="service-page-toolbar" aria-label="أدوات الصفحة">
+      <a class="service-home-button" href="./service-pos-review.html">
+        <span class="service-home-button-icon" aria-hidden="true">←</span>
+        <strong>سجل الشكاوى</strong>
+      </a>
+      <div class="service-toolbar-actions">
+        <div id="financialReviewUserState" class="service-session-state">
+          <span class="page-pill">جاري التحقق من الجلسة</span>
+        </div>
+        <button type="button" class="mi-language-toggle service-language-toggle" data-mi-language-toggle aria-label="تغيير اللغة">
+          <span aria-hidden="true">◎</span><strong>EN</strong>
+        </button>
+      </div>
+    </nav>
+
+    <section class="inventory-hero-card">
+      <div class="service-hero-copy">
+        <span class="inventory-hero-kicker">Financial Review</span>
+        <h1>المراجعة والتحقق المالي</h1>
+        <p>تظهر هنا التذاكر بعد موافقة المدير المختص. المراقب يراجع الكاميرات ويؤكد حقيقة الواقعة، وبعد التأكيد يستلم المحاسب الحالة ليبدأ إجراءات الصرف والقيد المالي في Odoo.</p>
+      </div>
+      <div class="service-hero-mark" aria-hidden="true">FR</div>
+    </section>
+
+    <section id="financialReviewMessage" class="error-box hidden"></section>
+
+    <section id="financialReviewAccessDenied" class="financial-review-access-denied hidden">
+      هذه الصفحة التشغيلية للمراقب والمحاسب المالي. المدير يراجع مسار التذكرة للمتابعة فقط بعد موافقته على الشكوى، والأدمن للطوارئ. موظف خدمة العملاء يرسل الطلب من سجل الشكاوى.
+    </section>
+
+    <section id="financialReviewWorkArea" class="hidden">
+      <section class="report-card">
+        <div class="report-card-head">
+          <div>
+            <h2>تذاكر المراجعة المالية</h2>
+            <p>كل تذكرة مرتبطة بالشكوى الأصلية وبملاحظة خدمة العملاء والفاتورة.</p>
+          </div>
+          <span id="financialReviewRoleBadge" class="page-pill">Workflow</span>
+        </div>
+
+        <div class="financial-review-flow-note">
+          المسار المعتمد: خدمة العملاء ← موافقة المدير المختص ← مراقب النظام / مراجعة الكاميرات ← تأكيد الاستحقاق ← المحاسب المالي / إجراءات الصرف + قيد Odoo على الشريك ← تأكيد الصرف ← تحديث حالة الشكوى وإغلاقها.
+        </div>
+
+        <div class="financial-review-quickbar">
+          <label class="financial-review-quick-search">
+            <span>بحث سريع</span>
+            <input id="compensationSearch" class="report-input" type="search" placeholder="رقم التذكرة، الفاتورة، رقم الطلب، العميل أو الهاتف" autocomplete="off" />
+          </label>
+
+          <label class="financial-review-quick-status">
+            <span>الحالة</span>
+            <select id="compensationStatus" class="report-select">
+              <option value="all">كل الحالات</option>
+              <option value="monitor_queue">طابور مراقب النظام</option>
+              <option value="accountant_queue">طابور المحاسب المالي</option>
+              <option value="pending_monitor_review">بانتظار مراجعة المراقبة</option>
+              <option value="monitor_rejected">غير مستحق - المراقبة</option>
+              <option value="pending_accounting_approval">تم تأكيد الاستحقاق - لدى المحاسب</option>
+              <option value="accounting_rejected">مرفوض محاسبيًا</option>
+              <option value="odoo_posting">جاري قيد Odoo</option>
+              <option value="awaiting_payment">بانتظار الصرف</option>
+              <option value="paid">تم الدفع</option>
+              <option value="failed">خطأ يحتاج مراجعة</option>
+            </select>
+          </label>
+
+          <div class="financial-review-date-presets" aria-label="فترة التذاكر">
+            <span>الفترة</span>
+            <div>
+              <button type="button" data-date-preset="today">اليوم</button>
+              <button type="button" data-date-preset="7days">7 أيام</button>
+              <button type="button" data-date-preset="month" class="active">الشهر</button>
+              <button type="button" data-date-preset="all">الكل</button>
+            </div>
+          </div>
+
+          <div class="financial-review-view-toggle" aria-label="طريقة العرض">
+            <span>العرض</span>
+            <div>
+              <button id="financialReviewTableView" type="button" data-view-mode="table" class="active">جدول</button>
+              <button id="financialReviewCardsView" type="button" data-view-mode="cards">بطاقات</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="financial-review-toolbar-row">
+          <span id="financialReviewResultsCount" class="page-pill">0 تذكرة</span>
+          <div class="inventory-hero-actions">
+            <button id="loadCompensationsBtn" class="run-btn" type="button">تحديث التذاكر</button>
+            <button id="loadCompensationReportBtn" class="export-btn hidden" type="button">التقرير المالي</button>
+          </div>
+        </div>
+
+        <details class="financial-review-advanced-filters">
+          <summary>فلاتر إضافية</summary>
+          <div class="report-filter-grid">
+            <label class="report-field">
+              الشركة
+              <select id="companyId" class="report-select">
+                <option value="">كل الشركات</option>
+                <option value="1">فيرجينيا</option>
+                <option value="2">كليوباترا</option>
+              </select>
+            </label>
+            <label class="report-field">
+              هاتف العميل
+              <input id="compensationPhone" class="report-input" type="text" placeholder="اختياري" />
+            </label>
+            <label class="report-field">
+              من تاريخ
+              <input id="dateFrom" class="report-input" type="date" />
+            </label>
+            <label class="report-field">
+              إلى تاريخ
+              <input id="dateTo" class="report-input" type="date" />
+            </label>
+            <label class="report-field">
+              حد النتائج
+              <select id="compensationLimit" class="report-select">
+                <option value="50">50</option>
+                <option value="100" selected>100</option>
+                <option value="300">300</option>
+              </select>
+            </label>
+          </div>
+        </details>
+
+        <div id="compensationSummary" class="inventory-kpi-grid hidden"></div>
+        <div id="compensationContent" class="report-section-gap"></div>
+        <div id="compensationTicketWorkspace" class="financial-review-ticket-workspace hidden"></div>
+      </section>
+    </section>
+  </main>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js?v=20260831-financial-review-03"></script>
+  <script src="./financial-review.js?v=order-number-search-20260901-01"></script>
+</body>
+</html>

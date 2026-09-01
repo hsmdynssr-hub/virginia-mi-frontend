@@ -110,99 +110,48 @@ function getDefaultDates() {
 }
 
 function isUsableToken(token) {
+  const value = String(token || "").trim();
   return Boolean(
-    token &&
-    token !== "null" &&
-    token !== "undefined" &&
-    String(token).trim()
+    value &&
+    value !== "null" &&
+    value !== "undefined" &&
+    value !== "dev-bypass-token"
   );
 }
 
+function clearLegacyDevBypassSession() {
+  const storedToken = localStorage.getItem("token");
+  if (storedToken === "dev-bypass-token") {
+    localStorage.removeItem("token");
+  }
+
+  try {
+    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+    if (storedUser?.isDevBypass === true || storedUser?.username === "dev-admin") {
+      localStorage.removeItem("user");
+      localStorage.removeItem("companyId");
+      localStorage.removeItem("branchCode");
+    }
+  } catch (_) {}
+}
+
 function getToken() {
-  const directToken =
-    localStorage.getItem("token") ||
-    localStorage.getItem("authToken") ||
-    localStorage.getItem("accessToken") ||
-    localStorage.getItem("jwt") ||
-    localStorage.getItem("appToken") ||
-    localStorage.getItem("adminToken") ||
-    localStorage.getItem("odoo_mi_token") ||
-    localStorage.getItem("odooMiToken");
+  clearLegacyDevBypassSession();
 
-  if (isUsableToken(directToken)) {
-    return directToken;
-  }
-
-  const possibleJsonKeys = [
-    "user",
-    "auth",
-    "session",
-    "currentUser",
-    "loginData"
-  ];
-
-  for (const key of possibleJsonKeys) {
-    try {
-      const value = localStorage.getItem(key);
-      if (!value) continue;
-
-      const parsed = JSON.parse(value);
-
-      const nestedToken =
-        parsed.token ||
-        parsed.authToken ||
-        parsed.accessToken ||
-        parsed.jwt ||
-        parsed.appToken;
-
-      if (isUsableToken(nestedToken)) {
-        return nestedToken;
-      }
-    } catch (_) {}
-  }
-
-  return "";
+  // The server login flow stores the canonical JWT only under `token`.
+  // Local testing intentionally uses exactly the same auth contract.
+  const token = localStorage.getItem("token");
+  return isUsableToken(token) ? String(token).trim() : "";
 }
 
 function getAuthToken() {
   return getToken();
 }
 
-function isLocalDevHost() {
-  return (
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1"
-  );
-}
-
 function ensureLocalDevSession() {
-  if (!isLocalDevHost()) return;
-
-  const token = getToken();
-
-  if (!token) {
-    localStorage.setItem("token", "dev-bypass-token");
-  }
-
-  const currentUserRaw = localStorage.getItem("user");
-
-  if (!currentUserRaw) {
-    localStorage.setItem(
-      "user",
-      JSON.stringify({
-        id: 0,
-        username: "dev-admin",
-        fullName: "Development Admin",
-        role: "admin",
-        roles: [
-          { id: 0, code: "admin", name: "Development Admin" },
-          { id: 1, code: "super_admin", name: "Development Super Admin" }
-        ],
-        permissions: ["*"],
-        isDevBypass: true
-      })
-    );
-  }
+  // Kept as a compatibility hook for older pages. It no longer creates
+  // a fake local user or token; local auth must be a real server JWT.
+  clearLegacyDevBypassSession();
 }
 
 function getAuthHeaders({ json = true } = {}) {
@@ -364,17 +313,27 @@ async function handleApiResponse(response) {
   if (response.status === 401) {
     console.warn("AUTH ERROR:", data);
 
-    throw new Error(
+    const message =
       data.message ||
-      "الجلسة غير صالحة. اعمل Login مرة تانية."
-    );
+      "الجلسة غير صالحة. اعمل Login مرة تانية.";
+
+    window.MINotifications?.error?.(message, {
+      title: "تعذر التحقق من الجلسة",
+      id: "mi-api-auth-error"
+    });
+    throw new Error(message);
   }
 
   if (!response.ok) {
-    throw new Error(
+    const message =
       data?.message ||
-      `API request failed. Status: ${response.status}`
-    );
+      `API request failed. Status: ${response.status}`;
+
+    window.MINotifications?.error?.(message, {
+      title: "تعذر تنفيذ الطلب",
+      id: `mi-api-error-${response.status}`
+    });
+    throw new Error(message);
   }
 
   return data;

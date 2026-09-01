@@ -208,12 +208,17 @@ window.ReportUI = (() => {
   }
 
   function showError(containerId, error) {
+    const message = error?.message || String(error || "حدث خطأ أثناء تحميل التقرير.");
+    window.MINotifications?.error?.(message, {
+      title: "حدث خطأ أثناء تحميل التقرير",
+      id: `mi-report-ui-error-${containerId}`
+    });
+
     const container = document.getElementById(containerId);
     if (!container) return;
 
     container.className = "report-error alert alert-danger";
-    container.textContent =
-      error?.message || String(error || "حدث خطأ أثناء تحميل التقرير.");
+    container.textContent = message;
     container.classList.remove("hidden");
   }
 

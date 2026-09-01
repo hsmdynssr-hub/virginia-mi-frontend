@@ -274,6 +274,7 @@ const REPORT_PAGE_MAP = {
   customer: "customer.index",
   "customer-pos-phones": "customer.pos_phones",
   "customer-service-pos-review": "customer.service_pos_review",
+  "customer-financial-review": "customer.service_pos_review",
   "customer-service-management-report": "customer.service_management_report",
   "customer-vip": "customer.vip",
   "customer-migration": "customer.migration",
@@ -364,6 +365,7 @@ const PAGES_WITHOUT_REPORT_TOOLBAR = new Set([
 
 const STANDALONE_CUSTOMER_PAGES = new Set([
   "customer-service-pos-review",
+  "customer-financial-review",
   "customer-service-management-report",
   "customer-review-sms-dashboard",
   "customer-review-sms-settings",
@@ -429,11 +431,19 @@ function hasPermission(pageCode) {
     return false;
   }
 
+  const permissions = getUserPermissions();
+
+  if (pageCode === "customer-financial-review") {
+    return [
+      "customer.service_compensation.monitor",
+      "customer.service_compensation.accounting",
+      "customer.review_sms.manage_followups"
+    ].some((permission) => permissions.includes(permission));
+  }
+
   const reportCode = getReportCodeForPage(pageCode);
 
   if (!reportCode) return false;
-
-  const permissions = getUserPermissions();
 
   return permissions.includes(reportCode);
 }
@@ -465,15 +475,8 @@ async function syncCurrentUserPermissions() {
 }
 
 function guardPage(activePage) {
-  if (
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1"
-  ) {
-    if (typeof ensureLocalDevSession === "function") {
-      ensureLocalDevSession();
-    } else if (!localStorage.getItem("token")) {
-      localStorage.setItem("token", "dev-bypass-token");
-    }
+  if (typeof ensureLocalDevSession === "function") {
+    ensureLocalDevSession();
   }
 
   const token =
@@ -689,20 +692,15 @@ async function loadAllowedCompaniesForCurrentUser() {
 
   const user = getCurrentUser();
 
-  const isLocalDev =
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1";
-
   const isSuperUser =
     user.role === "admin" ||
     user.role === "super_admin" ||
-    user.isDevBypass === true ||
     getUserPermissions().includes("*") ||
     getUserRoles().some((role) => {
       return ["admin", "super_admin"].includes(role.code);
     });
 
-  if (isLocalDev || isSuperUser) {
+  if (isSuperUser) {
     return [
       {
         companyId: 1,
@@ -1037,10 +1035,8 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
               <a data-page="customer" class="nav-link" href="../customer/index.html">مركز خدمة العملاء</a>
               <a data-page="customer-pos-phones" class="nav-link" href="../customer/pos-phones.html">متابعة عملاء نقاط البيع</a>
               <a data-page="customer-service-pos-review" class="nav-link" href="../customer/service-pos-review.html">سجل شكاوى وملاحظات العملاء</a>
+              <a data-page="customer-financial-review" class="nav-link" href="../customer/financial-review.html">المراجعة والتحقق المالي</a>
               <a data-page="customer-service-management-report" class="nav-link" href="../customer/customer-service-management-report.html">تقرير أداء خدمة العملاء</a>
-              <a data-page="customer-vip" class="nav-link" href="../customer/vip.html">عملاء VIP</a>
-              <a data-page="customer-migration" class="nav-link" href="../customer/migration.html">تحول قنوات العملاء</a>
-              <a data-page="customer-rfm" class="nav-link" href="../customer/rfm.html">تحليل RFM</a>
             
 
               <a data-page="customer-review-sms-queue" class="nav-link" href="../customer/review-sms-queue.html">تشغيل رسائل التقييم</a>
@@ -1299,10 +1295,18 @@ function showLoading(targetId = "reportArea") {
 }
 
 function showError(error, targetId = "reportArea") {
-  document.getElementById(targetId).innerHTML = `
+  const message = error?.message || String(error || "حدث خطأ أثناء تحميل التقرير");
+  window.MINotifications?.error?.(message, {
+    title: "حدث خطأ أثناء تحميل التقرير",
+    id: `mi-report-error-${targetId}`
+  });
+
+  const target = document.getElementById(targetId);
+  if (!target) return;
+  target.innerHTML = `
     <div class="error-box">
       حدث خطأ أثناء تحميل التقرير<br>
-      ${error.message}
+      ${message}
     </div>
   `;
 }
@@ -1560,6 +1564,10 @@ function mountStandaloneCustomerPage() {
       "سجل شكاوى وملاحظات العملاء",
       "بحث الفواتير وتسجيل الملاحظات ومتابعة معالجة الحالات"
     ],
+    "customer-financial-review": [
+      "المراجعة والتحقق المالي",
+      "تذاكر الشكاوى المالية بعد موافقة المدير المختص ومتابعة المراقبة والمحاسبة"
+    ],
     "customer-service-management-report": [
       "تقرير أداء خدمة العملاء",
       "مؤشرات الشكاوى وسرعة المعالجة وأداء فريق خدمة العملاء"
@@ -1595,6 +1603,7 @@ function mountStandaloneCustomerPage() {
     if (document.body?.classList.contains("cs-management-page")) return "customer-service-management-report";
     const fileName = location.pathname.split("/").pop();
     return {
+      "financial-review.html": "customer-financial-review",
       "review-sms-dashboard.html": "customer-review-sms-dashboard",
       "review-sms-queue.html": "customer-review-sms-queue",
       "review-sms-manual.html": "customer-review-sms-manual",
