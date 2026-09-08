@@ -24,7 +24,7 @@
   min-inline-size: 0 !important;
   overflow-x: auto !important;
   overscroll-behavior-inline: contain;
-  scrollbar-gutter: stable;
+  scrollbar-gutter: stable both-edges;
   border: 1px solid var(--mi-table-line-strong) !important;
   border-radius: 12px !important;
   background: #fff !important;
@@ -39,8 +39,8 @@
 
 .mi-managed-table {
   inline-size: 100% !important;
-  min-inline-size: var(--mi-table-min-width, 720px) !important;
-  max-inline-size: none !important;
+  min-inline-size: 100% !important;
+  max-inline-size: 100% !important;
   margin: 0 !important;
   border-collapse: separate !important;
   border-spacing: 0 !important;
@@ -55,9 +55,9 @@
 .mi-managed-table > tfoot > tr > td,
 .mi-managed-table > tr > th,
 .mi-managed-table > tr > td {
-  inline-size: var(--mi-col-width, 152px) !important;
-  min-inline-size: var(--mi-col-width, 152px) !important;
-  max-inline-size: var(--mi-col-width, 152px) !important;
+  inline-size: var(--mi-col-share, auto) !important;
+  min-inline-size: 0 !important;
+  max-inline-size: none !important;
   padding: 10px 11px !important;
   border: 0 !important;
   border-block-end: 1px solid var(--mi-table-line) !important;
@@ -102,19 +102,23 @@
 .mi-managed-table > tbody > tr.is-active > td { background: var(--mi-table-row-active) !important; }
 .mi-managed-table > tbody > tr:last-child > td { border-block-end: 0 !important; }
 
-/* Fixed column contracts. */
-.mi-managed-table :is(th,td).mi-col-tiny { --mi-col-width: 72px; text-align: center; }
-.mi-managed-table :is(th,td).mi-col-compact { --mi-col-width: 122px; }
-.mi-managed-table :is(th,td).mi-col-standard { --mi-col-width: 152px; }
-.mi-managed-table :is(th,td).mi-col-wide { --mi-col-width: 178px; }
-.mi-managed-table :is(th,td).mi-col-code { --mi-col-width: 210px; }
-.mi-managed-table :is(th,td).mi-col-long { --mi-col-width: 300px; }
+/* Column contracts are proportional, not hard pixel widths.
+   JS assigns --mi-col-share so the table fits its container while rows grow vertically. */
+.mi-managed-table :is(th,td).mi-col-tiny { text-align: center; }
+.mi-managed-table :is(th,td).mi-col-compact,
+.mi-managed-table :is(th,td).mi-col-standard,
+.mi-managed-table :is(th,td).mi-col-wide,
+.mi-managed-table :is(th,td).mi-col-code,
+.mi-managed-table :is(th,td).mi-col-long { min-inline-size: 0 !important; }
 
-/* Compact operational values stay in one line and never dictate column width. */
+/* Compact operational values are also allowed to wrap. This avoids clipping at the
+   table edges and keeps every value visible inside its own cell. */
 .mi-managed-table td:is(.mi-col-tiny,.mi-col-compact) {
-  white-space: nowrap !important;
+  white-space: normal !important;
   overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  text-overflow: clip !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
 }
 
 /* Ordinary labels wrap inside their own bounded cell. Horizontal overflow is never
@@ -141,7 +145,7 @@
   text-align: start !important;
   white-space: normal !important;
   overflow: hidden !important;
-  word-break: break-all !important;
+  word-break: break-word !important;
   overflow-wrap: anywhere !important;
 }
 .mi-managed-table th.mi-col-code { direction: rtl !important; text-align: start !important; }
@@ -217,6 +221,17 @@
 :is(.content,.card,.panel,.table-card,.report-card,.cs-management-table-card,.cs-operations-section):has(.mi-managed-table) {
   min-inline-size: 0 !important;
   max-inline-size: 100% !important;
+}
+
+/* Edge guard: reserve scrollbar space and keep first/last columns fully visible. */
+.mi-table-shell > .mi-managed-table {
+  margin-inline: 0 !important;
+}
+.mi-managed-table > :is(thead,tbody,tfoot) > tr > :first-child {
+  padding-inline-start: 12px !important;
+}
+.mi-managed-table > :is(thead,tbody,tfoot) > tr > :last-child {
+  padding-inline-end: 12px !important;
 }
 
 @media (max-width: 900px) {
