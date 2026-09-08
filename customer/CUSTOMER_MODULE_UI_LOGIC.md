@@ -30,3 +30,7 @@
 
 ### إعدادات
 - إعدادات رسائل التقييم
+
+
+## V20 note
+The canonical page header and module navigator are now project-wide and live in `css/mi-app.css`. `customer-module.css` contains only Customer Care-specific runtime/report behavior.

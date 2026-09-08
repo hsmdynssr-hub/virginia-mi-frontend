@@ -1,6 +1,5 @@
-/* MI Application UI — consolidated full-project identity
-   Build: 2026-09-02 customer-unified-02
-   This file replaces the incremental V18 design chain. */
+/* MI Application UI — V20 project-wide dashboard-first identity
+   Build: 2026-09-08 project-unified-01
 
 /* --- consolidated: mi-core.css --- */
 /* MI V18 — product identity foundation (pilot) */
@@ -77,69 +76,17 @@ html[dir="rtl"] body.mi-app-unified .app-shell {
   flex-direction: row-reverse !important;
 }
 
-html[dir="rtl"] body.mi-app-unified .sidebar,
-html[dir="rtl"] body.mi-app-unified .main {
-  direction: rtl !important;
-}
 
-body.mi-app-unified .sidebar {
-  position: sticky !important;
-  top: 0 !important;
-  align-self: flex-start !important;
-  flex: 0 0 248px !important;
-  width: 248px !important;
-  max-width: 248px !important;
-  height: 100vh !important;
-  padding: 18px 14px 16px !important;
-  border: 0 !important;
-  background: linear-gradient(180deg, var(--mi-base-navy) 0%, #0d1730 100%) !important;
-  box-shadow: -12px 0 38px rgba(15, 23, 42, .12) !important;
-  overflow-y: auto !important;
-  scrollbar-width: thin;
-}
 
-body.mi-app-unified .brand {
-  display: flex !important;
-  align-items: center !important;
-  gap: 11px !important;
-  min-height: 58px !important;
-  margin: 0 0 18px !important;
-  padding: 0 7px 15px !important;
-  border-bottom: 1px solid rgba(255,255,255,.09) !important;
-}
 
-body.mi-app-unified .brand-logo {
-  display: grid !important;
-  place-items: center !important;
-  width: 38px !important;
-  height: 38px !important;
-  min-width: 38px !important;
-  border: 1px solid rgba(255,255,255,.15) !important;
-  border-radius: 12px !important;
-  color: #fff !important;
-  background: linear-gradient(145deg, var(--mi-base-blue), var(--mi-base-violet)) !important;
-  box-shadow: 0 8px 20px rgba(37, 99, 235, .24) !important;
-  font-size: 13px !important;
-  font-weight: 900 !important;
-  letter-spacing: -.03em;
-}
 
-body.mi-app-unified .brand h1 {
-  margin: 0 !important;
-  color: #fff !important;
-  font-size: 13px !important;
-  line-height: 1.2 !important;
-  font-weight: 800 !important;
-  letter-spacing: -.015em;
-}
 
-body.mi-app-unified .brand p {
-  margin: 4px 0 0 !important;
-  color: #93a4c8 !important;
-  font-size: 9px !important;
-  letter-spacing: .09em;
-  text-transform: uppercase;
-}
+
+
+
+
+
+
 
 body.mi-app-unified .nav {
   display: grid !important;
@@ -147,77 +94,23 @@ body.mi-app-unified .nav {
   padding: 0 !important;
 }
 
-body.mi-app-unified .nav-group {
-  margin: 15px 8px 5px !important;
-  color: #7485aa !important;
-  font-size: 8.5px !important;
-  font-weight: 800 !important;
-  letter-spacing: .08em !important;
-  text-transform: uppercase;
-}
 
-body.mi-app-unified .nav-link,
-body.mi-app-unified .nav-accordion-head {
-  min-height: 38px !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  width: 100% !important;
-  margin: 0 !important;
-  padding: 9px 11px !important;
-  border: 1px solid transparent !important;
-  border-radius: 10px !important;
-  color: #cbd5ea !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  font-size: 10.5px !important;
-  font-weight: 650 !important;
-  text-decoration: none !important;
-  transition: background .15s ease, color .15s ease, border-color .15s ease, transform .15s ease;
-}
 
-body.mi-app-unified .nav-link:hover,
-body.mi-app-unified .nav-accordion-head:hover {
-  color: #fff !important;
-  border-color: rgba(255,255,255,.07) !important;
-  background: rgba(255,255,255,.055) !important;
-  transform: translateX(-1px);
-}
 
-body.mi-app-unified .nav-link.active {
-  color: #fff !important;
-  border-color: rgba(96, 165, 250, .18) !important;
-  background: linear-gradient(90deg, rgba(37,99,235,.28), rgba(124,58,237,.18)) !important;
-  box-shadow: inset -3px 0 0 #60a5fa !important;
-}
 
-body.mi-app-unified .nav-link.active::before { display: none !important; }
-body.mi-app-unified .nav-accordion { margin: 0 !important; border: 0 !important; background: none !important; }
-body.mi-app-unified .nav-accordion-arrow { margin-inline-start: auto !important; color: #778bb4 !important; }
-body.mi-app-unified .nav-accordion-body {
-  display: none;
-  margin: 3px 0 6px !important;
-  padding: 3px 6px 3px 0 !important;
-  border-inline-end: 1px solid rgba(148,163,184,.18) !important;
-  background: transparent !important;
-}
-body.mi-app-unified .nav-accordion.open .nav-accordion-body { display: grid !important; gap: 2px !important; }
-body.mi-app-unified .nav-accordion-body .nav-link {
-  min-height: 32px !important;
-  padding: 7px 10px !important;
-  border-radius: 8px !important;
-  color: #9faccc !important;
-  font-size: 9.5px !important;
-}
-body.mi-app-unified .nav-accordion-body .nav-link.active { color: #fff !important; }
 
-body.mi-app-unified .sidebar-footer {
-  margin-top: 18px !important;
-  padding: 13px 8px 2px !important;
-  border-top: 1px solid rgba(255,255,255,.07) !important;
-  color: #6f82a9 !important;
-  font-size: 8.5px !important;
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 body.mi-app-unified .main {
   flex: 1 1 auto !important;
@@ -412,8 +305,8 @@ body.mi-app-login .mi-login-story::after {
 
 @media (max-width: 980px) {
   body.mi-app-unified .app-shell { display: block !important; }
-  body.mi-app-unified .sidebar { position: fixed !important; inset: 0 0 0 auto !important; transform: translateX(110%); z-index: 120; }
-  body.mi-app-unified.mi-sidebar-open .sidebar { transform: translateX(0); }
+  
+  
   body.mi-app-unified .mi-page-hero { min-height: 76px !important; }
   body.mi-app-login .mi-login-shell { grid-template-columns: 1fr; max-width: 560px; }
   body.mi-app-login .mi-login-story { display: none; }
@@ -432,50 +325,20 @@ body.mi-app-login .mi-login-story::after {
    Identity refinement
    Light navigation, corrected page header and account tools.
    ========================================================= */
-body.mi-app-unified .sidebar {
-  border-inline-start: 1px solid #e6eaf2 !important;
-  background: #fbfcff !important;
-  box-shadow: -8px 0 28px rgba(31, 41, 55, .045) !important;
-}
-body.mi-app-unified .brand {
-  border-bottom-color: #e9edf5 !important;
-}
-body.mi-app-unified .brand-logo {
-  border-color: #d8e2ff !important;
-  color: #fff !important;
-  background: #3157d5 !important;
-  box-shadow: 0 7px 18px rgba(49, 87, 213, .16) !important;
-}
-body.mi-app-unified .brand h1 { color: #182230 !important; }
-body.mi-app-unified .brand p { color: #7c3aed !important; }
-body.mi-app-unified .nav-group { color: #98a2b3 !important; }
-body.mi-app-unified .nav-link,
-body.mi-app-unified .nav-accordion-head {
-  color: #475467 !important;
-}
-body.mi-app-unified .nav-link:hover,
-body.mi-app-unified .nav-accordion-head:hover {
-  color: #1d4ed8 !important;
-  border-color: #e0e7ff !important;
-  background: #f4f7ff !important;
-  transform: translateX(-2px) !important;
-}
-body.mi-app-unified .nav-link.active {
-  color: #214cc7 !important;
-  border-color: #cfdcff !important;
-  background: #edf3ff !important;
-  box-shadow: inset -3px 0 0 #3157d5 !important;
-}
-body.mi-app-unified .nav-accordion-arrow { color: #98a2b3 !important; }
-body.mi-app-unified .nav-accordion-body {
-  border-inline-end-color: #e5eaf3 !important;
-}
-body.mi-app-unified .nav-accordion-body .nav-link { color: #667085 !important; }
-body.mi-app-unified .nav-accordion-body .nav-link.active { color: #214cc7 !important; }
-body.mi-app-unified .sidebar-footer {
-  border-top-color: #e9edf5 !important;
-  color: #98a2b3 !important;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 body.mi-app-unified .mi-page-hero {
   min-height: 92px !important;
@@ -1107,130 +970,28 @@ body.mi-app-unified .mi-managed-table > tbody > tr.is-active > td { background: 
    Pilot pages only: .mi-app-unified / .mi-app-login
    ========================================================= */
 
-/* ---------- Application chrome / sidebar ---------- */
-body.mi-app-unified .sidebar {
-  flex-basis: 236px !important;
-  width: 236px !important;
-  max-width: 236px !important;
-  padding: 14px 12px 14px !important;
-  border-inline-start: 1px solid #e7ebf2 !important;
-  background: #f8f9fc !important;
-  box-shadow: -5px 0 18px rgba(31, 41, 55, .035) !important;
-}
 
-body.mi-app-unified .brand {
-  min-height: 52px !important;
-  gap: 9px !important;
-  margin: 0 0 12px !important;
-  padding: 0 6px 12px !important;
-  border-bottom: 1px solid #e7ebf2 !important;
-}
-body.mi-app-unified .brand-logo {
-  width: 34px !important;
-  height: 34px !important;
-  min-width: 34px !important;
-  border: 0 !important;
-  border-radius: 10px !important;
-  background: #3157d5 !important;
-  box-shadow: 0 6px 14px rgba(49, 87, 213, .14) !important;
-}
-body.mi-app-unified .brand h1 {
-  color: #1d2939 !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
-}
-body.mi-app-unified .brand p {
-  margin-top: 2px !important;
-  color: #7c3aed !important;
-  font-size: 7.5px !important;
-  letter-spacing: .03em !important;
-  text-transform: none !important;
-}
+
+
+
+
+
 
 body.mi-app-unified .nav { gap: 1px !important; }
-body.mi-app-unified .nav-group {
-  margin: 13px 10px 5px !important;
-  color: #98a2b3 !important;
-  font-size: 7.5px !important;
-  font-weight: 900 !important;
-  letter-spacing: .035em !important;
-  text-transform: none !important;
-}
+
 
 /* No card/box around every navigation group. */
-body.mi-app-unified .nav-accordion {
-  margin: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-body.mi-app-unified .nav-link,
-body.mi-app-unified .nav-accordion-head {
-  min-height: 35px !important;
-  margin: 0 !important;
-  padding: 8px 10px !important;
-  border: 0 !important;
-  border-radius: 8px !important;
-  color: #475467 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  font-size: 9.5px !important;
-  font-weight: 700 !important;
-  transition: color .16s ease, background .16s ease, transform .16s ease !important;
-}
-body.mi-app-unified .nav-accordion-head { cursor: pointer !important; }
-body.mi-app-unified .nav-link:hover,
-body.mi-app-unified .nav-accordion-head:hover {
-  color: #2548ba !important;
-  background: #eef3ff !important;
-  transform: translateX(-1px) !important;
-}
-body.mi-app-unified .nav-accordion.open > .nav-accordion-head {
-  color: #344054 !important;
-  background: #f1f4f9 !important;
-}
-body.mi-app-unified .nav-link.active {
-  position: relative !important;
-  color: #214cc7 !important;
-  background: #e9f0ff !important;
-  box-shadow: none !important;
-  font-weight: 850 !important;
-}
-body.mi-app-unified .nav-link.active::after {
-  content: "";
-  position: absolute;
-  top: 8px;
-  bottom: 8px;
-  inset-inline-end: 0;
-  width: 3px;
-  border-radius: 999px;
-  background: #3157d5;
-}
-body.mi-app-unified .nav-accordion-arrow {
-  color: #98a2b3 !important;
-  font-size: 10px !important;
-}
-body.mi-app-unified .nav-accordion-body {
-  margin: 1px 0 4px !important;
-  padding: 2px 8px 2px 0 !important;
-  border-inline-end: 1px solid #e4e8f0 !important;
-  background: transparent !important;
-}
-body.mi-app-unified .nav-accordion-body .nav-link {
-  min-height: 29px !important;
-  padding: 6px 9px !important;
-  color: #667085 !important;
-  font-size: 8.7px !important;
-  border-radius: 7px !important;
-}
-body.mi-app-unified .sidebar-footer {
-  margin-top: 14px !important;
-  padding: 10px 8px 0 !important;
-  border-top-color: #e7ebf2 !important;
-  color: #98a2b3 !important;
-  font-size: 7.5px !important;
-}
+
+
+
+
+
+
+
+
+
+
+
 
 /* ---------- Page header + account toolbar ---------- */
 body.mi-app-unified .mi-page-hero {
@@ -1484,7 +1245,7 @@ body.mi-app-login .mi-login-btn {
 body.mi-app-login .mi-login-btn:hover { background: #2447bd !important; }
 
 @media (max-width: 980px) {
-  body.mi-app-unified .sidebar { width: 236px !important; max-width: 236px !important; }
+  
   body.mi-app-unified .mi-page-hero { min-height: 72px !important; }
 }
 
@@ -1503,8 +1264,6 @@ body.mi-app-login .mi-login-btn:hover { background: #2447bd !important; }
 
 :root {
   --mi184-page: #f5f7fb;
-  --mi184-sidebar: #eaf0ff;
-  --mi184-sidebar-strong: #dfe8ff;
   --mi184-surface: #ffffff;
   --mi184-line: #dce3ef;
   --mi184-ink: #172033;
@@ -1522,80 +1281,24 @@ body.mi-app-unified .main {
   background: var(--mi184-page) !important;
 }
 
-body.mi-app-unified .sidebar {
-  flex-basis: 238px !important;
-  width: 238px !important;
-  max-width: 238px !important;
-  padding: 14px 12px !important;
-  border-inline-start: 1px solid #d4def2 !important;
-  background: var(--mi184-sidebar) !important;
-  box-shadow: -8px 0 24px rgba(44, 69, 122, .055) !important;
-}
 
-html[dir="ltr"] body.mi-app-unified .sidebar {
-  border-inline-start: 0 !important;
-  border-inline-end: 1px solid #d4def2 !important;
-  box-shadow: 8px 0 24px rgba(44, 69, 122, .055) !important;
-}
 
-body.mi-app-unified .brand {
-  margin-bottom: 10px !important;
-  padding: 2px 6px 12px !important;
-  border-bottom: 1px solid #ced9ef !important;
-}
-body.mi-app-unified .brand-logo {
-  color: #fff !important;
-  background: var(--mi184-blue) !important;
-  box-shadow: 0 6px 14px rgba(47, 91, 211, .16) !important;
-}
-body.mi-app-unified .brand h1 { color: #1d2b4b !important; }
-body.mi-app-unified .brand p {
-  color: #6d5bd5 !important;
-  letter-spacing: 0 !important;
-  text-transform: none !important;
-}
-body.mi-app-unified .nav-group {
-  color: #8090ad !important;
-  letter-spacing: .02em !important;
-  text-transform: none !important;
-}
-body.mi-app-unified .nav-link,
-body.mi-app-unified .nav-accordion-head {
-  color: #3f4f6d !important;
-}
-body.mi-app-unified .nav-link:hover,
-body.mi-app-unified .nav-accordion-head:hover {
-  color: var(--mi184-blue-deep) !important;
-  background: rgba(255,255,255,.72) !important;
-  transform: none !important;
-}
-body.mi-app-unified .nav-accordion.open > .nav-accordion-head {
-  color: #2f3f5c !important;
-  background: rgba(255,255,255,.48) !important;
-}
-body.mi-app-unified .nav-link.active {
-  color: var(--mi184-blue-deep) !important;
-  background: #fff !important;
-  box-shadow: 0 5px 13px rgba(47,91,211,.08) !important;
-}
-body.mi-app-unified .nav-link.active::after {
-  inset-inline-end: auto !important;
-  inset-inline-start: 0 !important;
-  width: 3px !important;
-  background: var(--mi184-blue) !important;
-}
-html[dir="ltr"] body.mi-app-unified .nav-link.active::after {
-  inset-inline-start: auto !important;
-  inset-inline-end: 0 !important;
-}
-body.mi-app-unified .nav-accordion-body {
-  border-inline-end-color: #ced8ea !important;
-}
-body.mi-app-unified .nav-accordion-body .nav-link { color: #64728d !important; }
-body.mi-app-unified .sidebar-footer {
-  border-top-color: #ced9ef !important;
-  color: #7e8da8 !important;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* ----- Report/page header: title is a heading, not a card ----- */
 body.mi-app-unified .mi-page-hero {
@@ -1773,7 +1476,7 @@ body.mi-app-dashboard .dashboard-section-title h3 { font-size: 16px !important; 
 
 /* English pilot: proper LTR rhythm instead of translated Arabic geometry. */
 html[dir="ltr"] body.mi-app-unified .mi-hero-account-bar { direction: ltr !important; }
-html[dir="ltr"] body.mi-app-unified .nav-link.active::after { inset-inline-start: auto !important; inset-inline-end: 0 !important; }
+
 html[dir="ltr"] body.mi-app-dashboard .dashboard-card,
 html[dir="ltr"] body.mi-app-dashboard .ops-welcome,
 html[dir="ltr"] body.mi-app-dashboard .ops-status-panel { text-align: left !important; }
@@ -1794,19 +1497,15 @@ html[dir="ltr"] body.mi-app-dashboard .ops-status-panel { text-align: left !impo
    Dashboard-first navigation
    Dashboard + customer complaints + financial review only.
    The dashboard is the application entry point; section pages
-   use a compact local navigator instead of the global sidebar.
    ========================================================= */
 
-/* Remove the global admin-template sidebar from pilot navigation pages. */
 body.mi-app-navigation .app-shell,
 body.mi-app-navigation .mi-app-navigation-shell {
   display: block !important;
   min-height: 100vh !important;
 }
 
-body.mi-app-navigation .sidebar {
-  display: none !important;
-}
+
 
 body.mi-app-navigation .main {
   width: 100% !important;
@@ -1835,7 +1534,6 @@ body.mi-app-navigation .mi-hero-account-bar {
   background: #f7f9fd !important;
 }
 
-/* Local section navigator — replaces the entire project sidebar. */
 body.mi-app-navigation .mi-section-nav {
   width: min(1540px, calc(100% - 48px));
   min-height: 52px;
@@ -1917,7 +1615,6 @@ body.mi-app-navigation .mi-section-nav-link.active {
   box-shadow: 0 4px 10px rgba(47,91,211,.09);
 }
 
-/* Content becomes a centered workspace instead of sidebar-constrained content. */
 body.mi-app-navigation .content,
 body.mi-app-navigation .mi-context-toolbar,
 body.mi-app-navigation .report-toolbar {
@@ -1999,7 +1696,6 @@ body.mi-app-navigation.mi-app-dashboard .dashboard-card[data-workspace-href]:foc
   transform: translateY(0);
 }
 
-/* Let the dashboard use the new width now that the sidebar is gone. */
 body.mi-app-navigation.mi-app-dashboard .dashboard-modules-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
 }
@@ -2476,10 +2172,10 @@ body.mi-app-navigation.cs-management-page .cs-messages-section {
 body.mi-app-navigation.cs-management-page .cs-management-kpis .cs-kpi {
   background: color-mix(in srgb, var(--tone, #0f8f91) 5%, #fff) !important;
 }
-body.mi-app-navigation.cs-management-page .cs-management-kpis .cs-kpi:nth-child(4n+1) { --tone: #0f8f91 !important; }
-body.mi-app-navigation.cs-management-page .cs-management-kpis .cs-kpi:nth-child(4n+2) { --tone: #7c5ac7 !important; }
-body.mi-app-navigation.cs-management-page .cs-management-kpis .cs-kpi:nth-child(4n+3) { --tone: #f59e0b !important; }
-body.mi-app-navigation.cs-management-page .cs-management-kpis .cs-kpi:nth-child(4n+4) { --tone: #16a34a !important; }
+body.mi-app-navigation.cs-management-page .cs-management-kpis .cs-kpi:nth-child(4n/**/+1) { --tone: #0f8f91 !important; }
+body.mi-app-navigation.cs-management-page .cs-management-kpis .cs-kpi:nth-child(4n/**/+2) { --tone: #7c5ac7 !important; }
+body.mi-app-navigation.cs-management-page .cs-management-kpis .cs-kpi:nth-child(4n/**/+3) { --tone: #f59e0b !important; }
+body.mi-app-navigation.cs-management-page .cs-management-kpis .cs-kpi:nth-child(4n/**/+4) { --tone: #16a34a !important; }
 
 /* --- consolidated: ui-qa --- */
 /* =========================================================
@@ -2712,7 +2408,7 @@ body.mi-app-navigation :is(
 html, body { background: var(--mi-app-canvas) !important; }
 body.mi-app-unified .app-shell,
 body.mi-app-unified .main { width: 100% !important; max-width: none !important; min-width: 0 !important; }
-body.mi-app-unified .sidebar[hidden] { display: none !important; }
+
 body.mi-app-unified .main { margin: 0 !important; }
 
 /* Page header is the strongest visual anchor. Every textual title is white. */
@@ -2824,3 +2520,263 @@ html body.mi-app-unified .mi-page-hero :is(h1,h2,h3,h4,p,span,strong,small,label
    a permanent blank screen if a page script fails before rendering. */
 html.mi-app-preboot body { visibility: hidden !important; }
 html.mi-app-ready body { visibility: visible !important; }
+
+
+/* ======================================================================
+   V20 PROJECT-WIDE MODULE SHELL — FINAL CONTRACT
+   Reference UX: Customer Service management report / financial workbench.
+   ====================================================================== */
+:root {
+  --mi-shell-head-1: #342b73;
+  --mi-shell-head-2: #2f4078;
+  --mi-shell-accent: #f97316;
+  --mi-shell-module: #6d4ae2;
+  --mi-shell-module-soft: #f0ebff;
+  --mi-shell-canvas: #f4f7fb;
+  --mi-shell-surface: #ffffff;
+  --mi-shell-line: #dce5ef;
+  --mi-shell-ink: #182235;
+  --mi-shell-muted: #6d798e;
+}
+
+html body.mi-app-unified {
+  background: var(--mi-shell-canvas) !important;
+  color: var(--mi-shell-ink) !important;
+}
+html body.mi-app-unified .app-shell,
+html body.mi-app-unified .main {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+html body.mi-app-unified .app-shell {
+  min-height: 100vh !important;
+  display: block !important;
+  direction: inherit !important;
+  background: var(--mi-shell-canvas) !important;
+}
+html body.mi-app-unified .main {
+  padding: 0 !important;
+  overflow-x: clip !important;
+  background: var(--mi-shell-canvas) !important;
+}
+
+/* One header language for every internal module. */
+html body.mi-app-unified .mi-page-hero {
+  position: sticky !important;
+  inset: 0 0 auto !important;
+  top: 0 !important;
+  z-index: 8000 !important;
+  width: 100% !important;
+  min-height: 126px !important;
+  height: auto !important;
+  box-sizing: border-box !important;
+  padding: 22px 30px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 26px !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-bottom: 4px solid var(--mi-shell-accent) !important;
+  border-radius: 0 !important;
+  background: linear-gradient(112deg, var(--mi-shell-head-1) 0%, #39337c 58%, var(--mi-shell-head-2) 100%) !important;
+  box-shadow: 0 10px 28px rgba(31, 40, 78, .14) !important;
+  isolation: isolate !important;
+}
+html body.mi-app-unified .mi-page-hero::before,
+html body.mi-app-unified .mi-page-hero::after,
+html body.mi-app-unified .mi-page-hero picture,
+html body.mi-app-unified .mi-page-hero-shade {
+  display: none !important;
+  content: none !important;
+}
+html body.mi-app-unified .mi-hero-heading {
+  position: static !important;
+  inset: auto !important;
+  width: 100% !important;
+  max-width: 900px !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 14px 0 0 !important;
+  overflow: hidden !important;
+  text-align: right !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+/* Non-negotiable project rule: every header title/subtitle/pill is white. */
+html body.mi-app-unified .mi-page-hero,
+html body.mi-app-unified .mi-page-hero *,
+html body.mi-app-unified .mi-page-hero :is(h1,h2,h3,h4,p,span,strong,small,label) {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  text-shadow: none !important;
+}
+html body.mi-app-unified .mi-hero-heading .page-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  width: fit-content !important;
+  margin: 0 0 5px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  opacity: .84 !important;
+}
+html body.mi-app-unified .mi-hero-heading h2 {
+  margin: 0 !important;
+  max-width: 100% !important;
+  font-size: clamp(30px, 3.25vw, 46px) !important;
+  line-height: 1.08 !important;
+  font-weight: 950 !important;
+  letter-spacing: -.025em !important;
+  white-space: normal !important;
+  overflow-wrap: break-word !important;
+}
+html body.mi-app-unified .mi-hero-heading p {
+  margin: 5px 0 0 !important;
+  max-width: 760px !important;
+  font-size: 11px !important;
+  line-height: 1.55 !important;
+  font-weight: 650 !important;
+  opacity: .82 !important;
+  white-space: normal !important;
+  overflow-wrap: break-word !important;
+}
+html body.mi-app-unified .mi-hero-account-bar {
+  position: static !important;
+  inset: auto !important;
+  width: auto !important;
+  max-width: 355px !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 5px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 4px !important;
+  flex-wrap: nowrap !important;
+  border: 1px solid rgba(255,255,255,.16) !important;
+  border-radius: 13px !important;
+  background: rgba(255,255,255,.08) !important;
+  backdrop-filter: blur(10px) !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+html body.mi-app-unified .mi-hero-account-bar > * { min-width:0 !important; max-width:165px !important; }
+html body.mi-app-unified .mi-hero-account-bar .mi-tool-capsule,
+html body.mi-app-unified .mi-hero-account-bar .mi-account-capsule {
+  border-color: rgba(255,255,255,.18) !important;
+  background: rgba(255,255,255,.09) !important;
+}
+html body.mi-app-unified .mi-hero-account-bar .mi-logout-capsule {
+  background: var(--mi-shell-accent) !important;
+  border-color: var(--mi-shell-accent) !important;
+}
+
+html body.mi-app-unified .mi-section-nav-grouped {
+  position: relative !important;
+  top: auto !important;
+  z-index: 3000 !important;
+  width: calc(100% - 44px) !important;
+  max-width: 1500px !important;
+  min-width: 0 !important;
+  margin: 16px auto 18px !important;
+  padding: 8px 10px !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+  border: 1px solid var(--mi-shell-line) !important;
+  border-radius: 16px !important;
+  background: rgba(255,255,255,.98) !important;
+  box-shadow: 0 8px 24px rgba(35,48,75,.06) !important;
+}
+html body.mi-app-unified .mi-section-dashboard-link {
+  color:#fff !important;
+  background:#314071 !important;
+  border-color:#314071 !important;
+}
+html body.mi-app-unified .mi-section-nav-context,
+html body.mi-app-unified .mi-section-nav-groups,
+html body.mi-app-unified .mi-section-nav-group { overflow:visible !important; }
+html body.mi-app-unified .mi-section-module-label {
+  color:#667085 !important;
+  font-weight:900 !important;
+}
+html body.mi-app-unified .mi-section-nav-group > summary {
+  color:#344054 !important;
+  background:#fff !important;
+  border-color:#e0e6ef !important;
+}
+html body.mi-app-unified .mi-section-nav-group.active > summary {
+  color:#fff !important;
+  background:var(--mi-shell-module) !important;
+  border-color:var(--mi-shell-module) !important;
+}
+html body.mi-app-unified .mi-section-nav-group.active > summary * { color:#fff !important; }
+html body.mi-app-unified .mi-section-nav-group[open],
+html body.mi-app-unified .mi-section-menu { z-index:3600 !important; }
+html body.mi-app-unified .mi-section-menu {
+  border:1px solid var(--mi-shell-line) !important;
+  background:#fff !important;
+  box-shadow:0 18px 42px rgba(27,37,67,.16) !important;
+}
+
+/* The workspace always spans the page; modules never inherit historic gutters. */
+html body.mi-app-unified .content {
+  position: relative !important;
+  z-index: 1 !important;
+  width: auto !important;
+  max-width: 1500px !important;
+  min-width: 0 !important;
+  margin: 0 auto 34px !important;
+  padding: 0 22px !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+html body.mi-app-unified .content > main,
+html body.mi-app-unified .content > main > * {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Module accent only changes a small interaction color; identity stays one system. */
+html body.mi-app-unified[data-mi-module="branches"] { --mi-shell-module:#0f9f9f; }
+html body.mi-app-unified[data-mi-module="menu"] { --mi-shell-module:#f97316; }
+html body.mi-app-unified[data-mi-module="pos"] { --mi-shell-module:#2563eb; }
+html body.mi-app-unified[data-mi-module="customer"] { --mi-shell-module:#6d4ae2; }
+html body.mi-app-unified[data-mi-module="production"] { --mi-shell-module:#16a36a; }
+html body.mi-app-unified[data-mi-module="costing"] { --mi-shell-module:#e67e22; }
+html body.mi-app-unified[data-mi-module="purchase"] { --mi-shell-module:#7c3aed; }
+html body.mi-app-unified[data-mi-module="inventory"] { --mi-shell-module:#0f9f9f; }
+html body.mi-app-unified[data-mi-module="forecast"] { --mi-shell-module:#2563eb; }
+html body.mi-app-unified[data-mi-module="planning"] { --mi-shell-module:#8b5cf6; }
+html body.mi-app-unified[data-mi-module="admin"] { --mi-shell-module:#475467; }
+html body.mi-app-unified[data-mi-module="reports"] { --mi-shell-module:#7c3aed; }
+
+/* Old per-page promotional heroes/toolbars are content, never a second page header. */
+html body.mi-app-unified .content :is(.inventory-hero-card,.service-page-toolbar,.cs-management-nav,.crsms-return-bar) {
+  display:none !important;
+}
+
+@media (max-width:900px) {
+  html body.mi-app-unified .mi-page-hero {
+    min-height:112px !important;
+    padding:15px 16px !important;
+    grid-template-columns:minmax(0,1fr) auto !important;
+    gap:10px !important;
+  }
+  html body.mi-app-unified .mi-hero-heading { padding:0 !important; }
+  html body.mi-app-unified .mi-hero-heading h2 { font-size:clamp(24px,7vw,34px) !important; }
+  html body.mi-app-unified .mi-hero-heading p { display:none !important; }
+  html body.mi-app-unified .mi-hero-account-bar { max-width:205px !important; }
+  html body.mi-app-unified .mi-section-nav-grouped { width:calc(100% - 20px) !important; margin-top:10px !important; }
+  html body.mi-app-unified .content { padding-inline:10px !important; }
+}
+@media (max-width:620px) {
+  html body.mi-app-unified .mi-page-hero { grid-template-columns:1fr !important; align-items:start !important; }
+  html body.mi-app-unified .mi-hero-account-bar { grid-row:2 !important; max-width:100% !important; }
+}

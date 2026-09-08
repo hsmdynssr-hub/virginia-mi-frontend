@@ -62,7 +62,6 @@
   --shadow-lg: 0 26px 70px rgba(15, 23, 42, 0.16);
 
   --control-height: 46px;
-  --sidebar-width: 315px;
 }
 
 html {
@@ -115,118 +114,34 @@ select:disabled {
   align-items: stretch;
 }
 
-.sidebar {
-  width: var(--sidebar-width);
-  flex: 0 0 var(--sidebar-width);
-  background:
-    linear-gradient(180deg, rgba(6, 17, 31, 0.98), rgba(11, 23, 40, 0.98)),
-    radial-gradient(circle at 30% 0%, rgba(20, 184, 166, 0.26), transparent 28%);
-  color: #ffffff;
-  padding: 22px 18px;
-  overflow-y: auto;
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: -8px 0 32px rgba(6, 17, 31, 0.16);
-}
 
-.sidebar::-webkit-scrollbar {
-  width: 8px;
-}
 
-.sidebar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 999px;
-}
 
-.sidebar::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.34);
-  border-radius: 999px;
-}
 
-.brand {
-  display: flex;
-  gap: 13px;
-  align-items: center;
-  margin-bottom: 28px;
-  padding: 10px 8px 18px;
-  border-bottom: 1px solid rgba(226, 232, 240, 0.10);
-}
 
-.brand-logo {
-  width: 58px;
-  height: 58px;
-  border-radius: 20px;
-  display: grid;
-  place-items: center;
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: 900;
-  letter-spacing: 0.4px;
-  background:
-    linear-gradient(135deg, #2563eb, #0f766e);
-  box-shadow:
-    0 18px 38px rgba(37, 99, 235, 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.20);
-}
 
-.brand h1 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 900;
-  line-height: 1.25;
-  color: #ffffff;
-}
 
-.brand p {
-  margin: 5px 0 0;
-  color: #b7c8db;
-  font-size: 12px;
-  font-weight: 700;
-}
+
+
+
+
+
+
+
+
 
 .nav {
   display: grid;
   gap: 8px;
 }
 
-.nav-group {
-  margin-top: 18px;
-  color: #9ed9d4;
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 0.3px;
-  padding: 0 10px;
-}
 
-.nav-link {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 8px;
-  min-height: 46px;
-  text-decoration: none;
-  color: #dbe7f3;
-  background: rgba(255, 255, 255, 0.055);
-  border: 1px solid rgba(255, 255, 255, 0.055);
-  padding: 11px 14px;
-  border-radius: 15px;
-  font-size: 14px;
-  font-weight: 800;
-  transition: 0.18s ease;
-}
 
-.nav-link:hover {
-  color: #ffffff;
-  background: rgba(37, 99, 235, 0.22);
-  border-color: rgba(96, 165, 250, 0.28);
-  transform: translateX(-3px);
-}
 
-.nav-link.active {
-  color: #ffffff;
-  background: linear-gradient(135deg, #2563eb, #0f766e);
-  border-color: rgba(255, 255, 255, 0.18);
-  box-shadow: 0 14px 28px rgba(37, 99, 235, 0.23);
-}
+
+
+
+
 
 .main {
   flex: 1;
@@ -1738,53 +1653,19 @@ tr:hover td,
    Navigation Accordions
 ========================================================= */
 
-.nav-accordion {
-  margin-bottom: 10px;
-}
 
-.nav-accordion-head {
-  width: 100%;
-  border: 0;
-  outline: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  min-height: 44px;
-  padding: 11px 13px;
-  border-radius: 14px;
-  background: transparent;
-  color: #bdd4e8;
-  font-weight: 900;
-  font-size: 13px;
-  text-align: right;
-}
 
-.nav-accordion-head:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: #ffffff;
-}
 
-.nav-accordion-arrow {
-  transition: transform 0.2s ease;
-  font-size: 14px;
-}
 
-.nav-accordion-body {
-  display: none;
-  flex-direction: column;
-  gap: 8px;
-  padding-top: 8px;
-}
 
-.nav-accordion.open .nav-accordion-body {
-  display: flex;
-}
 
-.nav-accordion.open .nav-accordion-arrow {
-  transform: rotate(180deg);
-}
+
+
+
+
+
+
+
 
 /* =========================================================
    BOM Tree
@@ -2022,11 +1903,7 @@ tr:hover td,
     flex-direction: column;
   }
 
-  .sidebar {
-    width: 100%;
-    flex-basis: auto;
-    max-height: none;
-  }
+  
 
   .main {
     padding: 18px;
@@ -2666,64 +2543,25 @@ td,
     min-height: 100vh;
   }
 
-  .sidebar {
-    position: sticky !important;
-    top: 0;
-    z-index: 1000;
-    width: 100% !important;
-    max-height: 44vh;
-    overflow-y: auto;
-    padding: 12px 12px 14px !important;
-    border-left: 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 12px 28px rgba(6, 17, 31, 0.18);
-  }
+  
 
-  .brand {
-    margin-bottom: 10px !important;
-    padding: 8px 6px 12px !important;
-    gap: 10px;
-  }
+  
 
-  .brand-logo {
-    width: 46px;
-    height: 46px;
-    border-radius: 16px;
-    font-size: 14px;
-  }
+  
 
-  .brand h1 {
-    font-size: 16px !important;
-    line-height: 1.25;
-  }
+  
 
-  .brand p {
-    font-size: 10px !important;
-    margin-top: 2px;
-  }
+  
 
   .nav {
     gap: 6px;
   }
 
-  .nav-group {
-    margin-top: 10px;
-    font-size: 11px;
-    padding: 0 6px;
-  }
+  
 
-  .nav-link,
-  .nav-accordion-head {
-    min-height: 40px !important;
-    padding: 9px 11px !important;
-    font-size: 12px !important;
-    border-radius: 12px !important;
-  }
+  
 
-  .nav-accordion-body {
-    gap: 6px;
-    padding-top: 6px;
-  }
+  
 
   .main {
     padding: 10px !important;
@@ -3022,34 +2860,17 @@ td,
     padding: 8px !important;
   }
 
-  .sidebar {
-    max-height: 42vh;
-    padding: 10px !important;
-  }
+  
 
-  .brand {
-    align-items: center;
-  }
+  
 
-  .brand-logo {
-    width: 42px;
-    height: 42px;
-  }
+  
 
-  .brand h1 {
-    font-size: 14px !important;
-  }
+  
 
-  .brand p {
-    display: none;
-  }
+  
 
-  .nav-link,
-  .nav-accordion-head {
-    min-height: 38px !important;
-    padding: 8px 10px !important;
-    font-size: 11px !important;
-  }
+  
 
   .main > .topbar,
   .main > .report-toolbar,
@@ -3156,9 +2977,7 @@ td,
     padding: 6px !important;
   }
 
-  .sidebar {
-    max-height: 40vh;
-  }
+  
 
   .topbar,
   .report-toolbar {
@@ -3213,19 +3032,7 @@ td,
 
 /* Better mobile touch/scroll behavior */
 @media (hover: none) and (pointer: coarse) {
-  .nav-link:hover,
-  .dashboard-report-links a:hover,
-  .card:hover,
-  .kpi-card:hover,
-  .inventory-kpi-card:hover,
-  .module-card:hover,
-  .report-card:hover,
-  .primary-btn:hover,
-  .run-btn:hover,
-  .inventory-refresh-btn:hover,
-  .export-btn:hover {
-    transform: none !important;
-  }
+  
 
   input,
   select,

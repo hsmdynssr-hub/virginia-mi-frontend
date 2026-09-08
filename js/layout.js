@@ -1,5 +1,5 @@
 /*
-  Shared UI foundation
+  Shared UI foundation — V20 project-wide dashboard-first shell
   --------------------
   Every authenticated page that loads layout.js inherits Bootstrap RTL and
   the project theme from one place. Existing page styles remain loaded during
@@ -494,11 +494,13 @@ const MI_MODULE_DEFINITIONS = [
   {
     id: "inventory",
     label: "المخزون والمواقع",
-    pages: ["inventory","inventory-intermediate-control","inventory-executive-summary","inventory-historical-executive-summary","inventory-movement-analysis-report","inventory-reorder-risk"],
+    pages: ["inventory","inventory-intermediate-control","inventory-flow-control","inventory-movement-intelligence","inventory-executive-summary","inventory-historical-executive-summary","inventory-movement-analysis-report","inventory-reorder-risk"],
     groups: [
       { id:"operations", label:"تشغيل", icon:"⚡", links:[
         {page:"inventory",label:"مركز المخزون",href:"../inventory/index.html"},
         {page:"inventory-intermediate-control",label:"رقابة المخازن الوسيطة",href:"../inventory/intermediate-control.html"},
+        {page:"inventory-flow-control",label:"التحكم في تدفق المخزون",href:"../inventory/flow-control.html"},
+        {page:"inventory-movement-intelligence",label:"ذكاء حركة المخزون",href:"../inventory/movement-intelligence.html"},
         {page:"inventory-reorder-risk",label:"إعادة الطلب والمخاطر",href:"../inventory/reorder-risk.html"}
       ]},
       { id:"reports", label:"تقارير", icon:"▦", links:[
@@ -537,7 +539,9 @@ const MI_MODULE_DEFINITIONS = [
     label: "الإدارة والصلاحيات",
     pages: ["admin-users","admin-roles","admin-report-classification"],
     groups: [{ id:"settings", label:"إدارة", icon:"⚙", links:[
-      {page:"admin-users",label:"المستخدمون والصلاحيات",href:"../admin/users.html"}
+      {page:"admin-users",label:"المستخدمون والصلاحيات",href:"../admin/users.html"},
+      {page:"admin-roles",label:"الأدوار والصلاحيات",href:"../admin/roles.html"},
+      {page:"admin-report-classification",label:"تصنيف التقارير",href:"../admin/report-classification.html"}
     ]}]
   },
   {
@@ -644,7 +648,7 @@ function ensureMiAppStyles() {
     return;
   }
   const scriptUrl = document.currentScript?.src || window.location.href;
-  const href = new URL("../css/mi-app.css?v=20260904-customer-final-01", scriptUrl).href;
+  const href = new URL("../css/mi-app.css?v=20260908-project-unified-01", scriptUrl).href;
   const link = document.createElement("link");
   link.rel = "stylesheet";
   link.href = href;
@@ -656,7 +660,7 @@ function ensureMiAppStyles() {
 function ensureMiCustomerModuleStyles(activePage) {
   if (MI_PAGE_MODULE_MAP.get(activePage)?.id !== "customer") return;
   const scriptUrl = document.currentScript?.src || window.location.href;
-  const href = new URL("../css/customer-module.css?v=20260904-customer-final-01", scriptUrl).href;
+  const href = new URL("../css/customer-module.css?v=20260908-project-unified-01", scriptUrl).href;
   let link = document.querySelector('link[data-mi-customer-module-ui="true"]');
   if (!link) {
     link = document.createElement("link");
@@ -670,6 +674,19 @@ function ensureMiCustomerModuleStyles(activePage) {
 
 function getMiSectionNavigation(activePage) {
   return MI_PAGE_MODULE_MAP.get(activePage) || null;
+}
+
+function getMiModulePageContext(activePage) {
+  const section = getMiSectionNavigation(activePage);
+  if (!section) return null;
+  const activeGroup = section.groups.find((group) =>
+    group.links.some((item) => item.page === activePage)
+  ) || section.groups[0] || null;
+  return {
+    section,
+    group: activeGroup,
+    pill: activeGroup ? `${section.label} · ${activeGroup.label}` : section.label
+  };
 }
 
 function canShowMiModuleLink(item, activePage) {
@@ -983,55 +1000,6 @@ function notifyDateRangeChanged() {
   dateFrom?.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
-function applySidebarPermissions() {
-  document.querySelectorAll(".nav-link").forEach((link) => {
-    const page = link.dataset.page;
-
-    if (!hasPermission(page)) {
-      link.style.display = "none";
-    } else {
-      link.style.display = "";
-    }
-  });
-
-  document.querySelectorAll(".nav-accordion").forEach((accordion) => {
-    const visibleLinks = accordion.querySelectorAll(
-      '.nav-link:not([style*="display: none"])'
-    );
-
-    accordion.style.display = visibleLinks.length ? "" : "none";
-  });
-
-  document.querySelectorAll(".nav-group").forEach((group) => {
-    let next = group.nextElementSibling;
-    let hasVisibleLink = false;
-
-    while (next && !next.classList.contains("nav-group")) {
-      if (
-        next.classList.contains("nav-link") &&
-        next.style.display !== "none"
-      ) {
-        hasVisibleLink = true;
-      }
-
-      if (
-        next.classList.contains("nav-accordion") &&
-        next.style.display !== "none"
-      ) {
-        hasVisibleLink = true;
-      }
-
-      next = next.nextElementSibling;
-    }
-
-    if (!hasVisibleLink) {
-      group.style.display = "none";
-    } else {
-      group.style.display = "";
-    }
-  });
-}
-
 async function loadAllowedCompaniesForCurrentUser() {
   try {
     const response = await apiGet("/company-access/me");
@@ -1239,11 +1207,6 @@ function initLayout(activePage) {
     });
   }
 
-  document.querySelectorAll(".nav-link").forEach((link) => {
-    link.classList.toggle("active", link.dataset.page === activePage);
-  });
-
-  applySidebarPermissions();
   syncCurrentUserPermissions();
 }
 
@@ -1261,7 +1224,13 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
   document.body.classList.toggle("mi-app-unified", unifiedNavigation);
   document.body.classList.toggle("mi-app-dashboard", activePage === "dashboard");
   document.body.classList.toggle("mi-app-service", ["customer-service-pos-review", "customer-financial-review"].includes(activePage));
-  document.body.classList.toggle("mi-customer-module-page", getMiSectionNavigation(activePage)?.id === "customer");
+  const moduleContext = getMiModulePageContext(activePage);
+  const activeModuleId = moduleContext?.section?.id || (activePage === "dashboard" ? "dashboard" : "general");
+  const activeModuleGroup = customerModel?.group || moduleContext?.group?.id || "";
+  document.body.classList.toggle("mi-customer-module-page", activeModuleId === "customer");
+  document.body.dataset.miModule = activeModuleId;
+  if (activeModuleGroup) document.body.dataset.miModuleGroup = activeModuleGroup;
+  else delete document.body.dataset.miModuleGroup;
   const customerGroup = customerModel?.group || "";
   if (customerGroup) document.body.dataset.miCustomerGroup = customerGroup;
   else delete document.body.dataset.miCustomerGroup;
@@ -1282,7 +1251,7 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
   const sectionNavigationHtml = unifiedNavigation ? renderMiSectionNavigation(activePage) : "";
   const customerPill = customerModel
     ? `خدمة العملاء · ${MI_CUSTOMER_GROUP_LABELS[customerModel.group] || "تشغيل"}`
-    : "عمليات فيرجينيا";
+    : (moduleContext?.pill || (activePage === "dashboard" ? "لوحة الإدارة" : "منصة الإدارة"));
 
   const reportToolbarHtml = STANDALONE_CUSTOMER_PAGES.has(activePage)
   ? ""
@@ -1290,7 +1259,7 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
   ? `
     <section id="reportToolbar" class="report-toolbar mi-unified-filter-toolbar">
       <div class="mi-filter-intro">
-        <span>Filters</span>
+        <span>فلاتر</span>
         <strong>فلتر التقرير</strong>
       </div>
 
