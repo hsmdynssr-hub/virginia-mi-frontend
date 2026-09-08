@@ -9,12 +9,17 @@
   <link rel="stylesheet" href="./review-sms.css?v=sms-core-20260814" />
   <link rel="stylesheet" href="./review-sms-internal.css?v=dual-theme-20260830-01" />
   <script src="../js/api.js" defer></script>
-  <script src="../js/layout.js" defer></script>
+  <script src="../js/layout.js?v=20260904-customer-final-01" defer></script>
   <script src="./review-sms.js?v=coupon-policy-ui-20260831-01" defer></script>
   <script src="../js/notifications.js?v=20260901-global-01"></script>
+  <link rel="stylesheet" href="../css/mi-app.css?v=20260904-customer-final-01" data-mi-unified-ui="true" />
+  <script>
+    document.documentElement.classList.add("mi-app-preboot");
+    setTimeout(() => document.documentElement.classList.remove("mi-app-preboot"), 3000);
+  </script>
 </head>
 
-<body class="crsms-internal-page crsms-settings-page" data-page="settings" data-report-code="customer.review_sms.view">
+<body class="crsms-internal-page crsms-settings-page" data-page="settings" data-report-code="customer.review_sms.view" data-active-page="customer-review-sms-settings">
   <main class="crsms-page">
     <nav class="crsms-return-bar" aria-label="التنقل في مركز رسائل Virginia">
       <a class="crsms-return-link" data-return-page="dashboard" href="./review-sms-dashboard.html"><span>◫</span><strong>نظرة عامة</strong></a>
@@ -27,7 +32,7 @@
 
     <header class="crsms-operation-hero crsms-settings-hero">
       <div>
-        <span class="crsms-eyebrow">VIRGINIA MESSAGING CONTROL</span>
+        <span class="crsms-eyebrow">إعدادات التشغيل</span>
         <h1>إعدادات رسائل التقييم</h1>
         <p>تحكم آمن في إرسال الرسائل، قواعد اختيار العملاء، ومكافآت Shopify من خلال حساب المشروع الحالي.</p>
       </div>
@@ -40,7 +45,7 @@
     <section id="settingsAccessGate" class="crsms-panel crsms-settings-access" aria-live="polite">
       <div class="crsms-settings-access-icon" aria-hidden="true">⌁</div>
       <div>
-        <span class="crsms-section-kicker">PROJECT SESSION</span>
+        <span class="crsms-section-kicker">جلسة المشروع</span>
         <h2>التحقق من صلاحية حساب المشروع</h2>
         <p id="settingsAccessMessage">جاري التحقق من صلاحية حساب المشروع...</p>
       </div>
@@ -68,7 +73,7 @@
           <div class="crsms-settings-card-head">
             <div class="crsms-settings-number">01</div>
             <div>
-              <span class="crsms-section-kicker">MESSAGING CONTROL</span>
+              <span class="crsms-section-kicker">التحكم في الإرسال</span>
               <h2>التشغيل والإرسال</h2>
               <p>المفتاح الرئيسي وطريقة تشغيل منظومة رسائل Virginia.</p>
             </div>
@@ -108,7 +113,7 @@
           <div class="crsms-settings-card-head">
             <div class="crsms-settings-number">02</div>
             <div>
-              <span class="crsms-section-kicker">CUSTOMER SELECTION</span>
+              <span class="crsms-section-kicker">اختيار العملاء</span>
               <h2>اختيار العملاء والفواتير</h2>
               <p>القواعد الافتراضية المستخدمة في البحث ومنع التكرار.</p>
             </div>
@@ -142,7 +147,7 @@
           <div class="crsms-settings-card-head">
             <div class="crsms-settings-number">03</div>
             <div>
-              <span class="crsms-section-kicker">SHOPIFY COUPONS</span>
+              <span class="crsms-section-kicker">كوبونات Shopify</span>
               <h2>سياسات كوبونات Shopify</h2>
               <p>إعداد مستقل لمكافأة التقييم والكوبون التسويقي اليدوي: شحن مجاني أو خصم مبلغ، وعدد الاستخدامات والصلاحية.</p>
             </div>

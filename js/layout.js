@@ -53,13 +53,6 @@
     document.head.appendChild(reportToolbarCss);
   }
 
-  if (!hasStylesheet("virginia-showcase.css")) {
-    const showcaseCss = document.createElement("link");
-    showcaseCss.rel = "stylesheet";
-    showcaseCss.href = `${assetUrl("../css/virginia-showcase.css")}?v=dual-theme-20260830-01`;
-    showcaseCss.dataset.miVirginiaShowcase = "true";
-    document.head.appendChild(showcaseCss);
-  }
 
   function loadLocalizationScripts() {
     if (window.MI18n || document.querySelector('script[data-mi-i18n-loader="true"]')) {
@@ -117,37 +110,52 @@
   }
 })();
 
-const MI_THEME_STORAGE_KEY = "mi-visual-theme";
-const MI_THEMES = ["light", "dark"];
-
-function applyMiTheme(theme) {
-  const selected = MI_THEMES.includes(theme) ? theme : "light";
-  document.documentElement.dataset.miTheme = selected;
-  localStorage.setItem(MI_THEME_STORAGE_KEY, selected);
-
-  document.querySelectorAll("[data-mi-theme]").forEach((button) => {
-    const active = button.dataset.miTheme === selected;
-    button.classList.toggle("active", active);
-    button.setAttribute("aria-pressed", active ? "true" : "false");
-  });
-}
-
 function setupMiThemeSwitcher() {
-  const saved = localStorage.getItem(MI_THEME_STORAGE_KEY);
-  applyMiTheme(MI_THEMES.includes(saved) ? saved : "light");
-
-  document.querySelectorAll("[data-mi-theme]").forEach((button) => {
-    if (button.dataset.miThemeBound === "true") return;
-    button.dataset.miThemeBound = "true";
-    button.addEventListener("click", () => applyMiTheme(button.dataset.miTheme));
-  });
+  document.documentElement.dataset.miTheme = "light";
+  localStorage.removeItem("mi-visual-theme");
 }
 
 const MI_VISUAL_TONES = ["purple", "teal", "success", "warning"];
 const MI_VISUAL_ICONS = ["📊", "◆", "✓", "⚡", "💰", "📦", "↗", "⚠"];
 
+function escapeMiUiText(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function getMiUserInitials(user = getCurrentUser()) {
+  const source = String(user?.fullName || user?.username || "MI").trim();
+  const parts = source.split(/\s+/).filter(Boolean);
+  return (parts.length > 1 ? `${parts[0][0]}${parts[1][0]}` : source.slice(0, 2)).toUpperCase();
+}
+
+function decorateSemanticActions(root = document) {
+  const scope = root?.querySelectorAll ? root : document;
+  scope.querySelectorAll('button, a.run-btn, a.export-btn, a.ops-action, a.dashboard-module-main-link').forEach((element) => {
+    if (element.dataset.miSemanticAction === "true") return;
+    element.dataset.miSemanticAction = "true";
+
+    const text = String(element.textContent || element.getAttribute("aria-label") || "").trim();
+    let tone = "neutral";
+
+    if (element.classList.contains("logout-btn") || /حذف|رفض|إلغاء|خروج|إغلاق نهائي/i.test(text)) tone = "danger";
+    else if (/حفظ|اعتماد|موافقة|تأكيد|إرسال|إنشاء|دفع|صرف|حل|إتمام/i.test(text)) tone = "success";
+    else if (/مراجعة|تحقق|تنبيه|تصعيد|تحذير|تعليق/i.test(text)) tone = "warning";
+    else if (/تقرير|تصدير|سجل|تفاصيل|تتبع|صلاحيات/i.test(text)) tone = "secondary";
+    else if (/بحث|تحديث|تحميل|تشغيل|عرض|تطبيق|فتح|دخول/i.test(text)) tone = "primary";
+    else if (/مسح|رجوع|إعادة تعيين/i.test(text)) tone = "neutral";
+
+    element.classList.add(`mi-action-${tone}`);
+  });
+}
+
 function enhanceLegacyReportUi(root = document) {
   const scope = root.querySelectorAll ? root : document;
+  decorateSemanticActions(scope);
 
   scope.querySelectorAll(
     ".inventory-kpi-card, .report-kpi-card, .kpi-card, .cards-grid > .card, .kpi-grid > article, .stats-grid > article, .summary-grid > article, .metric-card, .stat-card"
@@ -374,6 +382,362 @@ const STANDALONE_CUSTOMER_PAGES = new Set([
   "customer-review-followups",
   "customer-review-coupons-dashboard"
 ]);
+
+// Dashboard-first application navigation. Every module uses a compact local navigator.
+const MI_MODULE_DEFINITIONS = [
+  {
+    id: "branches",
+    label: "ذكاء الفروع",
+    pages: ["branches","branches-sales","branches-stock","branches-inventory-count","branches-replenishment"],
+    groups: [{ id:"operations", label:"تشغيل", icon:"⚡", links:[
+      {page:"branches",label:"نظرة عامة",href:"../branches/index.html"},
+      {page:"branches-sales",label:"مبيعات الفروع",href:"../branches/sales.html"},
+      {page:"branches-stock",label:"مخزون الفروع",href:"../branches/stock.html"},
+      {page:"branches-inventory-count",label:"الجرد اللحظي",href:"../branches/inventory-count.html"},
+      {page:"branches-replenishment",label:"احتياجات وإعادة الطلب",href:"../branches/replenishment.html"}
+    ]}]
+  },
+  {
+    id: "menu",
+    label: "المنيو والأسعار",
+    pages: ["menu-prices"],
+    groups: [{ id:"operations", label:"تشغيل", icon:"⚡", links:[
+      {page:"menu-prices",label:"الأسعار والمخزون",href:"../menu/prices.html"}
+    ]}]
+  },
+  {
+    id: "pos",
+    label: "المبيعات ونقاط البيع",
+    pages: ["pos","pos-summary","pos-branch-sales","pos-branches","pos-cashiers","pos-peak-hours","pos-returns","pos-discounts","pos-offers","alerts-dashboard"],
+    groups: [
+      { id:"operations", label:"تشغيل", icon:"⚡", links:[
+        {page:"pos",label:"مركز المبيعات",href:"../pos/index.html"},
+        {page:"pos-summary",label:"ملخص نقاط البيع",href:"../pos/summary.html"},
+        {page:"pos-branch-sales",label:"مبيعات الفروع",href:"../pos/branch-sales.html"},
+        {page:"pos-branches",label:"الفروع ونقاط البيع",href:"../pos/branches.html",permission:"pos.index"},
+        {page:"pos-cashiers",label:"أداء الكاشير",href:"../pos/cashiers.html"},
+        {page:"pos-peak-hours",label:"ساعات الذروة",href:"../pos/peak-hours.html"},
+        {page:"pos-returns",label:"المرتجعات",href:"../pos/returns.html"}
+      ]},
+      { id:"control", label:"رقابة", icon:"◉", links:[
+        {page:"alerts-dashboard",label:"التنبيهات",href:"../pos/alerts-dashboard.html"},
+        {page:"pos-discounts",label:"الخصومات",href:"../pos/discounts.html"},
+        {page:"pos-offers",label:"العروض",href:"../pos/offers.html"}
+      ]}
+    ]
+  },
+  {
+    id: "customer",
+    label: "خدمة العملاء",
+    pages: ["customer","customer-pos-phones","customer-service-pos-review","customer-financial-review","customer-service-management-report","customer-review-sms-dashboard","customer-review-sms-settings","customer-review-sms-queue","customer-review-sms-manual","customer-review-followups","customer-review-coupons-dashboard","customer-vip","customer-migration","customer-rfm"],
+    groups: [
+      { id:"operations", label:"تشغيل", icon:"⚡", links:[
+        {page:"customer",label:"مركز الخدمة",href:"../customer/index.html"},
+        {page:"customer-pos-phones",label:"متابعة عملاء نقاط البيع",href:"../customer/pos-phones.html"},
+        {page:"customer-service-pos-review",label:"سجل الشكاوى",href:"../customer/service-pos-review.html"},
+        {page:"customer-financial-review",label:"المراجعة والتحقق المالي",href:"../customer/financial-review.html"},
+        {page:"customer-review-sms-queue",label:"تشغيل رسائل التقييم",href:"../customer/review-sms-queue.html"},
+        {page:"customer-review-sms-manual",label:"الإرسال اليدوي للعملاء",href:"../customer/review-sms-manual.html"},
+        {page:"customer-review-followups",label:"متابعة العملاء غير الراضين",href:"../customer/review-followups.html"}
+      ]},
+      { id:"reports", label:"تقارير", icon:"▦", links:[
+        {page:"customer-service-management-report",label:"تقرير أداء خدمة العملاء",href:"../customer/customer-service-management-report.html"},
+        {page:"customer-review-sms-dashboard",label:"متابعة تقييمات العملاء",href:"../customer/review-sms-dashboard.html"},
+        {page:"customer-review-coupons-dashboard",label:"متابعة مكافآت العملاء",href:"../customer/review-coupons-dashboard.html"}
+      ]},
+      { id:"settings", label:"إعدادات", icon:"⚙", links:[
+        {page:"customer-review-sms-settings",label:"إعدادات رسائل التقييم",href:"../customer/review-sms-settings.html"}
+      ]}
+    ]
+  },
+  {
+    id: "production",
+    label: "الإنتاج والتصنيع",
+    pages: ["production","production-daily","production-report","production-mo-cost"],
+    groups: [
+      { id:"operations", label:"تشغيل", icon:"⚡", links:[
+        {page:"production",label:"مركز الإنتاج",href:"../production/index.html"},
+        {page:"production-daily",label:"الإنتاج اليومي",href:"../production/daily.html"}
+      ]},
+      { id:"reports", label:"تقارير", icon:"▦", links:[
+        {page:"production-report",label:"تقرير الإنتاج",href:"../production/report.html"},
+        {page:"production-mo-cost",label:"تكلفة أمر التصنيع",href:"../production/mo-cost.html"}
+      ]}
+    ]
+  },
+  {
+    id: "costing",
+    label: "مراقبة التكاليف",
+    pages: ["costing","costing-overview"],
+    groups: [{ id:"reports", label:"تحليل", icon:"▦", links:[
+      {page:"costing-overview",label:"التكاليف ونقطة التعادل",href:"../costing/index.html"}
+    ]}]
+  },
+  {
+    id: "purchase",
+    label: "المشتريات والموردون",
+    pages: ["purchase","purchase-daily","purchase-report","purchase-price","purchase-order-control","purchase-supplier-performance","purchase-open-orders"],
+    groups: [
+      { id:"operations", label:"تشغيل", icon:"⚡", links:[
+        {page:"purchase",label:"مركز المشتريات",href:"../purchase/index.html"},
+        {page:"purchase-daily",label:"مشتريات اليوم",href:"../purchase/daily.html"},
+        {page:"purchase-order-control",label:"متابعة أوامر الشراء",href:"../purchase/order-control.html"},
+        {page:"purchase-open-orders",label:"الأوامر المفتوحة",href:"../purchase/open-orders.html"}
+      ]},
+      { id:"reports", label:"تحليلات", icon:"▦", links:[
+        {page:"purchase-report",label:"تقرير المشتريات بالفترة",href:"../purchase/report.html"},
+        {page:"purchase-price",label:"تغير أسعار الشراء",href:"../purchase/price-intelligence.html"},
+        {page:"purchase-supplier-performance",label:"كفاءة الموردين",href:"../purchase/supplier-performance.html"}
+      ]}
+    ]
+  },
+  {
+    id: "inventory",
+    label: "المخزون والمواقع",
+    pages: ["inventory","inventory-intermediate-control","inventory-executive-summary","inventory-historical-executive-summary","inventory-movement-analysis-report","inventory-reorder-risk"],
+    groups: [
+      { id:"operations", label:"تشغيل", icon:"⚡", links:[
+        {page:"inventory",label:"مركز المخزون",href:"../inventory/index.html"},
+        {page:"inventory-intermediate-control",label:"رقابة المخازن الوسيطة",href:"../inventory/intermediate-control.html"},
+        {page:"inventory-reorder-risk",label:"إعادة الطلب والمخاطر",href:"../inventory/reorder-risk.html"}
+      ]},
+      { id:"reports", label:"تقارير", icon:"▦", links:[
+        {page:"inventory-executive-summary",label:"الملخص التنفيذي",href:"../inventory/executive-summary.html"},
+        {page:"inventory-historical-executive-summary",label:"الملخص التاريخي",href:"../inventory/historical-executive-summary.html"},
+        {page:"inventory-movement-analysis-report",label:"تحليل حركة الصنف",href:"../inventory/movement-analysis-report.html"}
+      ]}
+    ]
+  },
+  {
+    id: "forecast",
+    label: "التوقعات والأهداف",
+    pages: ["forecast","forecast-products","forecast-targets","forecast-target-report"],
+    groups: [
+      { id:"operations", label:"تشغيل", icon:"⚡", links:[
+        {page:"forecast",label:"مركز التوقعات",href:"../forecast/index.html"},
+        {page:"forecast-products",label:"منتجات التارجت",href:"../forecast/products.html"},
+        {page:"forecast-targets",label:"إدارة التارجت",href:"../forecast/targets.html"}
+      ]},
+      { id:"reports", label:"تقارير", icon:"▦", links:[
+        {page:"forecast-target-report",label:"تقرير التارجت",href:"../forecast/target-report.html"}
+      ]}
+    ]
+  },
+  {
+    id: "planning",
+    label: "تخطيط التوقعات",
+    pages: ["forecast-planning-achievement","forecast-planning-feasibility"],
+    groups: [{ id:"planning", label:"تخطيط", icon:"◈", links:[
+      {page:"forecast-planning-achievement",label:"الفوركاست والمبيعات الفعلية",href:"../forecast-planning/index.html"},
+      {page:"forecast-planning-feasibility",label:"قابلية التحقيق والخامات",href:"../forecast-planning/feasibility.html"}
+    ]}]
+  },
+  {
+    id: "admin",
+    label: "الإدارة والصلاحيات",
+    pages: ["admin-users","admin-roles","admin-report-classification"],
+    groups: [{ id:"settings", label:"إدارة", icon:"⚙", links:[
+      {page:"admin-users",label:"المستخدمون والصلاحيات",href:"../admin/users.html"}
+    ]}]
+  },
+  {
+    id: "reports",
+    label: "مركز التقارير",
+    pages: ["reports-executive","reports-management","reports-operational"],
+    groups: [{ id:"reports", label:"التقارير", icon:"▦", links:[
+      {page:"reports-executive",label:"تنفيذي",href:"../reports/executive.html",always:true},
+      {page:"reports-management",label:"إداري",href:"../reports/management.html",always:true},
+      {page:"reports-operational",label:"تشغيلي",href:"../reports/operational.html",always:true}
+    ]}]
+  }
+];
+
+
+// Customer Care module model — one source of truth for every internal page.
+// The visual contract is based on the two reference workbenches that proved most
+// usable in testing: complaints + financial review.
+const MI_CUSTOMER_PAGE_MODEL = {
+  "customer-pos-phones": { group:"operations", kicker:"متابعة نقاط البيع", title:"متابعة عملاء نقاط البيع", subtitle:"كل أرقام عملاء POS مع حالة الرسالة والتقييم والمتابعة والكوبون في شاشة واحدة." },
+  "customer-service-pos-review": { group:"operations", kicker:"تشغيل الشكاوى", title:"سجل شكاوى وملاحظات العملاء", subtitle:"بحث الفواتير وتسجيل ملاحظات خدمة العملاء ومتابعة معالجة الحالات حتى الإغلاق." },
+  "customer-financial-review": { group:"operations", kicker:"المسار المالي", title:"المراجعة والتحقق المالي", subtitle:"متابعة التذاكر بعد اعتماد المدير، من مراجعة المراقب وحتى إجراءات المحاسب والقيد والصرف." },
+  "customer-service-management-report": { group:"reports", kicker:"تقارير الإدارة", title:"تقرير أداء خدمة العملاء", subtitle:"مؤشرات الشكاوى وسرعة المعالجة ونتائج التقييم وأداء فريق خدمة العملاء في شاشة موحدة." },
+  "customer-review-sms-dashboard": { group:"reports", kicker:"متابعة التقييمات", title:"متابعة تقييمات العملاء", subtitle:"متابعة حالة الإرسال وتفاعل العملاء ونتائج التقييم من مساحة تشغيل واحدة." },
+  "customer-review-sms-queue": { group:"operations", kicker:"تشغيل الرسائل", title:"تشغيل رسائل التقييم", subtitle:"مراجعة الفواتير المؤهلة وتشغيل إرسال رسائل التقييم للعملاء الجاهزين فقط." },
+  "customer-review-sms-manual": { group:"operations", kicker:"إرسال مباشر", title:"الإرسال اليدوي للعملاء", subtitle:"إرسال رابط التقييم إلى عميل أو مجموعة عملاء باستخدام سياسات الحماية والمكافآت المعتمدة." },
+  "customer-review-followups": { group:"operations", kicker:"استعادة رضا العملاء", title:"متابعة العملاء غير الراضين", subtitle:"توثيق التواصل وتوزيع الحالات ومتابعتها حتى الحل والإغلاق." },
+  "customer-review-coupons-dashboard": { group:"reports", kicker:"مكافآت العملاء", title:"متابعة مكافآت العملاء", subtitle:"متابعة المكافآت والتعويضات وحالة الإصدار والاستخدام والانتهاء من شاشة واحدة." },
+  "customer-review-sms-settings": { group:"settings", kicker:"إعدادات التشغيل", title:"إعدادات رسائل التقييم", subtitle:"التحكم في إرسال الرسائل وقواعد اختيار العملاء والمكافآت من حساب المشروع الحالي." }
+};
+
+const MI_CUSTOMER_GROUP_LABELS = {
+  operations: "تشغيل",
+  reports: "تقارير",
+  settings: "إعدادات"
+};
+
+function getMiCustomerPageModel(activePage) {
+  return MI_CUSTOMER_PAGE_MODEL[activePage] || null;
+}
+
+function isMiCustomerModulePage(activePage) {
+  return MI_PAGE_MODULE_MAP?.get?.(activePage)?.id === "customer" || activePage === "customer-pos-phones";
+}
+
+// Old customer pages historically carried their own hero/navigation. Before the
+// unified shell mounts we remove that chrome and preserve only real functional
+// controls (health, provider mode, refresh, Shopify state) in one compact runtime bar.
+function normalizeStandaloneCustomerChrome(pageMain, activePage) {
+  const model = getMiCustomerPageModel(activePage);
+  if (!model || !pageMain) return;
+
+  pageMain.querySelectorAll(".crsms-return-bar, .service-page-toolbar, .cs-management-nav").forEach((node) => node.remove());
+
+  const legacyHero = pageMain.querySelector(".crsms-operation-hero, .crsms-dashboard-hero, .inventory-hero-card");
+  if (!legacyHero) return;
+
+  const runtime = document.createElement("section");
+  runtime.className = "mi-customer-runtime-bar";
+  runtime.dataset.miCustomerRuntime = "true";
+  runtime.innerHTML = `
+    <div class="mi-customer-runtime-copy">
+      <span class="mi-customer-runtime-dot" aria-hidden="true"></span>
+      <div><small>حالة التشغيل</small><strong>${escapeMiUiText(model.kicker)}</strong></div>
+    </div>
+    <div class="mi-customer-runtime-tools"></div>
+  `;
+  const tools = runtime.querySelector(".mi-customer-runtime-tools");
+
+  const move = (selector, className = "") => {
+    const node = legacyHero.querySelector(selector);
+    if (!node) return;
+    if (className) node.classList.add(className);
+    tools.appendChild(node);
+  };
+
+  // Preserve the minimum functional state only — never the old hero card itself.
+  move("#modeBadge", "mi-runtime-badge");
+  move(".crsms-company-chip", "mi-runtime-company");
+  move("[data-action='refresh-all']", "mi-runtime-action");
+  move("[data-action='health']", "mi-runtime-action");
+  move("[data-queue-action='health']", "mi-runtime-action");
+  move("[data-followups-action='health']", "mi-runtime-action");
+  move("#shopifyStatusBadge", "mi-runtime-action");
+
+  legacyHero.remove();
+  if (tools.children.length) pageMain.insertBefore(runtime, pageMain.firstChild);
+}
+
+const MI_PAGE_MODULE_MAP = new Map();
+MI_MODULE_DEFINITIONS.forEach((module) => module.pages.forEach((page) => MI_PAGE_MODULE_MAP.set(page, module)));
+
+const MI_APP_NAVIGATION_PAGES = new Set([
+  "dashboard",
+  ...MI_MODULE_DEFINITIONS.flatMap((module) => module.pages)
+]);
+
+function ensureMiAppStyles() {
+  const existing = document.querySelector('link[data-mi-unified-ui="true"], link[data-mi-app-navigation="true"]');
+  if (existing) {
+    // Keep the unified identity as the final stylesheet in cascade order, even
+    // after legacy compatibility styles are injected by old report pages.
+    document.head.appendChild(existing);
+    return;
+  }
+  const scriptUrl = document.currentScript?.src || window.location.href;
+  const href = new URL("../css/mi-app.css?v=20260904-customer-final-01", scriptUrl).href;
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = href;
+  link.dataset.miAppNavigation = "true";
+  link.dataset.miUnifiedUi = "true";
+  document.head.appendChild(link);
+}
+
+function ensureMiCustomerModuleStyles(activePage) {
+  if (MI_PAGE_MODULE_MAP.get(activePage)?.id !== "customer") return;
+  const scriptUrl = document.currentScript?.src || window.location.href;
+  const href = new URL("../css/customer-module.css?v=20260904-customer-final-01", scriptUrl).href;
+  let link = document.querySelector('link[data-mi-customer-module-ui="true"]');
+  if (!link) {
+    link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = href;
+    link.dataset.miCustomerModuleUi = "true";
+  }
+  // Always keep this scoped customer layer last in cascade order.
+  document.head.appendChild(link);
+}
+
+function getMiSectionNavigation(activePage) {
+  return MI_PAGE_MODULE_MAP.get(activePage) || null;
+}
+
+function canShowMiModuleLink(item, activePage) {
+  if (item.always || item.page === activePage || isAdmin()) return true;
+  if (item.permission) return getUserPermissions().includes(item.permission);
+  return hasPermission(item.page);
+}
+
+function renderMiSectionNavigation(activePage) {
+  const section = getMiSectionNavigation(activePage);
+  if (!section) return "";
+
+  const groups = section.groups.map((group) => {
+    const visibleLinks = group.links.filter((item) => canShowMiModuleLink(item, activePage));
+    if (!visibleLinks.length) return "";
+    const isActiveGroup = visibleLinks.some((item) => item.page === activePage);
+    const links = visibleLinks.map((item) => `
+      <a class="mi-section-menu-link ${item.page === activePage ? "active" : ""}"
+         data-page="${item.page}" href="${item.href}">
+        <span>${item.label}</span>
+        ${item.page === activePage ? '<small>الصفحة الحالية</small>' : ''}
+      </a>
+    `).join("");
+
+    return `
+      <details class="mi-section-nav-group ${isActiveGroup ? "active" : ""}">
+        <summary>
+          <span class="mi-section-group-icon" aria-hidden="true">${group.icon}</span>
+          <strong>${group.label}</strong>
+          <span class="mi-section-group-arrow" aria-hidden="true">⌄</span>
+        </summary>
+        <div class="mi-section-menu">${links}</div>
+      </details>
+    `;
+  }).join("");
+
+  return `
+    <nav class="mi-section-nav mi-section-nav-grouped" aria-label="تنقل ${section.label}">
+      <a class="mi-section-dashboard-link" href="../dashboard/index.html">
+        <span aria-hidden="true">←</span>
+        <strong>لوحة الإدارة</strong>
+      </a>
+      <div class="mi-section-nav-context">
+        <span class="mi-section-module-label">${section.label}</span>
+        <div class="mi-section-nav-groups">${groups}</div>
+      </div>
+    </nav>
+  `;
+}
+
+function setupMiSectionNavigation() {
+  const groups = Array.from(document.querySelectorAll(".mi-section-nav-group"));
+  if (!groups.length) return;
+
+  groups.forEach((group) => {
+    group.addEventListener("toggle", () => {
+      if (!group.open) return;
+      groups.forEach((other) => {
+        if (other !== group) other.open = false;
+      });
+    });
+  });
+
+  document.addEventListener("click", (event) => {
+    if (event.target.closest(".mi-section-nav-group")) return;
+    groups.forEach((group) => { group.open = false; });
+  }, { capture: true });
+}
 
 function shouldShowReportToolbar(activePage) {
   return !PAGES_WITHOUT_REPORT_TOOLBAR.has(activePage);
@@ -885,6 +1249,22 @@ function initLayout(activePage) {
 
 function renderLayout(title, subtitle, activePage, contentHtml) {
   document.body.classList.add("mi-report-design-v2");
+  const unifiedNavigation = activePage === "dashboard" || MI_APP_NAVIGATION_PAGES.has(activePage) || Boolean(activePage);
+  if (unifiedNavigation) ensureMiAppStyles();
+  ensureMiCustomerModuleStyles(activePage);
+  const customerModel = getMiCustomerPageModel(activePage);
+  if (customerModel) {
+    title = customerModel.title;
+    subtitle = customerModel.subtitle;
+  }
+  document.body.classList.toggle("mi-app-navigation", unifiedNavigation);
+  document.body.classList.toggle("mi-app-unified", unifiedNavigation);
+  document.body.classList.toggle("mi-app-dashboard", activePage === "dashboard");
+  document.body.classList.toggle("mi-app-service", ["customer-service-pos-review", "customer-financial-review"].includes(activePage));
+  document.body.classList.toggle("mi-customer-module-page", getMiSectionNavigation(activePage)?.id === "customer");
+  const customerGroup = customerModel?.group || "";
+  if (customerGroup) document.body.dataset.miCustomerGroup = customerGroup;
+  else delete document.body.dataset.miCustomerGroup;
   const isAllowed = guardPage(activePage);
 
     window.ACTIVE_PAGE = activePage;
@@ -895,6 +1275,14 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
     : renderPermissionDenied(title || "هذا التقرير");
 
   const showReportToolbar = shouldShowReportToolbar(activePage);
+  const currentUser = getCurrentUser() || {};
+  const currentUserName = escapeMiUiText(currentUser.fullName || currentUser.username || "User");
+  const currentUserRole = escapeMiUiText(currentUser.role === "admin" || currentUser.role === "super_admin" ? "إدارة النظام" : "حساب المستخدم");
+  const currentUserInitials = escapeMiUiText(getMiUserInitials(currentUser));
+  const sectionNavigationHtml = unifiedNavigation ? renderMiSectionNavigation(activePage) : "";
+  const customerPill = customerModel
+    ? `خدمة العملاء · ${MI_CUSTOMER_GROUP_LABELS[customerModel.group] || "تشغيل"}`
+    : "عمليات فيرجينيا";
 
   const reportToolbarHtml = STANDALONE_CUSTOMER_PAGES.has(activePage)
   ? ""
@@ -961,230 +1349,35 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
   `;
 
   document.body.innerHTML = `
-    <div class="app-shell">
-      <aside class="sidebar">
-        <div class="brand">
-          <div class="brand-logo">MI</div>
-          <div>
-            <h1>Management Intelligence</h1>
-            <p>Odoo Enterprise 18</p>
-          </div>
-        </div>
-
-        <nav class="nav">
-          <a data-page="dashboard" class="nav-link" href="../dashboard/index.html">
-            <span>🏠</span> لوحة الإدارة
-          </a>
-
-          <div class="nav-group">💼 التشغيل الرئيسي</div>
-
-          <div class="nav-accordion" data-accordion="branches">
-            <button type="button" class="nav-accordion-head" data-accordion-toggle="branches">
-              <span>ذكاء الفروع 🏬 Branches</span>
-              <span class="nav-accordion-arrow">⌄</span>
-            </button>
-
-            <div class="nav-accordion-body">
-              <a data-page="branches" class="nav-link" href="../branches/index.html">نظرة عامة على الفروع</a>
-              <a data-page="branches-sales" class="nav-link" href="../branches/sales.html">مبيعات الفروع</a>
-              <a data-page="branches-stock" class="nav-link" href="../branches/stock.html">مخزون الفروع</a>
-              <a data-page="branches-inventory-count" class="nav-link" href="../branches/inventory-count.html">جرد الفرع اللحظي</a>
-              <a data-page="branches-replenishment" class="nav-link" href="../branches/replenishment.html"> احتياجات الفروع واعاده الطلب</a>
-              <a data-page="branches-comparison" class="nav-link" href="../branches/comparison.html" hidden>مقارنة الفروع</a>
-            </div>
-          </div>
-
-
-          <div class="nav-accordion" data-accordion="Menu">
-            <button type="button" class="nav-accordion-head" data-accordion-toggle="Menu">
-              <span>مينو الأسعار والمخزون 🧾 Menu</span>
-              <span class="nav-accordion-arrow">⌄</span>
-            </button>
-
-            <div class="nav-accordion-body">
-              <a data-page="menu-prices" class="nav-link" href="../menu/prices.html">مينو الأسعار والمخزون</a>
-            </div>
-          </div>
-
-          <div class="nav-accordion" data-accordion="pos">
-            <button type="button" class="nav-accordion-head" data-accordion-toggle="pos">
-              <span>المبيعات ونقاط البيع 🧾</span>
-              <span class="nav-accordion-arrow">⌄</span>
-            </button>
-
-            <div class="nav-accordion-body">
-              <a data-page="pos" class="nav-link" href="../pos/index.html">صفحة تقارير نقاط البيع</a>
-              <a data-page="pos-summary" class="nav-link" href="../pos/summary.html">ملخص نقاط البيع</a>
-              <a data-page="pos-branch-sales" class="nav-link" href="../pos/branch-sales.html">تحليل أداء المعارض</a>
-              <a data-page="pos-cashiers" class="nav-link" href="../pos/cashiers.html">تحليل الكاشيرات</a>
-              <a data-page="pos-peak-hours" class="nav-link" href="../pos/peak-hours.html">تحليل ساعات البيع</a>
-              <a data-page="pos-returns" class="nav-link" href="../pos/returns.html">المرتجعات</a>
-              <a data-page="pos-discounts" class="nav-link" href="../pos/discounts.html">الخصومات</a>
-              <a data-page="pos-offers" class="nav-link" href="../pos/offers.html">العروض وتأثيرها</a>
-              <a data-page="alerts-dashboard" class="nav-link" href="../pos/alerts-dashboard.html">داشبورد تنبيهات Telegram</a>
-            </div>
-          </div>
-
-          <div class="nav-accordion" data-accordion="Customers">
-            <button type="button" class="nav-accordion-head" data-accordion-toggle="Customers">
-              <span>خدمة عملاء Virginia 💬</span>
-              <span class="nav-accordion-arrow">⌄</span>
-            </button>
-
-            <div class="nav-accordion-body">
-              <a data-page="customer" class="nav-link" href="../customer/index.html">مركز خدمة العملاء</a>
-              <a data-page="customer-pos-phones" class="nav-link" href="../customer/pos-phones.html">متابعة عملاء نقاط البيع</a>
-              <a data-page="customer-service-pos-review" class="nav-link" href="../customer/service-pos-review.html">سجل شكاوى وملاحظات العملاء</a>
-              <a data-page="customer-financial-review" class="nav-link" href="../customer/financial-review.html">المراجعة والتحقق المالي</a>
-              <a data-page="customer-service-management-report" class="nav-link" href="../customer/customer-service-management-report.html">تقرير أداء خدمة العملاء</a>
-            
-
-              <a data-page="customer-review-sms-queue" class="nav-link" href="../customer/review-sms-queue.html">تشغيل رسائل التقييم</a>
-              <a data-page="customer-review-sms-manual" class="nav-link" href="../customer/review-sms-manual.html">الإرسال اليدوي للعملاء</a>
-              <a data-page="customer-review-followups" class="nav-link" href="../customer/review-followups.html">متابعة العملاء غير الراضين</a>
-              <a data-page="customer-review-coupons-dashboard" class="nav-link" href="../customer/review-coupons-dashboard.html">إدارة مكافآت الشحن المجاني</a>
-              <a data-page="customer-review-sms-dashboard" class="nav-link" href="../customer/review-sms-dashboard.html">متابعة تقييمات العملاء</a>
-              <a data-page="customer-review-sms-settings" class="nav-link" href="../customer/review-sms-settings.html">إعدادات رسائل التقييم</a>
-</div>
-          </div>
-
-          <div class="nav-group">⚙️ الإدارة</div>
-          <a data-page="admin-users" class="nav-link" href="../admin/users.html">إدارة المستخدمين والصلاحيات</a>
-
-          <div class="nav-group">📊 التقارير المتخصصة</div>
-
-          <div class="nav-accordion" data-accordion="Production">
-            <button type="button" class="nav-accordion-head" data-accordion-toggle="Production">
-              <span>الإنتاج والتصنيع 🏭 Production</span>
-              <span class="nav-accordion-arrow">⌄</span>
-            </button>
-
-            <div class="nav-accordion-body">
-              <a data-page="production" class="nav-link" href="../production/index.html">صفحة تقارير الإنتاج</a>
-              <a data-page="production-daily" class="nav-link" href="../production/daily.html">إنتاج يومي</a>
-              <a data-page="production-report" class="nav-link" href="../production/report.html">إنتاج بالفترة</a>
-              <a data-page="production-mo-cost" class="nav-link" href="../production/mo-cost.html">تكلفة أمر التصنيع</a>
-            </div>
-          </div>
-
-          <div class="nav-accordion" data-accordion="Costing">
-            <button type="button" class="nav-accordion-head" data-accordion-toggle="Costing">
-              <span>مراقبة التكاليف 💰 Costing</span>
-              <span class="nav-accordion-arrow">⌄</span>
-            </button>
-
-            <div class="nav-accordion-body">
-              <a data-page="costing-overview" class="nav-link" href="../costing/index.html">لوحة التكاليف ونقطة التعادل</a>
-            </div>
-          </div>
-
-          <div class="nav-accordion" data-accordion="Purchase">
-            <button type="button" class="nav-accordion-head" data-accordion-toggle="Purchase">
-              <span>المشتريات والموردين 📦 Purchase</span>
-              <span class="nav-accordion-arrow">⌄</span>
-            </button>
-
-            <div class="nav-accordion-body">
-              <a data-page="purchase" class="nav-link" href="../purchase/index.html">صفحة تقارير المشتريات</a>
-              <a data-page="purchase-daily" class="nav-link" href="../purchase/daily.html">مشتريات يومي</a>
-              <a data-page="purchase-report" class="nav-link" href="../purchase/report.html">مشتريات بالفترة</a>
-              <a data-page="purchase-price" class="nav-link" href="../purchase/price-intelligence.html">تغير أسعار الشراء</a>
-              <a data-page="purchase-order-control" class="nav-link" href="../purchase/order-control.html">متابعة أوامر الشراء</a>
-              <a data-page="purchase-supplier-performance" class="nav-link" href="../purchase/supplier-performance.html">كفاءة الموردين</a>
-              <a data-page="purchase-open-orders" class="nav-link" href="../purchase/open-orders.html">أوامر شراء مفتوحة</a>
-            </div>
-          </div>
-
-          <div class="nav-accordion" data-accordion="Inventory">
-            <button type="button" class="nav-accordion-head" data-accordion-toggle="Inventory">
-              <span>المخزون والمواقع 🏬 Inventory</span>
-              <span class="nav-accordion-arrow">⌄</span>
-            </button>
-
-            <div class="nav-accordion-body">
-              <a data-page="inventory" class="nav-link" href="../inventory/index.html">داشبورد المخزون</a>
-              <a data-page="inventory-intermediate-control" class="nav-link" href="../inventory/intermediate-control.html">رقابة المخازن الوسيطة</a>
-              <a data-page="inventory-executive-summary" class="nav-link" href="../inventory/executive-summary.html">ملخص المخزون التنفيذي</a>
-              <a data-page="inventory-historical-executive-summary" class="nav-link" href="../inventory/historical-executive-summary.html">المخزون التنفيذي التاريخي</a>
-              <a data-page="inventory-movement-analysis-report" class="nav-link" href="../inventory/movement-analysis-report.html">تحليل حركة الصنف</a>
-              <a data-page="inventory-flow-control" class="nav-link" href="../inventory/flow-control.html">تحكم حركة المخزون</a>
-              <a data-page="inventory-movement-intelligence" class="nav-link" href="../inventory/movement-intelligence.html">تحليل حركة المخزون</a>
-              <a data-page="inventory-reorder-risk" class="nav-link" href="../inventory/reorder-risk.html">تشغيل المخازن وإعادة الطلب</a>
-            </div>
-          </div>
-
-          <div class="nav-accordion" data-accordion="Forecast">
-            <button type="button" class="nav-accordion-head" data-accordion-toggle="Forecast">
-              <span>التوقعات والتارجت 🎯 Forecast</span>
-              <span class="nav-accordion-arrow">⌄</span>
-            </button>
-
-            <div class="nav-accordion-body">
-              <a data-page="forecast" class="nav-link" href="../forecast/index.html">صفحة تقارير التارجت</a>
-              <a data-page="forecast-products" class="nav-link" href="../forecast/products.html">منتجات التارجت</a>
-              <a data-page="forecast-targets" class="nav-link" href="../forecast/targets.html">إدارة التارجت</a>
-              <a data-page="forecast-target-report" class="nav-link" href="../forecast/target-report.html">تقرير التارجت</a>
-            </div>
-          </div>
-
-          <div class="nav-accordion" data-accordion="ForecastPlanning">
-            <button type="button" class="nav-accordion-head" data-accordion-toggle="ForecastPlanning">
-              <span>تخطيط الفوركاست 📈 Forecast Planning</span>
-              <span class="nav-accordion-arrow">⌄</span>
-            </button>
-
-            <div class="nav-accordion-body">
-              <a data-page="forecast-planning-achievement" class="nav-link" href="../forecast-planning/index.html">تحقق الفوركاست والمبيعات الفعلية</a>
-              <a data-page="forecast-planning-feasibility" class="nav-link" href="../forecast-planning/feasibility.html">قابلية تحقيق الفوركاست والخامات</a>
-            </div>
-          </div>
-        </nav>
-
-        <div class="sidebar-footer">
-          <span><i></i> Virginia Operations · Odoo 18</span>
-        </div>
-      </aside>
+    <div class="app-shell ${unifiedNavigation ? "mi-app-shell" : ""}">
 
       <main class="main">
         <section class="mi-page-hero">
-          <picture aria-hidden="true">
-            <source
-              media="(min-width: 900px)"
-              srcset="../assets/virginia-showcase-1440.webp"
-              type="image/webp"
-            />
-            <img
-              src="../assets/virginia-showcase-960.webp"
-              width="960"
-              height="540"
-              alt=""
-              loading="eager"
-              decoding="async"
-              fetchpriority="high"
-            />
-          </picture>
 
-          <div class="mi-page-hero-shade" aria-hidden="true"></div>
-
-          <button type="button" class="mobile-menu-btn mi-hero-menu-btn" data-mi-mobile-menu aria-label="فتح القائمة">☰</button>
+          
 
           <div class="mi-hero-account-bar mi-compact-account-tools">
-            <div class="mi-theme-switcher" role="group" aria-label="نمط العرض">
-              <button type="button" data-mi-theme="light" aria-label="الوضع الفاتح" title="Light">☀<span class="mi-tool-label">Light</span></button>
-              <button type="button" data-mi-theme="dark" aria-label="الوضع الداكن" title="Dark">☾<span class="mi-tool-label">Dark</span></button>
+            <button type="button" class="mi-language-toggle mi-tool-capsule" data-mi-language-toggle aria-label="تغيير اللغة" title="Language">
+              <span class="mi-tool-symbol" aria-hidden="true">A/ع</span>
+              <span class="mi-tool-copy"><strong>EN</strong><small>اللغة</small></span>
+            </button>
+            <div class="user-chip mi-account-capsule" title="${currentUserName}" aria-label="المستخدم الحالي">
+              <span class="mi-account-avatar">${currentUserInitials}</span>
+              <span class="mi-account-copy"><strong>${currentUserName}</strong><small>${currentUserRole}</small></span>
             </div>
-            <div class="user-chip mi-user-icon" title="${getCurrentUser()?.fullName || getCurrentUser()?.username || "User"}" aria-label="المستخدم الحالي">👤</div>
-            <button type="button" class="mi-language-toggle" data-mi-language-toggle aria-label="تغيير اللغة" title="Language"><strong>EN</strong></button>
-            <button class="export-btn logout-btn mi-logout-icon" onclick="logout()" aria-label="تسجيل الخروج" title="تسجيل الخروج">↪</button>
+            <button class="logout-btn mi-logout-capsule" onclick="logout()" aria-label="تسجيل الخروج" title="تسجيل الخروج">
+              <span aria-hidden="true">↪</span><strong>خروج</strong>
+            </button>
           </div>
 
           <div class="mi-hero-heading">
-            <span class="page-pill">Virginia Operations</span>
+            <span class="page-pill">${customerPill}</span>
             <h2>${title}</h2>
             <p>${subtitle}</p>
           </div>
         </section>
 
+        ${sectionNavigationHtml}
         ${reportToolbarHtml}
 
         <section class="content mi-bootstrap-page">
@@ -1194,43 +1387,17 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
     </div>
   `;
 
+  document.documentElement.classList.remove("mi-app-preboot");
+  document.documentElement.classList.add("mi-app-ready");
+
   initLayout(activePage);
-  setupSidebarAccordions(activePage);
   loadReportExportEngine(activePage);
   loadReportFiltersEngine(activePage);
   enhanceLegacyReportUi(document);
   observeLegacyReportUi();
-  setupMobileSidebar();
   setupMiThemeSwitcher();
+  setupMiSectionNavigation();
   window.MI18n?.refresh?.();
-}
-
-function setupMobileSidebar() {
-  const button = document.querySelector("[data-mi-mobile-menu]");
-  const sidebar = document.querySelector(".sidebar");
-  if (!button || !sidebar || button.dataset.miBound === "true") return;
-
-  button.dataset.miBound = "true";
-  button.addEventListener("click", (event) => {
-    event.stopPropagation();
-    document.body.classList.toggle("mi-sidebar-open");
-  });
-
-  sidebar.addEventListener("click", (event) => {
-    if (window.innerWidth <= 820 && event.target.closest("a")) {
-      document.body.classList.remove("mi-sidebar-open");
-    }
-  });
-
-  document.addEventListener("click", (event) => {
-    if (
-      document.body.classList.contains("mi-sidebar-open") &&
-      !event.target.closest(".sidebar") &&
-      !event.target.closest("[data-mi-mobile-menu]")
-    ) {
-      document.body.classList.remove("mi-sidebar-open");
-    }
-  });
 }
 
 function kpiCard(label, value, hint = "") {
@@ -1311,185 +1478,6 @@ function showError(error, targetId = "reportArea") {
   `;
 }
 
-function setupSidebarAccordions(activePage) {
-  const accordions = document.querySelectorAll(".nav-accordion");
-
-  accordions.forEach((accordion) => {
-    if (accordion.style.display === "none") return;
-
-    const key = accordion.dataset.accordion;
-    const button = accordion.querySelector("[data-accordion-toggle]");
-    const hasActiveChild = !!accordion.querySelector(
-      `.nav-link[data-page="${activePage}"]`
-    );
-
-    const savedState = localStorage.getItem(`sidebar-accordion-${key}`);
-
-    const shouldOpen =
-      hasActiveChild || savedState === "open";
-
-    accordion.classList.toggle("open", shouldOpen);
-
-    if (!button) return;
-
-    button.addEventListener("click", () => {
-      const isOpen = accordion.classList.toggle("open");
-
-      localStorage.setItem(
-        `sidebar-accordion-${key}`,
-        isOpen ? "open" : "closed"
-      );
-    });
-  });
-}
-
-function getExportAuthToken() {
-  if (typeof getAuthToken === "function") {
-    return getAuthToken();
-  }
-
-  return localStorage.getItem("token") || "";
-}
-
-function getCurrentExportParams(activePage) {
-  const params = new URLSearchParams(window.location.search);
-
-  const companyId = document.getElementById("companySelect")?.value;
-  const dateFrom = document.getElementById("dateFrom")?.value;
-  const dateTo = document.getElementById("dateTo")?.value;
-
-  if (companyId) params.set("companyId", companyId);
-  if (dateFrom) params.set("dateFrom", dateFrom);
-  if (dateTo) params.set("dateTo", dateTo);
-
-  const branchCode = document.getElementById("branchCode")?.value;
-  if (branchCode) params.set("branchCode", branchCode);
-
-  const branchId = document.getElementById("branchId")?.value;
-  if (branchId) params.set("branchId", branchId);
-
-  const periodMode = document.getElementById("periodMode")?.value;
-  if (periodMode) params.set("periodMode", periodMode);
-
-  const year = document.getElementById("year")?.value;
-  if (year) params.set("year", year);
-
-  const monthFrom = document.getElementById("monthFrom")?.value;
-  if (monthFrom) params.set("monthFrom", monthFrom);
-
-  const monthTo = document.getElementById("monthTo")?.value;
-  if (monthTo) params.set("monthTo", monthTo);
-
-  const channelType = document.getElementById("channelType")?.value;
-  if (channelType) params.set("channelType", channelType);
-
-  const channelName = document.getElementById("channelName")?.value;
-  if (channelName) params.set("channelName", channelName);
-
-  const productGroup = document.getElementById("productGroup")?.value;
-  if (productGroup) params.set("productGroup", productGroup);
-
-  const itemNo = document.getElementById("itemNo")?.value;
-  if (itemNo) params.set("itemNo", itemNo);
-
-  const reportCode = getReportCodeForPage(activePage);
-  params.set("report", reportCode);
-
-  return params;
-}
-
-function getFilenameFromDisposition(headerValue) {
-  if (!headerValue) return "";
-
-  const utf8Match = headerValue.match(/filename\*=UTF-8''([^;]+)/i);
-  if (utf8Match?.[1]) {
-    return decodeURIComponent(utf8Match[1]);
-  }
-
-  const normalMatch = headerValue.match(/filename="?([^"]+)"?/i);
-  if (normalMatch?.[1]) {
-    return normalMatch[1];
-  }
-
-  return "";
-}
-
-async function downloadGenericExcel(activePage) {
-  const reportCode = getReportCodeForPage(activePage);
-
-  if (!reportCode) {
-    alert("لا يوجد كود تصدير لهذا التقرير");
-    return;
-  }
-
-  if (!hasPermission(activePage)) {
-    alert("ليس لديك صلاحية تصدير هذا التقرير");
-    return;
-  }
-
-  const button = document.getElementById("exportExcelBtn");
-
-  try {
-    if (button) {
-      button.disabled = true;
-      button.textContent = "جاري تصدير Excel...";
-    }
-
-    const params = getCurrentExportParams(activePage);
-    const token = getExportAuthToken();
-
-    const response = await fetch(
-      `${API_BASE_URL}/exports/excel?${params.toString()}`,
-      {
-        method: "GET",
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
-        }
-      }
-    );
-
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(text || "فشل تصدير Excel");
-    }
-
-    const blob = await response.blob();
-
-    const filename =
-      getFilenameFromDisposition(
-        response.headers.get("Content-Disposition")
-      ) || `${reportCode}.xlsx`;
-
-    const url = window.URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-
-    window.URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error(error);
-    alert(error.message || "حدث خطأ أثناء تصدير Excel");
-  } finally {
-    if (button) {
-      button.disabled = false;
-      button.textContent = "⬇ Export Excel";
-    }
-  }
-}
-
-function setupGenericExcelExport(activePage) {
-  const button = document.getElementById("exportExcelBtn");
-  if (!button) return;
-
-  button.addEventListener("click", () => {
-    downloadGenericExcel(activePage);
-  });
-}
-
 function loadReportExportEngine(activePage) {
   if (window.ReportExport) {
     window.ReportExport.setup(activePage);
@@ -1559,45 +1547,6 @@ function loadReportFiltersEngine(activePage) {
 function mountStandaloneCustomerPage() {
   if (document.body?.dataset.miSidebarMounted === "true") return;
 
-  const pageConfig = {
-    "customer-service-pos-review": [
-      "سجل شكاوى وملاحظات العملاء",
-      "بحث الفواتير وتسجيل الملاحظات ومتابعة معالجة الحالات"
-    ],
-    "customer-financial-review": [
-      "المراجعة والتحقق المالي",
-      "تذاكر الشكاوى المالية بعد موافقة المدير المختص ومتابعة المراقبة والمحاسبة"
-    ],
-    "customer-service-management-report": [
-      "تقرير أداء خدمة العملاء",
-      "مؤشرات الشكاوى وسرعة المعالجة وأداء فريق خدمة العملاء"
-    ],
-    "customer-review-sms-dashboard": [
-      "متابعة تقييمات العملاء",
-      "متابعة الإرسال وتفاعل العملاء ونتائج التقييم"
-    ],
-    "customer-review-sms-queue": [
-      "تشغيل رسائل التقييم",
-      "اختيار الفواتير المؤهلة وتشغيل إرسال رسائل التقييم"
-    ],
-    "customer-review-sms-manual": [
-      "الإرسال اليدوي للعملاء",
-      "إرسال رسالة تقييم إلى عميل محدد بعد مراجعة بياناته"
-    ],
-    "customer-review-followups": [
-      "متابعة العملاء غير الراضين",
-      "متابعة الحالات التي تحتاج إلى تواصل ومعالجة"
-    ],
-    "customer-review-coupons-dashboard": [
-      "إدارة مكافآت الشحن المجاني",
-      "متابعة كوبونات العملاء ونتائج استخدامها"
-    ],
-    "customer-review-sms-settings": [
-      "إعدادات رسائل التقييم",
-      "التحكم في التشغيل والإرسال واختيار العملاء والمكافآت"
-    ]
-  };
-
   const activePage = document.body?.dataset.activePage || (() => {
     if (document.body?.classList.contains("service-pos-page")) return "customer-service-pos-review";
     if (document.body?.classList.contains("cs-management-page")) return "customer-service-management-report";
@@ -1613,14 +1562,15 @@ function mountStandaloneCustomerPage() {
     }[fileName];
   })();
 
-  if (!activePage || !pageConfig[activePage]) return;
+  const model = getMiCustomerPageModel(activePage);
+  if (!activePage || !model) return;
 
   const pageMain = document.querySelector("body > main");
   if (!pageMain) return;
 
-  pageMain.querySelector(".crsms-return-bar, .service-page-toolbar, .cs-management-nav")?.remove();
+  normalizeStandaloneCustomerChrome(pageMain, activePage);
   document.body.dataset.miSidebarMounted = "true";
-  renderLayout(pageConfig[activePage][0], pageConfig[activePage][1], activePage, pageMain.outerHTML);
+  renderLayout(model.title, model.subtitle, activePage, pageMain.outerHTML);
 }
 
 document.addEventListener("DOMContentLoaded", mountStandaloneCustomerPage);

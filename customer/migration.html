@@ -5,10 +5,15 @@
   <title>Customer Migration</title>
   <link rel="stylesheet" href="../css/style.css" />
   <script src="../js/notifications.js?v=20260901-global-01"></script>
+  <link rel="stylesheet" href="../css/mi-app.css?v=20260902-customer-stable-03" data-mi-unified-ui="true" />
+  <script>
+    document.documentElement.classList.add("mi-app-preboot");
+    setTimeout(() => document.documentElement.classList.remove("mi-app-preboot"), 3000);
+  </script>
 </head>
 <body>
   <script src="../js/api.js"></script>
-  <script src="../js/layout.js"></script>
+  <script src="../js/layout.js?v=20260902-customer-stable-03"></script>
 
   <script>
     renderLayout("تحول قنوات العملاء", "تحليل انتقال العملاء بين POS و Sales", "customer-migration", `<div id="reportArea"></div>`);

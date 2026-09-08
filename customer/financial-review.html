@@ -6,8 +6,13 @@
   <title>المراجعة والتحقق المالي</title>
   <link rel="stylesheet" href="../css/style.css" />
   <link rel="stylesheet" href="../css/report-ui.css" />
-  <link rel="stylesheet" href="./service-pos-review.css?v=20260901-financial-table-01" />
+<link rel="stylesheet" href="./service-pos-review.css?v=20260901-financial-table-01" />
   <script src="../js/notifications.js?v=20260901-global-01"></script>
+  <link rel="stylesheet" href="../css/mi-app.css?v=20260904-customer-final-01" data-mi-unified-ui="true" />
+  <script>
+    document.documentElement.classList.add("mi-app-preboot");
+    setTimeout(() => document.documentElement.classList.remove("mi-app-preboot"), 3000);
+  </script>
 </head>
 <body class="service-pos-page financial-review-page" data-active-page="customer-financial-review">
   <main class="report-ui-page service-pos-shell">
@@ -28,7 +33,7 @@
 
     <section class="inventory-hero-card">
       <div class="service-hero-copy">
-        <span class="inventory-hero-kicker">Financial Review</span>
+        <span class="inventory-hero-kicker">المسار المالي</span>
         <h1>المراجعة والتحقق المالي</h1>
         <p>تظهر هنا التذاكر بعد موافقة المدير المختص. المراقب يراجع الكاميرات ويؤكد حقيقة الواقعة، وبعد التأكيد يستلم المحاسب الحالة ليبدأ إجراءات الصرف والقيد المالي في Odoo.</p>
       </div>
@@ -48,7 +53,7 @@
             <h2>تذاكر المراجعة المالية</h2>
             <p>كل تذكرة مرتبطة بالشكوى الأصلية وبملاحظة خدمة العملاء والفاتورة.</p>
           </div>
-          <span id="financialReviewRoleBadge" class="page-pill">Workflow</span>
+          <span id="financialReviewRoleBadge" class="page-pill">مسار مالي</span>
         </div>
 
         <div class="financial-review-flow-note">
@@ -147,7 +152,7 @@
   </main>
 
   <script src="../js/api.js"></script>
-  <script src="../js/layout.js?v=20260831-financial-review-03"></script>
+  <script src="../js/layout.js?v=20260904-customer-final-01"></script>
   <script src="./financial-review.js?v=order-number-search-20260901-01"></script>
 </body>
 </html>

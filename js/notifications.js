@@ -1,6 +1,31 @@
 (function installMiNotifications() {
   "use strict";
 
+  // Structural table protection is shared by every page that already loads notifications.js.
+  // It deliberately changes tables only; it is not a site-wide color/theme layer.
+  (function ensureMiTableSystem() {
+    const scriptUrl = document.currentScript?.src || window.location.href;
+    const assetUrl = (relativePath) => new URL(relativePath, scriptUrl).href;
+
+    const hasTableCss = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+      .some((link) => String(link.href || "").includes("table-system.css"));
+    if (!hasTableCss) {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = `${assetUrl("../css/table-system.css")}?v=20260901-table-system-04`;
+      link.dataset.miTableSystem = "true";
+      document.head.appendChild(link);
+    }
+
+    if (!document.querySelector('script[data-mi-table-system="true"]')) {
+      const script = document.createElement("script");
+      script.src = `${assetUrl("./table-system.js")}?v=20260901-table-system-04`;
+      script.defer = true;
+      script.dataset.miTableSystem = "true";
+      document.head.appendChild(script);
+    }
+  })();
+
   if (window.MINotifications?.version) return;
 
   const ROOT_ID = "mi-global-notifications";

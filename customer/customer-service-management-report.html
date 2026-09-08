@@ -7,9 +7,14 @@
   <link rel="stylesheet" href="../css/style.css" />
   <link rel="stylesheet" href="../css/report-ui.css" />
   <link rel="stylesheet" href="./customer-service-management-report.css?v=financial-workflow-20260831-03" />
-  <script src="../js/notifications.js?v=20260901-global-01"></script>
+<script src="../js/notifications.js?v=20260901-global-01"></script>
+  <link rel="stylesheet" href="../css/mi-app.css?v=20260904-customer-final-01" data-mi-unified-ui="true" />
+  <script>
+    document.documentElement.classList.add("mi-app-preboot");
+    setTimeout(() => document.documentElement.classList.remove("mi-app-preboot"), 3000);
+  </script>
 </head>
-<body class="cs-management-page" data-report-code="customer.service_management_report">
+<body class="cs-management-page" data-report-code="customer.service_management_report" data-active-page="customer-service-management-report">
   <main class="cs-management-shell">
     <header class="cs-live-toolbar">
       <div class="cs-live-state"><i></i><div><strong>متابعة مباشرة</strong><span id="managementLastUpdated">في انتظار أول تحديث</span></div></div>
@@ -76,7 +81,7 @@
     </section>
   </main>
   <script src="../js/api.js"></script>
-  <script src="../js/layout.js?v=20260814-14"></script>
-  <script src="./customer-service-management-report.js?v=financial-workflow-20260831-03"></script>
+  <script src="../js/layout.js?v=20260904-customer-final-01"></script>
+  <script src="./customer-service-management-report.js?v=20260901-v18-09"></script>
 </body>
 </html>

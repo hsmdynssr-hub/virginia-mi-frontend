@@ -1,0 +1,2826 @@
+/* MI Application UI — consolidated full-project identity
+   Build: 2026-09-02 customer-unified-02
+   This file replaces the incremental V18 design chain. */
+
+/* --- consolidated: mi-core.css --- */
+/* MI V18 — product identity foundation (pilot) */
+:root {
+  --mi-base-bg: #f5f7fb;
+  --mi-base-surface: #ffffff;
+  --mi-base-surface-2: #f8faff;
+  --mi-base-ink: #111827;
+  --mi-base-muted: #667085;
+  --mi-base-line: #e3e8f1;
+  --mi-base-line-strong: #d5ddea;
+  --mi-base-blue: #2563eb;
+  --mi-base-blue-700: #1d4ed8;
+  --mi-base-blue-soft: #eff6ff;
+  --mi-base-violet: #7c3aed;
+  --mi-base-violet-soft: #f5f3ff;
+  --mi-base-orange: #f97316;
+  --mi-base-orange-soft: #fff7ed;
+  --mi-base-navy: #101a33;
+  --mi-base-navy-2: #162342;
+  --mi-base-success: #0f9f6e;
+  --mi-base-danger: #dc2626;
+  --mi-base-radius-xs: 8px;
+  --mi-base-radius-sm: 12px;
+  --mi-base-radius: 16px;
+  --mi-base-radius-lg: 22px;
+  --mi-base-shadow-sm: 0 5px 18px rgba(16, 24, 40, .055);
+  --mi-base-shadow: 0 15px 40px rgba(16, 24, 40, .08);
+}
+
+body.mi-app-unified,
+body.mi-app-login {
+  color: var(--mi-base-ink);
+  background: var(--mi-base-bg);
+  font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body.mi-app-unified *,
+body.mi-app-login * { box-sizing: border-box; }
+
+body.mi-app-unified ::selection,
+body.mi-app-login ::selection {
+  color: #fff;
+  background: var(--mi-base-violet);
+}
+
+body.mi-app-unified a,
+body.mi-app-login a { text-underline-offset: 3px; }
+
+body.mi-app-unified :focus-visible,
+body.mi-app-login :focus-visible {
+  outline: 3px solid rgba(37, 99, 235, .18);
+  outline-offset: 2px;
+}
+
+/* --- consolidated: mi-layout.css --- */
+/* MI V18 — layout language */
+body.mi-app-unified .app-shell {
+  min-height: 100vh !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  direction: ltr !important;
+  background: var(--mi-base-bg) !important;
+}
+
+/* RTL keeps the navigation on the right and lets the workspace own all
+   remaining width. Using flex here is intentional: the legacy shell is also
+   flex-based, so standalone customer pages and normal dashboard pages share
+   the exact same sizing model. */
+html[dir="rtl"] body.mi-app-unified .app-shell {
+  flex-direction: row-reverse !important;
+}
+
+html[dir="rtl"] body.mi-app-unified .sidebar,
+html[dir="rtl"] body.mi-app-unified .main {
+  direction: rtl !important;
+}
+
+body.mi-app-unified .sidebar {
+  position: sticky !important;
+  top: 0 !important;
+  align-self: flex-start !important;
+  flex: 0 0 248px !important;
+  width: 248px !important;
+  max-width: 248px !important;
+  height: 100vh !important;
+  padding: 18px 14px 16px !important;
+  border: 0 !important;
+  background: linear-gradient(180deg, var(--mi-base-navy) 0%, #0d1730 100%) !important;
+  box-shadow: -12px 0 38px rgba(15, 23, 42, .12) !important;
+  overflow-y: auto !important;
+  scrollbar-width: thin;
+}
+
+body.mi-app-unified .brand {
+  display: flex !important;
+  align-items: center !important;
+  gap: 11px !important;
+  min-height: 58px !important;
+  margin: 0 0 18px !important;
+  padding: 0 7px 15px !important;
+  border-bottom: 1px solid rgba(255,255,255,.09) !important;
+}
+
+body.mi-app-unified .brand-logo {
+  display: grid !important;
+  place-items: center !important;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  border: 1px solid rgba(255,255,255,.15) !important;
+  border-radius: 12px !important;
+  color: #fff !important;
+  background: linear-gradient(145deg, var(--mi-base-blue), var(--mi-base-violet)) !important;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, .24) !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  letter-spacing: -.03em;
+}
+
+body.mi-app-unified .brand h1 {
+  margin: 0 !important;
+  color: #fff !important;
+  font-size: 13px !important;
+  line-height: 1.2 !important;
+  font-weight: 800 !important;
+  letter-spacing: -.015em;
+}
+
+body.mi-app-unified .brand p {
+  margin: 4px 0 0 !important;
+  color: #93a4c8 !important;
+  font-size: 9px !important;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+body.mi-app-unified .nav {
+  display: grid !important;
+  gap: 4px !important;
+  padding: 0 !important;
+}
+
+body.mi-app-unified .nav-group {
+  margin: 15px 8px 5px !important;
+  color: #7485aa !important;
+  font-size: 8.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase;
+}
+
+body.mi-app-unified .nav-link,
+body.mi-app-unified .nav-accordion-head {
+  min-height: 38px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 9px 11px !important;
+  border: 1px solid transparent !important;
+  border-radius: 10px !important;
+  color: #cbd5ea !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 10.5px !important;
+  font-weight: 650 !important;
+  text-decoration: none !important;
+  transition: background .15s ease, color .15s ease, border-color .15s ease, transform .15s ease;
+}
+
+body.mi-app-unified .nav-link:hover,
+body.mi-app-unified .nav-accordion-head:hover {
+  color: #fff !important;
+  border-color: rgba(255,255,255,.07) !important;
+  background: rgba(255,255,255,.055) !important;
+  transform: translateX(-1px);
+}
+
+body.mi-app-unified .nav-link.active {
+  color: #fff !important;
+  border-color: rgba(96, 165, 250, .18) !important;
+  background: linear-gradient(90deg, rgba(37,99,235,.28), rgba(124,58,237,.18)) !important;
+  box-shadow: inset -3px 0 0 #60a5fa !important;
+}
+
+body.mi-app-unified .nav-link.active::before { display: none !important; }
+body.mi-app-unified .nav-accordion { margin: 0 !important; border: 0 !important; background: none !important; }
+body.mi-app-unified .nav-accordion-arrow { margin-inline-start: auto !important; color: #778bb4 !important; }
+body.mi-app-unified .nav-accordion-body {
+  display: none;
+  margin: 3px 0 6px !important;
+  padding: 3px 6px 3px 0 !important;
+  border-inline-end: 1px solid rgba(148,163,184,.18) !important;
+  background: transparent !important;
+}
+body.mi-app-unified .nav-accordion.open .nav-accordion-body { display: grid !important; gap: 2px !important; }
+body.mi-app-unified .nav-accordion-body .nav-link {
+  min-height: 32px !important;
+  padding: 7px 10px !important;
+  border-radius: 8px !important;
+  color: #9faccc !important;
+  font-size: 9.5px !important;
+}
+body.mi-app-unified .nav-accordion-body .nav-link.active { color: #fff !important; }
+
+body.mi-app-unified .sidebar-footer {
+  margin-top: 18px !important;
+  padding: 13px 8px 2px !important;
+  border-top: 1px solid rgba(255,255,255,.07) !important;
+  color: #6f82a9 !important;
+  font-size: 8.5px !important;
+}
+
+body.mi-app-unified .main {
+  flex: 1 1 auto !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: clip !important;
+  background: var(--mi-base-bg) !important;
+}
+
+/* The marketing/banner hero becomes a compact application header. */
+body.mi-app-unified .mi-page-hero {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 45 !important;
+  min-height: 82px !important;
+  height: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin: 0 !important;
+  padding: 14px clamp(18px, 3vw, 34px) !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--mi-base-line) !important;
+  border-radius: 0 !important;
+  background: rgba(255,255,255,.94) !important;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 5px 20px rgba(16,24,40,.035) !important;
+  overflow: visible !important;
+}
+
+body.mi-app-unified .mi-page-hero picture,
+body.mi-app-unified .mi-page-hero-shade { display: none !important; }
+
+body.mi-app-unified .mi-hero-heading {
+  position: static !important;
+  inset: auto !important;
+  order: 1 !important;
+  width: auto !important;
+  max-width: min(780px, 68vw) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  text-align: right !important;
+  color: var(--mi-base-ink) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.mi-app-unified .mi-hero-heading .page-pill {
+  display: inline-flex !important;
+  margin: 0 0 4px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  color: var(--mi-base-blue) !important;
+  background: transparent !important;
+  font-size: 8.5px !important;
+  font-weight: 850 !important;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+body.mi-app-unified .mi-hero-heading h2 {
+  margin: 0 !important;
+  color: var(--mi-base-ink) !important;
+  font-size: clamp(18px, 2vw, 25px) !important;
+  line-height: 1.2 !important;
+  font-weight: 850 !important;
+  letter-spacing: -.025em;
+  text-shadow: none !important;
+}
+body.mi-app-unified .mi-hero-heading p {
+  margin: 4px 0 0 !important;
+  color: var(--mi-base-muted) !important;
+  font-size: 10px !important;
+  line-height: 1.5 !important;
+  text-shadow: none !important;
+}
+
+body.mi-app-unified .mi-hero-account-bar {
+  position: static !important;
+  inset: auto !important;
+  order: 2 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.mi-app-unified .mi-hero-account-bar > * {
+  min-width: 34px !important;
+  height: 34px !important;
+  border: 1px solid var(--mi-base-line) !important;
+  border-radius: 9px !important;
+  color: #344054 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+body.mi-app-unified .mi-theme-switcher { display: none !important; }
+body.mi-app-unified .mi-hero-menu-btn { position: static !important; order: 3 !important; }
+body.mi-app-unified .mi-language-toggle strong { color: var(--mi-base-blue) !important; }
+
+body.mi-app-unified .mi-context-toolbar,
+body.mi-app-unified .report-toolbar {
+  margin: 18px clamp(18px, 3vw, 34px) 0 !important;
+}
+
+body.mi-app-unified .content {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 22px clamp(18px, 3vw, 34px) 40px !important;
+  background: transparent !important;
+}
+
+/* Standalone pages are injected as the first child of .content by layout.js.
+   Force them to stretch instead of retaining their pre-shell intrinsic size. */
+body.mi-app-unified .content > .report-ui-page,
+body.mi-app-unified .content > main,
+body.mi-app-unified .content > section {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+body.mi-app-unified .content > .report-ui-page,
+body.mi-app-service .service-pos-shell {
+  width: 100% !important;
+}
+
+/* Login */
+body.mi-app-login {
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(124,58,237,.11), transparent 27rem),
+    radial-gradient(circle at 82% 76%, rgba(37,99,235,.11), transparent 30rem),
+    #f4f7fc !important;
+}
+
+body.mi-app-login .mi-login-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+}
+
+body.mi-app-login .mi-login-shell {
+  width: min(1080px, 100%);
+  min-height: 620px;
+  display: grid;
+  grid-template-columns: minmax(360px, .85fr) minmax(0, 1.15fr);
+  overflow: hidden;
+  border: 1px solid rgba(213,221,234,.9);
+  border-radius: 28px;
+  background: #fff;
+  box-shadow: 0 35px 90px rgba(16,24,40,.13);
+}
+
+body.mi-app-login .mi-login-form-side {
+  display: grid;
+  place-items: center;
+  padding: 48px clamp(30px, 5vw, 58px);
+  background: #fff;
+}
+
+body.mi-app-login .mi-login-story {
+  position: relative;
+  overflow: hidden;
+  padding: 58px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 80% 18%, rgba(249,115,22,.24), transparent 15rem),
+    radial-gradient(circle at 15% 88%, rgba(124,58,237,.35), transparent 24rem),
+    linear-gradient(145deg, #101a33 0%, #172a56 58%, #1f3c7d 100%);
+}
+body.mi-app-login .mi-login-story::after {
+  content: "";
+  position: absolute;
+  width: 340px;
+  height: 340px;
+  inset-inline-end: -170px;
+  bottom: -170px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 50%;
+  box-shadow: 0 0 0 54px rgba(255,255,255,.025), 0 0 0 108px rgba(255,255,255,.018);
+}
+
+@media (max-width: 980px) {
+  body.mi-app-unified .app-shell { display: block !important; }
+  body.mi-app-unified .sidebar { position: fixed !important; inset: 0 0 0 auto !important; transform: translateX(110%); z-index: 120; }
+  body.mi-app-unified.mi-sidebar-open .sidebar { transform: translateX(0); }
+  body.mi-app-unified .mi-page-hero { min-height: 76px !important; }
+  body.mi-app-login .mi-login-shell { grid-template-columns: 1fr; max-width: 560px; }
+  body.mi-app-login .mi-login-story { display: none; }
+}
+
+@media (max-width: 620px) {
+  body.mi-app-login .mi-login-page { padding: 14px; }
+  body.mi-app-login .mi-login-shell { min-height: auto; border-radius: 20px; }
+  body.mi-app-login .mi-login-form-side { padding: 30px 20px; }
+  body.mi-app-unified .mi-hero-heading p { display: none !important; }
+  body.mi-app-unified .content { padding-inline: 12px !important; }
+}
+
+
+/* =========================================================
+   Identity refinement
+   Light navigation, corrected page header and account tools.
+   ========================================================= */
+body.mi-app-unified .sidebar {
+  border-inline-start: 1px solid #e6eaf2 !important;
+  background: #fbfcff !important;
+  box-shadow: -8px 0 28px rgba(31, 41, 55, .045) !important;
+}
+body.mi-app-unified .brand {
+  border-bottom-color: #e9edf5 !important;
+}
+body.mi-app-unified .brand-logo {
+  border-color: #d8e2ff !important;
+  color: #fff !important;
+  background: #3157d5 !important;
+  box-shadow: 0 7px 18px rgba(49, 87, 213, .16) !important;
+}
+body.mi-app-unified .brand h1 { color: #182230 !important; }
+body.mi-app-unified .brand p { color: #7c3aed !important; }
+body.mi-app-unified .nav-group { color: #98a2b3 !important; }
+body.mi-app-unified .nav-link,
+body.mi-app-unified .nav-accordion-head {
+  color: #475467 !important;
+}
+body.mi-app-unified .nav-link:hover,
+body.mi-app-unified .nav-accordion-head:hover {
+  color: #1d4ed8 !important;
+  border-color: #e0e7ff !important;
+  background: #f4f7ff !important;
+  transform: translateX(-2px) !important;
+}
+body.mi-app-unified .nav-link.active {
+  color: #214cc7 !important;
+  border-color: #cfdcff !important;
+  background: #edf3ff !important;
+  box-shadow: inset -3px 0 0 #3157d5 !important;
+}
+body.mi-app-unified .nav-accordion-arrow { color: #98a2b3 !important; }
+body.mi-app-unified .nav-accordion-body {
+  border-inline-end-color: #e5eaf3 !important;
+}
+body.mi-app-unified .nav-accordion-body .nav-link { color: #667085 !important; }
+body.mi-app-unified .nav-accordion-body .nav-link.active { color: #214cc7 !important; }
+body.mi-app-unified .sidebar-footer {
+  border-top-color: #e9edf5 !important;
+  color: #98a2b3 !important;
+}
+
+body.mi-app-unified .mi-page-hero {
+  min-height: 92px !important;
+  gap: 24px !important;
+  padding: 16px clamp(20px, 3vw, 38px) !important;
+  border-bottom: 1px solid #e7ebf2 !important;
+  background: rgba(255,255,255,.97) !important;
+  box-shadow: 0 6px 22px rgba(16,24,40,.035) !important;
+}
+body.mi-app-unified .mi-hero-heading {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  overflow: visible !important;
+}
+body.mi-app-unified .mi-hero-heading .page-pill {
+  margin-bottom: 5px !important;
+  color: #6d4ce8 !important;
+  font-size: 8px !important;
+  letter-spacing: .07em !important;
+}
+body.mi-app-unified .mi-hero-heading h2 {
+  max-width: 100% !important;
+  margin: 0 !important;
+  color: #182230 !important;
+  font-size: clamp(20px, 2.1vw, 28px) !important;
+  line-height: 1.18 !important;
+  font-weight: 880 !important;
+  letter-spacing: -.035em !important;
+  overflow-wrap: anywhere !important;
+  text-wrap: balance;
+}
+body.mi-app-unified .mi-hero-heading p {
+  max-width: 820px !important;
+  margin-top: 5px !important;
+  color: #667085 !important;
+  font-size: 10px !important;
+}
+body.mi-app-unified .mi-hero-account-bar {
+  flex: 0 0 auto !important;
+  gap: 8px !important;
+  direction: rtl !important;
+}
+body.mi-app-unified .mi-hero-account-bar > * {
+  height: 42px !important;
+  min-height: 42px !important;
+  border: 1px solid #e1e6ef !important;
+  border-radius: 12px !important;
+  background: #fff !important;
+  box-shadow: 0 4px 12px rgba(16,24,40,.035) !important;
+}
+body.mi-app-unified .mi-tool-capsule,
+body.mi-app-unified .mi-logout-capsule {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  padding: 0 11px !important;
+  font-size: 9px !important;
+}
+body.mi-app-unified .mi-tool-capsule {
+  color: #3157d5 !important;
+  border-color: #dbe4ff !important;
+  background: #f7f9ff !important;
+}
+body.mi-app-unified .mi-tool-symbol {
+  min-width: 25px;
+  color: #6d4ce8;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: -.03em;
+}
+body.mi-app-unified .mi-tool-copy,
+body.mi-app-unified .mi-account-copy {
+  display: grid !important;
+  gap: 1px !important;
+  line-height: 1.15 !important;
+  text-align: right !important;
+}
+body.mi-app-unified .mi-tool-copy strong,
+body.mi-app-unified .mi-account-copy strong { font-size: 9.5px !important; font-weight: 850 !important; }
+body.mi-app-unified .mi-tool-copy small,
+body.mi-app-unified .mi-account-copy small { color: #98a2b3 !important; font-size: 7.5px !important; font-weight: 700 !important; }
+body.mi-app-unified .mi-account-capsule {
+  min-width: 150px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 0 9px !important;
+  color: #344054 !important;
+}
+body.mi-app-unified .mi-account-avatar {
+  width: 28px !important;
+  height: 28px !important;
+  display: grid !important;
+  place-items: center !important;
+  flex: 0 0 28px !important;
+  border-radius: 9px !important;
+  color: #fff !important;
+  background: #6d4ce8 !important;
+  font-size: 8.5px !important;
+  font-weight: 900 !important;
+}
+body.mi-app-unified .mi-logout-capsule {
+  color: #c62828 !important;
+  border-color: #fed7d7 !important;
+  background: #fff7f7 !important;
+}
+body.mi-app-unified .mi-logout-capsule:hover {
+  color: #fff !important;
+  border-color: #dc2626 !important;
+  background: #dc2626 !important;
+}
+
+@media (max-width: 760px) {
+  body.mi-app-unified .mi-account-copy,
+  body.mi-app-unified .mi-tool-copy small,
+  body.mi-app-unified .mi-logout-capsule strong { display: none !important; }
+  body.mi-app-unified .mi-account-capsule { min-width: 42px !important; padding: 0 6px !important; }
+  body.mi-app-unified .mi-tool-capsule,
+  body.mi-app-unified .mi-logout-capsule { min-width: 42px !important; padding: 0 8px !important; }
+}
+
+body.mi-app-unified .mi-account-capsule { max-width: 220px !important; }
+body.mi-app-unified .mi-account-copy { min-width: 0 !important; }
+body.mi-app-unified .mi-account-copy strong { max-width: 150px !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; }
+
+/* --- consolidated: mi-components.css --- */
+/* MI V18 — components */
+body.mi-app-unified :is(.report-card,.panel,.card,.inventory-kpi-card,.dashboard-card) {
+  border: 1px solid var(--mi-base-line) !important;
+  border-radius: var(--mi-base-radius) !important;
+  background: var(--mi-base-surface) !important;
+  box-shadow: var(--mi-base-shadow-sm) !important;
+}
+
+body.mi-app-unified .report-card { padding: 18px !important; }
+body.mi-app-unified .report-card-head {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  margin-bottom: 16px !important;
+  padding-bottom: 13px !important;
+  border-bottom: 1px solid var(--mi-base-line) !important;
+}
+body.mi-app-unified .report-card-head h2 {
+  margin: 0 !important;
+  color: var(--mi-base-ink) !important;
+  font-size: 15px !important;
+  font-weight: 850 !important;
+}
+body.mi-app-unified .report-card-head p {
+  margin: 5px 0 0 !important;
+  color: var(--mi-base-muted) !important;
+  font-size: 10px !important;
+  line-height: 1.65 !important;
+}
+
+body.mi-app-unified :is(.run-btn,.export-btn,.ops-action,.dashboard-module-main-link) {
+  min-height: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  padding: 8px 13px !important;
+  border-radius: 10px !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  text-decoration: none !important;
+  transition: transform .14s ease, box-shadow .14s ease, background .14s ease !important;
+}
+body.mi-app-unified .run-btn,
+body.mi-app-unified .ops-action.primary,
+body.mi-app-unified .dashboard-module-main-link {
+  border: 1px solid var(--mi-base-blue) !important;
+  color: #fff !important;
+  background: var(--mi-base-blue) !important;
+  box-shadow: 0 7px 16px rgba(37,99,235,.16) !important;
+}
+body.mi-app-unified .export-btn,
+body.mi-app-unified .ops-action.secondary {
+  border: 1px solid var(--mi-base-line-strong) !important;
+  color: #344054 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+body.mi-app-unified :is(.run-btn,.export-btn,.ops-action,.dashboard-module-main-link):hover {
+  transform: translateY(-1px) !important;
+}
+
+body.mi-app-unified :is(.page-pill,.badge,.status-badge,.financial-review-badge) {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  width: fit-content;
+  padding: 5px 8px !important;
+  border: 1px solid #d9e4f5 !important;
+  border-radius: 999px !important;
+  color: var(--mi-base-blue-700) !important;
+  background: var(--mi-base-blue-soft) !important;
+  font-size: 8.5px !important;
+  font-weight: 800 !important;
+}
+
+body.mi-app-unified .inventory-kpi-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)) !important;
+  gap: 10px !important;
+}
+body.mi-app-unified .inventory-kpi-card {
+  min-height: 105px !important;
+  padding: 15px !important;
+  position: relative;
+  overflow: hidden;
+}
+body.mi-app-unified .inventory-kpi-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  inset-inline: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--mi-base-blue), var(--mi-base-violet));
+}
+body.mi-app-unified .inventory-kpi-card span { color: var(--mi-base-muted) !important; font-size: 9px !important; }
+body.mi-app-unified .inventory-kpi-card strong { color: var(--mi-base-ink) !important; font-size: 22px !important; font-weight: 850 !important; }
+body.mi-app-unified .inventory-kpi-card small { color: #98a2b3 !important; font-size: 8.5px !important; }
+
+/* Dashboard: command-center feel without touching permissions/data logic. */
+body.mi-app-dashboard .dashboard-home-shell { gap: 18px !important; }
+body.mi-app-dashboard .ops-overview {
+  grid-template-columns: minmax(0, 1.45fr) minmax(255px, .55fr) !important;
+  gap: 12px !important;
+}
+body.mi-app-dashboard .ops-welcome,
+body.mi-app-dashboard .ops-status-panel {
+  min-height: 190px !important;
+  border: 1px solid var(--mi-base-line) !important;
+  border-radius: 18px !important;
+  box-shadow: var(--mi-base-shadow-sm) !important;
+}
+body.mi-app-dashboard .ops-welcome {
+  padding: 24px 26px !important;
+  background: #fff !important;
+}
+body.mi-app-dashboard .ops-welcome::after { display: none !important; }
+body.mi-app-dashboard .ops-eyebrow {
+  padding: 5px 8px !important;
+  color: var(--mi-base-violet) !important;
+  border: 1px solid #e7dcff !important;
+  background: var(--mi-base-violet-soft) !important;
+  font-size: 8.5px !important;
+}
+body.mi-app-dashboard .ops-eyebrow::before { background: var(--mi-base-orange) !important; box-shadow: 0 0 0 3px rgba(249,115,22,.12) !important; }
+body.mi-app-dashboard .ops-welcome h2 {
+  max-width: 720px !important;
+  margin: 11px 0 7px !important;
+  color: var(--mi-base-ink) !important;
+  font-size: clamp(23px, 2.6vw, 34px) !important;
+  line-height: 1.18 !important;
+  letter-spacing: -.035em !important;
+}
+body.mi-app-dashboard .ops-welcome p { max-width: 680px !important; color: var(--mi-base-muted) !important; font-size: 10.5px !important; }
+body.mi-app-dashboard .ops-status-panel {
+  padding: 22px !important;
+  color: #fff !important;
+  background: linear-gradient(145deg, #111b35 0%, #1d3976 100%) !important;
+}
+body.mi-app-dashboard .ops-status-panel::before,
+body.mi-app-dashboard .ops-status-panel::after { border-color: rgba(124,58,237,.28) !important; }
+body.mi-app-dashboard .ops-status-panel h3 { color: #fff !important; font-size: 17px !important; }
+body.mi-app-dashboard .ops-status-panel p { color: #b9c6e5 !important; font-size: 9.5px !important; }
+body.mi-app-dashboard .ops-status-badge { color: #dbeafe !important; background: rgba(37,99,235,.15) !important; border: 1px solid rgba(96,165,250,.2) !important; }
+body.mi-app-dashboard .ops-stat { border-color: rgba(255,255,255,.11) !important; background: rgba(255,255,255,.045) !important; }
+body.mi-app-dashboard .dashboard-section-title { margin-top: 6px !important; }
+body.mi-app-dashboard .dashboard-section-title h2 { color: var(--mi-base-ink) !important; font-size: 18px !important; }
+body.mi-app-dashboard .dashboard-grid { gap: 12px !important; }
+body.mi-app-dashboard .dashboard-card {
+  min-height: 235px !important;
+  padding: 18px !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+}
+body.mi-app-dashboard .dashboard-card::before {
+  width: 36px !important;
+  height: 3px !important;
+  inset-inline-start: 18px !important;
+  inset-inline-end: auto !important;
+  border-radius: 0 0 999px 999px;
+  background: linear-gradient(90deg, var(--mi-base-blue), var(--mi-base-violet)) !important;
+}
+body.mi-app-dashboard .dashboard-card:hover {
+  transform: translateY(-2px) !important;
+  border-color: #cfd9e8 !important;
+  box-shadow: var(--mi-base-shadow-sm) !important;
+}
+body.mi-app-dashboard .dashboard-icon {
+  width: 38px !important;
+  height: 38px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 11px !important;
+  background: var(--mi-base-blue-soft) !important;
+  font-size: 18px !important;
+}
+body.mi-app-dashboard .dashboard-card h3 { color: var(--mi-base-ink) !important; font-size: 14px !important; }
+body.mi-app-dashboard .dashboard-card p { color: var(--mi-base-muted) !important; font-size: 9.5px !important; }
+
+/* Customer-service page */
+body.mi-app-service .inventory-hero-card {
+  min-height: auto !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  gap: 18px !important;
+  margin: 0 0 16px !important;
+  padding: 18px 20px !important;
+  border: 1px solid var(--mi-base-line) !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+  box-shadow: var(--mi-base-shadow-sm) !important;
+}
+body.mi-app-service .inventory-hero-card::before,
+body.mi-app-service .inventory-hero-card::after { display: none !important; }
+body.mi-app-service .inventory-hero-kicker {
+  color: var(--mi-base-violet) !important;
+  font-size: 8px !important;
+  letter-spacing: .09em !important;
+  text-transform: uppercase;
+}
+body.mi-app-service .inventory-hero-card h1 {
+  margin: 5px 0 4px !important;
+  color: var(--mi-base-ink) !important;
+  font-size: clamp(20px,2.3vw,28px) !important;
+  letter-spacing: -.025em !important;
+}
+body.mi-app-service .inventory-hero-card p { margin: 0 !important; color: var(--mi-base-muted) !important; font-size: 9.5px !important; }
+body.mi-app-service .service-hero-mark {
+  width: 46px !important;
+  height: 46px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 13px !important;
+  color: #fff !important;
+  background: linear-gradient(145deg,var(--mi-base-blue),var(--mi-base-violet)) !important;
+  box-shadow: 0 8px 20px rgba(37,99,235,.18) !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+}
+
+/* Login components */
+body.mi-app-login .mi-login-story-brand,
+body.mi-app-login .mi-login-form-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+body.mi-app-login .mi-login-mark {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  color: #fff;
+  background: linear-gradient(145deg,var(--mi-base-blue),var(--mi-base-violet));
+  box-shadow: 0 10px 24px rgba(37,99,235,.24);
+  font-size: 13px;
+  font-weight: 900;
+}
+body.mi-app-login .mi-login-story-brand strong { display:block; color:#fff; font-size:14px; }
+body.mi-app-login .mi-login-story-brand small { display:block; margin-top:3px; color:#9fb1d4; font-size:9px; letter-spacing:.07em; }
+body.mi-app-login .mi-login-story-copy { position:relative; z-index:1; margin-top:86px; max-width:560px; }
+body.mi-app-login .mi-login-story-kicker { color:#93c5fd; font-size:9px; font-weight:850; letter-spacing:.1em; text-transform:uppercase; }
+body.mi-app-login .mi-login-story-copy h1 { margin:12px 0; color:#fff; font-size:clamp(32px,4vw,52px); line-height:1.07; letter-spacing:-.045em; }
+body.mi-app-login .mi-login-story-copy h1 span { color:#8ab4ff; }
+body.mi-app-login .mi-login-story-copy p { max-width:520px; margin:0; color:#bdc9e3; font-size:12px; line-height:1.8; }
+body.mi-app-login .mi-login-story-list { position:relative; z-index:1; display:grid; gap:9px; margin:38px 0 0; padding:0; list-style:none; }
+body.mi-app-login .mi-login-story-list li { display:flex; align-items:center; gap:9px; color:#d7e0f1; font-size:10px; }
+body.mi-app-login .mi-login-story-list i { width:20px; height:20px; display:grid; place-items:center; border-radius:7px; font-style:normal; color:#fff; background:rgba(255,255,255,.08); }
+
+body.mi-app-login .mi-login-card {
+  width: 100% !important;
+  max-width: 380px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+body.mi-app-login .mi-login-form-brand { margin-bottom: 42px; }
+body.mi-app-login .mi-login-form-brand .mi-login-mark { width:38px; height:38px; }
+body.mi-app-login .mi-login-form-brand strong { display:block; color:var(--mi-base-ink); font-size:13px; }
+body.mi-app-login .mi-login-form-brand small { display:block; margin-top:2px; color:var(--mi-base-muted); font-size:8.5px; }
+body.mi-app-login .mi-login-card > h2 { margin:0 !important; color:var(--mi-base-ink) !important; font-size:26px !important; font-weight:850 !important; letter-spacing:-.03em; }
+body.mi-app-login .mi-login-subtitle { margin:7px 0 26px !important; color:var(--mi-base-muted) !important; font-size:10.5px !important; }
+body.mi-app-login .mi-login-btn {
+  width:100% !important;
+  min-height:45px !important;
+  margin-top:6px !important;
+  border:0 !important;
+  border-radius:11px !important;
+  color:#fff !important;
+  background:linear-gradient(90deg,var(--mi-base-blue),#3159d9) !important;
+  box-shadow:0 10px 22px rgba(37,99,235,.2) !important;
+  font-size:11px !important;
+  font-weight:850 !important;
+}
+body.mi-app-login .mi-login-message { min-height:20px; margin-top:10px; color:var(--mi-base-danger); font-size:9.5px; }
+body.mi-app-login .mi-secure-note {
+  margin-top:20px !important;
+  padding-top:16px !important;
+  border-top:1px solid var(--mi-base-line) !important;
+  color:#98a2b3 !important;
+  background:transparent !important;
+  font-size:8.5px !important;
+}
+body.mi-app-login .mi-company-login-step { max-width:420px !important; }
+body.mi-app-login .mi-login-company-options { display:grid !important; gap:9px !important; }
+body.mi-app-login .mi-login-company-options button {
+  width:100% !important;
+  display:grid !important;
+  grid-template-columns:36px 1fr auto !important;
+  align-items:center !important;
+  gap:10px !important;
+  padding:11px !important;
+  border:1px solid var(--mi-base-line) !important;
+  border-radius:11px !important;
+  color:var(--mi-base-ink) !important;
+  background:#fff !important;
+  box-shadow:none !important;
+  text-align:right !important;
+}
+body.mi-app-login .mi-login-company-options button:hover { border-color:#b8c8e2 !important; background:#f8fbff !important; }
+
+body.mi-app-service .service-pos-shell {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+/* The shared application header owns the page title. */
+body.mi-app-service .inventory-hero-card { display: none !important; }
+body.mi-app-service #workArea { display: grid; gap: 14px; }
+body.mi-app-service #workArea.hidden { display: none !important; }
+body.mi-app-service .report-section-gap { margin-top: 12px !important; }
+
+body.mi-app-login .mi-card-logo {
+  display: grid !important;
+  place-items: center !important;
+  width: 42px !important;
+  height: 42px !important;
+  margin-bottom: 18px !important;
+  border-radius: 13px !important;
+  background: linear-gradient(145deg,var(--mi-base-blue),var(--mi-base-violet)) !important;
+}
+body.mi-app-login .mi-card-logo .mi-logo { width: 18px !important; height: 18px !important; margin: 0 !important; background: transparent !important; box-shadow: none !important; }
+body.mi-app-login .mi-card-logo .mi-logo::before { content: "MI"; color:#fff; font-size:10px; font-weight:900; }
+body.mi-app-login .mi-card-logo .mi-logo-bars { display:none !important; }
+body.mi-app-login .mi-company-step-kicker { display:inline-block; margin-bottom:7px; color:var(--mi-base-blue); font-size:8.5px; font-weight:850; }
+body.mi-app-login .mi-login-company-note { color:var(--mi-base-muted); font-size:8.5px; line-height:1.6; }
+
+
+/* =========================================================
+   Semantic actions + booster card interaction
+   ========================================================= */
+body.mi-app-unified :is(button,a).mi-action-primary {
+  border-color: #3157d5 !important;
+  color: #fff !important;
+  background: #3157d5 !important;
+  box-shadow: 0 6px 14px rgba(49,87,213,.16) !important;
+}
+body.mi-app-unified :is(button,a).mi-action-primary:hover { background: #2548ba !important; border-color: #2548ba !important; }
+
+body.mi-app-unified :is(button,a).mi-action-success {
+  border-color: #16a36a !important;
+  color: #fff !important;
+  background: #16a36a !important;
+  box-shadow: 0 6px 14px rgba(22,163,106,.15) !important;
+}
+body.mi-app-unified :is(button,a).mi-action-success:hover { background: #128456 !important; border-color: #128456 !important; }
+
+body.mi-app-unified :is(button,a).mi-action-warning {
+  border-color: #f47b20 !important;
+  color: #fff !important;
+  background: #f47b20 !important;
+  box-shadow: 0 6px 14px rgba(244,123,32,.15) !important;
+}
+body.mi-app-unified :is(button,a).mi-action-warning:hover { background: #db6413 !important; border-color: #db6413 !important; }
+
+body.mi-app-unified :is(button,a).mi-action-danger {
+  border-color: #dc2626 !important;
+  color: #fff !important;
+  background: #dc2626 !important;
+  box-shadow: 0 6px 14px rgba(220,38,38,.13) !important;
+}
+body.mi-app-unified :is(button,a).mi-action-danger:hover { background: #b91c1c !important; border-color: #b91c1c !important; }
+
+body.mi-app-unified :is(button,a).mi-action-secondary {
+  border-color: #6d4ce8 !important;
+  color: #fff !important;
+  background: #6d4ce8 !important;
+  box-shadow: 0 6px 14px rgba(109,76,232,.14) !important;
+}
+body.mi-app-unified :is(button,a).mi-action-secondary:hover { background: #5939cb !important; border-color: #5939cb !important; }
+
+body.mi-app-unified :is(button,a).mi-action-neutral {
+  border-color: #d5dbe6 !important;
+  color: #475467 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+body.mi-app-unified :is(button,a).mi-action-neutral:hover { border-color: #b9c2d0 !important; background: #f8fafc !important; }
+
+body.mi-app-unified :is(.report-card,.panel,.card,.inventory-kpi-card,.dashboard-card) {
+  transition: transform .2s cubic-bezier(.2,.8,.2,1), box-shadow .2s ease, border-color .2s ease !important;
+  will-change: transform;
+}
+body.mi-app-unified :is(.report-card,.panel,.card,.inventory-kpi-card,.dashboard-card):hover {
+  transform: translateY(-3px) !important;
+  border-color: #cad5f1 !important;
+  box-shadow: 0 14px 32px rgba(31,41,55,.09) !important;
+}
+body.mi-app-unified :is(.report-card,.panel,.card,.inventory-kpi-card,.dashboard-card):focus-within {
+  border-color: #aebff0 !important;
+  box-shadow: 0 0 0 3px rgba(49,87,213,.07), 0 14px 32px rgba(31,41,55,.08) !important;
+}
+body.mi-app-unified .inventory-kpi-card::before,
+body.mi-app-dashboard .dashboard-card::before {
+  background: #3157d5 !important;
+  transition: width .2s ease, background .2s ease !important;
+}
+body.mi-app-unified .inventory-kpi-card:hover::before,
+body.mi-app-dashboard .dashboard-card:hover::before {
+  background: #6d4ce8 !important;
+}
+body.mi-app-dashboard .dashboard-card:hover .dashboard-icon {
+  transform: translateY(-2px) scale(1.04) !important;
+  background: #eef1ff !important;
+}
+body.mi-app-dashboard .dashboard-icon { transition: transform .2s ease, background .2s ease !important; }
+
+/* --- consolidated: mi-forms.css --- */
+/* MI V18 — forms */
+body.mi-app-unified :is(.report-input,.report-select,.control,input[type="text"],input[type="number"],input[type="date"],input[type="tel"],input[type="email"],select,textarea) {
+  min-height: 38px;
+  max-width: 100%;
+  border: 1px solid var(--mi-base-line-strong) !important;
+  border-radius: 10px !important;
+  color: var(--mi-base-ink) !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  font-size: 10px !important;
+  transition: border-color .15s ease, box-shadow .15s ease !important;
+}
+body.mi-app-unified textarea { min-height: 88px; resize: vertical; }
+body.mi-app-unified :is(.report-input,.report-select,.control,input,select,textarea):focus {
+  border-color: #8bb1ff !important;
+  box-shadow: 0 0 0 3px rgba(37,99,235,.085) !important;
+  outline: 0 !important;
+}
+body.mi-app-unified :is(.report-field,.context-field) {
+  color: #475467 !important;
+  font-size: 9px !important;
+  font-weight: 750 !important;
+}
+body.mi-app-unified .report-filter-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)) !important;
+  gap: 11px !important;
+}
+body.mi-app-unified .inventory-hero-actions { display:flex !important; flex-wrap:wrap !important; gap:8px !important; margin-top:12px !important; }
+
+body.mi-app-login .mi-field { margin-bottom:16px !important; }
+body.mi-app-login .mi-field label { display:block; margin-bottom:6px; color:#475467; font-size:9px; font-weight:800; }
+body.mi-app-login .mi-input-wrap { position:relative; }
+body.mi-app-login .mi-input-wrap input {
+  width:100% !important;
+  height:44px !important;
+  padding:0 13px 0 42px !important;
+  border:1px solid var(--mi-base-line-strong) !important;
+  border-radius:11px !important;
+  color:var(--mi-base-ink) !important;
+  background:#fff !important;
+  box-shadow:none !important;
+  font-size:10.5px !important;
+}
+body.mi-app-login .mi-input-wrap input:focus { border-color:#8bb1ff !important; box-shadow:0 0 0 3px rgba(37,99,235,.08) !important; outline:0; }
+body.mi-app-login .mi-input-wrap span { position:absolute; inset-inline-end:13px; top:50%; transform:translateY(-50%); filter:grayscale(1); opacity:.55; font-size:13px; }
+body.mi-app-login .mi-login-options { display:flex; align-items:center; justify-content:space-between; margin:2px 0 16px !important; color:var(--mi-base-muted); font-size:9px; }
+
+/* --- consolidated: mi-tables.css --- */
+/* MI V18 — presentation overrides layered on top of the global fixed table contract. */
+body.mi-app-unified .mi-table-shell {
+  border-color: #cdd4e3 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 5px 16px rgba(28, 38, 70, .035) !important;
+}
+body.mi-app-unified .mi-managed-table > thead > tr > th,
+body.mi-app-unified .mi-managed-table > tr > th,
+body.mi-app-unified .mi-data-table > thead > tr > th {
+  padding-block: 10px !important;
+  color: #fff !important;
+  background: #334155 !important;
+  border-color: #64748b !important;
+  box-shadow: inset 0 -1px 0 rgba(255,255,255,.13) !important;
+  font-size: 9.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: .01em;
+}
+body.mi-app-unified .mi-managed-table > tbody > tr > td {
+  padding-block: 10px !important;
+  color: #344054 !important;
+  border-color: #dce2ed !important;
+  font-size: 9.5px !important;
+}
+body.mi-app-unified .mi-managed-table > tbody > tr:nth-child(even) > td { background: #fafbfe !important; }
+body.mi-app-unified .mi-managed-table > tbody > tr:hover > td,
+body.mi-app-unified .mi-data-table > tbody > tr:hover > td { background: #f3f1ff !important; }
+body.mi-app-unified .mi-managed-table > tbody > tr:focus-within > td,
+body.mi-app-unified .mi-managed-table > tbody > tr[aria-selected="true"] > td,
+body.mi-app-unified .mi-managed-table > tbody > tr.is-active > td { background: #fff4e9 !important; }
+
+/* --- consolidated: identity-polish --- */
+/* =========================================================
+   Product identity polish
+   Cleaner navigation, denser page rhythm, semantic actions,
+   stronger table hierarchy, and booster-style interaction.
+   Pilot pages only: .mi-app-unified / .mi-app-login
+   ========================================================= */
+
+/* ---------- Application chrome / sidebar ---------- */
+body.mi-app-unified .sidebar {
+  flex-basis: 236px !important;
+  width: 236px !important;
+  max-width: 236px !important;
+  padding: 14px 12px 14px !important;
+  border-inline-start: 1px solid #e7ebf2 !important;
+  background: #f8f9fc !important;
+  box-shadow: -5px 0 18px rgba(31, 41, 55, .035) !important;
+}
+
+body.mi-app-unified .brand {
+  min-height: 52px !important;
+  gap: 9px !important;
+  margin: 0 0 12px !important;
+  padding: 0 6px 12px !important;
+  border-bottom: 1px solid #e7ebf2 !important;
+}
+body.mi-app-unified .brand-logo {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  background: #3157d5 !important;
+  box-shadow: 0 6px 14px rgba(49, 87, 213, .14) !important;
+}
+body.mi-app-unified .brand h1 {
+  color: #1d2939 !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+}
+body.mi-app-unified .brand p {
+  margin-top: 2px !important;
+  color: #7c3aed !important;
+  font-size: 7.5px !important;
+  letter-spacing: .03em !important;
+  text-transform: none !important;
+}
+
+body.mi-app-unified .nav { gap: 1px !important; }
+body.mi-app-unified .nav-group {
+  margin: 13px 10px 5px !important;
+  color: #98a2b3 !important;
+  font-size: 7.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: .035em !important;
+  text-transform: none !important;
+}
+
+/* No card/box around every navigation group. */
+body.mi-app-unified .nav-accordion {
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+body.mi-app-unified .nav-link,
+body.mi-app-unified .nav-accordion-head {
+  min-height: 35px !important;
+  margin: 0 !important;
+  padding: 8px 10px !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  color: #475467 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 9.5px !important;
+  font-weight: 700 !important;
+  transition: color .16s ease, background .16s ease, transform .16s ease !important;
+}
+body.mi-app-unified .nav-accordion-head { cursor: pointer !important; }
+body.mi-app-unified .nav-link:hover,
+body.mi-app-unified .nav-accordion-head:hover {
+  color: #2548ba !important;
+  background: #eef3ff !important;
+  transform: translateX(-1px) !important;
+}
+body.mi-app-unified .nav-accordion.open > .nav-accordion-head {
+  color: #344054 !important;
+  background: #f1f4f9 !important;
+}
+body.mi-app-unified .nav-link.active {
+  position: relative !important;
+  color: #214cc7 !important;
+  background: #e9f0ff !important;
+  box-shadow: none !important;
+  font-weight: 850 !important;
+}
+body.mi-app-unified .nav-link.active::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  inset-inline-end: 0;
+  width: 3px;
+  border-radius: 999px;
+  background: #3157d5;
+}
+body.mi-app-unified .nav-accordion-arrow {
+  color: #98a2b3 !important;
+  font-size: 10px !important;
+}
+body.mi-app-unified .nav-accordion-body {
+  margin: 1px 0 4px !important;
+  padding: 2px 8px 2px 0 !important;
+  border-inline-end: 1px solid #e4e8f0 !important;
+  background: transparent !important;
+}
+body.mi-app-unified .nav-accordion-body .nav-link {
+  min-height: 29px !important;
+  padding: 6px 9px !important;
+  color: #667085 !important;
+  font-size: 8.7px !important;
+  border-radius: 7px !important;
+}
+body.mi-app-unified .sidebar-footer {
+  margin-top: 14px !important;
+  padding: 10px 8px 0 !important;
+  border-top-color: #e7ebf2 !important;
+  color: #98a2b3 !important;
+  font-size: 7.5px !important;
+}
+
+/* ---------- Page header + account toolbar ---------- */
+body.mi-app-unified .mi-page-hero {
+  min-height: 78px !important;
+  gap: 18px !important;
+  padding: 12px clamp(18px, 2.6vw, 32px) !important;
+  border-bottom: 1px solid #e7ebf2 !important;
+  background: rgba(255,255,255,.985) !important;
+  box-shadow: 0 4px 14px rgba(16,24,40,.028) !important;
+}
+body.mi-app-unified .mi-hero-heading .page-pill {
+  margin-bottom: 3px !important;
+  color: #6d4ce8 !important;
+  font-size: 7.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: .03em !important;
+  text-transform: none !important;
+}
+body.mi-app-unified .mi-hero-heading h2 {
+  color: #172033 !important;
+  font-size: clamp(19px, 1.9vw, 25px) !important;
+  line-height: 1.15 !important;
+  font-weight: 900 !important;
+  letter-spacing: -.03em !important;
+  text-wrap: pretty !important;
+}
+body.mi-app-unified .mi-hero-heading p {
+  margin-top: 3px !important;
+  color: #667085 !important;
+  font-size: 9px !important;
+  line-height: 1.4 !important;
+}
+
+/* One unified toolbar, not separate floating pills. */
+body.mi-app-unified .mi-hero-account-bar {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0 !important;
+  height: 42px !important;
+  padding: 3px !important;
+  border: 1px solid #e2e7ef !important;
+  border-radius: 13px !important;
+  background: #f8faff !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+  direction: rtl !important;
+}
+body.mi-app-unified .mi-hero-account-bar > * {
+  height: 34px !important;
+  min-height: 34px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-inline-start: 1px solid #e6eaf1 !important;
+  border-radius: 9px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+body.mi-app-unified .mi-hero-account-bar > *:first-child { border-inline-start: 0 !important; }
+body.mi-app-unified .mi-tool-capsule {
+  min-width: 58px !important;
+  padding: 0 8px !important;
+  color: #3157d5 !important;
+}
+body.mi-app-unified .mi-account-capsule {
+  min-width: 132px !important;
+  max-width: 188px !important;
+  padding: 0 8px !important;
+  color: #344054 !important;
+}
+body.mi-app-unified .mi-account-avatar {
+  width: 26px !important;
+  height: 26px !important;
+  flex-basis: 26px !important;
+  border-radius: 8px !important;
+  background: #6d4ce8 !important;
+}
+body.mi-app-unified .mi-logout-capsule {
+  min-width: 58px !important;
+  padding: 0 8px !important;
+  color: #c62828 !important;
+  background: transparent !important;
+}
+body.mi-app-unified .mi-logout-capsule:hover {
+  color: #fff !important;
+  background: #dc2626 !important;
+}
+body.mi-app-unified .mi-language-toggle:hover,
+body.mi-app-unified .mi-account-capsule:hover {
+  background: #fff !important;
+}
+body.mi-app-unified .mi-tool-symbol { color: #3157d5 !important; }
+body.mi-app-unified .mi-tool-copy small,
+body.mi-app-unified .mi-account-copy small { color: #98a2b3 !important; }
+
+/* ---------- Denser workspace rhythm ---------- */
+body.mi-app-unified .content {
+  padding: 18px clamp(16px, 2.6vw, 30px) 32px !important;
+}
+body.mi-app-unified .mi-context-toolbar,
+body.mi-app-unified .report-toolbar {
+  margin: 14px clamp(16px, 2.6vw, 30px) 0 !important;
+}
+body.mi-app-unified .report-card {
+  padding: 15px !important;
+  border-color: #e2e7ef !important;
+  border-radius: 14px !important;
+  box-shadow: 0 3px 10px rgba(16,24,40,.026) !important;
+}
+body.mi-app-unified .report-card-head {
+  gap: 12px !important;
+  margin-bottom: 11px !important;
+  padding-bottom: 10px !important;
+}
+body.mi-app-unified .report-card-head h2 { font-size: 14px !important; }
+body.mi-app-unified .report-card-head p { margin-top: 3px !important; line-height: 1.45 !important; }
+body.mi-app-service #workArea { gap: 11px !important; }
+body.mi-app-service .report-section-gap { margin-top: 9px !important; }
+body.mi-app-service :is(.report-filter-grid,.filters-grid,.inventory-filter-grid) { gap: 9px 10px !important; }
+
+/* Kill colorful legacy accents on surface cards. */
+body.mi-app-service :is(.report-card,.panel,.card,.service-stat-card,.service-summary-card)::before,
+body.mi-app-service :is(.report-card,.panel,.card,.service-stat-card,.service-summary-card)::after {
+  display: none !important;
+  background: none !important;
+}
+
+/* ---------- Semantic buttons: meaning first ---------- */
+body.mi-app-unified :is(button,a).mi-action-primary,
+body.mi-app-unified :is(button,a).mi-action-success,
+body.mi-app-unified :is(button,a).mi-action-warning,
+body.mi-app-unified :is(button,a).mi-action-danger,
+body.mi-app-unified :is(button,a).mi-action-secondary,
+body.mi-app-unified :is(button,a).mi-action-neutral {
+  background-image: none !important;
+  text-shadow: none !important;
+  border-radius: 9px !important;
+  box-shadow: none !important;
+}
+body.mi-app-unified :is(button,a).mi-action-primary { background: #3157d5 !important; border-color: #3157d5 !important; }
+body.mi-app-unified :is(button,a).mi-action-success { background: #149764 !important; border-color: #149764 !important; }
+body.mi-app-unified :is(button,a).mi-action-warning { background: #f47b20 !important; border-color: #f47b20 !important; }
+body.mi-app-unified :is(button,a).mi-action-danger { background: #d92d20 !important; border-color: #d92d20 !important; }
+body.mi-app-unified :is(button,a).mi-action-secondary { background: #6d4ce8 !important; border-color: #6d4ce8 !important; }
+body.mi-app-unified :is(button,a).mi-action-neutral { color: #475467 !important; background: #fff !important; border-color: #d7dde7 !important; }
+body.mi-app-unified :is(button,a).mi-action-primary:hover { background: #2447bd !important; }
+body.mi-app-unified :is(button,a).mi-action-success:hover { background: #117a52 !important; }
+body.mi-app-unified :is(button,a).mi-action-warning:hover { background: #dc6614 !important; }
+body.mi-app-unified :is(button,a).mi-action-secondary:hover { background: #5838cb !important; }
+body.mi-app-unified :is(button,a).mi-action-neutral:hover { background: #f8fafc !important; border-color: #bfc7d4 !important; }
+
+/* ---------- Table hierarchy ---------- */
+body.mi-app-unified .mi-table-shell {
+  border: 1px solid #d9e1ed !important;
+  border-radius: 12px !important;
+  background: #fff !important;
+  box-shadow: 0 3px 12px rgba(16,24,40,.025) !important;
+}
+body.mi-app-unified .mi-managed-table > thead > tr > th,
+body.mi-app-unified .mi-managed-table > tr > th,
+body.mi-app-unified .mi-data-table > thead > tr > th {
+  color: #fff !important;
+  border-color: #4365ce !important;
+  background: #3157d5 !important;
+  box-shadow: none !important;
+  font-weight: 850 !important;
+  letter-spacing: 0 !important;
+}
+body.mi-app-unified .mi-managed-table > thead > tr > th:first-child,
+body.mi-app-unified .mi-data-table > thead > tr > th:first-child { border-start-start-radius: 10px; }
+body.mi-app-unified .mi-managed-table > thead > tr > th:last-child,
+body.mi-app-unified .mi-data-table > thead > tr > th:last-child { border-start-end-radius: 10px; }
+body.mi-app-unified .mi-managed-table > tbody > tr > td,
+body.mi-app-unified .mi-data-table > tbody > tr > td {
+  border-color: #e5eaf1 !important;
+  background: #fff !important;
+}
+body.mi-app-unified .mi-managed-table > tbody > tr:nth-child(even) > td,
+body.mi-app-unified .mi-data-table > tbody > tr:nth-child(even) > td { background: #fbfcff !important; }
+body.mi-app-unified .mi-managed-table > tbody > tr:hover > td,
+body.mi-app-unified .mi-data-table > tbody > tr:hover > td { background: #eef3ff !important; }
+body.mi-app-unified .mi-managed-table > tbody > tr:focus-within > td,
+body.mi-app-unified .mi-managed-table > tbody > tr[aria-selected="true"] > td,
+body.mi-app-unified .mi-managed-table > tbody > tr.is-active > td { background: #fff3e8 !important; }
+
+/* ---------- Booster-style cards ---------- */
+body.mi-app-unified :is(.inventory-kpi-card,.dashboard-card,.mi-kpi-card) {
+  --mi-card-accent: #3157d5;
+  position: relative !important;
+  overflow: hidden !important;
+  border: 1px solid #e2e7ef !important;
+  background: #fff !important;
+  box-shadow: 0 3px 12px rgba(16,24,40,.025) !important;
+  transform: translateZ(0);
+  transition: transform .22s cubic-bezier(.2,.8,.2,1), box-shadow .22s ease, border-color .22s ease !important;
+}
+body.mi-app-unified :is(.inventory-kpi-card,.dashboard-card,.mi-kpi-card)::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  top: 0 !important;
+  inset-inline: 0 !important;
+  width: auto !important;
+  height: 3px !important;
+  border-radius: 0 !important;
+  background: var(--mi-card-accent) !important;
+  transition: height .22s ease, opacity .22s ease !important;
+}
+body.mi-app-unified :is(.inventory-kpi-card,.dashboard-card,.mi-kpi-card)[data-tone="purple"] { --mi-card-accent: #6d4ce8; }
+body.mi-app-unified :is(.inventory-kpi-card,.dashboard-card,.mi-kpi-card)[data-tone="teal"],
+body.mi-app-unified :is(.inventory-kpi-card,.dashboard-card,.mi-kpi-card)[data-tone="success"] { --mi-card-accent: #149764; }
+body.mi-app-unified :is(.inventory-kpi-card,.dashboard-card,.mi-kpi-card)[data-tone="warning"] { --mi-card-accent: #f47b20; }
+body.mi-app-unified :is(.inventory-kpi-card,.dashboard-card,.mi-kpi-card)[data-tone="danger"] { --mi-card-accent: #d92d20; }
+body.mi-app-unified :is(.inventory-kpi-card,.dashboard-card,.mi-kpi-card):hover {
+  transform: translateY(-4px) !important;
+  border-color: color-mix(in srgb, var(--mi-card-accent) 28%, #e2e7ef) !important;
+  box-shadow: 0 16px 34px rgba(31,41,55,.10) !important;
+}
+body.mi-app-unified :is(.inventory-kpi-card,.dashboard-card,.mi-kpi-card):hover::before { height: 4px !important; }
+body.mi-app-unified :is(.inventory-kpi-card,.dashboard-card,.mi-kpi-card):focus-within {
+  border-color: var(--mi-card-accent) !important;
+  box-shadow: 0 0 0 3px rgba(49,87,213,.08), 0 15px 30px rgba(31,41,55,.08) !important;
+}
+body.mi-app-dashboard .dashboard-card:hover .dashboard-icon {
+  transform: translateY(-2px) scale(1.055) rotate(-2deg) !important;
+}
+body.mi-app-dashboard .dashboard-icon {
+  border: 1px solid #dbe4ff !important;
+  background: #eef3ff !important;
+  transition: transform .22s cubic-bezier(.2,.8,.2,1), background .22s ease !important;
+}
+
+/* Report containers stay calm: no exaggerated lift. */
+body.mi-app-unified :is(.report-card,.panel):hover {
+  transform: none !important;
+  border-color: #d9e1ed !important;
+  box-shadow: 0 5px 16px rgba(31,41,55,.045) !important;
+}
+
+/* ---------- Login: align with the calmer product language ---------- */
+body.mi-app-login .mi-login-story {
+  background: #16244a !important;
+}
+body.mi-app-login .mi-login-story::after { opacity: .55; }
+body.mi-app-login .mi-login-mark,
+body.mi-app-login .mi-card-logo { background: #3157d5 !important; }
+body.mi-app-login .mi-login-btn {
+  background: #3157d5 !important;
+  background-image: none !important;
+  box-shadow: 0 8px 18px rgba(49,87,213,.16) !important;
+}
+body.mi-app-login .mi-login-btn:hover { background: #2447bd !important; }
+
+@media (max-width: 980px) {
+  body.mi-app-unified .sidebar { width: 236px !important; max-width: 236px !important; }
+  body.mi-app-unified .mi-page-hero { min-height: 72px !important; }
+}
+
+@media (max-width: 760px) {
+  body.mi-app-unified .mi-hero-account-bar { height: 40px !important; }
+  body.mi-app-unified .mi-account-capsule { min-width: 40px !important; width: 40px !important; padding: 0 5px !important; }
+  body.mi-app-unified .mi-tool-capsule,
+  body.mi-app-unified .mi-logout-capsule { min-width: 40px !important; width: 40px !important; padding: 0 6px !important; }
+}
+
+/* --- consolidated: identity-separation --- */
+/* =========================================================
+   Identity separation + command dashboard
+   Pilot pages only. Keeps the V17 table system and all logic.
+   ========================================================= */
+
+:root {
+  --mi184-page: #f5f7fb;
+  --mi184-sidebar: #eaf0ff;
+  --mi184-sidebar-strong: #dfe8ff;
+  --mi184-surface: #ffffff;
+  --mi184-line: #dce3ef;
+  --mi184-ink: #172033;
+  --mi184-muted: #667085;
+  --mi184-blue: #2f5bd3;
+  --mi184-blue-deep: #2447ad;
+  --mi184-violet: #7357e8;
+  --mi184-orange: #f97316;
+}
+
+/* ----- Stronger layer separation ----- */
+body.mi-app-unified,
+body.mi-app-unified .app-shell,
+body.mi-app-unified .main {
+  background: var(--mi184-page) !important;
+}
+
+body.mi-app-unified .sidebar {
+  flex-basis: 238px !important;
+  width: 238px !important;
+  max-width: 238px !important;
+  padding: 14px 12px !important;
+  border-inline-start: 1px solid #d4def2 !important;
+  background: var(--mi184-sidebar) !important;
+  box-shadow: -8px 0 24px rgba(44, 69, 122, .055) !important;
+}
+
+html[dir="ltr"] body.mi-app-unified .sidebar {
+  border-inline-start: 0 !important;
+  border-inline-end: 1px solid #d4def2 !important;
+  box-shadow: 8px 0 24px rgba(44, 69, 122, .055) !important;
+}
+
+body.mi-app-unified .brand {
+  margin-bottom: 10px !important;
+  padding: 2px 6px 12px !important;
+  border-bottom: 1px solid #ced9ef !important;
+}
+body.mi-app-unified .brand-logo {
+  color: #fff !important;
+  background: var(--mi184-blue) !important;
+  box-shadow: 0 6px 14px rgba(47, 91, 211, .16) !important;
+}
+body.mi-app-unified .brand h1 { color: #1d2b4b !important; }
+body.mi-app-unified .brand p {
+  color: #6d5bd5 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+body.mi-app-unified .nav-group {
+  color: #8090ad !important;
+  letter-spacing: .02em !important;
+  text-transform: none !important;
+}
+body.mi-app-unified .nav-link,
+body.mi-app-unified .nav-accordion-head {
+  color: #3f4f6d !important;
+}
+body.mi-app-unified .nav-link:hover,
+body.mi-app-unified .nav-accordion-head:hover {
+  color: var(--mi184-blue-deep) !important;
+  background: rgba(255,255,255,.72) !important;
+  transform: none !important;
+}
+body.mi-app-unified .nav-accordion.open > .nav-accordion-head {
+  color: #2f3f5c !important;
+  background: rgba(255,255,255,.48) !important;
+}
+body.mi-app-unified .nav-link.active {
+  color: var(--mi184-blue-deep) !important;
+  background: #fff !important;
+  box-shadow: 0 5px 13px rgba(47,91,211,.08) !important;
+}
+body.mi-app-unified .nav-link.active::after {
+  inset-inline-end: auto !important;
+  inset-inline-start: 0 !important;
+  width: 3px !important;
+  background: var(--mi184-blue) !important;
+}
+html[dir="ltr"] body.mi-app-unified .nav-link.active::after {
+  inset-inline-start: auto !important;
+  inset-inline-end: 0 !important;
+}
+body.mi-app-unified .nav-accordion-body {
+  border-inline-end-color: #ced8ea !important;
+}
+body.mi-app-unified .nav-accordion-body .nav-link { color: #64728d !important; }
+body.mi-app-unified .sidebar-footer {
+  border-top-color: #ced9ef !important;
+  color: #7e8da8 !important;
+}
+
+/* ----- Report/page header: title is a heading, not a card ----- */
+body.mi-app-unified .mi-page-hero {
+  min-height: 72px !important;
+  padding: 10px clamp(18px, 2.6vw, 30px) !important;
+  border-bottom: 1px solid #dbe2ec !important;
+  background: #fff !important;
+  box-shadow: 0 3px 12px rgba(30, 46, 79, .025) !important;
+}
+body.mi-app-unified .mi-hero-heading {
+  position: relative !important;
+  flex: 1 1 auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 13px 0 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-align: right !important;
+}
+body.mi-app-unified .mi-hero-heading::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 5px;
+  bottom: 5px;
+  width: 3px;
+  border-radius: 999px;
+  background: var(--mi184-blue);
+}
+html[dir="ltr"] body.mi-app-unified .mi-hero-heading {
+  padding: 0 0 0 13px !important;
+  text-align: left !important;
+}
+body.mi-app-unified .mi-hero-heading .page-pill {
+  margin: 0 0 2px !important;
+  color: #7357e8 !important;
+  font-size: 7.5px !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+body.mi-app-unified .mi-hero-heading h2 {
+  max-width: 100% !important;
+  margin: 0 !important;
+  font-size: clamp(18px, 1.6vw, 22px) !important;
+  line-height: 1.2 !important;
+  letter-spacing: -.02em !important;
+  white-space: normal !important;
+}
+body.mi-app-unified .mi-hero-heading p {
+  margin-top: 2px !important;
+  font-size: 8.7px !important;
+  line-height: 1.35 !important;
+}
+
+body.mi-app-unified .mi-hero-account-bar {
+  flex: 0 0 auto !important;
+  height: 38px !important;
+  padding: 3px !important;
+  border: 1px solid #dce3ef !important;
+  border-radius: 11px !important;
+  background: #f3f6fc !important;
+}
+body.mi-app-unified .mi-hero-account-bar > * {
+  height: 30px !important;
+  min-height: 30px !important;
+  border-inline-start: 0 !important;
+  border-radius: 8px !important;
+}
+body.mi-app-unified .mi-account-capsule { min-width: 118px !important; }
+body.mi-app-unified .mi-logout-capsule { color: #c43232 !important; }
+body.mi-app-unified .mi-logout-capsule:hover { background: #feecec !important; color: #a92121 !important; }
+
+/* ----- Surfaces ----- */
+body.mi-app-unified .report-card,
+body.mi-app-unified .dashboard-card,
+body.mi-app-unified .mi-report-card {
+  background: var(--mi184-surface) !important;
+  border-color: var(--mi184-line) !important;
+}
+
+/* ----- Dashboard: command center, not marketing landing page ----- */
+body.mi-app-dashboard .content {
+  padding-top: 14px !important;
+}
+body.mi-app-dashboard .dashboard-home-shell { gap: 16px !important; }
+body.mi-app-dashboard .ops-overview {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(130px, .48fr)) !important;
+  gap: 10px !important;
+}
+body.mi-app-dashboard .ops-welcome,
+body.mi-app-dashboard .ops-status-panel,
+body.mi-app-dashboard .ops-command-metric {
+  min-height: 142px !important;
+  border: 1px solid var(--mi184-line) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 6px 18px rgba(27, 45, 81, .045) !important;
+}
+body.mi-app-dashboard .ops-welcome {
+  justify-content: center !important;
+  padding: 20px 22px !important;
+  background: #fff !important;
+}
+body.mi-app-dashboard .ops-welcome::after { display: none !important; }
+body.mi-app-dashboard .ops-eyebrow {
+  padding: 5px 8px !important;
+  color: var(--mi184-blue) !important;
+  border-color: #dce6ff !important;
+  background: #f2f6ff !important;
+  font-size: 8px !important;
+  letter-spacing: 0 !important;
+}
+body.mi-app-dashboard .ops-welcome h2 {
+  max-width: 620px !important;
+  margin: 9px 0 4px !important;
+  font-size: clamp(20px, 2vw, 27px) !important;
+  line-height: 1.28 !important;
+}
+body.mi-app-dashboard .ops-welcome p {
+  max-width: 640px !important;
+  font-size: 9px !important;
+  line-height: 1.65 !important;
+}
+body.mi-app-dashboard .ops-actions { margin-top: 12px !important; }
+body.mi-app-dashboard .ops-action { min-height: 34px !important; font-size: 8.8px !important; border-radius: 9px !important; }
+body.mi-app-dashboard .ops-action.primary { background: var(--mi184-blue) !important; box-shadow: none !important; }
+
+body.mi-app-dashboard .ops-status-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  padding: 16px !important;
+  color: var(--mi184-ink) !important;
+  background: #fff !important;
+}
+body.mi-app-dashboard .ops-status-panel::after { display: none !important; }
+body.mi-app-dashboard .ops-status-badge {
+  color: #4b5d7e !important;
+  border-color: #e0e6f0 !important;
+  background: #f6f8fc !important;
+  letter-spacing: 0 !important;
+}
+body.mi-app-dashboard .ops-status-panel h3 { color: var(--mi184-ink) !important; font-size: 12px !important; }
+body.mi-app-dashboard .ops-status-panel > p { color: var(--mi184-muted) !important; }
+body.mi-app-dashboard .ops-status-grid { gap: 7px !important; margin-top: 10px !important; padding-top: 0 !important; }
+body.mi-app-dashboard .ops-stat {
+  padding: 9px !important;
+  border-color: #e1e6ef !important;
+  background: #f8faff !important;
+}
+body.mi-app-dashboard .ops-stat span { color: #77859d !important; }
+body.mi-app-dashboard .ops-stat strong { color: var(--mi184-blue-deep) !important; font-size: 18px !important; }
+
+body.mi-app-dashboard .dashboard-modules-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 11px !important;
+}
+body.mi-app-dashboard .dashboard-card {
+  min-height: 218px !important;
+  padding: 16px !important;
+  border-radius: 15px !important;
+  box-shadow: 0 5px 15px rgba(27,45,81,.035) !important;
+}
+body.mi-app-dashboard .dashboard-card::before { height: 3px !important; }
+body.mi-app-dashboard .dashboard-card:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 12px 26px rgba(27,45,81,.075) !important;
+}
+body.mi-app-dashboard .dashboard-icon { width: 40px !important; height: 40px !important; flex-basis: 40px !important; border-radius: 11px !important; font-size: 17px !important; }
+body.mi-app-dashboard .dashboard-card h3 { font-size: 13px !important; }
+body.mi-app-dashboard .dashboard-card p { font-size: 8.7px !important; line-height: 1.6 !important; }
+body.mi-app-dashboard .dashboard-section-title h3 { font-size: 16px !important; }
+
+/* English pilot: proper LTR rhythm instead of translated Arabic geometry. */
+html[dir="ltr"] body.mi-app-unified .mi-hero-account-bar { direction: ltr !important; }
+html[dir="ltr"] body.mi-app-unified .nav-link.active::after { inset-inline-start: auto !important; inset-inline-end: 0 !important; }
+html[dir="ltr"] body.mi-app-dashboard .dashboard-card,
+html[dir="ltr"] body.mi-app-dashboard .ops-welcome,
+html[dir="ltr"] body.mi-app-dashboard .ops-status-panel { text-align: left !important; }
+
+@media (max-width: 1180px) {
+  body.mi-app-dashboard .ops-overview { grid-template-columns: minmax(0, 1fr) minmax(210px, .55fr) !important; }
+  body.mi-app-dashboard .dashboard-modules-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+@media (max-width: 760px) {
+  body.mi-app-dashboard .ops-overview,
+  body.mi-app-dashboard .dashboard-modules-grid { grid-template-columns: 1fr !important; }
+  body.mi-app-unified .mi-page-hero { align-items: flex-start !important; }
+  body.mi-app-unified .mi-hero-account-bar { margin-top: 7px !important; }
+}
+
+/* --- consolidated: dashboard-navigation --- */
+/* =========================================================
+   Dashboard-first navigation
+   Dashboard + customer complaints + financial review only.
+   The dashboard is the application entry point; section pages
+   use a compact local navigator instead of the global sidebar.
+   ========================================================= */
+
+/* Remove the global admin-template sidebar from pilot navigation pages. */
+body.mi-app-navigation .app-shell,
+body.mi-app-navigation .mi-app-navigation-shell {
+  display: block !important;
+  min-height: 100vh !important;
+}
+
+body.mi-app-navigation .sidebar {
+  display: none !important;
+}
+
+body.mi-app-navigation .main {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
+body.mi-app-navigation .mobile-menu-btn,
+body.mi-app-navigation .mi-hero-menu-btn {
+  display: none !important;
+}
+
+/* Application header becomes the only global chrome. */
+body.mi-app-navigation .mi-page-hero {
+  min-height: 70px !important;
+  padding-inline: max(24px, calc((100vw - 1540px) / 2)) !important;
+  border-bottom-color: #dbe3f0 !important;
+}
+
+body.mi-app-navigation .mi-hero-heading {
+  max-width: min(820px, 65vw) !important;
+}
+
+body.mi-app-navigation .mi-hero-account-bar {
+  background: #f7f9fd !important;
+}
+
+/* Local section navigator — replaces the entire project sidebar. */
+body.mi-app-navigation .mi-section-nav {
+  width: min(1540px, calc(100% - 48px));
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 14px auto 0;
+  padding: 7px 8px;
+  border: 1px solid #dce4f0;
+  border-radius: 14px;
+  background: rgba(255,255,255,.92);
+  box-shadow: 0 5px 16px rgba(28, 47, 86, .045);
+}
+
+body.mi-app-navigation .mi-section-dashboard-link {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 12px;
+  border: 1px solid #d9e2f0;
+  border-radius: 10px;
+  color: #30415f;
+  background: #f8faff;
+  text-decoration: none;
+  font-size: 9.5px;
+  font-weight: 850;
+  white-space: nowrap;
+  transition: transform .16s ease, border-color .16s ease, background .16s ease;
+}
+body.mi-app-navigation .mi-section-dashboard-link:hover {
+  transform: translateY(-1px);
+  border-color: #bfcfec;
+  background: #f1f5ff;
+}
+
+body.mi-app-navigation .mi-section-nav-context {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+body.mi-app-navigation .mi-section-nav-context > span {
+  color: #7a879d;
+  font-size: 8.5px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+body.mi-app-navigation .mi-section-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 10px;
+  background: #f1f4f9;
+}
+body.mi-app-navigation .mi-section-nav-link {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: #5a6880;
+  text-decoration: none;
+  font-size: 9px;
+  font-weight: 800;
+  white-space: nowrap;
+  transition: color .15s ease, background .15s ease, box-shadow .15s ease;
+}
+body.mi-app-navigation .mi-section-nav-link:hover {
+  color: #2447ad;
+  background: rgba(255,255,255,.74);
+}
+body.mi-app-navigation .mi-section-nav-link.active {
+  color: #2447ad;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(47,91,211,.09);
+}
+
+/* Content becomes a centered workspace instead of sidebar-constrained content. */
+body.mi-app-navigation .content,
+body.mi-app-navigation .mi-context-toolbar,
+body.mi-app-navigation .report-toolbar {
+  width: min(1540px, calc(100% - 48px)) !important;
+  margin-inline: auto !important;
+}
+
+body.mi-app-navigation .content {
+  padding-inline: 0 !important;
+}
+
+/* Standalone customer pages no longer need their old mini-toolbar. */
+body.mi-app-navigation.mi-app-service .service-page-toolbar,
+body.mi-app-navigation.financial-review-page .service-page-toolbar {
+  display: none !important;
+}
+
+/* Dashboard: the hero is a command prompt only; cards are the navigator. */
+body.mi-app-navigation.mi-app-dashboard .ops-overview {
+  grid-template-columns: 238px minmax(0, 1fr) !important;
+  grid-template-areas: "status welcome" !important;
+  direction: ltr;
+  align-items: stretch !important;
+}
+body.mi-app-navigation.mi-app-dashboard .ops-welcome {
+  grid-area: welcome;
+  direction: rtl;
+  min-height: 164px !important;
+  padding: 24px 28px !important;
+}
+body.mi-app-navigation.mi-app-dashboard .ops-status-panel {
+  grid-area: status;
+  direction: rtl;
+  min-height: 164px !important;
+  padding: 16px !important;
+  align-self: stretch;
+}
+body.mi-app-navigation.mi-app-dashboard .ops-actions {
+  display: none !important;
+}
+body.mi-app-navigation.mi-app-dashboard .ops-welcome h2 {
+  max-width: 760px !important;
+  font-size: clamp(23px, 2.4vw, 32px) !important;
+}
+body.mi-app-navigation.mi-app-dashboard .ops-welcome p {
+  max-width: 820px !important;
+  font-size: 9.5px !important;
+}
+
+/* The workspace card itself becomes the primary navigation target. */
+body.mi-app-navigation.mi-app-dashboard .dashboard-card[data-workspace-href] {
+  cursor: pointer;
+  outline: none;
+}
+body.mi-app-navigation.mi-app-dashboard .dashboard-card[data-workspace-href]:focus-visible {
+  border-color: #7fa1f4 !important;
+  box-shadow: 0 0 0 4px rgba(47,91,211,.12) !important;
+}
+body.mi-app-navigation.mi-app-dashboard .dashboard-card[data-workspace-href] .dashboard-module-main-link {
+  position: relative;
+  z-index: 2;
+}
+body.mi-app-navigation.mi-app-dashboard .dashboard-card[data-workspace-href]::after {
+  content: "فتح مساحة العمل ←";
+  position: absolute;
+  inset-inline-end: 16px;
+  bottom: 14px;
+  color: var(--card-accent, #2f5bd3);
+  font-size: 8px;
+  font-weight: 850;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity .16s ease, transform .16s ease;
+  pointer-events: none;
+}
+body.mi-app-navigation.mi-app-dashboard .dashboard-card[data-workspace-href]:hover::after,
+body.mi-app-navigation.mi-app-dashboard .dashboard-card[data-workspace-href]:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Let the dashboard use the new width now that the sidebar is gone. */
+body.mi-app-navigation.mi-app-dashboard .dashboard-modules-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+html[dir="ltr"] body.mi-app-navigation.mi-app-dashboard .ops-overview {
+  grid-template-areas: "status welcome" !important;
+}
+html[dir="ltr"] body.mi-app-navigation.mi-app-dashboard .ops-welcome,
+html[dir="ltr"] body.mi-app-navigation.mi-app-dashboard .ops-status-panel {
+  direction: ltr;
+}
+html[dir="ltr"] body.mi-app-navigation .mi-section-dashboard-link span {
+  transform: rotate(180deg);
+}
+
+@media (max-width: 1050px) {
+  body.mi-app-navigation.mi-app-dashboard .ops-overview {
+    grid-template-columns: 210px minmax(0,1fr) !important;
+  }
+  body.mi-app-navigation.mi-app-dashboard .dashboard-modules-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  body.mi-app-navigation .mi-page-hero {
+    padding-inline: 15px !important;
+  }
+  body.mi-app-navigation .mi-section-nav,
+  body.mi-app-navigation .content,
+  body.mi-app-navigation .mi-context-toolbar,
+  body.mi-app-navigation .report-toolbar {
+    width: calc(100% - 24px) !important;
+  }
+  body.mi-app-navigation .mi-section-nav {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 7px;
+  }
+  body.mi-app-navigation .mi-section-nav-context {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 6px;
+  }
+  body.mi-app-navigation .mi-section-nav-links {
+    overflow-x: auto;
+  }
+  body.mi-app-navigation.mi-app-dashboard .ops-overview,
+  body.mi-app-navigation.mi-app-dashboard .dashboard-modules-grid {
+    grid-template-columns: 1fr !important;
+    grid-template-areas: "welcome" "status" !important;
+  }
+  body.mi-app-navigation.mi-app-dashboard .ops-status-panel {
+    min-height: 130px !important;
+  }
+}
+
+/* In the dashboard-first model the card itself is the action. */
+body.mi-app-navigation.mi-app-dashboard .dashboard-card-actions,
+body.mi-app-navigation.mi-app-dashboard .dashboard-report-links {
+  display: none !important;
+}
+body.mi-app-navigation.mi-app-dashboard .dashboard-card {
+  min-height: 176px !important;
+  padding-bottom: 38px !important;
+}
+body.mi-app-navigation.mi-app-dashboard .dashboard-card > p {
+  min-height: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* --- consolidated: module-navigation --- */
+/* =========================================================
+   Module navigation + dark page header
+   ========================================================= */
+
+/* A real visual anchor for every dashboard-first page. */
+body.mi-app-navigation .mi-page-hero {
+  position: relative;
+  min-height: 78px !important;
+  overflow: visible !important;
+  color: #fff !important;
+  border: 0 !important;
+  border-bottom: 3px solid #f97316 !important;
+  background:
+    radial-gradient(circle at 14% 20%, rgba(124, 58, 237, .28), transparent 30rem),
+    linear-gradient(112deg, #282451 0%, #342a69 54%, #29345f 100%) !important;
+  box-shadow: 0 10px 28px rgba(37, 32, 82, .16) !important;
+}
+
+body.mi-app-navigation .mi-page-hero picture,
+body.mi-app-navigation .mi-page-hero-shade {
+  display: none !important;
+}
+
+body.mi-app-navigation .mi-hero-heading {
+  position: relative;
+  z-index: 2;
+  max-width: min(860px, 67vw) !important;
+  padding-block: 13px !important;
+}
+
+body.mi-app-navigation .mi-hero-heading .page-pill {
+  color: #fed7aa !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  font-size: 8px !important;
+  opacity: .95;
+}
+
+body.mi-app-navigation .mi-hero-heading h2 {
+  margin: 2px 0 1px !important;
+  color: #fff !important;
+  font-size: clamp(22px, 2.25vw, 31px) !important;
+  line-height: 1.15 !important;
+  letter-spacing: -.035em !important;
+}
+
+body.mi-app-navigation .mi-hero-heading p {
+  margin: 0 !important;
+  color: #d9def0 !important;
+  font-size: 9px !important;
+  line-height: 1.55 !important;
+}
+
+/* Account tools become glass capsules over the dark header. */
+body.mi-app-navigation .mi-hero-account-bar {
+  z-index: 4;
+  gap: 6px !important;
+  padding: 5px !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  border-radius: 13px !important;
+  background: rgba(255,255,255,.085) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(12px);
+}
+body.mi-app-navigation .mi-hero-account-bar .mi-tool-capsule,
+body.mi-app-navigation .mi-hero-account-bar .mi-account-capsule {
+  color: #f7f8ff !important;
+  border-color: rgba(255,255,255,.12) !important;
+  background: rgba(255,255,255,.075) !important;
+}
+body.mi-app-navigation .mi-hero-account-bar small { color: #c7cce3 !important; }
+body.mi-app-navigation .mi-hero-account-bar .mi-logout-capsule {
+  color: #fff !important;
+  border-color: rgba(249,115,22,.34) !important;
+  background: #e8671d !important;
+}
+
+/* Grouped module navigator: 3 choices instead of 10 flat tabs. */
+body.mi-app-navigation .mi-section-nav-grouped {
+  overflow: visible !important;
+  min-height: 58px;
+  padding: 8px 9px !important;
+  border-color: #d9e0ec !important;
+  background: #fff !important;
+  box-shadow: 0 8px 22px rgba(30, 42, 76, .055) !important;
+}
+
+body.mi-app-navigation .mi-section-nav-grouped .mi-section-nav-context {
+  flex: 1 1 auto;
+  justify-content: flex-start;
+}
+
+body.mi-app-navigation .mi-section-module-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 11px;
+  border-inline-end: 1px solid #e2e7f0;
+  color: #6e7890 !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
+}
+
+body.mi-app-navigation .mi-section-nav-groups {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+body.mi-app-navigation .mi-section-nav-group {
+  position: relative;
+  z-index: 20;
+}
+
+body.mi-app-navigation .mi-section-nav-group > summary {
+  min-width: 112px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 12px;
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  color: #46526b;
+  border: 1px solid #dfe5ef;
+  border-radius: 10px;
+  background: #f8f9fc;
+  font-size: 9px;
+  transition: border-color .15s ease, background .15s ease, color .15s ease, transform .15s ease;
+}
+body.mi-app-navigation .mi-section-nav-group > summary::-webkit-details-marker { display: none; }
+body.mi-app-navigation .mi-section-nav-group > summary:hover {
+  transform: translateY(-1px);
+  color: #342a69;
+  border-color: #c9c0ed;
+  background: #f5f2ff;
+}
+body.mi-app-navigation .mi-section-nav-group.active > summary {
+  color: #fff;
+  border-color: #4338ca;
+  background: #4338ca;
+  box-shadow: 0 6px 14px rgba(67,56,202,.18);
+}
+body.mi-app-navigation .mi-section-group-icon { font-size: 11px; }
+body.mi-app-navigation .mi-section-group-arrow {
+  font-size: 10px;
+  transition: transform .15s ease;
+}
+body.mi-app-navigation .mi-section-nav-group[open] .mi-section-group-arrow { transform: rotate(180deg); }
+
+body.mi-app-navigation .mi-section-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  inset-inline-start: 0;
+  width: 270px;
+  max-height: min(430px, 65vh);
+  overflow: auto;
+  display: grid;
+  gap: 3px;
+  padding: 8px;
+  border: 1px solid #dfe4ee;
+  border-radius: 13px;
+  background: #fff;
+  box-shadow: 0 18px 45px rgba(23, 32, 61, .16);
+}
+
+body.mi-app-navigation .mi-section-menu-link {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 10px;
+  color: #344058;
+  border-radius: 9px;
+  text-decoration: none;
+  font-size: 9px;
+  font-weight: 800;
+  transition: background .14s ease, color .14s ease, padding .14s ease;
+}
+body.mi-app-navigation .mi-section-menu-link:hover {
+  color: #342a69;
+  background: #f4f2ff;
+  padding-inline-start: 13px;
+}
+body.mi-app-navigation .mi-section-menu-link.active {
+  color: #342a69;
+  background: #eeeafd;
+}
+body.mi-app-navigation .mi-section-menu-link small {
+  color: #7c6ed0;
+  font-size: 7px;
+  font-weight: 850;
+}
+
+body.mi-app-navigation .mi-section-dashboard-link {
+  color: #fff !important;
+  border-color: #29345f !important;
+  background: #29345f !important;
+}
+body.mi-app-navigation .mi-section-dashboard-link:hover {
+  color: #fff !important;
+  border-color: #342a69 !important;
+  background: #342a69 !important;
+}
+
+/* The customer module pages share the same dashboard-first shell. */
+body.mi-app-navigation .content {
+  padding-top: 16px !important;
+}
+
+@media (max-width: 760px) {
+  body.mi-app-navigation .mi-page-hero {
+    min-height: 112px !important;
+  }
+  body.mi-app-navigation .mi-hero-heading {
+    max-width: 100% !important;
+    padding-top: 44px !important;
+  }
+  body.mi-app-navigation .mi-hero-account-bar {
+    inset-block-start: 7px !important;
+  }
+  body.mi-app-navigation .mi-section-nav-groups {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 3px;
+  }
+  body.mi-app-navigation .mi-section-nav-group > summary {
+    min-width: 104px;
+  }
+  body.mi-app-navigation .mi-section-menu {
+    position: fixed;
+    inset-inline: 12px;
+    top: auto;
+    bottom: 12px;
+    width: auto;
+    max-height: 55vh;
+    z-index: 1000;
+  }
+}
+
+/* --- consolidated: data-visuals --- */
+/* =========================================================
+   Data readability + soft report identity
+   ========================================================= */
+
+/* Management report switcher behaves like two calm report cards. */
+body.mi-app-navigation.cs-management-page .cs-report-tabs {
+  position: sticky;
+  top: 10px;
+  z-index: 24;
+  gap: 10px !important;
+  padding: 7px !important;
+  border: 1px solid #dce2ec !important;
+  background: rgba(255,255,255,.92) !important;
+  box-shadow: 0 8px 22px rgba(28,39,73,.06) !important;
+}
+body.mi-app-navigation.cs-management-page .cs-report-tabs button {
+  min-height: 52px;
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+body.mi-app-navigation.cs-management-page .cs-report-tabs button:nth-child(1) {
+  color: #2853a6 !important;
+  border-color: #ccdaf8 !important;
+  background: #eef4ff !important;
+}
+body.mi-app-navigation.cs-management-page .cs-report-tabs button:nth-child(1):hover,
+body.mi-app-navigation.cs-management-page .cs-report-tabs button:nth-child(1).active {
+  color: #21458d !important;
+  border-color: #aebfea !important;
+  background: #dfe9ff !important;
+}
+body.mi-app-navigation.cs-management-page .cs-report-tabs button:nth-child(2) {
+  color: #7045b6 !important;
+  border-color: #ddd0f7 !important;
+  background: #f5f0ff !important;
+}
+body.mi-app-navigation.cs-management-page .cs-report-tabs button:nth-child(2):hover,
+body.mi-app-navigation.cs-management-page .cs-report-tabs button:nth-child(2).active {
+  color: #5e369f !important;
+  border-color: #c9b4ef !important;
+  background: #ece3ff !important;
+}
+body.mi-app-navigation.cs-management-page .cs-report-tabs button:nth-child(1) b {
+  color: #2853a6 !important;
+  background: rgba(255,255,255,.82) !important;
+}
+body.mi-app-navigation.cs-management-page .cs-report-tabs button:nth-child(2) b {
+  color: #7045b6 !important;
+  background: rgba(255,255,255,.82) !important;
+}
+
+/* KPI cards inherit their semantic tone as a very light tint instead of hard white blocks. */
+body.mi-app-navigation.cs-management-page .cs-management-kpis .cs-kpi {
+  border-color: color-mix(in srgb, var(--tone, #2563eb) 20%, #dce2ec) !important;
+  background: color-mix(in srgb, var(--tone, #2563eb) 6%, #fff) !important;
+  box-shadow: 0 7px 18px rgba(25,35,66,.04) !important;
+  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+}
+body.mi-app-navigation.cs-management-page .cs-management-kpis .cs-kpi:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--tone, #2563eb) 34%, #dce2ec) !important;
+  box-shadow: 0 12px 25px rgba(25,35,66,.075) !important;
+}
+body.mi-app-navigation.cs-management-page .cs-management-kpis .cs-kpi::before {
+  width: 4px !important;
+  background: var(--tone, #2563eb) !important;
+}
+body.mi-app-navigation.cs-management-page .cs-management-kpis .cs-kpi span { color: #69758b !important; }
+body.mi-app-navigation.cs-management-page .cs-management-kpis .cs-kpi strong { color: #253149 !important; }
+
+/* The report's legacy wrapper may scroll vertically, but it never owns page width. */
+body.mi-app-navigation.cs-management-page .cs-management-table-wrap {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  border-color: #cbd3e1 !important;
+  background: #fff !important;
+}
+body.mi-app-navigation.cs-management-page .cs-management-table-wrap table {
+  margin: 0 !important;
+}
+
+/* --- consolidated: turquoise-report --- */
+/* =========================================================
+   Turquoise report identity
+   Structural table rules remain global; this file changes visual tone only.
+   ========================================================= */
+body.mi-app-navigation.cs-management-page {
+  --mi-cs-tq-900: #0f5f63;
+  --mi-cs-tq-800: #0b7479;
+  --mi-cs-tq-700: #0f8f91;
+  --mi-cs-tq-200: #a9e5e1;
+  --mi-cs-tq-100: #d7f4f1;
+  --mi-cs-tq-50: #f0fbfa;
+}
+
+/* The report table header is intentionally lighter than the global dark header,
+   while separators stay visible. */
+body.mi-app-navigation.cs-management-page .mi-managed-table > thead > tr > th,
+body.mi-app-navigation.cs-management-page .mi-managed-table > tr > th,
+body.mi-app-navigation.cs-management-page .cs-management-table-wrap table > thead > tr > th {
+  color: #083b3e !important;
+  background: #bfece8 !important;
+  border-color: #70c8c4 !important;
+  box-shadow: inset 0 -2px 0 #45aaa8 !important;
+  text-shadow: none !important;
+}
+body.mi-app-navigation.cs-management-page .mi-managed-table > tbody > tr > td {
+  border-color: #d4e8e7 !important;
+}
+body.mi-app-navigation.cs-management-page .mi-managed-table > tbody > tr:nth-child(even) > td {
+  background: #f8fcfc !important;
+}
+body.mi-app-navigation.cs-management-page .mi-managed-table > tbody > tr:hover > td {
+  background: #ebfaf8 !important;
+}
+body.mi-app-navigation.cs-management-page .mi-table-shell {
+  border-color: #9dd8d5 !important;
+  box-shadow: 0 8px 24px rgba(15,143,145,.06) !important;
+}
+
+/* Fresh, restrained report navigation/cards. */
+body.mi-app-navigation.cs-management-page .cs-report-tabs button:nth-child(1) {
+  color: #0b7479 !important;
+  border-color: #b9e7e4 !important;
+  background: #edfbfa !important;
+}
+body.mi-app-navigation.cs-management-page .cs-report-tabs button:nth-child(1):hover,
+body.mi-app-navigation.cs-management-page .cs-report-tabs button:nth-child(1).active {
+  color: #084f53 !important;
+  border-color: #85d3cf !important;
+  background: #d7f4f1 !important;
+}
+body.mi-app-navigation.cs-management-page .cs-report-tabs button:nth-child(2) {
+  color: #6d4ab1 !important;
+  border-color: #dfd3f6 !important;
+  background: #f7f3ff !important;
+}
+body.mi-app-navigation.cs-management-page .cs-report-tabs button:nth-child(2):hover,
+body.mi-app-navigation.cs-management-page .cs-report-tabs button:nth-child(2).active {
+  color: #593793 !important;
+  border-color: #ccb8ee !important;
+  background: #eee7fb !important;
+}
+
+body.mi-app-navigation.cs-management-page .cs-operations-section {
+  border-color: #cbe8e5 !important;
+  background: #fbfefe !important;
+}
+body.mi-app-navigation.cs-management-page .cs-messages-section {
+  border-color: #e6daf8 !important;
+  background: #fdfbff !important;
+}
+
+/* KPI tints remain semantic but fresher. */
+body.mi-app-navigation.cs-management-page .cs-management-kpis .cs-kpi {
+  background: color-mix(in srgb, var(--tone, #0f8f91) 5%, #fff) !important;
+}
+body.mi-app-navigation.cs-management-page .cs-management-kpis .cs-kpi:nth-child(4n+1) { --tone: #0f8f91 !important; }
+body.mi-app-navigation.cs-management-page .cs-management-kpis .cs-kpi:nth-child(4n+2) { --tone: #7c5ac7 !important; }
+body.mi-app-navigation.cs-management-page .cs-management-kpis .cs-kpi:nth-child(4n+3) { --tone: #f59e0b !important; }
+body.mi-app-navigation.cs-management-page .cs-management-kpis .cs-kpi:nth-child(4n+4) { --tone: #16a34a !important; }
+
+/* --- consolidated: ui-qa --- */
+/* =========================================================
+   UI QA layer
+   Loaded LAST. Fixes stacking, table containment and the
+   turquoise customer-service report pilot after full cascade.
+   ========================================================= */
+
+/* ---------- Overlay / dropdown contract ---------- */
+body.mi-app-navigation .mi-section-nav-grouped {
+  position: relative !important;
+  z-index: 5000 !important;
+  overflow: visible !important;
+  isolation: auto !important;
+}
+body.mi-app-navigation .mi-section-nav-grouped .mi-section-nav-context,
+body.mi-app-navigation .mi-section-nav-grouped .mi-section-nav-groups {
+  position: relative !important;
+  z-index: 5001 !important;
+  overflow: visible !important;
+}
+body.mi-app-navigation .mi-section-nav-group {
+  position: relative !important;
+  z-index: 5002 !important;
+}
+body.mi-app-navigation .mi-section-nav-group[open] {
+  z-index: 5200 !important;
+}
+body.mi-app-navigation .mi-section-menu {
+  z-index: 5300 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  isolation: isolate;
+}
+/* Operational cards/tabs must never cover an open module menu. */
+body.mi-app-navigation :is(.cs-report-tabs,.cs-live-toolbar,.cs-management-filter-card,.cs-operations-section,.cs-management-table-card) {
+  position: relative;
+  z-index: 1 !important;
+}
+body.mi-app-navigation .mi-section-nav-grouped:has(.mi-section-nav-group[open]) {
+  z-index: 5500 !important;
+}
+
+/* ---------- Global table containment QA ---------- */
+.mi-table-shell {
+  contain: layout paint;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+}
+.mi-managed-table {
+  table-layout: fixed !important;
+  width: 100% !important;
+  max-width: none !important;
+}
+.mi-managed-table > tbody > tr {
+  height: auto !important;
+  min-height: 0 !important;
+}
+.mi-managed-table > tbody > tr > td {
+  height: auto !important;
+  min-height: 46px !important;
+  max-height: none !important;
+  vertical-align: top !important;
+  overflow: hidden !important;
+}
+.mi-managed-table td:is(.mi-col-standard,.mi-col-wide,.mi-col-long,.mi-col-code) {
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  text-overflow: clip !important;
+}
+.mi-managed-table td.mi-col-code {
+  direction: ltr !important;
+  unicode-bidi: plaintext !important;
+  text-align: start !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-all !important;
+  line-break: anywhere !important;
+}
+.mi-managed-table td.mi-col-code > *,
+.mi-managed-table td.mi-col-long > *,
+.mi-managed-table td.mi-table-long-cell > * {
+  display: inline !important;
+  max-inline-size: 100% !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
+.mi-managed-table td.mi-col-code > * {
+  direction: ltr !important;
+  unicode-bidi: plaintext !important;
+  word-break: break-all !important;
+}
+
+/* ---------- Customer service report: turquoise pilot ---------- */
+html body.mi-app-navigation.cs-management-page .cs-management-table-wrap {
+  border-color: #8ed4d1 !important;
+  background: #ffffff !important;
+  box-shadow: 0 8px 24px rgba(13, 148, 136, .07) !important;
+}
+html body.mi-app-navigation.cs-management-page .cs-management-table-wrap table > thead > tr > th,
+html body.mi-app-navigation.cs-management-page .mi-managed-table > thead > tr > th,
+html body.mi-app-navigation.cs-management-page .mi-managed-table > tr > th {
+  color: #0b3d40 !important;
+  background: #aee4e1 !important;
+  border-color: #69c2be !important;
+  box-shadow: inset 0 -2px 0 #3fa9a5 !important;
+  text-shadow: none !important;
+}
+html body.mi-app-navigation.cs-management-page .cs-management-table-wrap table > tbody > tr > td,
+html body.mi-app-navigation.cs-management-page .mi-managed-table > tbody > tr > td {
+  color: #25343a !important;
+  border-color: #d3e7e6 !important;
+  background: #ffffff !important;
+}
+html body.mi-app-navigation.cs-management-page .cs-management-table-wrap table > tbody > tr:nth-child(even) > td,
+html body.mi-app-navigation.cs-management-page .mi-managed-table > tbody > tr:nth-child(even) > td {
+  background: #f6fbfb !important;
+}
+html body.mi-app-navigation.cs-management-page .cs-management-table-wrap table > tbody > tr:hover > td,
+html body.mi-app-navigation.cs-management-page .mi-managed-table > tbody > tr:hover > td {
+  background: #e8f8f6 !important;
+}
+/* Force legacy report theme rules to stop repainting the new header. */
+html[data-mi-theme] body.mi-app-navigation.cs-management-page .cs-management-table-wrap table th {
+  color: #0b3d40 !important;
+  background: #aee4e1 !important;
+  border-color: #69c2be !important;
+}
+
+/* Keep report-path cards visibly different but soft. */
+html body.mi-app-navigation.cs-management-page .cs-report-tabs button:nth-child(1) {
+  color: #0b7479 !important;
+  border: 1px solid #9bdad6 !important;
+  background: #dff5f3 !important;
+}
+html body.mi-app-navigation.cs-management-page .cs-report-tabs button:nth-child(2) {
+  color: #6841a5 !important;
+  border: 1px solid #d1bff0 !important;
+  background: #efe8fb !important;
+}
+html body.mi-app-navigation.cs-management-page .cs-report-tabs button:nth-child(1).active {
+  color: #064e52 !important;
+  background: #c9eeeb !important;
+  box-shadow: 0 8px 18px rgba(15, 143, 145, .10) !important;
+}
+html body.mi-app-navigation.cs-management-page .cs-report-tabs button:nth-child(2).active {
+  color: #513189 !important;
+  background: #e3d7f7 !important;
+  box-shadow: 0 8px 18px rgba(109, 74, 177, .10) !important;
+}
+
+/* --- consolidated: scroll-stack --- */
+/* =========================================================
+   Sticky header / module navigation stack contract
+   Contract:
+     content/cards/tables < module nav/dropdown < page header
+   The module navigator and its menus stay above page content,
+   but scroll naturally BEHIND the sticky page header.
+   ========================================================= */
+
+/* Sticky application/page header is always the top UI layer. */
+body.mi-app-navigation .mi-page-hero {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 100 !important;
+  isolation: isolate !important;
+}
+
+/* Module navigation remains above report content, but below the header. */
+body.mi-app-navigation .mi-section-nav-grouped {
+  position: relative !important;
+  z-index: 30 !important;
+  overflow: visible !important;
+  isolation: auto !important;
+}
+body.mi-app-navigation .mi-section-nav-grouped .mi-section-nav-context,
+body.mi-app-navigation .mi-section-nav-grouped .mi-section-nav-groups {
+  position: relative !important;
+  z-index: 31 !important;
+  overflow: visible !important;
+}
+body.mi-app-navigation .mi-section-nav-group {
+  position: relative !important;
+  z-index: 32 !important;
+}
+body.mi-app-navigation .mi-section-nav-group[open] {
+  z-index: 34 !important;
+}
+body.mi-app-navigation .mi-section-menu {
+  z-index: 35 !important;
+}
+body.mi-app-navigation .mi-section-nav-grouped:has(.mi-section-nav-group[open]) {
+  z-index: 33 !important;
+}
+
+/* Report content remains below module navigation. */
+body.mi-app-navigation :is(
+  .cs-report-tabs,
+  .cs-live-toolbar,
+  .cs-management-filter-card,
+  .cs-operations-section,
+  .cs-management-table-card,
+  .report-card,
+  .card,
+  .mi-table-shell
+) {
+  z-index: 1 !important;
+}
+
+
+/* =========================================================
+   MI Unified Application Identity — full project rollout
+   Single final layer. No incremental theme files are loaded.
+   ========================================================= */
+:root {
+  --mi-app-header: #342b73;
+  --mi-app-header-accent: #f97316;
+  --mi-app-canvas: #f3f6fb;
+  --mi-app-surface: #ffffff;
+  --mi-app-line: #dbe3ef;
+  --mi-app-ink: #172033;
+  --mi-app-muted: #6d7890;
+  --mi-app-blue: #3159d9;
+  --mi-app-purple: #6842d9;
+  --mi-app-teal: #0f9e9a;
+  --mi-app-orange: #f97316;
+}
+
+html, body { background: var(--mi-app-canvas) !important; }
+body.mi-app-unified .app-shell,
+body.mi-app-unified .main { width: 100% !important; max-width: none !important; min-width: 0 !important; }
+body.mi-app-unified .sidebar[hidden] { display: none !important; }
+body.mi-app-unified .main { margin: 0 !important; }
+
+/* Page header is the strongest visual anchor. Every textual title is white. */
+body.mi-app-unified .mi-page-hero {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 100 !important;
+  min-height: 122px !important;
+  padding: 22px 28px !important;
+  border: 0 !important;
+  border-bottom: 4px solid var(--mi-app-header-accent) !important;
+  border-radius: 0 !important;
+  background: var(--mi-app-header) !important;
+  box-shadow: 0 8px 22px rgba(37, 34, 80, .11) !important;
+  isolation: isolate !important;
+}
+body.mi-app-unified .mi-page-hero picture,
+body.mi-app-unified .mi-page-hero-shade { display: none !important; }
+body.mi-app-unified .mi-hero-heading { max-width: min(760px, 62vw) !important; }
+body.mi-app-unified .mi-hero-heading :is(.page-pill,h1,h2,h3,p,span,strong,small),
+body.mi-app-unified .mi-page-hero .mi-hero-heading * {
+  color: #ffffff !important;
+  text-shadow: none !important;
+}
+body.mi-app-unified .mi-hero-heading .page-pill { opacity: .78 !important; }
+body.mi-app-unified .mi-hero-heading h2 { font-size: clamp(28px, 3vw, 42px) !important; line-height: 1.08 !important; }
+body.mi-app-unified .mi-hero-heading p { opacity: .76 !important; font-size: 11px !important; }
+
+/* Account controls belong to the header but never compete with the title. */
+body.mi-app-unified .mi-hero-account-bar {
+  background: rgba(255,255,255,.08) !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  box-shadow: none !important;
+}
+body.mi-app-unified .mi-hero-account-bar :is(.mi-tool-capsule,.mi-account-capsule,.mi-logout-capsule) {
+  border-color: rgba(255,255,255,.14) !important;
+}
+body.mi-app-unified .mi-hero-account-bar :is(.mi-tool-copy strong,.mi-account-copy strong,.mi-tool-copy small,.mi-account-copy small) { color:#fff !important; }
+body.mi-app-unified .mi-hero-account-bar .mi-tool-capsule,
+body.mi-app-unified .mi-hero-account-bar .mi-account-capsule { background: rgba(255,255,255,.08) !important; }
+body.mi-app-unified .mi-hero-account-bar .mi-logout-capsule { background: var(--mi-app-orange) !important; border-color: var(--mi-app-orange) !important; }
+
+/* The dashboard is the single global navigator; module bars are local-only. */
+body.mi-app-unified .mi-section-nav-grouped {
+  position: relative !important;
+  z-index: 30 !important;
+  width: calc(100% - 40px) !important;
+  max-width: 1460px !important;
+  margin: 16px auto 0 !important;
+  border: 1px solid var(--mi-app-line) !important;
+  background: rgba(255,255,255,.97) !important;
+  box-shadow: 0 8px 24px rgba(26, 39, 75, .06) !important;
+}
+body.mi-app-unified .mi-section-dashboard-link { background:#2f3d75 !important; color:#fff !important; }
+body.mi-app-unified .mi-section-module-label { color:#667085 !important; }
+body.mi-app-unified .mi-section-nav-group > summary { background:#fff !important; }
+body.mi-app-unified .mi-section-nav-group.active > summary { color:#fff !important; background:var(--mi-app-purple) !important; border-color:var(--mi-app-purple) !important; }
+body.mi-app-unified .mi-section-nav-group.active > summary * { color:#fff !important; }
+body.mi-app-unified .mi-section-menu { z-index:35 !important; }
+
+/* Surface hierarchy: canvas / white cards / quiet borders. */
+body.mi-app-unified .content { max-width: 1500px !important; margin-inline:auto !important; padding: 18px 22px 40px !important; }
+body.mi-app-unified :is(.report-card,.panel,.card,.table-card,.filter-panel,.summary-panel,.inventory-report-card,.cs-management-table-card,.cs-operations-section) {
+  border-color: var(--mi-app-line) !important;
+  background: var(--mi-app-surface) !important;
+}
+
+/* One global table palette. Header is fresh turquoise, readable and consistent. */
+:root {
+  --mi-table-head: #bdebe7;
+  --mi-table-head-border: #78cbc6;
+  --mi-table-head-text: #104c50;
+  --mi-table-line: #d6e6e5;
+  --mi-table-line-strong: #b9d8d5;
+  --mi-table-row-alt: #f8fcfc;
+  --mi-table-row-hover: #eaf8f7;
+}
+.mi-managed-table > thead > tr > th,
+.mi-managed-table > tr > th {
+  color: var(--mi-table-head-text) !important;
+  background: var(--mi-table-head) !important;
+  border-color: var(--mi-table-head-border) !important;
+  box-shadow: inset 0 -2px 0 #57b9b3 !important;
+  text-shadow: none !important;
+}
+.mi-managed-table > tbody > tr > td { vertical-align: top !important; }
+.mi-managed-table td.mi-col-code { line-height: 1.65 !important; }
+
+/* No legacy rainbow accent bars on ordinary cards. */
+body.mi-app-unified :is(.report-card,.panel,.card,.inventory-kpi-card,.dashboard-card)::before {
+  background: var(--card-accent, var(--mi-app-blue)) !important;
+}
+
+/* Prevent page-specific legacy headers from repainting the unified page header text. */
+html body.mi-app-unified .mi-page-hero :is(h1,h2,h3,h4,p,span,strong,small,label) { color:#fff !important; }
+
+@media (max-width: 900px) {
+  body.mi-app-unified .mi-page-hero { min-height: 96px !important; padding: 16px !important; }
+  body.mi-app-unified .mi-hero-heading { max-width: 100% !important; padding-inline-start: 0 !important; }
+  body.mi-app-unified .mi-hero-heading h2 { font-size: 25px !important; }
+  body.mi-app-unified .mi-hero-heading p { display:none !important; }
+  body.mi-app-unified .mi-section-nav-grouped { width:calc(100% - 20px) !important; }
+  body.mi-app-unified .content { padding-inline:10px !important; }
+}
+
+
+/* Refresh-flash guard: authenticated pages remain hidden only until renderLayout
+   replaces their legacy markup with the unified shell. A 3s HTML fallback prevents
+   a permanent blank screen if a page script fails before rendering. */
+html.mi-app-preboot body { visibility: hidden !important; }
+html.mi-app-ready body { visibility: visible !important; }

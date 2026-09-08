@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Virginia Customer Care & Messaging</title>
+  <title>مركز خدمة العملاء</title>
   <link rel="stylesheet" href="../css/style.css" />
-
-  <style>
+<style>
     .care-home {
       --care-ink: #10213f;
       --care-muted: #66758f;
@@ -279,10 +278,15 @@
     }
   </style>
   <script src="../js/notifications.js?v=20260901-global-01"></script>
+  <link rel="stylesheet" href="../css/mi-app.css?v=20260904-customer-final-01" data-mi-unified-ui="true" />
+  <script>
+    document.documentElement.classList.add("mi-app-preboot");
+    setTimeout(() => document.documentElement.classList.remove("mi-app-preboot"), 3000);
+  </script>
 </head>
 <body>
   <script src="../js/api.js"></script>
-  <script src="../js/layout.js"></script>
+  <script src="../js/layout.js?v=20260904-customer-final-01"></script>
 
   <script>
     renderLayout(

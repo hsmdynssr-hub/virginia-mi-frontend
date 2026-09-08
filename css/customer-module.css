@@ -1,0 +1,483 @@
+/* ======================================================================
+   CUSTOMER CARE MODULE — FINAL CONTRACT
+   Reference UX: complaints + financial review workbenches.
+   One module = one header, one navigator, optional runtime state, content.
+   This file is injected last and is intentionally scoped to Customer Care.
+   ====================================================================== */
+
+:root {
+  --cs-head-1: #342b73;
+  --cs-head-2: #2f4078;
+  --cs-accent: #f97316;
+  --cs-teal: #119c9d;
+  --cs-teal-soft: #e8f8f7;
+  --cs-purple: #6d4ae2;
+  --cs-purple-soft: #f0ebff;
+  --cs-orange-soft: #fff3e8;
+  --cs-green: #16a36a;
+  --cs-canvas: #f4f7fb;
+  --cs-surface: #ffffff;
+  --cs-line: #dce5ef;
+  --cs-ink: #182235;
+  --cs-muted: #6d798e;
+}
+
+/* ---------- Page layers ---------- */
+html body.mi-customer-module-page {
+  background: var(--cs-canvas) !important;
+  color: var(--cs-ink) !important;
+}
+
+html body.mi-customer-module-page .main,
+html body.mi-customer-module-page .app-shell {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+}
+
+/* ---------- Canonical page header ---------- */
+html body.mi-customer-module-page .mi-page-hero {
+  position: sticky !important;
+  inset: 0 0 auto !important;
+  top: 0 !important;
+  z-index: 8000 !important;
+  width: 100% !important;
+  min-height: 126px !important;
+  height: auto !important;
+  box-sizing: border-box !important;
+  padding: 22px 30px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 26px !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-bottom: 4px solid var(--cs-accent) !important;
+  border-radius: 0 !important;
+  background: linear-gradient(112deg, var(--cs-head-1) 0%, #39337c 58%, var(--cs-head-2) 100%) !important;
+  box-shadow: 0 10px 28px rgba(31, 40, 78, .14) !important;
+  isolation: isolate !important;
+}
+
+html body.mi-customer-module-page .mi-page-hero::before,
+html body.mi-customer-module-page .mi-page-hero::after,
+html body.mi-customer-module-page .mi-page-hero picture,
+html body.mi-customer-module-page .mi-page-hero-shade {
+  display: none !important;
+  content: none !important;
+}
+
+html body.mi-customer-module-page .mi-hero-heading {
+  position: static !important;
+  inset: auto !important;
+  width: 100% !important;
+  max-width: 900px !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 14px 0 0 !important;
+  overflow: hidden !important;
+  text-align: right !important;
+}
+
+/* Non-negotiable module rule: EVERY piece of header text is white. */
+html body.mi-customer-module-page .mi-page-hero,
+html body.mi-customer-module-page .mi-page-hero *,
+html body.mi-customer-module-page .mi-page-hero :is(h1,h2,h3,h4,p,span,strong,small,label) {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  text-shadow: none !important;
+}
+
+html body.mi-customer-module-page .mi-hero-heading .page-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  width: fit-content !important;
+  margin: 0 0 5px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  opacity: .84 !important;
+}
+html body.mi-customer-module-page .mi-hero-heading h2 {
+  margin: 0 !important;
+  max-width: 100% !important;
+  font-size: clamp(30px, 3.25vw, 46px) !important;
+  line-height: 1.08 !important;
+  font-weight: 950 !important;
+  letter-spacing: -.025em !important;
+  white-space: normal !important;
+  overflow-wrap: break-word !important;
+  word-break: normal !important;
+}
+html body.mi-customer-module-page .mi-hero-heading p {
+  margin: 5px 0 0 !important;
+  max-width: 760px !important;
+  font-size: 11px !important;
+  line-height: 1.55 !important;
+  font-weight: 650 !important;
+  opacity: .82 !important;
+  white-space: normal !important;
+  overflow-wrap: break-word !important;
+}
+
+/* Account tools occupy a fixed, safe column and can never push the title out. */
+html body.mi-customer-module-page .mi-hero-account-bar {
+  position: static !important;
+  inset: auto !important;
+  width: auto !important;
+  max-width: 355px !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 5px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 4px !important;
+  flex-wrap: nowrap !important;
+  border: 1px solid rgba(255,255,255,.16) !important;
+  border-radius: 13px !important;
+  background: rgba(255,255,255,.08) !important;
+  backdrop-filter: blur(10px) !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+html body.mi-customer-module-page .mi-hero-account-bar > * {
+  min-width: 0 !important;
+  max-width: 165px !important;
+}
+html body.mi-customer-module-page .mi-hero-account-bar .mi-logout-capsule {
+  background: var(--cs-accent) !important;
+  border-color: var(--cs-accent) !important;
+}
+
+/* ---------- Module navigator ---------- */
+html body.mi-customer-module-page .mi-section-nav-grouped {
+  position: relative !important;
+  top: auto !important;
+  z-index: 3000 !important;
+  width: calc(100% - 44px) !important;
+  max-width: 1500px !important;
+  min-width: 0 !important;
+  margin: 16px auto 18px !important;
+  padding: 8px 10px !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+  border: 1px solid var(--cs-line) !important;
+  border-radius: 16px !important;
+  background: rgba(255,255,255,.98) !important;
+  box-shadow: 0 8px 24px rgba(35,48,75,.06) !important;
+}
+html body.mi-customer-module-page .mi-section-nav-group,
+html body.mi-customer-module-page .mi-section-nav-groups,
+html body.mi-customer-module-page .mi-section-nav-context { overflow: visible !important; }
+html body.mi-customer-module-page .mi-section-nav-group[open],
+html body.mi-customer-module-page .mi-section-menu { z-index: 3600 !important; }
+html body.mi-customer-module-page .mi-section-dashboard-link {
+  background: #314071 !important;
+  color: #fff !important;
+  border-color: #314071 !important;
+}
+html body.mi-customer-module-page .mi-section-nav-group.active > summary {
+  color: #fff !important;
+  background: var(--cs-purple) !important;
+  border-color: var(--cs-purple) !important;
+}
+html body.mi-customer-module-page .mi-section-nav-group.active > summary * { color:#fff !important; }
+html body.mi-customer-module-page .mi-section-menu {
+  border: 1px solid var(--cs-line) !important;
+  box-shadow: 0 18px 42px rgba(27,37,67,.16) !important;
+}
+
+/* ---------- Runtime state bar ---------- */
+html body.mi-customer-module-page .mi-customer-runtime-bar {
+  position: relative !important;
+  z-index: 20 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  margin: 0 0 18px !important;
+  padding: 11px 13px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  flex-wrap: wrap !important;
+  overflow: hidden !important;
+  border: 1px solid var(--cs-line) !important;
+  border-inline-start: 4px solid var(--cs-teal) !important;
+  border-radius: 14px !important;
+  background: var(--cs-surface) !important;
+  box-shadow: 0 7px 20px rgba(35,48,75,.055) !important;
+}
+html body.mi-customer-module-page .mi-customer-runtime-copy {
+  flex: 0 1 270px !important;
+  min-width: 165px !important;
+  max-width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+}
+html body.mi-customer-module-page .mi-customer-runtime-copy > div {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 1px !important;
+}
+html body.mi-customer-module-page .mi-customer-runtime-copy small {
+  color: var(--cs-muted) !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+}
+html body.mi-customer-module-page .mi-customer-runtime-copy strong {
+  color: var(--cs-ink) !important;
+  font-size: 14px !important;
+  font-weight: 950 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+html body.mi-customer-module-page .mi-customer-runtime-dot {
+  flex: 0 0 auto !important;
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
+  background: #22c77a !important;
+  box-shadow: 0 0 0 5px rgba(34,199,122,.12) !important;
+}
+html body.mi-customer-module-page .mi-customer-runtime-tools {
+  flex: 1 1 430px !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  flex-wrap: wrap !important;
+  overflow: hidden !important;
+}
+html body.mi-customer-module-page .mi-customer-runtime-tools > * {
+  position: static !important;
+  inset: auto !important;
+  width: auto !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+html body.mi-customer-module-page .mi-runtime-badge,
+html body.mi-customer-module-page .mi-runtime-company,
+html body.mi-customer-module-page .mi-customer-runtime-tools .crsms-mode-badge,
+html body.mi-customer-module-page .mi-customer-runtime-tools .crsms-company-chip {
+  min-height: 34px !important;
+  padding: 7px 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  border: 1px solid #cfe3e1 !important;
+  border-radius: 999px !important;
+  background: var(--cs-teal-soft) !important;
+  color: #17676a !important;
+  -webkit-text-fill-color: #17676a !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  line-height: 1.25 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+html body.mi-customer-module-page .mi-runtime-action,
+html body.mi-customer-module-page .mi-customer-runtime-tools :is(.crsms-button,.crsms-connection-pill) {
+  min-height: 36px !important;
+  max-width: 100% !important;
+  padding: 7px 11px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  border-radius: 10px !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+
+/* ---------- Old per-page chrome can never reappear ---------- */
+html body.mi-customer-module-page .content :is(
+  .inventory-hero-card,
+  .crsms-operation-hero,
+  .crsms-dashboard-hero,
+  .crsms-return-bar,
+  .service-page-toolbar,
+  .cs-management-nav
+) { display: none !important; }
+
+/* ---------- Working surface ---------- */
+html body.mi-customer-module-page .content {
+  position: relative !important;
+  z-index: 1 !important;
+  width: auto !important;
+  max-width: 1500px !important;
+  min-width: 0 !important;
+  margin: 0 auto 34px !important;
+  padding: 0 22px !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+html body.mi-customer-module-page .content > main,
+html body.mi-customer-module-page .content > main > * {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Reference-workbench card language: quiet surface, clear title, no competing hero. */
+html body.mi-customer-module-page :is(
+  .report-card,
+  .inventory-report-card,
+  .crsms-panel,
+  .cs-live-toolbar,
+  .cs-report-tabs,
+  .cs-management-filter-card,
+  .cs-operations-section,
+  .cs-management-table-card
+) {
+  border-color: var(--cs-line) !important;
+  border-radius: 16px !important;
+  background: var(--cs-surface) !important;
+  box-shadow: 0 8px 24px rgba(35,48,75,.055) !important;
+}
+
+/* Management report paths are intentionally pastel but stay inside the same system. */
+html body.mi-customer-module-page.cs-management-page .cs-report-tabs button:nth-child(1) {
+  background: var(--cs-teal-soft) !important;
+  border-color: #a8dfdc !important;
+  color: #17676a !important;
+}
+html body.mi-customer-module-page.cs-management-page .cs-report-tabs button:nth-child(2) {
+  background: var(--cs-purple-soft) !important;
+  border-color: #d6c8ff !important;
+  color: #5a3ca8 !important;
+}
+html body.mi-customer-module-page.cs-management-page .cs-report-tabs button.active {
+  box-shadow: inset 0 0 0 2px currentColor !important;
+}
+
+/* ---------- Tables: same safe behavior everywhere in Customer Care ---------- */
+html body.mi-customer-module-page .mi-table-shell,
+html body.mi-customer-module-page :is(.crsms-table-wrap,.cs-management-table-wrap) {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  border: 1px solid var(--mi-table-line-strong, #b9d8d5) !important;
+  border-radius: 14px !important;
+  background: #fff !important;
+}
+html body.mi-customer-module-page table {
+  max-width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+html body.mi-customer-module-page :is(td,th) {
+  box-sizing: border-box !important;
+  border-inline-end: 1px solid var(--mi-table-line, #d6e6e5) !important;
+  border-bottom: 1px solid var(--mi-table-line, #d6e6e5) !important;
+}
+html body.mi-customer-module-page tbody tr { height: auto !important; min-height: 0 !important; }
+html body.mi-customer-module-page tbody td {
+  height: auto !important;
+  min-height: 0 !important;
+  vertical-align: top !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+}
+html body.mi-customer-module-page td.mi-col-code {
+  direction: ltr !important;
+  unicode-bidi: plaintext !important;
+  text-align: start !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  line-height: 1.55 !important;
+}
+
+/* ---------- Group accent — subtle, not a second theme ---------- */
+html body.mi-customer-module-page[data-mi-customer-group="operations"] { --cs-page-tone: var(--cs-teal); }
+html body.mi-customer-module-page[data-mi-customer-group="reports"] { --cs-page-tone: var(--cs-purple); }
+html body.mi-customer-module-page[data-mi-customer-group="settings"] { --cs-page-tone: var(--cs-accent); }
+html body.mi-customer-module-page .report-card-head h2,
+html body.mi-customer-module-page .crsms-section-title h2,
+html body.mi-customer-module-page .cs-management-section-title h2 {
+  color: var(--cs-ink) !important;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  html body.mi-customer-module-page .mi-page-hero {
+    min-height: 112px !important;
+    padding: 15px 16px !important;
+    grid-template-columns: minmax(0,1fr) auto !important;
+    gap: 10px !important;
+  }
+  html body.mi-customer-module-page .mi-hero-heading {
+    padding: 0 !important;
+  }
+  html body.mi-customer-module-page .mi-hero-heading h2 {
+    font-size: clamp(24px, 7vw, 34px) !important;
+  }
+  html body.mi-customer-module-page .mi-hero-heading p { display:none !important; }
+  html body.mi-customer-module-page .mi-hero-account-bar {
+    max-width: 205px !important;
+  }
+  html body.mi-customer-module-page .mi-hero-account-bar .mi-tool-copy small,
+  html body.mi-customer-module-page .mi-hero-account-bar .mi-account-copy small { display:none !important; }
+  html body.mi-customer-module-page .mi-section-nav-grouped {
+    width: calc(100% - 20px) !important;
+    margin-top: 10px !important;
+  }
+  html body.mi-customer-module-page .content { padding-inline: 10px !important; }
+  html body.mi-customer-module-page .mi-customer-runtime-bar { align-items: stretch !important; }
+  html body.mi-customer-module-page .mi-customer-runtime-copy,
+  html body.mi-customer-module-page .mi-customer-runtime-tools {
+    flex-basis: 100% !important;
+    justify-content: flex-start !important;
+  }
+}
+
+@media (max-width: 620px) {
+  html body.mi-customer-module-page .mi-page-hero {
+    grid-template-columns: 1fr !important;
+    align-items: start !important;
+  }
+  html body.mi-customer-module-page .mi-hero-account-bar {
+    grid-row: 2 !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Final alignment pass: page roots must not reintroduce their historical outer gutters. */
+html body.mi-customer-module-page .content > main {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+html body.mi-customer-module-page .content > main.crsms-page,
+html body.mi-customer-module-page .content > main.service-pos-shell,
+html body.mi-customer-module-page .content > main.cs-management-shell,
+html body.mi-customer-module-page .content > main.report-ui-page {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Semantic group orientation: same identity, different tiny accent only. */
+html body.mi-customer-module-page[data-mi-customer-group="operations"] { --cs-page-tone: var(--cs-teal); --cs-page-tone-soft: var(--cs-teal-soft); }
+html body.mi-customer-module-page[data-mi-customer-group="reports"] { --cs-page-tone: var(--cs-purple); --cs-page-tone-soft: var(--cs-purple-soft); }
+html body.mi-customer-module-page[data-mi-customer-group="settings"] { --cs-page-tone: var(--cs-accent); --cs-page-tone-soft: var(--cs-orange-soft); }
+html body.mi-customer-module-page .mi-section-nav-group.active > summary {
+  background: var(--cs-page-tone, var(--cs-purple)) !important;
+  border-color: var(--cs-page-tone, var(--cs-purple)) !important;
+}
+html body.mi-customer-module-page .mi-customer-runtime-bar {
+  border-inline-start-color: var(--cs-page-tone, var(--cs-teal)) !important;
+}

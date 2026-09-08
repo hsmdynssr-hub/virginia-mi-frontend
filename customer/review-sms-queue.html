@@ -9,12 +9,17 @@
   <link rel="stylesheet" href="./review-sms.css?v=sms-core-20260814" />
   <link rel="stylesheet" href="./review-sms-internal.css?v=dual-theme-20260830-01" />
   <script src="../js/api.js" defer></script>
-  <script src="../js/layout.js" defer></script>
+  <script src="../js/layout.js?v=20260904-customer-final-01" defer></script>
   <script src="./review-sms.js?v=unified-reports-20260830-01" defer></script>
   <script src="../js/notifications.js?v=20260901-global-01"></script>
+  <link rel="stylesheet" href="../css/mi-app.css?v=20260904-customer-final-01" data-mi-unified-ui="true" />
+  <script>
+    document.documentElement.classList.add("mi-app-preboot");
+    setTimeout(() => document.documentElement.classList.remove("mi-app-preboot"), 3000);
+  </script>
 </head>
 
-<body class="crsms-internal-page crsms-queue-page" data-page="queue" data-report-code="customer.review_sms.send">
+<body class="crsms-internal-page crsms-queue-page" data-page="queue" data-report-code="customer.review_sms.send" data-active-page="customer-review-sms-queue">
   <main class="crsms-page">
     <nav class="crsms-return-bar" aria-label="التنقل في مركز رسائل Virginia">
       <a class="crsms-return-link" data-return-page="dashboard" href="./review-sms-dashboard.html"><span>◫</span><strong>نظرة عامة</strong></a>
@@ -27,7 +32,7 @@
 
     <header class="crsms-operation-hero">
       <div>
-        <span class="crsms-eyebrow">VIRGINIA SMS OPERATIONS</span>
+        <span class="crsms-eyebrow">تشغيل الرسائل</span>
         <h1>تشغيل رسائل التقييم</h1>
         <p>ابحث أولًا عن فواتير Odoo المؤهلة، راجع النتائج، ثم اختر الفواتير الجاهزة فقط قبل تنفيذ الإرسال.</p>
       </div>
@@ -41,7 +46,7 @@
     <section class="crsms-panel crsms-filter-panel">
       <div class="crsms-section-title">
         <div>
-          <span class="crsms-section-kicker">ODOO INVOICE FILTERS</span>
+          <span class="crsms-section-kicker">فلاتر فواتير Odoo</span>
           <h2>تحديد نطاق الفواتير</h2>
           <p>قيم التشغيل الأساسية للقراءة فقط ويتم التحكم فيها من صفحة الإعدادات.</p>
         </div>
@@ -142,7 +147,7 @@
     <section class="crsms-panel crsms-queue-results-panel">
       <div class="crsms-section-title">
         <div>
-          <span class="crsms-section-kicker">ELIGIBLE INVOICES</span>
+          <span class="crsms-section-kicker">الفواتير المؤهلة</span>
           <h2>الفواتير المرشحة</h2>
           <p>الصفوف غير الجاهزة تظل للعرض والمراجعة فقط ولا يمكن تحديدها.</p>
         </div>

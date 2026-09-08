@@ -9,12 +9,17 @@
   <link rel="stylesheet" href="./review-sms.css?v=sms-core-20260814" />
   <link rel="stylesheet" href="./review-sms-internal.css?v=dual-theme-20260830-01" />
   <script src="../js/api.js" defer></script>
-  <script src="../js/layout.js" defer></script>
+  <script src="../js/layout.js?v=20260904-customer-final-01" defer></script>
   <script src="./review-sms.js?v=unified-reports-20260830-01" defer></script>
   <script src="../js/notifications.js?v=20260901-global-01"></script>
+  <link rel="stylesheet" href="../css/mi-app.css?v=20260904-customer-final-01" data-mi-unified-ui="true" />
+  <script>
+    document.documentElement.classList.add("mi-app-preboot");
+    setTimeout(() => document.documentElement.classList.remove("mi-app-preboot"), 3000);
+  </script>
 </head>
 
-<body class="crsms-internal-page crsms-followups-page" data-page="followups" data-report-code="customer.review_sms.followup">
+<body class="crsms-internal-page crsms-followups-page" data-page="followups" data-report-code="customer.review_sms.followup" data-active-page="customer-review-followups">
   <main class="crsms-page">
     <nav class="crsms-return-bar" aria-label="التنقل في مركز رسائل Virginia">
       <a class="crsms-return-link" data-return-page="dashboard" href="./review-sms-dashboard.html"><span>◫</span><strong>نظرة عامة</strong></a>
@@ -27,7 +32,7 @@
 
     <header class="crsms-operation-hero crsms-followups-hero">
       <div>
-        <span class="crsms-eyebrow">CUSTOMER RECOVERY WORKSPACE</span>
+        <span class="crsms-eyebrow">استعادة رضا العملاء</span>
         <h1>متابعة العملاء غير الراضين</h1>
         <p>إدارة تقييمات «غير راضٍ» و«محايد»، توثيق التواصل، وتوزيع الحالات حتى الحل والإغلاق.</p>
       </div>
@@ -41,7 +46,7 @@
     <section class="crsms-panel crsms-followups-filter-panel">
       <div class="crsms-section-title">
         <div>
-          <span class="crsms-section-kicker">FOLLOW-UP FILTERS</span>
+          <span class="crsms-section-kicker">فلاتر المتابعة</span>
           <h2>فلترة الحالات</h2>
           <p>حدد الحالة والأولوية والفترة ثم حدّث قائمة المتابعات المسندة إليك.</p>
         </div>
@@ -104,7 +109,7 @@
     <section class="crsms-panel crsms-followups-results-panel">
       <div class="crsms-section-title">
         <div>
-          <span class="crsms-section-kicker">CUSTOMER CASES</span>
+          <span class="crsms-section-kicker">حالات العملاء</span>
           <h2>حالات عدم الرضا</h2>
           <p>المدير يرى ويوزع الحالات، والموظف يرى الحالات المسندة إليه فقط.</p>
         </div>

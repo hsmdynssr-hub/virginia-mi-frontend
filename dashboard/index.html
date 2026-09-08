@@ -2,10 +2,9 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>Executive Dashboard</title>
+  <title>مركز القيادة التشغيلي</title>
   <link rel="stylesheet" href="../css/style.css" />
-
-  <style>
+<style>
     .dashboard-home-shell { display: grid; gap: 22px; }
 
     .ops-overview {
@@ -321,10 +320,15 @@
     }
   </style>
   <script src="../js/notifications.js?v=20260901-global-01"></script>
+  <link rel="stylesheet" href="../css/mi-app.css?v=20260902-customer-unified-02" data-mi-unified-ui="true" />
+  <script>
+    document.documentElement.classList.add("mi-app-preboot");
+    setTimeout(() => document.documentElement.classList.remove("mi-app-preboot"), 3000);
+  </script>
 </head>
-<body>
+<body class="mi-app-unified mi-app-dashboard">
   <script src="../js/api.js"></script>
-  <script src="../js/layout.js?v=20260815-01"></script>
+  <script src="../js/layout.js?v=20260902-customer-unified-02"></script>
 
   <script>
     const DASHBOARD_MODULES = [
@@ -764,7 +768,10 @@
             ${allowedModules.map((module, index) => {
               const tones = ["tone-blue", "tone-teal", "tone-amber", "tone-violet"];
               return `
-                <article class="dashboard-card ${tones[index % tones.length]}">
+                <article class="dashboard-card ${tones[index % tones.length]}"
+                  data-workspace="${module.indexPage}"
+                  data-workspace-href="${module.indexAllowed ? module.indexHref : (module.allowedReports[0]?.href || "")}"
+                  tabindex="0" role="link">
                   <div class="dashboard-card-top">
                     <div class="dashboard-card-title">
                       <div class="dashboard-icon">${module.icon}</div>
@@ -801,31 +808,28 @@
     }
 
     const dashboard = buildDashboardModules();
+    document.body.classList.add("mi-app-dashboard");
 
     renderLayout(
-      "Virginia Operations Hub",
-      "الفروع والمينو والمبيعات وخدمة العملاء في واجهة تشغيل واحدة",
+      "مركز القيادة التشغيلي",
+      "ما يحتاج انتباهك اليوم، ومساحات العمل الأساسية في مكان واحد",
       "dashboard",
       `
         <div class="dashboard-home-shell">
           <section class="ops-overview">
             <div class="ops-welcome">
-              <span class="ops-eyebrow">منصة التشغيل اليومية</span>
-              <h2>كل ما تحتاجه لإدارة المبيعات وتجربة العميل في مكان واحد</h2>
+              <span class="ops-eyebrow">مركز العمل اليومي</span>
+              <h2>ابدأ من مساحة العمل المطلوبة واتخذ الإجراء مباشرة</h2>
               <p>
-                ابدأ باختيار الشركة من أعلى الصفحة، ثم انتقل إلى الفروع أو المينو أو المبيعات أو رسائل خدمة العملاء مباشرة.
+                اختر الشركة، ثم افتح القسم المطلوب أو ابدأ إجراءً سريعًا. الصفحة مصممة للوصول إلى العمل بأقل عدد من الخطوات.
               </p>
 
-              <div class="ops-actions">
-                <a class="ops-action primary" href="../customer/review-sms-queue.html"><span aria-hidden="true">💬</span><span>تشغيل رسائل العملاء</span></a>
-                <a class="ops-action secondary" href="../menu/prices.html"><span aria-hidden="true">🧾</span><span>فتح المينو والأسعار</span></a>
-              </div>
             </div>
 
             <aside class="ops-status-panel">
-              <span class="ops-status-badge">Odoo Enterprise 18</span>
-              <h3>مركز عمليات فيرجينيا</h3>
-              <p>واجهة واحدة للفروع والمبيعات وخدمة العملاء.</p>
+              <span class="ops-status-badge">متصل بـ Odoo 18</span>
+              <h3>حالة منصة فيرجينيا</h3>
+              <p>الخدمات الأساسية متاحة من مركز تشغيل واحد.</p>
 
               <div class="ops-status-grid">
                 <div class="ops-stat">
@@ -844,6 +848,30 @@
         </div>
       `
     );
+
+    document.querySelectorAll("[data-workspace-href]").forEach((card) => {
+      const openWorkspace = () => {
+        const href = card.dataset.workspaceHref;
+        if (!href) return;
+        localStorage.setItem("miActiveWorkspace", card.dataset.workspace || "");
+        window.location.href = href;
+      };
+
+      card.addEventListener("click", (event) => {
+        const actionable = event.target.closest("a,button,input,select,textarea");
+        if (actionable) {
+          localStorage.setItem("miActiveWorkspace", card.dataset.workspace || "");
+          return;
+        }
+        openWorkspace();
+      });
+
+      card.addEventListener("keydown", (event) => {
+        if (!["Enter", " "].includes(event.key)) return;
+        event.preventDefault();
+        openWorkspace();
+      });
+    });
   </script>
 </body>
 </html>

@@ -14,11 +14,16 @@
     document.write(`<link rel="stylesheet" href="../css/style.css?v=${DEV_VERSION}">`);
   </script>
   <script src="../js/notifications.js?v=20260901-global-01"></script>
+  <link rel="stylesheet" href="../css/mi-app.css?v=20260902-customer-unified-02" data-mi-unified-ui="true" />
+  <script>
+    document.documentElement.classList.add("mi-app-preboot");
+    setTimeout(() => document.documentElement.classList.remove("mi-app-preboot"), 3000);
+  </script>
 </head>
 <body>
   <script>
     document.write(`<script src="../js/api.js?v=${DEV_VERSION}"><\/script>`);
-    document.write(`<script src="../js/layout.js?v=${DEV_VERSION}"><\/script>`);
+    document.write(`<script src="../js/layout.js?v=20260902-customer-unified-02"><\/script>`);
     document.write(`<script src="./targets.js?v=${DEV_VERSION}"><\/script>`);
   </script>
 </body>

@@ -9,12 +9,17 @@
   <link rel="stylesheet" href="./review-sms.css?v=sms-core-20260814" />
   <link rel="stylesheet" href="./review-sms-internal.css?v=dual-theme-20260830-01" />
   <script src="../js/api.js" defer></script>
-  <script src="../js/layout.js" defer></script>
+  <script src="../js/layout.js?v=20260904-customer-final-01" defer></script>
   <script src="./review-sms.js?v=unified-reports-20260830-01" defer></script>
   <script src="../js/notifications.js?v=20260901-global-01"></script>
+  <link rel="stylesheet" href="../css/mi-app.css?v=20260904-customer-final-01" data-mi-unified-ui="true" />
+  <script>
+    document.documentElement.classList.add("mi-app-preboot");
+    setTimeout(() => document.documentElement.classList.remove("mi-app-preboot"), 3000);
+  </script>
 </head>
 
-<body class="crsms-internal-page crsms-coupons-page" data-page="coupon-dashboard" data-report-code="customer.review_sms.view">
+<body class="crsms-internal-page crsms-coupons-page" data-page="coupon-dashboard" data-report-code="customer.review_sms.view" data-active-page="customer-review-coupons-dashboard">
   <main class="crsms-page">
     <nav class="crsms-return-bar" aria-label="التنقل في مركز رسائل Virginia">
       <a class="crsms-return-link" data-return-page="dashboard" href="./review-sms-dashboard.html"><span>◫</span><strong>نظرة عامة</strong></a>
@@ -27,7 +32,7 @@
 
     <header class="crsms-operation-hero crsms-coupons-hero">
       <div>
-        <span class="crsms-eyebrow">VIRGINIA CUSTOMER REWARDS</span>
+        <span class="crsms-eyebrow">مكافآت العملاء</span>
         <h1>إدارة مكافآت الشحن المجاني</h1>
         <p>متابعة كوبونات Shopify المخصصة لعملاء Virginia الذين اختاروا «راضٍ جدًا»، وحالة الإصدار والانتهاء والمحاولات.</p>
       </div>
@@ -37,7 +42,7 @@
     <input id="companyId" type="hidden" value="1" />
 
     <section class="crsms-panel crsms-compensation-panel">
-      <div class="crsms-section-title"><div><span class="crsms-section-kicker">CUSTOMER COMPENSATION</span><h2>إنشاء كوبون تعويض للعميل</h2><p>ينشئ كوبون شحن مجاني شخصيًا على Shopify ويسجله في تقرير المكافآت.</p></div></div>
+      <div class="crsms-section-title"><div><span class="crsms-section-kicker">تعويضات العملاء</span><h2>إنشاء كوبون تعويض للعميل</h2><p>ينشئ كوبون شحن مجاني شخصيًا على Shopify ويسجله في تقرير المكافآت.</p></div></div>
       <div class="crsms-compensation-grid">
         <div class="crsms-field"><label for="compensationPhone">رقم العميل</label><input id="compensationPhone" type="tel" placeholder="201xxxxxxxxx" /></div>
         <div class="crsms-field"><label for="compensationName">اسم العميل</label><input id="compensationName" type="text" placeholder="اختياري" /></div>
@@ -50,7 +55,7 @@
     <section class="crsms-panel crsms-coupons-filter-panel">
       <div class="crsms-section-title">
         <div>
-          <span class="crsms-section-kicker">REWARD FILTERS</span>
+          <span class="crsms-section-kicker">فلاتر المكافآت</span>
           <h2>البحث في المكافآت</h2>
           <p>فلتر حسب التاريخ أو الحالة أو رقم العميل، ثم حدّث النتائج أو صدّرها.</p>
         </div>
@@ -95,7 +100,7 @@
     <section class="crsms-panel crsms-coupons-results-panel">
       <div class="crsms-section-title">
         <div>
-          <span class="crsms-section-kicker">REWARD HISTORY</span>
+          <span class="crsms-section-kicker">سجل المكافآت</span>
           <h2>سجل المكافآت</h2>
           <p>الكوبون وحالته ومدة صلاحيته ومحاولات الإصدار على Shopify.</p>
         </div>
