@@ -1,5 +1,5 @@
 /*
-  MI Global Table System — v2
+  MI Global Table System — v3
   ---------------------------
   One structural contract for static + dynamically generated tables.
   No cell is allowed to widen the page; overflow belongs to the table shell.
@@ -24,7 +24,7 @@
   min-inline-size: 0 !important;
   overflow-x: auto !important;
   overscroll-behavior-inline: contain;
-  scrollbar-gutter: stable both-edges;
+  scrollbar-gutter: stable;
   border: 1px solid var(--mi-table-line-strong) !important;
   border-radius: 12px !important;
   background: #fff !important;
@@ -38,9 +38,9 @@
 }
 
 .mi-managed-table {
-  inline-size: 100% !important;
-  min-inline-size: 100% !important;
-  max-inline-size: 100% !important;
+  inline-size: max(100%, var(--mi-table-min-width, 720px)) !important;
+  min-inline-size: var(--mi-table-min-width, 720px) !important;
+  max-inline-size: none !important;
   margin: 0 !important;
   border-collapse: separate !important;
   border-spacing: 0 !important;
@@ -55,9 +55,9 @@
 .mi-managed-table > tfoot > tr > td,
 .mi-managed-table > tr > th,
 .mi-managed-table > tr > td {
-  inline-size: var(--mi-col-share, auto) !important;
-  min-inline-size: 0 !important;
-  max-inline-size: none !important;
+  inline-size: var(--mi-col-width, 152px) !important;
+  min-inline-size: var(--mi-col-width, 152px) !important;
+  max-inline-size: var(--mi-col-width, 152px) !important;
   padding: 10px 11px !important;
   border: 0 !important;
   border-block-end: 1px solid var(--mi-table-line) !important;
@@ -70,7 +70,6 @@
   overflow-wrap: anywhere !important;
   word-break: break-word !important;
   overflow: hidden !important;
-  min-inline-size: 0 !important;
 }
 
 .mi-managed-table > :is(thead,tbody,tfoot) > tr > :first-child,
@@ -102,17 +101,16 @@
 .mi-managed-table > tbody > tr.is-active > td { background: var(--mi-table-row-active) !important; }
 .mi-managed-table > tbody > tr:last-child > td { border-block-end: 0 !important; }
 
-/* Column contracts are proportional, not hard pixel widths.
-   JS assigns --mi-col-share so the table fits its container while rows grow vertically. */
-.mi-managed-table :is(th,td).mi-col-tiny { text-align: center; }
-.mi-managed-table :is(th,td).mi-col-compact,
-.mi-managed-table :is(th,td).mi-col-standard,
-.mi-managed-table :is(th,td).mi-col-wide,
-.mi-managed-table :is(th,td).mi-col-code,
-.mi-managed-table :is(th,td).mi-col-long { min-inline-size: 0 !important; }
+/* Fixed column contracts. */
+.mi-managed-table :is(th,td).mi-col-tiny { --mi-col-width: 72px; text-align: center; }
+.mi-managed-table :is(th,td).mi-col-compact { --mi-col-width: 122px; }
+.mi-managed-table :is(th,td).mi-col-standard { --mi-col-width: 152px; }
+.mi-managed-table :is(th,td).mi-col-wide { --mi-col-width: 178px; }
+.mi-managed-table :is(th,td).mi-col-code { --mi-col-width: 210px; }
+.mi-managed-table :is(th,td).mi-col-long { --mi-col-width: 300px; }
 
-/* Compact operational values are also allowed to wrap. This avoids clipping at the
-   table edges and keeps every value visible inside its own cell. */
+/* Compact operational columns keep a useful fixed width. Values may wrap inside
+   the cell, while status pills themselves stay on one line. */
 .mi-managed-table td:is(.mi-col-tiny,.mi-col-compact) {
   white-space: normal !important;
   overflow: hidden !important;
@@ -145,7 +143,7 @@
   text-align: start !important;
   white-space: normal !important;
   overflow: hidden !important;
-  word-break: break-word !important;
+  word-break: break-all !important;
   overflow-wrap: anywhere !important;
 }
 .mi-managed-table th.mi-col-code { direction: rtl !important; text-align: start !important; }
@@ -208,7 +206,9 @@
 .mi-managed-table :is(.status-badge,.badge,.pill,.financial-review-badge) {
   max-inline-size: 100%;
   border: 1px solid #d8e2f0 !important;
-  white-space: normal !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 .mi-managed-table :is(.status-badge,.badge,.pill,.financial-review-badge).pending,
 .mi-managed-table [class*="pending"] { color: #1d4ed8 !important; background: #eff6ff !important; }
@@ -223,20 +223,43 @@
   max-inline-size: 100% !important;
 }
 
-/* Edge guard: reserve scrollbar space and keep first/last columns fully visible. */
-.mi-table-shell > .mi-managed-table {
-  margin-inline: 0 !important;
-}
-.mi-managed-table > :is(thead,tbody,tfoot) > tr > :first-child {
-  padding-inline-start: 12px !important;
-}
-.mi-managed-table > :is(thead,tbody,tfoot) > tr > :last-child {
-  padding-inline-end: 12px !important;
-}
-
 @media (max-width: 900px) {
   .mi-table-shell { border-radius: 10px !important; }
   .mi-managed-table > thead > tr > th,
   .mi-managed-table > tbody > tr > td,
   .mi-managed-table > tfoot > tr > td { padding: 9px !important; font-size: 10px !important; }
+}
+
+
+/* V3 — hybrid table contract: preserve usable column widths and scroll the shell.
+   Never squeeze a many-column operational table to viewport width. */
+.mi-table-shell {
+  direction: inherit !important;
+  overflow-x: auto !important;
+  overflow-y: auto;
+  scrollbar-gutter: auto !important;
+}
+
+.mi-managed-table col[data-mi-generated-col] {
+  inline-size: var(--mi-generated-col-width, 152px) !important;
+}
+
+.mi-managed-table > :is(thead,tbody,tfoot) > tr > :is(th,td) {
+  min-inline-size: var(--mi-col-width, 152px) !important;
+  max-inline-size: var(--mi-col-width, 152px) !important;
+}
+
+/* Controls remain usable instead of being crushed by responsive fitting. */
+.mi-managed-table :is(input,select,textarea,button) {
+  max-inline-size: 100% !important;
+  box-sizing: border-box !important;
+}
+.mi-managed-table textarea { min-block-size: 54px !important; resize: vertical !important; }
+.mi-managed-table td.mi-col-long textarea { min-block-size: 60px !important; }
+
+/* Short status values should never split letter-by-letter. */
+.mi-managed-table td.mi-col-compact :is(.status-badge,.badge,.pill,[class*="status"]) {
+  white-space: nowrap !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
 }

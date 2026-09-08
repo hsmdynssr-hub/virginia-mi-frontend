@@ -21,13 +21,13 @@
     wide: /العميل|اسم|منتج|customer|product/i
   };
 
-  const WEIGHTS = {
-    tiny: 0.58,
-    compact: 0.88,
-    standard: 1.0,
-    wide: 1.16,
-    code: 1.34,
-    long: 1.9
+  const WIDTHS = {
+    tiny: 72,
+    compact: 124,
+    standard: 156,
+    wide: 184,
+    code: 220,
+    long: 320
   };
 
   const ignoreTable = (table) =>
@@ -67,6 +67,23 @@
     return wrapper;
   };
 
+  const syncGeneratedColgroup = (table, columnKinds) => {
+    table.querySelectorAll('colgroup[data-mi-generated="true"]').forEach((node) => node.remove());
+    if (table.querySelector('colgroup:not([data-mi-generated="true"])')) return;
+
+    const group = document.createElement("colgroup");
+    group.dataset.miGenerated = "true";
+    columnKinds.forEach((kind) => {
+      const col = document.createElement("col");
+      const width = WIDTHS[kind || "standard"] || WIDTHS.standard;
+      col.dataset.miGeneratedCol = "true";
+      col.style.setProperty("--mi-generated-col-width", `${width}px`);
+      col.style.width = `${width}px`;
+      group.appendChild(col);
+    });
+    table.insertBefore(group, table.firstChild);
+  };
+
   const decorateColumns = (table) => {
     const headers = headerCells(table);
     if (!headers.length) return;
@@ -79,37 +96,25 @@
       const kind = classifyHeader(header.textContent);
       header.classList.add(`mi-col-${kind}`);
       header.dataset.miColumnKind = kind;
+      header.style.setProperty("--mi-col-width", `${WIDTHS[kind]}px`);
       for (let offset = 0; offset < span; offset += 1) columnKinds[visualIndex + offset] = kind;
       visualIndex += span;
     });
 
-    const totalWeight = Math.max(1, columnKinds.reduce((sum, kind) => sum + (WEIGHTS[kind || "standard"] || WEIGHTS.standard), 0));
-    const shareForRange = (startIndex, span = 1) => {
-      let weight = 0;
-      for (let offset = 0; offset < span; offset += 1) {
-        const kind = columnKinds[startIndex + offset] || "standard";
-        weight += WEIGHTS[kind] || WEIGHTS.standard;
-      }
-      return `${Math.max(4, (weight / totalWeight) * 100).toFixed(4)}%`;
-    };
-
-    let headerIndex = 0;
-    headers.forEach((header) => {
-      const span = Math.max(1, Number(header.colSpan) || 1);
-      header.style.setProperty("--mi-col-share", shareForRange(headerIndex, span));
-      headerIndex += span;
-    });
+    syncGeneratedColgroup(table, columnKinds);
 
     table.querySelectorAll("tbody tr, tfoot tr").forEach((row) => {
       let columnIndex = 0;
       Array.from(row.cells || []).forEach((cell) => {
         const span = Math.max(1, Number(cell.colSpan) || 1);
         const kind = columnKinds[columnIndex] || "standard";
+        const spanWidth = Array.from({ length: span }, (_, offset) => WIDTHS[columnKinds[columnIndex + offset] || kind] || WIDTHS.standard)
+          .reduce((sum, width) => sum + width, 0);
         cell.classList.remove("mi-col-tiny", "mi-col-compact", "mi-col-standard", "mi-col-wide", "mi-col-code", "mi-col-long", "mi-table-long-cell");
         cell.classList.add(`mi-col-${kind}`);
         if (kind === "long") cell.classList.add("mi-table-long-cell");
         cell.dataset.miColumnKind = kind;
-        cell.style.setProperty("--mi-col-share", shareForRange(columnIndex, span));
+        cell.style.setProperty("--mi-col-width", `${spanWidth}px`);
 
         const text = String(cell.textContent || "").replace(/\s+/g, " ").trim();
         if (kind !== "long" && text.length > 38 && !cell.hasAttribute("title")) cell.title = text;
@@ -117,10 +122,8 @@
       });
     });
 
-    /* Fit-first policy: the table occupies its shell instead of forcing a pixel minimum.
-       Long content wraps vertically; horizontal scrolling is reserved for explicit legacy
-       wrappers that choose it, not created by this manager. */
-    table.style.setProperty("--mi-table-min-width", "100%");
+    const totalWidth = columnKinds.reduce((sum, kind) => sum + (WIDTHS[kind || "standard"] || WIDTHS.standard), 0);
+    table.style.setProperty("--mi-table-min-width", `${Math.max(720, totalWidth)}px`);
   };
 
   const manageTable = (table) => {
