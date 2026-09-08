@@ -148,7 +148,7 @@
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
-    window.MITableSystem = { scan, manageTable, version: "20260901-04" };
+    window.MITableSystem = { scan, manageTable, version: "20260908-05" };
   };
 
   if (document.readyState === "loading") {
