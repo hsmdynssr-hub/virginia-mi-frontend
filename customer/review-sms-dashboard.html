@@ -10,9 +10,9 @@
   <link rel="stylesheet" href="./review-sms-internal.css?v=dual-theme-20260830-01" />
   <script src="../js/api.js" defer></script>
   <script src="../js/layout.js?v=20260904-customer-final-01" defer></script>
-  <script src="./review-sms.js?v=unified-reports-20260830-01" defer></script>
+  <script src="./review-sms.js?v=customer-live-20260913-01" defer></script>
   <script src="../js/notifications.js?v=20260901-global-01"></script>
-  <link rel="stylesheet" href="../css/mi-app.css?v=20260908-project-unified-01" data-mi-unified-ui="true" />
+  <link rel="stylesheet" href="../css/mi-app.css?v=20260913-customer-live-01" data-mi-unified-ui="true" />
   <script>
     document.documentElement.classList.add("mi-app-preboot");
     setTimeout(() => document.documentElement.classList.remove("mi-app-preboot"), 3000);
@@ -55,6 +55,11 @@
         <p>الإرسال خاضع لمفتاح التشغيل وسياسة المستخدم من صفحة الإعدادات.</p>
       </aside>
     </header>
+
+    <div class="crsms-live-strip" aria-live="polite">
+      <span class="crsms-live-indicator" id="liveRefreshState"><i></i><strong>مباشر · كل 15 ثانية</strong><small id="liveRefreshTime">لم يتم التحديث بعد</small></span>
+      <button type="button" class="crsms-live-toggle" id="liveRefreshToggle" aria-pressed="true">إيقاف التحديث التلقائي</button>
+    </div>
 
     <input id="companyId" type="hidden" value="1" />
     <input id="limit" type="hidden" value="100" />

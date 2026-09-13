@@ -8,6 +8,22 @@
   let lastQueueRows = [];
   let couponGoogleReviewUrl = "";
 
+  const LIVE_REFRESH_MS = 15000;
+  const FOLLOWUPS_FETCH_LIMIT = 500;
+  let liveRefreshTimer = null;
+  let liveRefreshHandler = null;
+  let liveRefreshEnabled = true;
+  let liveRefreshBusy = false;
+  let liveRefreshLastUpdatedAt = null;
+  let liveRefreshLastError = false;
+
+  let followupsAllRows = [];
+  let followupsPage = 1;
+  let followupsPageSize = 25;
+  let followupsServerTotal = 0;
+  let followupsPaginationMode = "auto";
+  let followupHasUnsavedChanges = false;
+
   document.addEventListener("DOMContentLoaded", () => {
     localStorage.removeItem("reviewSmsAdminKey");
     localStorage.removeItem("reviewSmsApiBase");
@@ -52,6 +68,95 @@
     return document.getElementById(id);
   }
 
+  function formatLiveRefreshTime(date) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return "لم يتم التحديث بعد";
+    return `آخر تحديث ${date.toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`;
+  }
+
+  function updateLiveRefreshUi(note = "") {
+    const state = byId("liveRefreshState");
+    const time = byId("liveRefreshTime");
+    const toggle = byId("liveRefreshToggle");
+    if (state) {
+      state.classList.toggle("is-paused", !liveRefreshEnabled);
+      state.classList.toggle("is-error", liveRefreshLastError);
+      state.classList.toggle("is-busy", liveRefreshBusy);
+      const label = state.querySelector("strong");
+      if (label) {
+        if (!liveRefreshEnabled) label.textContent = "التحديث التلقائي متوقف";
+        else if (liveRefreshLastError) label.textContent = "تعذر آخر تحديث";
+        else if (liveRefreshBusy) label.textContent = "جاري التحديث";
+        else label.textContent = "مباشر · كل 15 ثانية";
+      }
+    }
+    if (time) time.textContent = note || formatLiveRefreshTime(liveRefreshLastUpdatedAt);
+    if (toggle) {
+      toggle.textContent = liveRefreshEnabled ? "إيقاف التحديث التلقائي" : "تشغيل التحديث التلقائي";
+      toggle.setAttribute("aria-pressed", liveRefreshEnabled ? "true" : "false");
+    }
+  }
+
+  function liveRefreshIsTemporarilyBlocked() {
+    if (document.hidden) return true;
+    if (document.body?.dataset.page === "followups" && followupHasUnsavedChanges) {
+      updateLiveRefreshUi("متوقف مؤقتًا لوجود تعديلات غير محفوظة");
+      return true;
+    }
+    const active = document.activeElement;
+    if (document.body?.dataset.page === "followups" && active?.closest?.(".crsms-followups-table input, .crsms-followups-table textarea, .crsms-followups-table select")) {
+      updateLiveRefreshUi("متوقف مؤقتًا أثناء تعديل الحالة");
+      return true;
+    }
+    return false;
+  }
+
+  async function runLiveRefresh({ force = false, silent = true } = {}) {
+    if (!liveRefreshHandler || liveRefreshBusy) return false;
+    if (!force && (!liveRefreshEnabled || liveRefreshIsTemporarilyBlocked())) return false;
+    liveRefreshBusy = true;
+    liveRefreshLastError = false;
+    updateLiveRefreshUi();
+    try {
+      const result = await liveRefreshHandler({ silent });
+      if (result === false) {
+        liveRefreshLastError = true;
+        return false;
+      }
+      liveRefreshLastUpdatedAt = new Date();
+      return true;
+    } catch (error) {
+      liveRefreshLastError = true;
+      if (!silent) setStatus(`Live Refresh Error: ${error.message}`);
+      return false;
+    } finally {
+      liveRefreshBusy = false;
+      updateLiveRefreshUi();
+    }
+  }
+
+  function scheduleLiveRefresh() {
+    if (liveRefreshTimer) clearInterval(liveRefreshTimer);
+    liveRefreshTimer = null;
+    if (!liveRefreshEnabled || !liveRefreshHandler) { updateLiveRefreshUi(); return; }
+    liveRefreshTimer = window.setInterval(() => runLiveRefresh({ silent: true }), LIVE_REFRESH_MS);
+    updateLiveRefreshUi();
+  }
+
+  function initLiveRefresh(handler) {
+    liveRefreshHandler = handler;
+    liveRefreshEnabled = true;
+    liveRefreshLastError = false;
+    byId("liveRefreshToggle")?.addEventListener("click", () => {
+      liveRefreshEnabled = !liveRefreshEnabled;
+      scheduleLiveRefresh();
+      if (liveRefreshEnabled) runLiveRefresh({ force: true, silent: true });
+    });
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden && liveRefreshEnabled) runLiveRefresh({ force: true, silent: true });
+    });
+    scheduleLiveRefresh();
+  }
+
   function isLocalFrontend() {
     const host = window.location.hostname;
     const port = window.location.port;
@@ -92,7 +197,7 @@
   }
 
   async function requestJson(url, options = {}) {
-    const response = await fetch(url, options);
+    const response = await fetch(url, { cache: "no-store", ...options });
     const text = await response.text();
 
     let data = null;
@@ -229,6 +334,8 @@
 
     setStatus("جاهز. لا يتم إصدار كوبونات من هذه الصفحة تلقائيًا.");
     loadCouponSettings();
+    initLiveRefresh(({ silent }) => loadCoupons({ silent }));
+    runLiveRefresh({ force: true, silent: false });
 
     // Excel export is handled locally for this standalone dashboard.
     // Do not inject the generic ReportExport button here.
@@ -337,6 +444,26 @@
     }
   }
 
+  function getCouponTypeInfo(row = {}) {
+    const raw = String(row.couponType ?? row.discountType ?? row.rewardType ?? row.shopifyDiscountType ?? "").trim().toLowerCase();
+    const isFreeShipping = row.freeShipping === true || row.isFreeShipping === true || /free[_ -]?shipping|shipping/.test(raw);
+    const isAmountDiscount = /amount|fixed|value|order|invoice|price/.test(raw) || row.amountOff != null || row.discountAmount != null;
+    if (isFreeShipping) return { key: "free_shipping", label: "شحن مجاني" };
+    if (isAmountDiscount) return { key: "amount_discount", label: "خصم قيمة على الفاتورة" };
+    // Legacy rewards in this screen were historically free-shipping coupons.
+    return { key: "free_shipping", label: "شحن مجاني" };
+  }
+
+  function getCouponUsageInfo(row = {}) {
+    const usedAt = row.usedAt || row.redeemedAt || row.lastUsedAt || row.used_at || row.redeemed_at || "";
+    const rawCount = row.usageCount ?? row.timesUsed ?? row.usedCount ?? row.usage_count;
+    const count = rawCount == null ? null : Number(rawCount);
+    const explicit = row.isUsed ?? row.used ?? row.redeemed;
+    if (explicit === true || usedAt || (Number.isFinite(count) && count > 0)) return { key: "used", label: "تم الاستخدام", usedAt };
+    if (explicit === false || (Number.isFinite(count) && count === 0)) return { key: "unused", label: "لم يُستخدم بعد", usedAt: "" };
+    return { key: "unknown", label: "غير معروف", usedAt: "" };
+  }
+
   function getCouponFilters() {
     const params = new URLSearchParams();
     const companyId = getCompanyIdOrNull();
@@ -362,7 +489,7 @@
     loadCoupons();
   }
 
-  async function loadCoupons() {
+  async function loadCoupons({ silent = false } = {}) {
     try {
       const params = getCouponFilters();
       const base = getApiBaseFromDashboard();
@@ -375,9 +502,11 @@
 
       renderCoupons(listData.data || []);
       renderCouponStats(statsData.data || {});
-      setStatus(`تم تحميل ${listData.data?.length || 0} كوبون.`);
+      if (!silent) setStatus(`تم تحميل ${listData.data?.length || 0} كوبون.`);
+      return true;
     } catch (error) {
-      setStatus(`Coupons Error: ${error.message}`);
+      if (!silent) setStatus(`Coupons Error: ${error.message}`);
+      return false;
     }
   }
 
@@ -430,13 +559,12 @@
   function renderCoupons(rows) {
     const tbody = byId("couponsBody");
     if (!tbody) return;
-
-    if (!rows.length) {
-      tbody.innerHTML = `<tr><td colspan="15">لا توجد كوبونات حسب الفلاتر.</td></tr>`;
-      return;
-    }
-
-    tbody.innerHTML = rows.map((row) => `
+    if (!rows.length) { tbody.innerHTML = `<tr><td colspan="17">لا توجد كوبونات حسب الفلاتر.</td></tr>`; return; }
+    tbody.innerHTML = rows.map((row) => {
+      const couponType = getCouponTypeInfo(row);
+      const couponUsage = getCouponUsageInfo(row);
+      const usageTitle = couponUsage.usedAt ? ` title="${escapeHtml(`تاريخ الاستخدام: ${formatDate(couponUsage.usedAt)}`)}"` : "";
+      return `
       <tr>
         <td>${escapeHtml(row.id)}</td>
         <td>${badge(row.status)} ${escapeHtml(getCouponStatusLabel(row.status))}</td>
@@ -445,23 +573,21 @@
         <td>${escapeHtml(row.customerPhone || "-")}</td>
         <td>${escapeHtml(row.odooOrderName || "-")}</td>
         <td>${escapeHtml(row.couponCode || "-")}</td>
+        <td><span class="crsms-coupon-type ${escapeHtml(couponType.key)}">${escapeHtml(couponType.label)}</span></td>
+        <td><span class="crsms-coupon-usage ${escapeHtml(couponUsage.key)}"${usageTitle}>${escapeHtml(couponUsage.label)}</span></td>
         <td title="${escapeHtml(row.shopifyDiscountId || "")}">${escapeHtml(row.shopifyDiscountId || "-")}</td>
         <td>${escapeHtml(row.validityMonths)} شهر</td>
         <td>${escapeHtml(formatDate(row.startsAt))}</td>
         <td>${escapeHtml(formatDate(row.endsAt))}</td>
-        <td>${escapeHtml(
-          !row.shopifyCustomerId ? "-" : row.shopifyCustomerCreated ? "جديد" : "موجود"
-        )}</td>
+        <td>${escapeHtml(!row.shopifyCustomerId ? "-" : row.shopifyCustomerCreated ? "جديد" : "موجود")}</td>
         <td>${escapeHtml(row.attemptCount || 0)}</td>
         <td title="${escapeHtml(row.lastError || "")}">${escapeHtml(row.lastError || "-")}</td>
-        <td>
-          <div class="crsms-mini-actions">
-            ${row.couponCode ? `<button type="button" data-copy-coupon="${escapeHtml(row.couponCode)}">نسخ</button>` : ""}
-            ${row.status === "failed" ? `<button type="button" data-retry-coupon="${escapeHtml(row.id)}">إعادة المحاولة</button>` : ""}
-          </div>
-        </td>
-      </tr>
-    `).join("");
+        <td><div class="crsms-mini-actions">
+          ${row.couponCode ? `<button type="button" data-copy-coupon="${escapeHtml(row.couponCode)}">نسخ</button>` : ""}
+          ${row.status === "failed" ? `<button type="button" data-retry-coupon="${escapeHtml(row.id)}">إعادة المحاولة</button>` : ""}
+        </div></td>
+      </tr>`;
+    }).join("");
   }
 
   async function retryCoupon(id) {
@@ -647,27 +773,21 @@
   function initFollowupsPage() {
     const apiBaseInput = byId("apiBase");
     const adminKeyInput = byId("adminKey");
-
-    if (apiBaseInput) {
-      apiBaseInput.value = getStoredApiBase();
-    }
-
-    if (adminKeyInput) {
-      adminKeyInput.value = localStorage.getItem("reviewSmsAdminKey") || "";
-    }
-
+    if (apiBaseInput) apiBaseInput.value = getStoredApiBase();
+    if (adminKeyInput) adminKeyInput.value = localStorage.getItem("reviewSmsAdminKey") || "";
     document.querySelectorAll("[data-followups-action]").forEach((button) => {
       button.addEventListener("click", () => {
         const action = button.dataset.followupsAction;
-
         if (action === "health") loadHealth();
         if (action === "settings") loadSettings();
-        if (action === "followups") loadFollowups();
+        if (action === "followups") loadFollowups({ resetPage: true });
       });
     });
-
-    setStatus("جاهز. اضغط تحديث المتابعات لعرض الحالات المسندة إليك.");
+    initFollowupPagination();
+    initLiveRefresh(({ silent }) => loadFollowups({ silent }));
+    setStatus("جاري تحميل حالات المتابعة...");
     loadHealth();
+    runLiveRefresh({ force: true, silent: false });
   }
 
   /* =========================
@@ -708,10 +828,15 @@
       });
     });
 
-    setStatus("جاهز. اختر الشركة واضغط الزر المطلوب.");
+    setStatus("جاري تحميل معاملات العملاء...");
     loadHealth();
     loadSettings();
     initLogFilters();
+    initLiveRefresh(async ({ silent }) => {
+      const [statsOk, logsOk] = await Promise.all([loadStats({ silent }), loadLogs({ silent })]);
+      return statsOk !== false && logsOk !== false;
+    });
+    runLiveRefresh({ force: true, silent: false });
   }
 
   function getApiBaseFromDashboard() {
@@ -1371,7 +1496,7 @@
     await applyLogFilters();
   }
 
-  async function loadStats() {
+  async function loadStats({ silent = false } = {}) {
     try {
       const query = `?${logFilterParams({ includeLimit: false })}`;
 
@@ -1389,39 +1514,43 @@
       if (byId("statReviewed")) byId("statReviewed").textContent = stats.reviewed ?? 0;
       if (byId("statAvgRating")) byId("statAvgRating").textContent = stats.avg_rating ?? "-";
 
-      setStatus("تم تحديث إحصائيات الرسائل.");
+      if (!silent) setStatus("تم تحديث إحصائيات الرسائل.");
+      return true;
     } catch (error) {
-      setStatus(`Stats Error: ${error.message}`);
+      if (!silent) setStatus(`Stats Error: ${error.message}`);
+      return false;
     }
   }
 
-  function getFollowupsQueryParams({ includeLimit = true } = {}) {
+  function getFollowupsQueryParams({ includeLimit = true, serverPagination = false } = {}) {
     const params = new URLSearchParams();
-
     if (includeLimit) {
-      params.set("limit", String(getLimitValue()));
+      if (serverPagination) {
+        params.set("limit", String(followupsPageSize));
+        params.set("offset", String((followupsPage - 1) * followupsPageSize));
+      } else {
+        params.set("limit", String(FOLLOWUPS_FETCH_LIMIT));
+      }
     }
-
-    const status = byId("followupStatusFilter")?.value;
-    if (status) params.set("status", status);
-
-    const priority = byId("priorityFilter")?.value;
-    if (priority) params.set("priority", priority);
-
-    const companyId = getCompanyIdOrNull();
-    if (companyId) params.set("companyId", String(companyId));
-
-    const dateField = byId("followupDateField")?.value || "created_at";
-    if (dateField) params.set("dateField", dateField);
-
+    const status = byId("followupStatusFilter")?.value; if (status) params.set("status", status);
+    const priority = byId("priorityFilter")?.value; if (priority) params.set("priority", priority);
+    const companyId = getCompanyIdOrNull(); if (companyId) params.set("companyId", String(companyId));
+    const dateField = byId("followupDateField")?.value || "created_at"; if (dateField) params.set("dateField", dateField);
     const dates = getDateFilterValues("followup");
     if (dates.dateFrom) params.set("dateFrom", dates.dateFrom);
     if (dates.dateTo) params.set("dateTo", dates.dateTo);
-
     return params;
   }
 
-  async function loadFollowupStats() {
+  function getFollowupsPaginationPayload(response) {
+    const raw = response?.pagination || response?.meta?.pagination || null;
+    if (!raw) return null;
+    const total = Number(raw.total), limit = Number(raw.limit), offset = Number(raw.offset);
+    if (!Number.isFinite(total) || !Number.isFinite(limit) || !Number.isFinite(offset)) return null;
+    return { total, limit, offset, hasMore: Boolean(raw.hasMore ?? raw.has_more ?? (offset + limit < total)) };
+  }
+
+  async function loadFollowupStats({ silent = false } = {}) {
     try {
       const params = getFollowupsQueryParams({ includeLimit: false });
 
@@ -1441,14 +1570,17 @@
       if (byId("followupContacted")) byId("followupContacted").textContent = stats.contacted ?? 0;
       if (byId("followupResolved")) byId("followupResolved").textContent = stats.resolved ?? 0;
       if (byId("followupHigh")) byId("followupHigh").textContent = stats.high_priority ?? 0;
+      followupsServerTotal = Number(stats.total || 0);
+      return stats;
     } catch (error) {
-      setStatus(`Follow-up Stats Error: ${error.message}`);
+      if (!silent) setStatus(`Follow-up Stats Error: ${error.message}`);
+      return null;
     }
   }
 
-  async function loadLogs() {
+  async function loadLogs({ silent = false } = {}) {
     const tbody = byId("logsBody");
-    if (!tbody) return;
+    if (!tbody) return true;
 
     try {
       const params = logFilterParams();
@@ -1459,9 +1591,11 @@
       });
 
       renderLogs(data.data || []);
-      setStatus("تم تحديث الرسائل.");
+      if (!silent) setStatus("تم تحديث الرسائل.");
+      return true;
     } catch (error) {
-      setStatus(`Logs Error: ${error.message}`);
+      if (!silent) setStatus(`Logs Error: ${error.message}`);
+      return false;
     }
   }
 
@@ -1504,23 +1638,44 @@
     }
   }
 
-  async function loadFollowups() {
+  async function loadFollowups({ silent = false, resetPage = false } = {}) {
     const tbody = byId("followupsBody");
-    if (!tbody) return;
-
+    if (!tbody) return true;
+    if (resetPage) followupsPage = 1;
     try {
-      const params = getFollowupsQueryParams();
-
-      const data = await requestJson(`${getApiBaseFromDashboard()}/followups?${params}`, {
-        method: "GET",
-        headers: authHeaders()
-      });
-
-      renderFollowups(data.data || []);
-      await loadFollowupStats();
-      setStatus("تم تحديث متابعات خدمة العملاء حسب الفلاتر المحددة.");
+      const statsPromise = loadFollowupStats({ silent: true });
+      if (followupsPaginationMode !== "client") {
+        const pageParams = getFollowupsQueryParams({ serverPagination: true });
+        const data = await requestJson(`${getApiBaseFromDashboard()}/followups?${pageParams}`, { method: "GET", headers: authHeaders() });
+        const pagination = getFollowupsPaginationPayload(data);
+        if (pagination) {
+          followupsPaginationMode = "server";
+          followupsAllRows = Array.isArray(data.data) ? data.data : [];
+          followupsServerTotal = pagination.total;
+          await statsPromise;
+          renderFollowupRows(followupsAllRows);
+          updateFollowupPagination();
+          if (!silent) setStatus("تم تحديث متابعات خدمة العملاء حسب الفلاتر المحددة.");
+          return true;
+        }
+        followupsPaginationMode = "client";
+      }
+      const params = getFollowupsQueryParams({ serverPagination: false });
+      const [data, stats] = await Promise.all([
+        requestJson(`${getApiBaseFromDashboard()}/followups?${params}`, { method: "GET", headers: authHeaders() }),
+        statsPromise
+      ]);
+      followupsAllRows = Array.isArray(data.data) ? data.data : [];
+      if (stats && Number.isFinite(Number(stats.total))) followupsServerTotal = Number(stats.total);
+      renderFollowupsPage();
+      if (!silent) {
+        const extra = followupsServerTotal > followupsAllRows.length ? ` — متاح حاليًا أول ${followupsAllRows.length} من ${followupsServerTotal} حالة.` : "";
+        setStatus(`تم تحديث متابعات خدمة العملاء حسب الفلاتر المحددة.${extra}`);
+      }
+      return true;
     } catch (error) {
-      setStatus(`Follow-ups Error: ${error.message}`);
+      if (!silent) setStatus(`Follow-ups Error: ${error.message}`);
+      return false;
     }
   }
 
@@ -1693,61 +1848,81 @@
     bindCopyButtons(tbody);
   }
 
-  function renderFollowups(rows) {
+  function initFollowupPagination() {
+    const pageSize = byId("followupPageSize");
+    if (pageSize) {
+      const parsed = Number(pageSize.value || 25);
+      followupsPageSize = [25, 50, 100, 200].includes(parsed) ? parsed : 25;
+      pageSize.value = String(followupsPageSize);
+      pageSize.addEventListener("change", () => {
+        const nextSize = Number(pageSize.value || 25);
+        followupsPageSize = [25, 50, 100, 200].includes(nextSize) ? nextSize : 25;
+        followupsPage = 1;
+        if (followupsPaginationMode === "server") loadFollowups({ silent: false }); else renderFollowupsPage();
+      });
+    }
+    byId("followupPrevPage")?.addEventListener("click", () => {
+      if (followupsPage <= 1) return;
+      followupsPage -= 1;
+      if (followupsPaginationMode === "server") loadFollowups({ silent: true }); else renderFollowupsPage();
+    });
+    byId("followupNextPage")?.addEventListener("click", () => {
+      const total = followupsPaginationMode === "server" ? followupsServerTotal : followupsAllRows.length;
+      const pages = Math.max(1, Math.ceil(total / followupsPageSize));
+      if (followupsPage >= pages) return;
+      followupsPage += 1;
+      if (followupsPaginationMode === "server") loadFollowups({ silent: true }); else renderFollowupsPage();
+    });
+    ["followupStatusFilter","priorityFilter","followupDateField","followupDatePreset","followupDateFrom","followupDateTo"].forEach((id) => byId(id)?.addEventListener("change", () => { followupsPage = 1; }));
+    byId("followupsBody")?.addEventListener("input", (event) => {
+      if (event.target.matches("[data-followup-assigned], [data-followup-note], [data-followup-status]")) { followupHasUnsavedChanges = true; updateLiveRefreshUi("متوقف مؤقتًا لوجود تعديلات غير محفوظة"); }
+    });
+    byId("followupsBody")?.addEventListener("change", (event) => {
+      if (event.target.matches("[data-followup-assigned], [data-followup-note], [data-followup-status]")) { followupHasUnsavedChanges = true; updateLiveRefreshUi("متوقف مؤقتًا لوجود تعديلات غير محفوظة"); }
+    });
+  }
+
+  function updateFollowupPagination() {
+    const total = followupsPaginationMode === "server" ? followupsServerTotal : followupsAllRows.length;
+    const pages = Math.max(1, Math.ceil(total / followupsPageSize));
+    followupsPage = Math.min(Math.max(1, followupsPage), pages);
+    const start = total ? ((followupsPage - 1) * followupsPageSize) + 1 : 0;
+    const end = total ? Math.min(followupsPage * followupsPageSize, total) : 0;
+    if (byId("followupPageLabel")) byId("followupPageLabel").textContent = `صفحة ${followupsPage} من ${pages}`;
+    if (byId("followupRange")) byId("followupRange").textContent = total ? `${start}–${end}` : "0";
+    if (byId("followupResultCount")) byId("followupResultCount").textContent = followupsPaginationMode === "client" && followupsServerTotal > followupsAllRows.length ? `${followupsAllRows.length} متاح من أصل ${followupsServerTotal}` : String(total);
+    if (byId("followupPrevPage")) byId("followupPrevPage").disabled = followupsPage <= 1;
+    if (byId("followupNextPage")) byId("followupNextPage").disabled = followupsPage >= pages || (followupsPaginationMode === "client" && followupsPage * followupsPageSize >= followupsAllRows.length);
+  }
+
+  function renderFollowupsPage() {
+    if (followupsPaginationMode === "server") { renderFollowupRows(followupsAllRows); updateFollowupPagination(); return; }
+    const start = (followupsPage - 1) * followupsPageSize;
+    renderFollowupRows(followupsAllRows.slice(start, start + followupsPageSize));
+    updateFollowupPagination();
+  }
+
+  function renderFollowupRows(rows) {
     const tbody = byId("followupsBody");
     if (!tbody) return;
-
-    if (!rows.length) {
-      tbody.innerHTML = `<tr><td colspan="14">لا توجد متابعات مسندة إليك حاليًا.</td></tr>`;
-      return;
-    }
-
-    const currentUser = (() => {
-      try { return JSON.parse(localStorage.getItem("user") || "{}"); } catch (_) { return {}; }
-    })();
+    if (!rows.length) { tbody.innerHTML = `<tr><td colspan="14">لا توجد متابعات مسندة إليك حاليًا.</td></tr>`; return; }
+    const currentUser = (() => { try { return JSON.parse(localStorage.getItem("user") || "{}"); } catch (_) { return {}; } })();
     const permissions = Array.isArray(currentUser.permissions) ? currentUser.permissions : [];
-    const manager = permissions.includes("*") ||
-      permissions.includes("customer.review_sms.manage_followups") ||
-      currentUser.role === "admin";
-
-    tbody.innerHTML = rows
-      .map((row) => {
-        return `
-          <tr>
-            <td>${escapeHtml(row.id)}</td>
-            <td>${badge(row.priority)}</td>
-            <td>${badge(row.status)}</td>
-            <td>${escapeHtml(getRatingLabel(row.rating))}</td>
-            <td>${escapeHtml(getReasonLabel(row.dissatisfactionReason))}</td>
-            <td>${escapeHtml(row.customerComment || "")}</td>
-            <td>${escapeHtml(getPublicBranchName(row.branchName))}</td>
-            <td>${escapeHtml(row.customerName || "")}</td>
-            <td>${escapeHtml(row.customerPhone || "")}</td>
-            <td>${escapeHtml(row.odooOrderName || "")}</td>
-            <td>${escapeHtml(formatMoney(row.amountTotal))}</td>
-            <td>
-              ${manager
-                ? `<input class="crsms-followup-input" data-followup-assigned="${escapeHtml(row.id)}" value="${escapeHtml(row.assignedTo || "")}" placeholder="اسم المستخدم أو ID" />`
-                : escapeHtml(row.assignedTo || "-")}
-            </td>
-            <td><textarea class="crsms-followup-input" data-followup-note="${escapeHtml(row.id)}" placeholder="نتيجة المكالمة أو الملاحظة">${escapeHtml(row.internalNote || "")}</textarea></td>
-            <td>
-              <div class="crsms-mini-actions">
-                <select class="crsms-followup-select" data-followup-status="${escapeHtml(row.id)}">
-                  <option value="new" ${row.status === "new" ? "selected" : ""}>جديد</option>
-                  <option value="in_progress" ${row.status === "in_progress" ? "selected" : ""}>جاري المتابعة</option>
-                  <option value="contacted" ${row.status === "contacted" ? "selected" : ""}>تم التواصل</option>
-                  <option value="resolved" ${row.status === "resolved" ? "selected" : ""}>تم الحل</option>
-                  <option value="closed" ${row.status === "closed" ? "selected" : ""}>مغلق</option>
-                </select>
-                <button type="button" data-followup-update="${escapeHtml(row.id)}">حفظ</button>
-              </div>
-            </td>
-          </tr>
-        `;
-      })
-      .join("");
-
+    const manager = permissions.includes("*") || permissions.includes("customer.review_sms.manage_followups") || currentUser.role === "admin";
+    tbody.innerHTML = rows.map((row) => `
+      <tr>
+        <td>${escapeHtml(row.id)}</td><td>${badge(row.priority)}</td><td>${badge(row.status)}</td><td>${escapeHtml(getRatingLabel(row.rating))}</td>
+        <td class="crsms-wrap-cell">${escapeHtml(getReasonLabel(row.dissatisfactionReason))}</td>
+        <td class="crsms-wrap-cell crsms-customer-comment-cell">${escapeHtml(row.customerComment || "")}</td>
+        <td class="crsms-wrap-cell">${escapeHtml(getPublicBranchName(row.branchName))}</td>
+        <td class="crsms-wrap-cell">${escapeHtml(row.customerName || "")}</td>
+        <td>${escapeHtml(row.customerPhone || "")}</td><td>${escapeHtml(row.odooOrderName || "")}</td><td>${escapeHtml(formatMoney(row.amountTotal))}</td>
+        <td>${manager ? `<input class="crsms-followup-input" data-followup-assigned="${escapeHtml(row.id)}" value="${escapeHtml(row.assignedTo || "")}" placeholder="اسم المستخدم أو ID" />` : escapeHtml(row.assignedTo || "-")}</td>
+        <td><textarea class="crsms-followup-input" data-followup-note="${escapeHtml(row.id)}" placeholder="نتيجة المكالمة أو الملاحظة">${escapeHtml(row.internalNote || "")}</textarea></td>
+        <td><div class="crsms-mini-actions"><select class="crsms-followup-select" data-followup-status="${escapeHtml(row.id)}">
+          <option value="new" ${row.status === "new" ? "selected" : ""}>جديد</option><option value="in_progress" ${row.status === "in_progress" ? "selected" : ""}>جاري المتابعة</option><option value="contacted" ${row.status === "contacted" ? "selected" : ""}>تم التواصل</option><option value="resolved" ${row.status === "resolved" ? "selected" : ""}>تم الحل</option><option value="closed" ${row.status === "closed" ? "selected" : ""}>مغلق</option>
+        </select><button type="button" data-followup-update="${escapeHtml(row.id)}">حفظ</button></div></td>
+      </tr>`).join("");
     bindFollowupButtons(tbody);
   }
 
@@ -1785,8 +1960,10 @@
             })
           });
 
+          followupHasUnsavedChanges = false;
+          updateLiveRefreshUi();
           setStatus("تم تحديث حالة المتابعة.");
-          await loadFollowups();
+          await loadFollowups({ silent: true });
         } catch (error) {
           setStatus(`Update Follow-up Error: ${error.message}`);
         }

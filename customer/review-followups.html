@@ -10,9 +10,9 @@
   <link rel="stylesheet" href="./review-sms-internal.css?v=dual-theme-20260830-01" />
   <script src="../js/api.js" defer></script>
   <script src="../js/layout.js?v=20260904-customer-final-01" defer></script>
-  <script src="./review-sms.js?v=unified-reports-20260830-01" defer></script>
+  <script src="./review-sms.js?v=customer-live-20260913-01" defer></script>
   <script src="../js/notifications.js?v=20260901-global-01"></script>
-  <link rel="stylesheet" href="../css/mi-app.css?v=20260908-project-unified-01" data-mi-unified-ui="true" />
+  <link rel="stylesheet" href="../css/mi-app.css?v=20260913-customer-live-01" data-mi-unified-ui="true" />
   <script>
     document.documentElement.classList.add("mi-app-preboot");
     setTimeout(() => document.documentElement.classList.remove("mi-app-preboot"), 3000);
@@ -42,6 +42,11 @@
         <button type="button" class="crsms-button ghost" data-followups-action="health"><span>✓</span> فحص النظام</button>
       </div>
     </header>
+
+    <div class="crsms-live-strip" aria-live="polite">
+      <span class="crsms-live-indicator" id="liveRefreshState"><i></i><strong>مباشر · كل 15 ثانية</strong><small id="liveRefreshTime">لم يتم التحديث بعد</small></span>
+      <button type="button" class="crsms-live-toggle" id="liveRefreshToggle" aria-pressed="true">إيقاف التحديث التلقائي</button>
+    </div>
 
     <section class="crsms-panel crsms-followups-filter-panel">
       <div class="crsms-section-title">
@@ -85,7 +90,7 @@
         </div>
         <div class="crsms-field"><label for="followupDateFrom">من تاريخ</label><input id="followupDateFrom" type="date" /></div>
         <div class="crsms-field"><label for="followupDateTo">إلى تاريخ</label><input id="followupDateTo" type="date" /></div>
-        <div class="crsms-field"><label for="limit">عدد النتائج</label><input id="limit" type="number" value="50" min="1" max="500" /></div>
+        <div class="crsms-field"><label for="followupPageSize">عدد الحالات في الصفحة</label><select id="followupPageSize"><option value="25" selected>25 حالة</option><option value="50">50 حالة</option><option value="100">100 حالة</option><option value="200">200 حالة</option></select></div>
         <button type="button" class="crsms-button search crsms-followups-refresh" data-followups-action="followups"><span>↻</span> تحديث المتابعات</button>
       </div>
 
@@ -122,8 +127,12 @@
             <th>ID</th><th>الأولوية</th><th>الحالة</th><th>التقييم</th><th>سبب عدم الرضا</th><th>ملاحظة العميل</th><th>الفرع</th>
             <th>العميل</th><th>الموبايل</th><th>الفاتورة</th><th>القيمة</th><th>مسؤول المتابعة</th><th>ملاحظة الاتصال</th><th>إجراءات</th>
           </tr></thead>
-          <tbody id="followupsBody"><tr><td colspan="14">اضغط تحديث المتابعات لعرض الحالات.</td></tr></tbody>
+          <tbody id="followupsBody"><tr><td colspan="14">جاري تحميل حالات المتابعة...</td></tr></tbody>
         </table>
+      </div>
+      <div class="crsms-pagination" aria-label="تقسيم صفحات حالات عدم الرضا">
+        <div class="crsms-pagination-summary">عرض <strong id="followupRange">0</strong> · النتائج <strong id="followupResultCount">0</strong></div>
+        <div class="crsms-pagination-actions"><button type="button" id="followupPrevPage" disabled>السابق</button><span id="followupPageLabel">صفحة 1 من 1</span><button type="button" id="followupNextPage" disabled>التالي</button></div>
       </div>
     </section>
   </main>
