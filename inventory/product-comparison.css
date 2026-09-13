@@ -421,7 +421,31 @@
   .pc-table th { position: static; }
 }
 
+/* Product comparison owns its date period selector; hide the generic report date presets. */
 body[data-active-page="inventory-product-comparison"] #reportToolbar .date-context-field,
-body[data-active-page="inventory-product-comparison"] #reportToolbar #datePreset {
+body[data-active-page="inventory-product-comparison"] #reportToolbar #datePreset,
+body[data-active-page="inventory-product-comparison"] #reportToolbar #customDates {
   display: none !important;
+}
+
+.pc-period-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  align-items: end;
+}
+
+.pc-period-part {
+  display: grid;
+  gap: 6px;
+}
+
+.pc-period-part > span {
+  color: #60736a;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+@media (max-width: 680px) {
+  .pc-period-controls { grid-template-columns: 1fr; }
 }

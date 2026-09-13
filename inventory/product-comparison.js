@@ -18,8 +18,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   );
 
   bindProductComparisonEvents();
-  setProductComparisonPeriod("month");
   await waitForPageContext();
+  initializeProductComparisonPeriod();
   updateComparisonVisibility();
 });
 
@@ -40,7 +40,7 @@ function buildProductComparisonPage() {
           </div>
 
           <div class="pc-field">
-            <label for="comparisonPeriodMode">فترة التطبيق</label>
+            <label for="comparisonPeriodMode">نوع الفترة</label>
             <select id="comparisonPeriodMode" class="pc-select">
               <option value="month">شهر</option>
               <option value="quarter">ربع سنوي</option>
@@ -48,6 +48,11 @@ function buildProductComparisonPage() {
               <option value="year">سنة</option>
               <option value="custom">مخصص بالأيام</option>
             </select>
+          </div>
+
+          <div class="pc-field pc-field-wide">
+            <label>تحديد الفترة</label>
+            <div id="productComparisonPeriodControls" class="pc-period-controls"></div>
           </div>
 
           <div class="pc-field">
@@ -112,7 +117,14 @@ function buildProductComparisonPage() {
 function bindProductComparisonEvents() {
   document.getElementById("loadBtn")?.addEventListener("click", loadProductComparisonReport);
   document.getElementById("comparisonPeriodMode")?.addEventListener("change", (event) => {
-    setProductComparisonPeriod(event.target.value);
+    renderProductComparisonPeriodControls(event.target.value);
+    applyProductComparisonPeriod(event.target.value);
+    markReportDirty();
+  });
+
+  document.getElementById("productComparisonPeriodControls")?.addEventListener("change", () => {
+    const mode = document.getElementById("comparisonPeriodMode")?.value || "month";
+    applyProductComparisonPeriod(mode);
     markReportDirty();
   });
 
@@ -127,10 +139,7 @@ function bindProductComparisonEvents() {
   });
 
   document.addEventListener("change", (event) => {
-    if (["branchCode", "dateFrom", "dateTo"].includes(event.target?.id)) {
-      if (["dateFrom", "dateTo"].includes(event.target?.id)) renderPeriodLabel();
-      markReportDirty();
-    }
+    if (event.target?.id === "branchCode") markReportDirty();
   });
 
   bindProductSearch("primary");
@@ -276,42 +285,152 @@ function updateComparisonVisibility() {
   document.getElementById("comparisonProductBox")?.classList.toggle("pc-hidden", !enabled);
 }
 
-function setProductComparisonPeriod(mode) {
-  const fromInput = document.getElementById("dateFrom");
-  const toInput = document.getElementById("dateTo");
-  const customDates = document.getElementById("customDates");
-  const datePreset = document.getElementById("datePreset");
+function initializeProductComparisonPeriod() {
+  const mode = document.getElementById("comparisonPeriodMode")?.value || "month";
+  renderProductComparisonPeriodControls(mode);
+  applyProductComparisonPeriod(mode);
+}
 
-  if (!fromInput || !toInput) {
-    setTimeout(() => setProductComparisonPeriod(mode), 100);
+function renderProductComparisonPeriodControls(mode) {
+  const container = document.getElementById("productComparisonPeriodControls");
+  if (!container) return;
+
+  const today = getCairoCalendarDate();
+  const currentYear = today.getUTCFullYear();
+  const currentMonth = `${currentYear}-${String(today.getUTCMonth() + 1).padStart(2, "0")}`;
+  const currentQuarter = Math.floor(today.getUTCMonth() / 3) + 1;
+  const currentHalf = today.getUTCMonth() < 6 ? 1 : 2;
+  const existingFrom = document.getElementById("dateFrom")?.value || toIsoDate(today);
+  const existingTo = document.getElementById("dateTo")?.value || toIsoDate(today);
+
+  if (mode === "month") {
+    container.innerHTML = `
+      <label class="pc-period-part">
+        <span>الشهر المطلوب</span>
+        <input id="comparisonMonth" class="pc-input" type="month" value="${currentMonth}" />
+      </label>
+    `;
     return;
   }
 
+  if (mode === "quarter") {
+    container.innerHTML = `
+      <label class="pc-period-part">
+        <span>الربع</span>
+        <select id="comparisonQuarter" class="pc-select">
+          <option value="1" ${currentQuarter === 1 ? "selected" : ""}>الربع الأول</option>
+          <option value="2" ${currentQuarter === 2 ? "selected" : ""}>الربع الثاني</option>
+          <option value="3" ${currentQuarter === 3 ? "selected" : ""}>الربع الثالث</option>
+          <option value="4" ${currentQuarter === 4 ? "selected" : ""}>الربع الرابع</option>
+        </select>
+      </label>
+      ${renderPeriodYearInput(currentYear)}
+    `;
+    return;
+  }
+
+  if (mode === "half") {
+    container.innerHTML = `
+      <label class="pc-period-part">
+        <span>النصف</span>
+        <select id="comparisonHalf" class="pc-select">
+          <option value="1" ${currentHalf === 1 ? "selected" : ""}>النصف الأول</option>
+          <option value="2" ${currentHalf === 2 ? "selected" : ""}>النصف الثاني</option>
+        </select>
+      </label>
+      ${renderPeriodYearInput(currentYear)}
+    `;
+    return;
+  }
+
+  if (mode === "year") {
+    container.innerHTML = renderPeriodYearInput(currentYear, "السنة المطلوبة");
+    return;
+  }
+
+  container.innerHTML = `
+    <label class="pc-period-part">
+      <span>من</span>
+      <input id="comparisonCustomFrom" class="pc-input" type="date" value="${escapeHtml(existingFrom)}" />
+    </label>
+    <label class="pc-period-part">
+      <span>إلى</span>
+      <input id="comparisonCustomTo" class="pc-input" type="date" value="${escapeHtml(existingTo)}" />
+    </label>
+  `;
+}
+
+function renderPeriodYearInput(year, label = "السنة") {
+  return `
+    <label class="pc-period-part">
+      <span>${escapeHtml(label)}</span>
+      <input id="comparisonPeriodYear" class="pc-input" type="number" min="2015" max="2100" step="1" value="${Number(year)}" />
+    </label>
+  `;
+}
+
+function applyProductComparisonPeriod(mode) {
+  const fromInput = document.getElementById("dateFrom");
+  const toInput = document.getElementById("dateTo");
+  const datePreset = document.getElementById("datePreset");
+  const customDates = document.getElementById("customDates");
+
+  if (!fromInput || !toInput) return;
+
   const today = getCairoCalendarDate();
-  const from = new Date(today);
-  const to = new Date(today);
+  let from = null;
+  let to = null;
 
   if (mode === "month") {
-    from.setUTCDate(1);
+    const raw = document.getElementById("comparisonMonth")?.value || "";
+    const match = /^(\d{4})-(\d{2})$/.exec(raw);
+    if (!match) return;
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    from = new Date(Date.UTC(year, month - 1, 1));
+    to = new Date(Date.UTC(year, month, 0));
   } else if (mode === "quarter") {
-    const quarterStartMonth = Math.floor(today.getUTCMonth() / 3) * 3;
-    from.setUTCMonth(quarterStartMonth, 1);
+    const year = readComparisonPeriodYear();
+    const quarter = Number(document.getElementById("comparisonQuarter")?.value || 1);
+    const startMonth = (quarter - 1) * 3;
+    from = new Date(Date.UTC(year, startMonth, 1));
+    to = new Date(Date.UTC(year, startMonth + 3, 0));
   } else if (mode === "half") {
-    from.setUTCMonth(today.getUTCMonth() < 6 ? 0 : 6, 1);
+    const year = readComparisonPeriodYear();
+    const half = Number(document.getElementById("comparisonHalf")?.value || 1);
+    const startMonth = half === 2 ? 6 : 0;
+    from = new Date(Date.UTC(year, startMonth, 1));
+    to = new Date(Date.UTC(year, startMonth + 6, 0));
   } else if (mode === "year") {
-    from.setUTCMonth(0, 1);
-  } else if (mode === "custom") {
-    if (customDates) customDates.hidden = false;
+    const year = readComparisonPeriodYear();
+    from = new Date(Date.UTC(year, 0, 1));
+    to = new Date(Date.UTC(year, 11, 31));
+  } else {
+    const customFrom = document.getElementById("comparisonCustomFrom")?.value || "";
+    const customTo = document.getElementById("comparisonCustomTo")?.value || "";
+    fromInput.value = customFrom;
+    toInput.value = customTo;
     if (datePreset) datePreset.value = "custom";
+    if (customDates) customDates.hidden = true;
     renderPeriodLabel();
     return;
   }
 
+  // For the active current period, compare only up to today. Past periods remain complete.
+  if (from <= today && to > today) to = new Date(today);
+
   fromInput.value = toIsoDate(from);
   toInput.value = toIsoDate(to);
-  if (customDates) customDates.hidden = true;
   if (datePreset) datePreset.value = "custom";
+  if (customDates) customDates.hidden = true;
   renderPeriodLabel();
+}
+
+function readComparisonPeriodYear() {
+  const value = Number(document.getElementById("comparisonPeriodYear")?.value || 0);
+  return Number.isInteger(value) && value >= 2015 && value <= 2100
+    ? value
+    : getCairoCalendarDate().getUTCFullYear();
 }
 
 function getCairoCalendarDate() {
@@ -334,7 +453,7 @@ function renderPeriodLabel() {
   const from = document.getElementById("dateFrom")?.value || "-";
   const to = document.getElementById("dateTo")?.value || "-";
   const label = document.getElementById("productComparisonPeriodLabel");
-  if (label) label.textContent = `الفترة المطبقة: ${from} إلى ${to}`;
+  if (label) label.textContent = `الفترة المطبقة فعليًا: ${from} إلى ${to}`;
 }
 
 function getReportParams() {
@@ -357,6 +476,7 @@ function validateReportParams(params) {
   if (!params.companyId) return "اختر الشركة الأساسية أولًا.";
   if (!params.productId) return "اختر صنف الشركة الأساسية بالباركود أو الاسم أو الرقم المرجعي.";
   if (!params.dateFrom || !params.dateTo) return "حدد فترة التقرير.";
+  if (params.dateFrom > params.dateTo) return "تاريخ البداية يجب أن يكون قبل أو مساويًا لتاريخ النهاية.";
   if (!params.branchCode) return "اختر الفرع / النطاق.";
   if (params.comparisonEnabled && String(params.companyId) === CLEOPATRA_COMPANY_ID) {
     return "مقارنة كليوباترا مصممة بحيث تكون كليوباترا شركة المقارنة؛ اختر فيرجينيا كشركة أساسية.";
