@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   bindProductComparisonEvents();
   await waitForPageContext();
+  mountProductComparisonContextControls();
   initializeProductComparisonPeriod();
   updateComparisonVisibility();
 });
@@ -26,9 +27,40 @@ document.addEventListener("DOMContentLoaded", async () => {
 function buildProductComparisonPage() {
   return `
     <main class="product-comparison-page">
-      <section class="pc-config-card">
-        <div class="pc-config-grid">
-          <div class="pc-field pc-field-wide">
+      <section class="pc-config-card" aria-label="فلاتر تقرير مقارنة الأصناف">
+        <div class="pc-context-row">
+          <div id="pcCompanySlot" class="pc-context-slot"></div>
+          <div id="pcBranchSlot" class="pc-context-slot"></div>
+          <label class="pc-field pc-uniform-field" for="comparisonMode">
+            <span>المقارنة الخارجية</span>
+            <select id="comparisonMode" class="pc-select">
+              <option value="none">بدون مقارنة</option>
+              <option value="cleopatra">مقارنة مع كليوباترا</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="pc-divider"></div>
+
+        <div class="pc-period-row">
+          <label class="pc-field pc-uniform-field" for="comparisonPeriodMode">
+            <span>نوع الفترة</span>
+            <select id="comparisonPeriodMode" class="pc-select">
+              <option value="month">شهر</option>
+              <option value="quarter">ربع سنوي</option>
+              <option value="half">نصف سنوي</option>
+              <option value="year">سنة</option>
+              <option value="custom">مخصص بالأيام</option>
+            </select>
+          </label>
+          <div id="productComparisonPeriodControls" class="pc-period-controls"></div>
+        </div>
+        <div id="productComparisonPeriodLabel" class="pc-period-summary"></div>
+
+        <div class="pc-divider"></div>
+
+        <div class="pc-product-action-row">
+          <div class="pc-field pc-product-main-field">
             <label for="primaryProductSearch">صنف الشركة الأساسية</label>
             <div class="pc-product-picker">
               <input id="primaryProductSearch" class="pc-input" autocomplete="off"
@@ -39,55 +71,28 @@ function buildProductComparisonPage() {
             <div id="primarySelectedProduct" class="pc-selected-product">لم يتم اختيار صنف بعد.</div>
           </div>
 
-          <div class="pc-field">
-            <label for="comparisonPeriodMode">نوع الفترة</label>
-            <select id="comparisonPeriodMode" class="pc-select">
-              <option value="month">شهر</option>
-              <option value="quarter">ربع سنوي</option>
-              <option value="half">نصف سنوي</option>
-              <option value="year">سنة</option>
-              <option value="custom">مخصص بالأيام</option>
-            </select>
-          </div>
-
-          <div class="pc-field pc-field-wide">
-            <label>تحديد الفترة</label>
-            <div id="productComparisonPeriodControls" class="pc-period-controls"></div>
-          </div>
-
-          <div class="pc-field">
-            <span>المقارنة الخارجية</span>
-            <label class="pc-toggle-row" for="comparisonEnabled">
-              <input id="comparisonEnabled" type="checkbox" />
-              <strong>مقارنة مع كليوباترا</strong>
-            </label>
+          <div class="pc-action-buttons" aria-label="إجراءات التقرير">
+            <button id="pcUpdateBtn" class="pc-btn pc-btn-primary" type="button">تحديث التقرير</button>
+            <button id="pcExcelBtn" class="pc-btn pc-btn-secondary" type="button">تصدير Excel</button>
+            <button id="productComparisonPdfBtn" class="pc-btn pc-btn-secondary" type="button">تصدير PDF</button>
           </div>
         </div>
 
         <div id="comparisonProductBox" class="pc-comparison-box pc-hidden">
-          <div class="pc-config-grid">
-            <div class="pc-field">
-              <label>شركة المقارنة</label>
-              <input class="pc-input" value="كليوباترا" disabled />
-              <input id="comparisonCompanyId" type="hidden" value="2" />
-            </div>
-
-            <div class="pc-field pc-field-wide">
-              <label for="comparisonProductSearch">صنف كليوباترا</label>
-              <div class="pc-product-picker">
-                <input id="comparisonProductSearch" class="pc-input" autocomplete="off"
-                       placeholder="اختر صنف كليوباترا بالباركود أو الاسم أو الرقم المرجعي" />
-                <div id="comparisonProductResults" class="pc-product-results hidden"></div>
-              </div>
-              <input id="comparisonProductId" type="hidden" />
-              <div id="comparisonSelectedProduct" class="pc-selected-product">لازم تختار صنف كليوباترا للمقارنة.</div>
-            </div>
+          <div class="pc-comparison-title">
+            <strong>صنف كليوباترا للمقارنة</strong>
+            <span>اختر الصنف المقابل بشكل مستقل من كتالوج كليوباترا.</span>
           </div>
-        </div>
-
-        <div class="pc-actions">
-          <button id="productComparisonPdfBtn" class="pc-btn pc-btn-secondary" type="button">تصدير PDF</button>
-          <span id="productComparisonPeriodLabel" class="pc-selected-product"></span>
+          <div class="pc-field">
+            <div class="pc-product-picker">
+              <input id="comparisonProductSearch" class="pc-input" autocomplete="off"
+                     placeholder="ابحث بصنف كليوباترا بالباركود أو الاسم أو الرقم المرجعي" />
+              <div id="comparisonProductResults" class="pc-product-results hidden"></div>
+            </div>
+            <input id="comparisonProductId" type="hidden" />
+            <input id="comparisonCompanyId" type="hidden" value="2" />
+            <div id="comparisonSelectedProduct" class="pc-selected-product">لازم تختار صنف كليوباترا للمقارنة.</div>
+          </div>
         </div>
       </section>
 
@@ -116,6 +121,8 @@ function buildProductComparisonPage() {
 
 function bindProductComparisonEvents() {
   document.getElementById("loadBtn")?.addEventListener("click", loadProductComparisonReport);
+  document.getElementById("pcUpdateBtn")?.addEventListener("click", loadProductComparisonReport);
+
   document.getElementById("comparisonPeriodMode")?.addEventListener("change", (event) => {
     renderProductComparisonPeriodControls(event.target.value);
     applyProductComparisonPeriod(event.target.value);
@@ -128,7 +135,7 @@ function bindProductComparisonEvents() {
     markReportDirty();
   });
 
-  document.getElementById("comparisonEnabled")?.addEventListener("change", () => {
+  document.getElementById("comparisonMode")?.addEventListener("change", () => {
     updateComparisonVisibility();
     markReportDirty();
   });
@@ -144,6 +151,16 @@ function bindProductComparisonEvents() {
 
   bindProductSearch("primary");
   bindProductSearch("comparison");
+
+  document.getElementById("pcExcelBtn")?.addEventListener("click", () => {
+    if (window.ReportExport?.exportExcel) {
+      window.ReportExport.exportExcel(PRODUCT_COMPARISON_PAGE);
+      return;
+    }
+    const fallback = document.getElementById("reportExportExcelBtn");
+    if (fallback) fallback.click();
+    else alert("محرك تصدير Excel لم يكتمل تحميله بعد. حاول مرة أخرى بعد لحظة.");
+  });
 
   document.getElementById("productComparisonPdfBtn")?.addEventListener("click", () => {
     if (!productComparisonState.report) {
@@ -161,6 +178,18 @@ async function waitForPageContext() {
     if (company && branch) return;
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
+}
+
+function mountProductComparisonContextControls() {
+  const companySlot = document.getElementById("pcCompanySlot");
+  const branchSlot = document.getElementById("pcBranchSlot");
+  const companyField = document.getElementById("companySelect")?.closest(".context-field");
+  const branchField = document.getElementById("branchCode")?.closest(".context-field");
+
+  if (companySlot && companyField) companySlot.appendChild(companyField);
+  if (branchSlot && branchField) branchSlot.appendChild(branchField);
+
+  document.getElementById("reportToolbar")?.classList.add("pc-source-toolbar-hidden");
 }
 
 function bindProductSearch(kind) {
@@ -281,7 +310,7 @@ function clearSelectedProduct(kind) {
 }
 
 function updateComparisonVisibility() {
-  const enabled = document.getElementById("comparisonEnabled")?.checked;
+  const enabled = document.getElementById("comparisonMode")?.value === "cleopatra";
   document.getElementById("comparisonProductBox")?.classList.toggle("pc-hidden", !enabled);
 }
 
@@ -294,6 +323,7 @@ function initializeProductComparisonPeriod() {
 function renderProductComparisonPeriodControls(mode) {
   const container = document.getElementById("productComparisonPeriodControls");
   if (!container) return;
+  container.classList.toggle("pc-period-single", mode === "month" || mode === "year");
 
   const today = getCairoCalendarDate();
   const currentYear = today.getUTCFullYear();
@@ -457,7 +487,7 @@ function renderPeriodLabel() {
 }
 
 function getReportParams() {
-  const comparisonEnabled = document.getElementById("comparisonEnabled")?.checked || false;
+  const comparisonEnabled = document.getElementById("comparisonMode")?.value === "cleopatra";
 
   return {
     companyId: document.getElementById("companySelect")?.value || "",
@@ -497,13 +527,16 @@ async function loadProductComparisonReport() {
     return;
   }
 
-  const loadButton = document.getElementById("loadBtn");
+  const loadButtons = [
+    document.getElementById("loadBtn"),
+    document.getElementById("pcUpdateBtn")
+  ].filter(Boolean);
 
   try {
-    if (loadButton) {
-      loadButton.disabled = true;
-      loadButton.textContent = "جاري التحميل...";
-    }
+    loadButtons.forEach((button) => {
+      button.disabled = true;
+      button.textContent = "جاري التحميل...";
+    });
 
     setProductComparisonStatus("جاري قراءة بيانات POS من الكاش وتجهيز المقارنة...");
 
@@ -517,10 +550,10 @@ async function loadProductComparisonReport() {
     console.error(error);
     setProductComparisonStatus(error.message || "تعذر تحميل تقرير مقارنة الأصناف.", true);
   } finally {
-    if (loadButton) {
-      loadButton.disabled = false;
-      loadButton.textContent = "تحديث التقرير";
-    }
+    loadButtons.forEach((button) => {
+      button.disabled = false;
+      button.textContent = "تحديث التقرير";
+    });
   }
 }
 

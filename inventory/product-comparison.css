@@ -1,8 +1,15 @@
 .product-comparison-page {
   --pc-border: rgba(29, 78, 61, 0.14);
+  --pc-border-strong: rgba(29, 78, 61, 0.22);
   --pc-soft: #f6f9f7;
   --pc-ink: #18352a;
   --pc-muted: #6d7c75;
+  --pc-control-height: 48px;
+  --pc-radius: 12px;
+}
+
+body[data-active-page="inventory-product-comparison"] #reportToolbar.pc-source-toolbar-hidden {
+  display: none !important;
 }
 
 .pc-config-card,
@@ -11,55 +18,188 @@
   border: 1px solid var(--pc-border);
   border-radius: 18px;
   background: #fff;
-  box-shadow: 0 12px 32px rgba(20, 54, 42, 0.06);
+  box-shadow: 0 10px 28px rgba(20, 54, 42, 0.05);
 }
 
 .pc-config-card {
-  padding: 18px;
+  padding: 18px 20px;
   margin-bottom: 18px;
 }
 
-.pc-config-grid {
+.pc-context-row,
+.pc-period-row {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
   align-items: end;
 }
 
-.pc-field {
+.pc-context-slot,
+.pc-field,
+.pc-uniform-field,
+.pc-product-main-field {
+  min-width: 0;
   position: relative;
+}
+
+.pc-context-slot .context-field,
+.pc-field {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.pc-context-slot .context-field > span,
+.pc-field > span,
+.pc-field > label,
+.pc-product-main-field > label {
+  display: block;
+  margin: 0;
+  color: var(--pc-ink);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.pc-context-slot .context-field .control,
+.pc-input,
+.pc-select {
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--pc-control-height) !important;
+  min-height: var(--pc-control-height) !important;
+  border: 1px solid #d7e1dc !important;
+  border-radius: var(--pc-radius) !important;
+  background: #fff !important;
+  padding: 0 13px !important;
+  color: #1f342b !important;
+  font: inherit !important;
+  font-size: 14px !important;
+  line-height: var(--pc-control-height) !important;
+  box-shadow: none !important;
+}
+
+.pc-context-slot .context-field select.control,
+.pc-select {
+  cursor: pointer;
+}
+
+.pc-context-slot .context-field .control:focus,
+.pc-input:focus,
+.pc-select:focus {
+  border-color: #2c7860 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(44, 120, 96, 0.09) !important;
+}
+
+.pc-context-slot .context-field select:disabled,
+.pc-select:disabled,
+.pc-input:disabled {
+  background: #f3f6f4 !important;
+  color: #819087 !important;
+  cursor: not-allowed;
+}
+
+.pc-divider {
+  height: 1px;
+  margin: 16px 0;
+  background: #edf2ef;
+}
+
+.pc-period-row > .pc-field {
   min-width: 0;
 }
 
-.pc-field-wide {
+.pc-period-controls {
   grid-column: span 2;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: end;
 }
 
-.pc-field label,
-.pc-field > span {
-  display: block;
-  margin-bottom: 7px;
-  font-weight: 800;
+.pc-period-controls.pc-period-single .pc-period-part {
+  grid-column: 1 / -1;
+}
+
+.pc-period-part {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.pc-period-part > span {
   color: var(--pc-ink);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
 }
 
-.pc-input,
-.pc-select {
-  width: 100%;
-  min-height: 44px;
-  border: 1px solid #d7e1dc;
-  border-radius: 12px;
-  background: #fff;
-  padding: 10px 12px;
+.pc-period-summary {
+  margin-top: 9px;
+  min-height: 20px;
+  color: #5f746a;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pc-product-action-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: end;
+}
+
+.pc-product-main-field {
+  display: grid;
+  gap: 7px;
+}
+
+.pc-action-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  gap: 10px;
+  align-items: end;
+}
+
+.pc-btn {
+  box-sizing: border-box;
+  min-width: 126px;
+  height: var(--pc-control-height);
+  min-height: var(--pc-control-height);
+  border: 1px solid transparent;
+  border-radius: var(--pc-radius);
+  padding: 0 16px;
   font: inherit;
-  color: #1f342b;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform .14s ease, box-shadow .14s ease, opacity .14s ease;
 }
 
-.pc-input:focus,
-.pc-select:focus {
-  border-color: #2c7860;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(44, 120, 96, 0.1);
+.pc-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.pc-btn:disabled {
+  opacity: .66;
+  cursor: wait;
+}
+
+.pc-btn-primary {
+  background: #6150e8;
+  color: #fff;
+  border-color: #6150e8;
+  box-shadow: 0 6px 16px rgba(97, 80, 232, .16);
+}
+
+.pc-btn-secondary {
+  background: #fff;
+  color: #5144c9;
+  border-color: #d7d1ff;
 }
 
 .pc-product-picker {
@@ -109,61 +249,36 @@
 }
 
 .pc-selected-product {
-  margin-top: 7px;
-  min-height: 22px;
-  font-size: 13px;
-  color: #476259;
-}
-
-.pc-toggle-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  padding: 9px 12px;
-  border: 1px solid #d7e1dc;
-  border-radius: 12px;
-  background: var(--pc-soft);
-}
-
-.pc-toggle-row input {
-  width: 18px;
-  height: 18px;
+  min-height: 20px;
+  color: #526c61;
+  font-size: 12px;
+  line-height: 1.55;
 }
 
 .pc-comparison-box {
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px dashed #cbd9d3;
+  margin-top: 16px;
+  padding: 14px 16px;
+  border: 1px solid #e2e7f7;
+  border-radius: 14px;
+  background: #fafaff;
 }
 
-.pc-actions {
+.pc-comparison-title {
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  align-items: center;
-  margin-top: 14px;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 10px;
 }
 
-.pc-btn {
-  min-height: 42px;
-  border: 0;
-  border-radius: 12px;
-  padding: 9px 16px;
-  font: inherit;
-  font-weight: 800;
-  cursor: pointer;
+.pc-comparison-title strong {
+  color: #302b67;
+  font-size: 14px;
 }
 
-.pc-btn-primary {
-  background: #1f6a52;
-  color: #fff;
-}
-
-.pc-btn-secondary {
-  background: #eef4f1;
-  color: #244e3f;
-  border: 1px solid #d8e3de;
+.pc-comparison-title span {
+  color: #777594;
+  font-size: 12px;
 }
 
 .pc-status {
@@ -390,17 +505,58 @@
   line-height: 1.9;
 }
 
-@media (max-width: 1100px) {
-  .pc-config-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
-  .pc-company-grid { grid-template-columns: 1fr; }
-  .pc-cross-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+@media (max-width: 1180px) {
+  .pc-product-action-row {
+    grid-template-columns: 1fr;
+  }
+
+  .pc-action-buttons {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .pc-context-row,
+  .pc-period-row {
+    grid-template-columns: 1fr;
+  }
+
+  .pc-period-controls {
+    grid-column: auto;
+  }
+
+  .pc-company-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pc-cross-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 680px) {
-  .pc-config-grid,
+  .pc-config-card {
+    padding: 14px;
+  }
+
+  .pc-period-controls,
   .pc-kpi-grid,
-  .pc-cross-grid { grid-template-columns: 1fr; }
-  .pc-field-wide { grid-column: span 1; }
+  .pc-cross-grid,
+  .pc-action-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .pc-period-controls.pc-period-single .pc-period-part {
+    grid-column: auto;
+  }
+
+  .pc-btn {
+    width: 100%;
+  }
+
+  .pc-comparison-title {
+    display: grid;
+  }
 }
 
 @media print {
@@ -408,7 +564,6 @@
   .mi-section-nav,
   #reportToolbar,
   .pc-config-card,
-  .pc-actions,
   .pc-status { display: none !important; }
   .pc-report-card,
   .pc-company-panel,
@@ -419,33 +574,4 @@
   .pc-table-wrap { max-height: none; overflow: visible; }
   .pc-table { min-width: 0; font-size: 10px; }
   .pc-table th { position: static; }
-}
-
-/* Product comparison owns its date period selector; hide the generic report date presets. */
-body[data-active-page="inventory-product-comparison"] #reportToolbar .date-context-field,
-body[data-active-page="inventory-product-comparison"] #reportToolbar #datePreset,
-body[data-active-page="inventory-product-comparison"] #reportToolbar #customDates {
-  display: none !important;
-}
-
-.pc-period-controls {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  align-items: end;
-}
-
-.pc-period-part {
-  display: grid;
-  gap: 6px;
-}
-
-.pc-period-part > span {
-  color: #60736a;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-@media (max-width: 680px) {
-  .pc-period-controls { grid-template-columns: 1fr; }
 }
