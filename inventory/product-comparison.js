@@ -1,0 +1,651 @@
+const PRODUCT_COMPARISON_PAGE = "inventory-product-comparison";
+const PRODUCT_COMPARISON_TIMEZONE = "Africa/Cairo";
+const CLEOPATRA_COMPANY_ID = "2";
+
+const productComparisonState = {
+  primaryProduct: null,
+  comparisonProduct: null,
+  report: null,
+  searchTimers: new Map()
+};
+
+document.addEventListener("DOMContentLoaded", async () => {
+  renderLayout(
+    "مقارنة الأصناف",
+    "مقارنة أداء صنف داخل نقاط البيع مع نفس الفترة من السنة السابقة، واختياريًا مع صنف محدد في كليوباترا.",
+    PRODUCT_COMPARISON_PAGE,
+    buildProductComparisonPage()
+  );
+
+  bindProductComparisonEvents();
+  setProductComparisonPeriod("month");
+  await waitForPageContext();
+  updateComparisonVisibility();
+});
+
+function buildProductComparisonPage() {
+  return `
+    <main class="product-comparison-page">
+      <section class="pc-config-card">
+        <div class="pc-config-grid">
+          <div class="pc-field pc-field-wide">
+            <label for="primaryProductSearch">صنف الشركة الأساسية</label>
+            <div class="pc-product-picker">
+              <input id="primaryProductSearch" class="pc-input" autocomplete="off"
+                     placeholder="ابحث بالباركود أو اسم الصنف أو الرقم المرجعي" />
+              <div id="primaryProductResults" class="pc-product-results hidden"></div>
+            </div>
+            <input id="productId" type="hidden" />
+            <div id="primarySelectedProduct" class="pc-selected-product">لم يتم اختيار صنف بعد.</div>
+          </div>
+
+          <div class="pc-field">
+            <label for="comparisonPeriodMode">فترة التطبيق</label>
+            <select id="comparisonPeriodMode" class="pc-select">
+              <option value="month">شهر</option>
+              <option value="quarter">ربع سنوي</option>
+              <option value="half">نصف سنوي</option>
+              <option value="year">سنة</option>
+              <option value="custom">مخصص بالأيام</option>
+            </select>
+          </div>
+
+          <div class="pc-field">
+            <span>المقارنة الخارجية</span>
+            <label class="pc-toggle-row" for="comparisonEnabled">
+              <input id="comparisonEnabled" type="checkbox" />
+              <strong>مقارنة مع كليوباترا</strong>
+            </label>
+          </div>
+        </div>
+
+        <div id="comparisonProductBox" class="pc-comparison-box pc-hidden">
+          <div class="pc-config-grid">
+            <div class="pc-field">
+              <label>شركة المقارنة</label>
+              <input class="pc-input" value="كليوباترا" disabled />
+              <input id="comparisonCompanyId" type="hidden" value="2" />
+            </div>
+
+            <div class="pc-field pc-field-wide">
+              <label for="comparisonProductSearch">صنف كليوباترا</label>
+              <div class="pc-product-picker">
+                <input id="comparisonProductSearch" class="pc-input" autocomplete="off"
+                       placeholder="اختر صنف كليوباترا بالباركود أو الاسم أو الرقم المرجعي" />
+                <div id="comparisonProductResults" class="pc-product-results hidden"></div>
+              </div>
+              <input id="comparisonProductId" type="hidden" />
+              <div id="comparisonSelectedProduct" class="pc-selected-product">لازم تختار صنف كليوباترا للمقارنة.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pc-actions">
+          <button id="productComparisonPdfBtn" class="pc-btn pc-btn-secondary" type="button">تصدير PDF</button>
+          <span id="productComparisonPeriodLabel" class="pc-selected-product"></span>
+        </div>
+      </section>
+
+      <section id="productComparisonStatus" class="pc-status">اختر الصنف والفترة ثم اضغط تحديث التقرير.</section>
+
+      <section id="productComparisonCompanyGrid" class="pc-company-grid"></section>
+      <section id="productComparisonCross" class="pc-cross-company pc-hidden"></section>
+
+      <section id="productComparisonTrendCard" class="pc-report-card pc-hidden">
+        <h2>اتجاه مبيعات الصنف خلال الفترة</h2>
+        <div id="productComparisonTrend"></div>
+      </section>
+
+      <section id="productComparisonBranchesCard" class="pc-report-card pc-hidden">
+        <h2>تفصيل المقارنة حسب الفرع</h2>
+        <div id="productComparisonBranches"></div>
+      </section>
+
+      <section id="productComparisonNotesCard" class="pc-report-card pc-hidden">
+        <h2>ملاحظات التقرير</h2>
+        <div id="productComparisonNotes"></div>
+      </section>
+    </main>
+  `;
+}
+
+function bindProductComparisonEvents() {
+  document.getElementById("loadBtn")?.addEventListener("click", loadProductComparisonReport);
+  document.getElementById("comparisonPeriodMode")?.addEventListener("change", (event) => {
+    setProductComparisonPeriod(event.target.value);
+    markReportDirty();
+  });
+
+  document.getElementById("comparisonEnabled")?.addEventListener("change", () => {
+    updateComparisonVisibility();
+    markReportDirty();
+  });
+
+  document.getElementById("companySelect")?.addEventListener("change", () => {
+    clearSelectedProduct("primary");
+    markReportDirty();
+  });
+
+  document.addEventListener("change", (event) => {
+    if (["branchCode", "dateFrom", "dateTo"].includes(event.target?.id)) {
+      if (["dateFrom", "dateTo"].includes(event.target?.id)) renderPeriodLabel();
+      markReportDirty();
+    }
+  });
+
+  bindProductSearch("primary");
+  bindProductSearch("comparison");
+
+  document.getElementById("productComparisonPdfBtn")?.addEventListener("click", () => {
+    if (!productComparisonState.report) {
+      alert("حمّل التقرير أولًا قبل تصدير PDF.");
+      return;
+    }
+    window.print();
+  });
+}
+
+async function waitForPageContext() {
+  for (let i = 0; i < 30; i += 1) {
+    const company = document.getElementById("companySelect");
+    const branch = document.getElementById("branchCode");
+    if (company && branch) return;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+}
+
+function bindProductSearch(kind) {
+  const inputId = kind === "primary" ? "primaryProductSearch" : "comparisonProductSearch";
+  const input = document.getElementById(inputId);
+  if (!input) return;
+
+  input.addEventListener("input", () => {
+    const currentTimer = productComparisonState.searchTimers.get(kind);
+    if (currentTimer) clearTimeout(currentTimer);
+
+    const timer = setTimeout(() => searchProducts(kind), 300);
+    productComparisonState.searchTimers.set(kind, timer);
+  });
+
+  input.addEventListener("focus", () => {
+    if (input.value.trim().length >= 1) searchProducts(kind);
+  });
+
+  document.addEventListener("click", (event) => {
+    const results = getProductResultsElement(kind);
+    if (!results) return;
+    if (event.target === input || results.contains(event.target)) return;
+    results.classList.add("hidden");
+  });
+}
+
+function getProductResultsElement(kind) {
+  return document.getElementById(kind === "primary" ? "primaryProductResults" : "comparisonProductResults");
+}
+
+function getSearchCompanyId(kind) {
+  if (kind === "comparison") return CLEOPATRA_COMPANY_ID;
+  return document.getElementById("companySelect")?.value || "";
+}
+
+async function searchProducts(kind) {
+  const input = document.getElementById(kind === "primary" ? "primaryProductSearch" : "comparisonProductSearch");
+  const results = getProductResultsElement(kind);
+  const companyId = getSearchCompanyId(kind);
+  const q = input?.value?.trim() || "";
+
+  if (!results || !input) return;
+
+  if (!companyId) {
+    results.innerHTML = `<div class="pc-product-option">اختر الشركة الأساسية أولًا.</div>`;
+    results.classList.remove("hidden");
+    return;
+  }
+
+  if (q.length < 1) {
+    results.classList.add("hidden");
+    return;
+  }
+
+  results.classList.remove("hidden");
+  results.innerHTML = `<div class="pc-product-option">جاري البحث في كاش الأصناف...</div>`;
+
+  try {
+    const response = await apiGet("/inventory/product-comparison/products", {
+      companyId,
+      q,
+      limit: 30
+    });
+
+    const rows = Array.isArray(response.data) ? response.data : [];
+
+    if (!rows.length) {
+      results.innerHTML = `<div class="pc-product-option">لا توجد أصناف مطابقة.</div>`;
+      return;
+    }
+
+    results.innerHTML = rows.map((row) => `
+      <button type="button" class="pc-product-option" data-product-kind="${kind}" data-product-id="${escapeHtml(row.productId)}">
+        <strong>${escapeHtml(row.displayName || row.name || "صنف بدون اسم")}</strong>
+        <small>باركود: ${escapeHtml(row.barcode || "-")} · مرجع: ${escapeHtml(row.defaultCode || "-")}</small>
+      </button>
+    `).join("");
+
+    results.querySelectorAll("[data-product-id]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const product = rows.find((row) => String(row.productId) === String(button.dataset.productId));
+        if (product) selectProduct(kind, product);
+      });
+    });
+  } catch (error) {
+    results.innerHTML = `<div class="pc-product-option">${escapeHtml(error.message || "تعذر البحث عن الصنف")}</div>`;
+  }
+}
+
+function selectProduct(kind, product) {
+  const isPrimary = kind === "primary";
+  productComparisonState[isPrimary ? "primaryProduct" : "comparisonProduct"] = product;
+
+  const hidden = document.getElementById(isPrimary ? "productId" : "comparisonProductId");
+  const input = document.getElementById(isPrimary ? "primaryProductSearch" : "comparisonProductSearch");
+  const label = document.getElementById(isPrimary ? "primarySelectedProduct" : "comparisonSelectedProduct");
+  const results = getProductResultsElement(kind);
+
+  if (hidden) hidden.value = product.productId || "";
+  if (input) input.value = product.displayName || product.name || "";
+  if (label) {
+    label.textContent = `المختار: ${product.displayName || product.name || "-"} · باركود ${product.barcode || "-"} · مرجع ${product.defaultCode || "-"}`;
+  }
+  results?.classList.add("hidden");
+  markReportDirty();
+}
+
+function clearSelectedProduct(kind) {
+  const isPrimary = kind === "primary";
+  productComparisonState[isPrimary ? "primaryProduct" : "comparisonProduct"] = null;
+  const hidden = document.getElementById(isPrimary ? "productId" : "comparisonProductId");
+  const input = document.getElementById(isPrimary ? "primaryProductSearch" : "comparisonProductSearch");
+  const label = document.getElementById(isPrimary ? "primarySelectedProduct" : "comparisonSelectedProduct");
+  if (hidden) hidden.value = "";
+  if (input) input.value = "";
+  if (label) label.textContent = isPrimary ? "لم يتم اختيار صنف بعد." : "لازم تختار صنف كليوباترا للمقارنة.";
+}
+
+function updateComparisonVisibility() {
+  const enabled = document.getElementById("comparisonEnabled")?.checked;
+  document.getElementById("comparisonProductBox")?.classList.toggle("pc-hidden", !enabled);
+}
+
+function setProductComparisonPeriod(mode) {
+  const fromInput = document.getElementById("dateFrom");
+  const toInput = document.getElementById("dateTo");
+  const customDates = document.getElementById("customDates");
+  const datePreset = document.getElementById("datePreset");
+
+  if (!fromInput || !toInput) {
+    setTimeout(() => setProductComparisonPeriod(mode), 100);
+    return;
+  }
+
+  const today = getCairoCalendarDate();
+  const from = new Date(today);
+  const to = new Date(today);
+
+  if (mode === "month") {
+    from.setUTCDate(1);
+  } else if (mode === "quarter") {
+    const quarterStartMonth = Math.floor(today.getUTCMonth() / 3) * 3;
+    from.setUTCMonth(quarterStartMonth, 1);
+  } else if (mode === "half") {
+    from.setUTCMonth(today.getUTCMonth() < 6 ? 0 : 6, 1);
+  } else if (mode === "year") {
+    from.setUTCMonth(0, 1);
+  } else if (mode === "custom") {
+    if (customDates) customDates.hidden = false;
+    if (datePreset) datePreset.value = "custom";
+    renderPeriodLabel();
+    return;
+  }
+
+  fromInput.value = toIsoDate(from);
+  toInput.value = toIsoDate(to);
+  if (customDates) customDates.hidden = true;
+  if (datePreset) datePreset.value = "custom";
+  renderPeriodLabel();
+}
+
+function getCairoCalendarDate() {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: PRODUCT_COMPARISON_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(new Date());
+
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return new Date(Date.UTC(Number(values.year), Number(values.month) - 1, Number(values.day)));
+}
+
+function toIsoDate(date) {
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
+}
+
+function renderPeriodLabel() {
+  const from = document.getElementById("dateFrom")?.value || "-";
+  const to = document.getElementById("dateTo")?.value || "-";
+  const label = document.getElementById("productComparisonPeriodLabel");
+  if (label) label.textContent = `الفترة المطبقة: ${from} إلى ${to}`;
+}
+
+function getReportParams() {
+  const comparisonEnabled = document.getElementById("comparisonEnabled")?.checked || false;
+
+  return {
+    companyId: document.getElementById("companySelect")?.value || "",
+    productId: document.getElementById("productId")?.value || "",
+    dateFrom: document.getElementById("dateFrom")?.value || "",
+    dateTo: document.getElementById("dateTo")?.value || "",
+    branchCode: document.getElementById("branchCode")?.value || "all",
+    timezone: PRODUCT_COMPARISON_TIMEZONE,
+    comparisonEnabled,
+    comparisonCompanyId: CLEOPATRA_COMPANY_ID,
+    comparisonProductId: comparisonEnabled ? (document.getElementById("comparisonProductId")?.value || "") : ""
+  };
+}
+
+function validateReportParams(params) {
+  if (!params.companyId) return "اختر الشركة الأساسية أولًا.";
+  if (!params.productId) return "اختر صنف الشركة الأساسية بالباركود أو الاسم أو الرقم المرجعي.";
+  if (!params.dateFrom || !params.dateTo) return "حدد فترة التقرير.";
+  if (!params.branchCode) return "اختر الفرع / النطاق.";
+  if (params.comparisonEnabled && String(params.companyId) === CLEOPATRA_COMPANY_ID) {
+    return "مقارنة كليوباترا مصممة بحيث تكون كليوباترا شركة المقارنة؛ اختر فيرجينيا كشركة أساسية.";
+  }
+  if (params.comparisonEnabled && !params.comparisonProductId) {
+    return "فعّلت مقارنة كليوباترا؛ لازم تختار صنف كليوباترا أيضًا.";
+  }
+  return "";
+}
+
+async function loadProductComparisonReport() {
+  renderPeriodLabel();
+  const params = getReportParams();
+  const error = validateReportParams(params);
+
+  if (error) {
+    setProductComparisonStatus(error, true);
+    return;
+  }
+
+  const loadButton = document.getElementById("loadBtn");
+
+  try {
+    if (loadButton) {
+      loadButton.disabled = true;
+      loadButton.textContent = "جاري التحميل...";
+    }
+
+    setProductComparisonStatus("جاري قراءة بيانات POS من الكاش وتجهيز المقارنة...");
+
+    const response = await apiGet("/inventory/product-comparison", params);
+    const report = response.data || {};
+    productComparisonState.report = report;
+
+    renderProductComparisonReport(report);
+    setProductComparisonStatus("تم تحديث التقرير بنجاح.");
+  } catch (error) {
+    console.error(error);
+    setProductComparisonStatus(error.message || "تعذر تحميل تقرير مقارنة الأصناف.", true);
+  } finally {
+    if (loadButton) {
+      loadButton.disabled = false;
+      loadButton.textContent = "تحديث التقرير";
+    }
+  }
+}
+
+function renderProductComparisonReport(report) {
+  renderCompanyPanels(report);
+  renderCrossCompany(report);
+  renderTrend(report);
+  renderBranches(report);
+  renderNotes(report.notes || []);
+}
+
+function renderCompanyPanels(report) {
+  const container = document.getElementById("productComparisonCompanyGrid");
+  if (!container) return;
+
+  const companies = [report.primary, report.comparison].filter(Boolean);
+  container.style.gridTemplateColumns = companies.length > 1 ? "repeat(2, minmax(0, 1fr))" : "1fr";
+  container.innerHTML = companies.map(renderCompanyPanel).join("");
+}
+
+function renderCompanyPanel(company) {
+  const product = company.product || {};
+  const current = company.current?.summary || {};
+  const previous = company.previous?.summary || {};
+  const change = company.change || {};
+  const changeValue = Number(change.netSales || 0);
+
+  return `
+    <article class="pc-company-panel">
+      <div class="pc-company-heading">
+        <div>
+          <h2>${escapeHtml(company.companyName || "الشركة")}</h2>
+          <p>${escapeHtml(product.displayName || product.name || "-")}</p>
+        </div>
+        <div class="pc-product-identifiers">
+          باركود: ${escapeHtml(product.barcode || "-")}<br />
+          مرجع: ${escapeHtml(product.defaultCode || "-")}
+        </div>
+      </div>
+
+      <div class="pc-kpi-grid">
+        ${renderKpi("الكمية المباعة", formatNumber(current.soldQty), `صافي بعد المرتجعات: ${formatNumber(current.netQty)} · مرتجع: ${formatNumber(current.returnedQty)}`)}
+        ${renderKpi("صافي مبيعات الصنف", formatMoney(current.netSales), `السنة السابقة: ${formatMoney(previous.netSales)}`)}
+        ${renderKpi("مساهمة الصنف من إيراد POS", formatPercent(current.revenueSharePercent), `${formatMoney(current.netSales)} من ${formatMoney(current.totalPosRevenue)}`)}
+        ${renderKpi(
+          "التغير عن السنة السابقة",
+          formatSignedPercent(change.netSalesPercent),
+          `${formatSignedMoney(change.netSales)} · الفترة السابقة ${formatMoney(previous.netSales)}`,
+          changeValue >= 0 ? "positive" : "negative"
+        )}
+      </div>
+    </article>
+  `;
+}
+
+function renderKpi(label, value, hint, tone = "") {
+  return `
+    <div class="pc-kpi ${tone}">
+      <span>${escapeHtml(label)}</span>
+      <strong>${escapeHtml(value)}</strong>
+      <small>${escapeHtml(hint)}</small>
+    </div>
+  `;
+}
+
+function renderCrossCompany(report) {
+  const container = document.getElementById("productComparisonCross");
+  const comparison = report.comparison;
+  const cross = report.crossCompany;
+
+  if (!container || !comparison || !cross) {
+    container?.classList.add("pc-hidden");
+    return;
+  }
+
+  const primarySales = Number(report.primary?.current?.summary?.netSales || 0);
+  const comparisonSales = Number(comparison.current?.summary?.netSales || 0);
+  const winner = primarySales === comparisonSales
+    ? "تعادل في صافي المبيعات"
+    : primarySales > comparisonSales
+      ? `الفارق لصالح ${report.primary?.companyName || "الشركة الأساسية"}`
+      : `الفارق لصالح ${comparison.companyName || "كليوباترا"}`;
+
+  container.innerHTML = `
+    <h2>مقارنة مباشرة بين الشركتين — ${escapeHtml(winner)}</h2>
+    <div class="pc-cross-grid">
+      ${renderCrossMetric("فرق صافي المبيعات", formatSignedMoney(cross.netSalesDifference), formatSignedPercent(cross.netSalesDifferencePercent))}
+      ${renderCrossMetric("فرق الكمية الصافية", formatSignedNumber(cross.netQtyDifference), "بعد المرتجعات والتعديلات")}
+      ${renderCrossMetric("فرق مساهمة الإيراد", formatSignedNumber(cross.revenueShareDifferencePoints), "نقطة مئوية")}
+      ${renderCrossMetric("كليوباترا — مبيعات الصنف", formatMoney(comparisonSales), `${formatPercent(comparison.current?.summary?.revenueSharePercent)} من إيراد POS`)}
+    </div>
+  `;
+  container.classList.remove("pc-hidden");
+}
+
+function renderCrossMetric(label, value, hint) {
+  return `<div class="pc-cross-metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(hint)}</small></div>`;
+}
+
+function renderTrend(report) {
+  const card = document.getElementById("productComparisonTrendCard");
+  const container = document.getElementById("productComparisonTrend");
+  if (!card || !container) return;
+
+  const primaryRows = report.primary?.current?.trend || [];
+  const comparisonRows = report.comparison?.current?.trend || [];
+  const primaryMap = new Map(primaryRows.map((row) => [row.bucket, Number(row.netSales || 0)]));
+  const comparisonMap = new Map(comparisonRows.map((row) => [row.bucket, Number(row.netSales || 0)]));
+  const buckets = Array.from(new Set([...primaryMap.keys(), ...comparisonMap.keys()])).sort();
+
+  if (!buckets.length) {
+    container.innerHTML = `<p>لا توجد مبيعات للصنف داخل الفترة المختارة.</p>`;
+    card.classList.remove("pc-hidden");
+    return;
+  }
+
+  const max = Math.max(1, ...buckets.flatMap((bucket) => [Math.abs(primaryMap.get(bucket) || 0), Math.abs(comparisonMap.get(bucket) || 0)]));
+
+  container.innerHTML = `
+    <div class="pc-trend-scroll">
+      <div class="pc-trend-chart">
+        ${buckets.map((bucket) => {
+          const p = primaryMap.get(bucket) || 0;
+          const c = comparisonMap.get(bucket) || 0;
+          const pHeight = Math.max(2, Math.round((Math.abs(p) / max) * 200));
+          const cHeight = Math.max(2, Math.round((Math.abs(c) / max) * 200));
+          return `
+            <div class="pc-trend-group" title="${escapeHtml(bucket)} — ${escapeHtml(formatMoney(p))}">
+              <div class="pc-trend-bars">
+                <div class="pc-trend-bar" style="height:${pHeight}px" title="${escapeHtml(report.primary?.companyName || "الأساسي")}: ${escapeHtml(formatMoney(p))}"></div>
+                ${report.comparison ? `<div class="pc-trend-bar comparison" style="height:${cHeight}px" title="${escapeHtml(report.comparison?.companyName || "كليوباترا")}: ${escapeHtml(formatMoney(c))}"></div>` : ""}
+              </div>
+              <div class="pc-trend-label">${escapeHtml(bucket)}</div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    </div>
+  `;
+  card.classList.remove("pc-hidden");
+}
+
+function renderBranches(report) {
+  const card = document.getElementById("productComparisonBranchesCard");
+  const container = document.getElementById("productComparisonBranches");
+  if (!card || !container) return;
+
+  const rows = [];
+  [report.primary, report.comparison].filter(Boolean).forEach((company) => {
+    (company.branches || []).forEach((branch) => rows.push({ company, branch }));
+  });
+
+  container.innerHTML = `
+    <div class="pc-table-wrap">
+      <table class="pc-table">
+        <thead>
+          <tr>
+            <th>الشركة</th>
+            <th>الفرع</th>
+            <th>الكمية</th>
+            <th>مبيعات الصنف</th>
+            <th>إجمالي إيراد POS</th>
+            <th>مساهمة الصنف</th>
+            <th>السنة السابقة</th>
+            <th>التغير</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.length ? rows.map(({ company, branch }) => `
+            <tr>
+              <td>${escapeHtml(company.companyName)}</td>
+              <td>${escapeHtml(branch.branchName)}</td>
+              <td>${escapeHtml(formatNumber(branch.current?.netQty))}</td>
+              <td>${escapeHtml(formatMoney(branch.current?.netSales))}</td>
+              <td>${escapeHtml(formatMoney(branch.current?.totalPosRevenue))}</td>
+              <td>${escapeHtml(formatPercent(branch.current?.revenueSharePercent))}<br><small>${escapeHtml(formatMoney(branch.current?.netSales))} من ${escapeHtml(formatMoney(branch.current?.totalPosRevenue))}</small></td>
+              <td>${escapeHtml(formatMoney(branch.previous?.netSales))}</td>
+              <td>${escapeHtml(formatSignedPercent(branch.change?.netSalesPercent))}<br><small>${escapeHtml(formatSignedMoney(branch.change?.netSales))}</small></td>
+            </tr>
+          `).join("") : `<tr><td colspan="8">لا توجد بيانات فروع في الفترة المحددة.</td></tr>`}
+        </tbody>
+      </table>
+    </div>
+  `;
+  card.classList.remove("pc-hidden");
+}
+
+function renderNotes(notes) {
+  const card = document.getElementById("productComparisonNotesCard");
+  const container = document.getElementById("productComparisonNotes");
+  if (!card || !container) return;
+
+  container.innerHTML = `<ul class="pc-notes">${notes.map((note) => `<li>${escapeHtml(note)}</li>`).join("")}</ul>`;
+  card.classList.remove("pc-hidden");
+}
+
+function setProductComparisonStatus(message, isError = false) {
+  const box = document.getElementById("productComparisonStatus");
+  if (!box) return;
+  box.textContent = message;
+  box.classList.toggle("error", isError);
+  box.classList.remove("hidden");
+}
+
+function markReportDirty() {
+  if (!productComparisonState.report) return;
+  setProductComparisonStatus("تم تغيير الفلاتر. اضغط تحديث التقرير لتطبيق القيم الجديدة.");
+}
+
+function formatMoney(value) {
+  const number = Number(value || 0);
+  return `${number.toLocaleString("ar-EG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ر.س`;
+}
+
+function formatNumber(value) {
+  const number = Number(value || 0);
+  return number.toLocaleString("ar-EG", { maximumFractionDigits: 3 });
+}
+
+function formatPercent(value) {
+  const number = Number(value || 0);
+  return `${number.toLocaleString("ar-EG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
+}
+
+function formatSignedMoney(value) {
+  const number = Number(value || 0);
+  return `${number > 0 ? "+" : ""}${formatMoney(number)}`;
+}
+
+function formatSignedNumber(value) {
+  const number = Number(value || 0);
+  return `${number > 0 ? "+" : ""}${formatNumber(number)}`;
+}
+
+function formatSignedPercent(value) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return "جديد / لا توجد قاعدة مقارنة";
+  const number = Number(value || 0);
+  return `${number > 0 ? "+" : ""}${formatPercent(number)}`;
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}

@@ -12,6 +12,7 @@
 
     "inventory-executive-summary",
     "inventory-historical-executive-summary",
+    "inventory-product-comparison",
     "inventory-intermediate-control",
 
     "production-mo-cost",
@@ -32,6 +33,17 @@
   };
 
   const CUSTOM_PARAMS = {
+    "inventory-product-comparison": () => ({
+      companyId: document.getElementById("companySelect")?.value || "",
+      productId: document.getElementById("productId")?.value || "",
+      dateFrom: document.getElementById("dateFrom")?.value || "",
+      dateTo: document.getElementById("dateTo")?.value || "",
+      branchCode: document.getElementById("branchCode")?.value || "all",
+      timezone: "Africa/Cairo",
+      comparisonEnabled: document.getElementById("comparisonEnabled")?.checked ? "true" : "false",
+      comparisonCompanyId: "2",
+      comparisonProductId: document.getElementById("comparisonProductId")?.value || ""
+    }),
     "inventory-reorder-risk": () => ({
       companyId: document.getElementById("companySelect")?.value || "1",
       warehouseRole: document.getElementById("warehouseRole")?.value || "all",

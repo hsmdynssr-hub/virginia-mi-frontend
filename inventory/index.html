@@ -46,6 +46,13 @@
             </p>
           </a>
 
+          ${typeof hasPermission === "function" && hasPermission("inventory-product-comparison") ? `
+          <a class="report-card" href="./product-comparison.html">
+            <span class="page-pill">Product Comparison</span>
+            <h3>مقارنة الأصناف</h3>
+            <p>مبيعات الصنف وكمية البيع ونسبة مساهمته من إيراد POS مع نفس الفترة من السنة السابقة، ومقارنة اختيارية مع صنف كليوباترا.</p>
+          </a>` : ""}
+
           ${typeof hasPermission === "function" && hasPermission("inventory-historical-executive-summary") ? `
           <a class="report-card" href="./historical-executive-summary.html">
             <span class="page-pill">Historical Executive</span>
