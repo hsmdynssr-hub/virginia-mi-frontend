@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>إعدادات رسائل التقييم</title>
+  <title>إعدادات رسائل العملاء والمكافآت</title>
   <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.rtl.min.css" />
   <link rel="stylesheet" href="../css/bootstrap-theme.css" />
   <link rel="stylesheet" href="./review-sms.css?v=sms-core-20260814" />
   <link rel="stylesheet" href="./review-sms-internal.css?v=dual-theme-20260830-01" />
   <script src="../js/api.js" defer></script>
   <script src="../js/layout.js?v=20260904-customer-final-01" defer></script>
-  <script src="./review-sms.js?v=coupon-policy-ui-20260831-01" defer></script>
+  <script src="./review-sms.js?v=direct-reward-mode-20260914-01" defer></script>
   <script src="../js/notifications.js?v=20260901-global-01"></script>
   <link rel="stylesheet" href="../css/mi-app.css?v=20260908-project-unified-01" data-mi-unified-ui="true" />
   <script>
@@ -33,8 +33,8 @@
     <header class="crsms-operation-hero crsms-settings-hero">
       <div>
         <span class="crsms-eyebrow">إعدادات التشغيل</span>
-        <h1>إعدادات رسائل التقييم</h1>
-        <p>تحكم آمن في إرسال الرسائل، قواعد اختيار العملاء، ومكافآت Shopify من خلال حساب المشروع الحالي.</p>
+        <h1>إعدادات رسائل العملاء والمكافآت</h1>
+        <p>تحكم في نظام التقييم أو المكافأة المباشرة، صياغة الرسائل، قواعد اختيار العملاء، ومكافآت Shopify.</p>
       </div>
       <div class="crsms-settings-hero-state">
         <span class="crsms-company-chip"><i></i> Virginia — Company 1</span>
@@ -143,26 +143,47 @@
           </div>
         </article>
 
-        <article class="crsms-panel crsms-settings-section accent-amber crsms-settings-reward-card">
+        <article class="crsms-panel crsms-settings-section accent-blue">
           <div class="crsms-settings-card-head">
             <div class="crsms-settings-number">03</div>
             <div>
+              <span class="crsms-section-kicker">رحلة العميل</span>
+              <h2>نظام الرسالة والمكافأة</h2>
+              <p>اختر النظام الذي سيُطبّق على الرسائل الجديدة فقط. السجلات القديمة تحتفظ بالنظام الذي أُنشئت به.</p>
+            </div>
+          </div>
+          <div class="crsms-form-grid crsms-settings-form-grid">
+            <div class="crsms-field crsms-span-2">
+              <label for="customerCommunicationMode">نظام التواصل مع العميل</label>
+              <select id="customerCommunicationMode">
+                <option value="review_reward">التقييم ثم المكافأة</option>
+                <option value="direct_reward">المكافأة المباشرة داخل الرسالة</option>
+              </select>
+              <small id="communicationModeHelp">في نظام التقييم يتم إرسال رابط التقييم أولًا. في النظام المباشر يتم إنشاء الكوبون على Shopify قبل إرسال SMS ويظهر الكود داخل الرسالة.</small>
+            </div>
+          </div>
+        </article>
+
+        <article class="crsms-panel crsms-settings-section accent-amber crsms-settings-reward-card">
+          <div class="crsms-settings-card-head">
+            <div class="crsms-settings-number">04</div>
+            <div>
               <span class="crsms-section-kicker">كوبونات Shopify</span>
               <h2>سياسات كوبونات Shopify</h2>
-              <p>إعداد مستقل لمكافأة التقييم والكوبون التسويقي اليدوي: شحن مجاني أو خصم مبلغ، وعدد الاستخدامات والصلاحية.</p>
+              <p>سياسة مكافأة العميل تُستخدم في نظام التقييم ونظام المكافأة المباشرة: شحن مجاني أو خصم مبلغ، وعدد الاستخدامات والصلاحية.</p>
             </div>
           </div>
 
           <div class="crsms-coupon-policy-grid">
             <section class="crsms-coupon-policy" data-policy="review">
               <div class="crsms-coupon-policy-head">
-                <div><span>مكافأة التقييم</span><small>تُصدر تلقائيًا بعد التقييم المؤهل.</small></div>
+                <div><span>مكافأة العميل</span><small>بعد التقييم في النظام الحالي، أو قبل إرسال الرسالة في النظام المباشر.</small></div>
                 <label class="crsms-policy-switch"><input id="reviewCouponEnabled" type="checkbox" /><strong>مفعّل</strong></label>
               </div>
               <div class="crsms-form-grid crsms-settings-form-grid">
                 <div class="crsms-field"><label for="reviewCouponDiscountType">نوع الخصم</label><select id="reviewCouponDiscountType"><option value="free_shipping">شحن مجاني</option><option value="amount">خصم مبلغ</option></select></div>
                 <div class="crsms-field" id="reviewCouponAmountField"><label for="reviewCouponDiscountValue">قيمة الخصم</label><div class="crsms-input-suffix"><input id="reviewCouponDiscountValue" type="number" min="0" step="0.01" /><span id="reviewCouponCurrencyLabel">EGP</span></div></div>
-                <div class="crsms-field"><label for="reviewCouponValidityMonths">مدة الصلاحية</label><select id="reviewCouponValidityMonths"><option value="1">شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="9">9 أشهر</option><option value="12">12 شهرًا</option></select></div>
+                <div class="crsms-field"><label for="reviewCouponValidityDays">مدة الصلاحية بالأيام</label><div class="crsms-input-suffix"><input id="reviewCouponValidityDays" type="number" min="1" max="3650" value="30" /><span>يوم</span></div><small>مثال: 15 أو 45 يومًا.</small></div>
                 <div class="crsms-field"><label for="reviewCouponUsageLimit">عدد الاستخدامات الإجمالي</label><input id="reviewCouponUsageLimit" type="number" min="1" step="1" value="1" /></div>
               </div>
               <div class="crsms-toggle-grid crsms-settings-toggle-grid">
@@ -179,7 +200,7 @@
               <div class="crsms-form-grid crsms-settings-form-grid">
                 <div class="crsms-field"><label for="marketingCouponDiscountType">نوع الخصم</label><select id="marketingCouponDiscountType"><option value="free_shipping">شحن مجاني</option><option value="amount">خصم مبلغ</option></select></div>
                 <div class="crsms-field" id="marketingCouponAmountField"><label for="marketingCouponDiscountValue">قيمة الخصم</label><div class="crsms-input-suffix"><input id="marketingCouponDiscountValue" type="number" min="0" step="0.01" /><span id="marketingCouponCurrencyLabel">EGP</span></div></div>
-                <div class="crsms-field"><label for="marketingCouponValidityMonths">مدة الصلاحية</label><select id="marketingCouponValidityMonths"><option value="1">شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="9">9 أشهر</option><option value="12">12 شهرًا</option></select></div>
+                <div class="crsms-field"><label for="marketingCouponValidityDays">مدة الصلاحية بالأيام</label><div class="crsms-input-suffix"><input id="marketingCouponValidityDays" type="number" min="1" max="3650" value="30" /><span>يوم</span></div></div>
                 <div class="crsms-field"><label for="marketingCouponUsageLimit">عدد الاستخدامات الإجمالي</label><input id="marketingCouponUsageLimit" type="number" min="1" step="1" value="1" /></div>
               </div>
               <div class="crsms-toggle-grid crsms-settings-toggle-grid">
@@ -188,6 +209,31 @@
               </div>
             </section>
           </div>
+
+
+          <section class="crsms-coupon-policy" id="rewardCouponModeSection">
+            <div class="crsms-coupon-policy-head">
+              <div><span>طريقة إنشاء الكوبون للرسائل المباشرة</span><small>اختر كوبونًا مستقلًا لكل عميل أو كودًا موحدًا للحملة.</small></div>
+            </div>
+            <div class="crsms-form-grid crsms-settings-form-grid">
+              <div class="crsms-field crsms-span-2"><label for="rewardCouponMode">نوع الكوبون</label><select id="rewardCouponMode"><option value="individual">كود مستقل لكل عميل</option><option value="shared_campaign">كود موحد للحملة</option></select></div>
+            </div>
+            <div id="sharedCampaignSettings" hidden>
+              <div class="crsms-form-grid crsms-settings-form-grid">
+                <div class="crsms-field"><label for="sharedCampaignName">اسم الحملة</label><input id="sharedCampaignName" type="text" maxlength="120" placeholder="مثال: حملة سبتمبر" /></div>
+                <div class="crsms-field"><label for="sharedCampaignCode">كود الحملة</label><input id="sharedCampaignCode" type="text" maxlength="50" placeholder="اختياري - يُنشأ تلقائيًا إذا تُرك فارغًا" /></div>
+                <div class="crsms-field"><label for="sharedCampaignPrimaryLimit">عدد العملاء الأساسيين</label><input id="sharedCampaignPrimaryLimit" type="number" min="1" max="1000000" value="500" /></div>
+                <div class="crsms-field"><label for="sharedCampaignBeneficiaries">مستفيدون إضافيون لكل عميل</label><input id="sharedCampaignBeneficiaries" type="number" min="0" max="100" value="5" /></div>
+                <div class="crsms-field"><label for="sharedCampaignValidityDays">صلاحية الحملة</label><div class="crsms-input-suffix"><input id="sharedCampaignValidityDays" type="number" min="1" max="3650" value="3" /><span>يوم</span></div></div>
+                <div class="crsms-field"><label for="sharedCampaignUsageLimit">حد استخدامات الحملة</label><input id="sharedCampaignUsageLimit" type="number" min="1" max="10000000" value="1000" /></div>
+              </div>
+              <div class="crsms-toggle-grid crsms-settings-toggle-grid">
+                <label class="crsms-toggle-card"><input id="sharedCampaignUnlimited" type="checkbox" checked /><span><strong>استخدامات غير محدودة خلال الصلاحية</strong><small>المحفز الأساسي هو انتهاء المدة، وليس عدد الاستخدامات.</small></span></label>
+                <label class="crsms-toggle-card"><input id="sharedCampaignOncePerCustomer" type="checkbox" /><span><strong>استخدام واحد لكل عميل Shopify</strong><small>اتركه غير مفعّل للسماح بتكرار الاستخدام خلال مدة الحملة.</small></span></label>
+              </div>
+              <small>عدد المستفيدين الإضافيين يُحفظ كسياسة للحملة. الكود الموحد نفسه يمكن مشاركته واستخدامه أكثر من مرة حسب الإعدادات.</small>
+            </div>
+          </section>
 
 
           <div class="crsms-message-template-editor">
@@ -216,6 +262,41 @@
             </div>
           </div>
 
+          <div class="crsms-message-template-editor">
+            <div class="crsms-message-template-head">
+              <div>
+                <h3>صياغة رسالة المكافأة المباشرة</h3>
+                <p>في هذا النظام ينشئ الخادم كوبون Shopify أولًا ثم يضع الكود ورابط صفحة البيع داخل رسالة SMS نفسها.</p>
+              </div>
+              <span class="crsms-template-badge">Direct Reward</span>
+            </div>
+            <div class="crsms-field">
+              <label for="directRewardShopUrl">رابط صفحة البيع على Shopify</label>
+              <input id="directRewardShopUrl" type="url" placeholder="https://your-store.com/collections/..." />
+              <small>يجب أن يبدأ الرابط بـ <code>https://</code>. لن تُرسل رسالة المكافأة المباشرة إذا كان الرابط فارغًا.</small>
+            </div>
+            <div class="crsms-field">
+              <label for="directRewardMessageTemplate">نص رسالة المكافأة المباشرة</label>
+              <textarea id="directRewardMessageTemplate" rows="7" maxlength="2000" dir="rtl" placeholder="اكتب رسالة المكافأة المباشرة هنا..."></textarea>
+              <small>يجب أن تحتوي الرسالة على <code>{{coupon_code}}</code> و <code>{{shop_url}}</code>.</small>
+            </div>
+            <div class="crsms-template-vars" aria-label="متغيرات رسالة المكافأة المباشرة">
+              <button type="button" class="crsms-template-var" data-direct-template-var="{{customer_name}}">اسم العميل</button>
+              <button type="button" class="crsms-template-var" data-direct-template-var="{{order_number}}">رقم الطلب</button>
+              <button type="button" class="crsms-template-var" data-direct-template-var="{{branch_name}}">الفرع</button>
+              <button type="button" class="crsms-template-var" data-direct-template-var="{{reward_text}}">وصف المكافأة</button>
+              <button type="button" class="crsms-template-var" data-direct-template-var="{{coupon_code}}">كود الكوبون</button>
+              <button type="button" class="crsms-template-var" data-direct-template-var="{{coupon_type}}">نوع الكوبون</button>
+              <button type="button" class="crsms-template-var" data-direct-template-var="{{discount_value}}">قيمة الخصم</button>
+              <button type="button" class="crsms-template-var" data-direct-template-var="{{expiry_date}}">تاريخ الانتهاء</button>
+              <button type="button" class="crsms-template-var" data-direct-template-var="{{shop_url}}">رابط المتجر</button>
+            </div>
+            <div class="crsms-template-preview">
+              <strong>معاينة الرسالة المباشرة</strong>
+              <div id="directRewardMessagePreview" class="crsms-template-preview-body"></div>
+            </div>
+          </div>
+
           <div class="crsms-form-grid crsms-settings-form-grid reward-rules crsms-coupon-common-settings">
             <div class="crsms-field"><label for="couponCurrencyCode">عملة خصم المبلغ</label><input id="couponCurrencyCode" type="text" maxlength="3" value="EGP" placeholder="EGP" /></div>
             <div class="crsms-field crsms-span-2"><label for="googleReviewUrl">رابط تقييم Google بعد ظهور مكافأة التقييم</label><input id="googleReviewUrl" type="url" placeholder="https://g.page/r/.../review" /></div>
@@ -227,7 +308,7 @@
             <div class="crsms-compensation-grid">
               <div class="crsms-field"><label for="compensationPhone">رقم العميل / مرجع الكود</label><input id="compensationPhone" type="tel" placeholder="201xxxxxxxxx" /></div>
               <div class="crsms-field"><label for="compensationName">اسم العميل</label><input id="compensationName" type="text" placeholder="اختياري" /></div>
-              <div class="crsms-field"><label for="compensationValidity">مدة الصلاحية لهذا الكوبون</label><select id="compensationValidity"><option value="1">شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="9">9 أشهر</option><option value="12">12 شهرًا</option></select></div>
+              <div class="crsms-field"><label for="compensationValidity">مدة الصلاحية لهذا الكوبون بالأيام</label><div class="crsms-input-suffix"><input id="compensationValidity" type="number" min="1" max="3650" value="30" /><span>يوم</span></div></div>
               <div class="crsms-field"><label for="compensationReason">سبب / حملة التسويق</label><input id="compensationReason" type="text" placeholder="مثال: حملة عملاء أغسطس" /></div>
               <button id="createCompensationCouponBtn" type="button" class="crsms-button reward">إنشاء كوبون تسويقي</button>
             </div>

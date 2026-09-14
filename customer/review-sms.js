@@ -352,8 +352,8 @@
       byId("couponIssuingEnabled").checked = Boolean(settings.couponIssuingEnabled);
     }
 
-    if (byId("couponValidityMonths")) {
-      byId("couponValidityMonths").value = String(settings.couponValidityMonths || 1);
+    if (byId("couponValidityDays")) {
+      byId("couponValidityDays").value = String(settings.couponValidityDays || ((settings.couponValidityMonths || 1) * 30));
     }
 
     if (byId("googleReviewUrl")) {
@@ -380,7 +380,7 @@
         headers: adminHeaders(),
         body: JSON.stringify({
           couponIssuingEnabled: Boolean(byId("couponIssuingEnabled")?.checked),
-          couponValidityMonths: Number(byId("couponValidityMonths")?.value || 1),
+          couponValidityDays: Number(byId("couponValidityDays")?.value || 30),
           googleReviewUrl: String(byId("googleReviewUrl")?.value || "").trim()
         })
       });
@@ -436,7 +436,7 @@
           companyId: getCompanyIdOrNull(),
           customerPhone,
           customerName: String(byId("compensationName")?.value || "").trim(),
-          validityMonths: Number(byId("compensationValidity")?.value || 1),
+          validityDays: Number(byId("compensationValidity")?.value || 30),
           compensationReason: String(byId("compensationReason")?.value || "").trim()
         })
       });
@@ -461,6 +461,7 @@
   }
 
   function getCouponUsageInfo(row = {}) {
+    if (row.couponMode === "shared_campaign") return { key: "unknown", label: "استخدام الحملة مشترك", usedAt: "" };
     const usedAt = row.usedAt || row.redeemedAt || row.lastUsedAt || row.used_at || row.redeemed_at || "";
     const rawCount = row.usageCount ?? row.timesUsed ?? row.usedCount ?? row.usage_count;
     const count = rawCount == null ? null : Number(rawCount);
@@ -559,12 +560,16 @@
     const params = new URLSearchParams();
     const companyId = getCompanyIdOrNull();
     const status = String(byId("couponStatusFilter")?.value || "").trim();
+    const issueSource = String(byId("couponSystemFilter")?.value || "").trim();
+    const couponMode = String(byId("couponModeFilter")?.value || "").trim();
     const phone = String(byId("couponPhoneFilter")?.value || "").trim();
     const dateFrom = String(byId("couponDateFrom")?.value || "").trim();
     const dateTo = String(byId("couponDateTo")?.value || "").trim();
 
     if (companyId) params.set("companyId", companyId);
     if (status) params.set("status", status);
+    if (issueSource) params.set("issueSource", issueSource);
+    if (couponMode) params.set("couponMode", couponMode);
     if (phone) params.set("customerPhone", phone);
     if (dateFrom) params.set("dateFrom", dateFrom);
     if (dateTo) params.set("dateTo", dateTo);
@@ -663,6 +668,13 @@
     }
   }
 
+  function getCouponIssueSourceLabel(issueSource) {
+    if (issueSource === "direct_reward") return "مكافأة مباشرة";
+    if (issueSource === "marketing_manual") return "تسويق يدوي";
+    if (issueSource === "customer_service_compensation") return "تعويض خدمة العملاء";
+    return "تقييم ثم مكافأة";
+  }
+
   function renderCoupons(rows) {
     const tbody = byId("couponsBody");
     if (!tbody) return;
@@ -675,7 +687,8 @@
       <tr>
         <td>${escapeHtml(row.id)}</td>
         <td>${badge(row.status)} ${escapeHtml(getCouponStatusLabel(row.status))}</td>
-        <td>${escapeHtml(row.issueSource === "customer_service_compensation" ? "تعويض خدمة العملاء" : "مكافأة تقييم")}</td>
+        <td>${escapeHtml(getCouponIssueSourceLabel(row.issueSource))}</td>
+        <td>${escapeHtml(row.couponMode === "shared_campaign" ? `حملة موحدة${row.campaignName ? ` · ${row.campaignName}` : ""}` : "مستقل")}</td>
         <td>${escapeHtml(row.customerName || "-")}</td>
         <td>${escapeHtml(row.customerPhone || "-")}</td>
         <td>${escapeHtml(row.odooOrderName || "-")}</td>
@@ -683,7 +696,7 @@
         <td><span class="crsms-coupon-type ${escapeHtml(couponType.key)}">${escapeHtml(couponType.label)}</span></td>
         <td><span class="crsms-coupon-usage ${escapeHtml(couponUsage.key)}"${usageTitle}>${escapeHtml(couponUsage.label)}</span></td>
         <td title="${escapeHtml(row.shopifyDiscountId || "")}">${escapeHtml(row.shopifyDiscountId || "-")}</td>
-        <td>${escapeHtml(row.validityMonths)} شهر</td>
+        <td>${escapeHtml(row.validityDays || ((row.validityMonths || 1) * 30))} يوم</td>
         <td>${escapeHtml(formatDate(row.startsAt))}</td>
         <td>${escapeHtml(formatDate(row.endsAt))}</td>
         <td>${escapeHtml(!row.shopifyCustomerId ? "-" : row.shopifyCustomerCreated ? "جديد" : "موجود")}</td>
@@ -983,7 +996,7 @@
     if (byId(`${prefix}CouponEnabled`)) byId(`${prefix}CouponEnabled`).checked = Boolean(policy.enabled);
     if (byId(`${prefix}CouponDiscountType`)) byId(`${prefix}CouponDiscountType`).value = discountType;
     if (byId(`${prefix}CouponDiscountValue`)) byId(`${prefix}CouponDiscountValue`).value = policy.discountValue ?? "";
-    if (byId(`${prefix}CouponValidityMonths`)) byId(`${prefix}CouponValidityMonths`).value = String(policy.validityMonths || 1);
+    if (byId(`${prefix}CouponValidityDays`)) byId(`${prefix}CouponValidityDays`).value = String(policy.validityDays || ((policy.validityMonths || 1) * 30));
     if (byId(`${prefix}CouponUsageLimit`)) byId(`${prefix}CouponUsageLimit`).value = String(policy.usageLimit ?? 1);
     if (byId(`${prefix}CouponUnlimited`)) byId(`${prefix}CouponUnlimited`).checked = Boolean(policy.unlimited || policy.usageLimit == null);
     if (byId(`${prefix}CouponOncePerCustomer`)) byId(`${prefix}CouponOncePerCustomer`).checked = Boolean(policy.oncePerCustomer);
@@ -1000,7 +1013,7 @@
       usageLimit: Math.max(1, Number(byId(`${prefix}CouponUsageLimit`)?.value || 1)),
       unlimited,
       oncePerCustomer: Boolean(byId(`${prefix}CouponOncePerCustomer`)?.checked),
-      validityMonths: Number(byId(`${prefix}CouponValidityMonths`)?.value || 1)
+      validityDays: Number(byId(`${prefix}CouponValidityDays`)?.value || 30)
     };
   }
 
@@ -1022,9 +1035,23 @@
     if (byId("lookbackMinutes")) byId("lookbackMinutes").value = settings.customerLookbackMinutes ?? 10080;
     if (byId("limit")) byId("limit").value = settings.customerScanLimit ?? 100;
     if (byId("repeatPolicy")) byId("repeatPolicy").value = settings.customerRepeatPolicy || "same_day";
+    if (byId("customerCommunicationMode")) byId("customerCommunicationMode").value = settings.customerCommunicationMode || "review_reward";
+    if (byId("directRewardShopUrl")) byId("directRewardShopUrl").value = settings.directRewardShopUrl || "";
+    if (byId("directRewardMessageTemplate")) byId("directRewardMessageTemplate").value = settings.directRewardMessageTemplate || "";
+    if (byId("rewardCouponMode")) byId("rewardCouponMode").value = settings.rewardCouponMode || "individual";
+    const campaign = settings.sharedCampaign || {};
+    if (byId("sharedCampaignName")) byId("sharedCampaignName").value = campaign.name || "";
+    if (byId("sharedCampaignCode")) byId("sharedCampaignCode").value = campaign.code || "";
+    if (byId("sharedCampaignPrimaryLimit")) byId("sharedCampaignPrimaryLimit").value = campaign.primaryCustomerLimit ?? 500;
+    if (byId("sharedCampaignBeneficiaries")) byId("sharedCampaignBeneficiaries").value = campaign.beneficiariesPerCustomer ?? 5;
+    if (byId("sharedCampaignValidityDays")) byId("sharedCampaignValidityDays").value = campaign.validityDays ?? 3;
+    if (byId("sharedCampaignUnlimited")) byId("sharedCampaignUnlimited").checked = campaign.unlimited !== false;
+    if (byId("sharedCampaignUsageLimit")) byId("sharedCampaignUsageLimit").value = campaign.usageLimit ?? 1000;
+    if (byId("sharedCampaignOncePerCustomer")) byId("sharedCampaignOncePerCustomer").checked = Boolean(campaign.oncePerCustomer);
+    toggleSharedCampaignSettings();
     applyCouponPolicyToSettingsUi("review", settings.reviewCoupon || {
       enabled: settings.couponIssuingEnabled,
-      validityMonths: settings.couponValidityMonths || 1,
+      validityDays: settings.couponValidityDays || ((settings.couponValidityMonths || 1) * 30),
       discountType: "free_shipping",
       usageLimit: 1
     });
@@ -1038,7 +1065,9 @@
       byId("reviewMessageTemplate").value = settings.reviewMessageTemplate || "";
       updateReviewMessagePreview(settings);
     }
-    if (byId("compensationValidity")) byId("compensationValidity").value = String(settings.marketingCoupon?.validityMonths || 1);
+    updateDirectRewardMessagePreview(settings);
+    updateCommunicationModeHelp();
+    if (byId("compensationValidity")) byId("compensationValidity").value = String(settings.marketingCoupon?.validityDays || 30);
   }
 
   function collectAllSettings() {
@@ -1052,6 +1081,20 @@
       customerLookbackMinutes: Number(byId("lookbackMinutes")?.value || 1),
       customerScanLimit: Number(byId("limit")?.value || 100),
       customerRepeatPolicy: byId("repeatPolicy")?.value || "same_day",
+      customerCommunicationMode: byId("customerCommunicationMode")?.value || "review_reward",
+      directRewardShopUrl: String(byId("directRewardShopUrl")?.value || "").trim(),
+      directRewardMessageTemplate: String(byId("directRewardMessageTemplate")?.value || "").trim(),
+      rewardCouponMode: byId("rewardCouponMode")?.value || "individual",
+      sharedCampaign: {
+        name: String(byId("sharedCampaignName")?.value || "").trim(),
+        code: String(byId("sharedCampaignCode")?.value || "").trim(),
+        primaryCustomerLimit: Number(byId("sharedCampaignPrimaryLimit")?.value || 500),
+        beneficiariesPerCustomer: Number(byId("sharedCampaignBeneficiaries")?.value || 5),
+        validityDays: Number(byId("sharedCampaignValidityDays")?.value || 3),
+        unlimited: Boolean(byId("sharedCampaignUnlimited")?.checked),
+        usageLimit: Number(byId("sharedCampaignUsageLimit")?.value || 1000),
+        oncePerCustomer: Boolean(byId("sharedCampaignOncePerCustomer")?.checked)
+      },
       reviewCoupon: collectCouponPolicyFromSettingsUi("review"),
       marketingCoupon: collectCouponPolicyFromSettingsUi("marketing"),
       couponCurrencyCode: currency,
@@ -1159,6 +1202,62 @@
     updateReviewMessagePreview();
   }
 
+  function updateCommunicationModeHelp() {
+    const help = byId("communicationModeHelp");
+    if (!help) return;
+    const mode = byId("customerCommunicationMode")?.value || "review_reward";
+    help.textContent = mode === "direct_reward"
+      ? "المكافأة المباشرة: يتم إنشاء كوبون Shopify أولًا ثم يُرسل الكود ورابط البيع داخل SMS. إذا فشل إنشاء الكوبون فلن تُرسل الرسالة."
+      : "التقييم ثم المكافأة: يستلم العميل رابط التقييم أولًا، وبعد التقييم المؤهل يتم إصدار المكافأة بالطريقة الحالية.";
+  }
+
+  function toggleSharedCampaignSettings() {
+    const shared = (byId("rewardCouponMode")?.value || "individual") === "shared_campaign";
+    if (byId("sharedCampaignSettings")) byId("sharedCampaignSettings").hidden = !shared;
+    if (byId("sharedCampaignUsageLimit")) byId("sharedCampaignUsageLimit").disabled = Boolean(byId("sharedCampaignUnlimited")?.checked);
+    updateDirectRewardMessagePreview();
+  }
+
+  function updateDirectRewardMessagePreview(settings = null) {
+    const preview = byId("directRewardMessagePreview");
+    const textarea = byId("directRewardMessageTemplate");
+    if (!preview || !textarea) return;
+    let value = String(textarea.value || "");
+    const currency = String(byId("couponCurrencyCode")?.value || settings?.couponCurrencyCode || "EGP").trim().toUpperCase();
+    const discountType = byId("reviewCouponDiscountType")?.value || settings?.reviewCoupon?.discountType || "free_shipping";
+    const discountValue = Number(byId("reviewCouponDiscountValue")?.value || settings?.reviewCoupon?.discountValue || 0);
+    const shopUrl = String(byId("directRewardShopUrl")?.value || settings?.directRewardShopUrl || "https://store.example.com").trim();
+    const replacements = {
+      "{{customer_name}}": "أحمد محمد",
+      "{{order_number}}": "POS/2026/12345",
+      "{{branch_name}}": "فرع فيرجينيا",
+      "{{reward_text}}": getReviewRewardPreviewText(settings),
+      "{{coupon_code}}": "DIR-3385-A1B2C3D4",
+      "{{coupon_type}}": discountType === "amount" ? "خصم قيمة" : "شحن مجاني",
+      "{{discount_value}}": discountType === "amount" && discountValue > 0 ? `${discountValue} ${currency}` : "",
+      "{{expiry_date}}": "2026-10-14",
+      "{{shop_url}}": shopUrl,
+      "{{campaign_name}}": String(byId("sharedCampaignName")?.value || settings?.sharedCampaign?.name || "حملة سبتمبر"),
+      "{{beneficiaries_count}}": String(byId("sharedCampaignBeneficiaries")?.value || settings?.sharedCampaign?.beneficiariesPerCustomer || 5)
+    };
+    for (const [token, replacement] of Object.entries(replacements)) {
+      value = value.replaceAll(token, replacement);
+    }
+    preview.textContent = value || "ستظهر معاينة رسالة المكافأة المباشرة هنا.";
+  }
+
+  function insertDirectRewardTemplateVariable(token) {
+    const textarea = byId("directRewardMessageTemplate");
+    if (!textarea) return;
+    const start = Number.isInteger(textarea.selectionStart) ? textarea.selectionStart : textarea.value.length;
+    const end = Number.isInteger(textarea.selectionEnd) ? textarea.selectionEnd : start;
+    textarea.value = `${textarea.value.slice(0, start)}${token}${textarea.value.slice(end)}`;
+    textarea.focus();
+    const cursor = start + token.length;
+    textarea.setSelectionRange(cursor, cursor);
+    updateDirectRewardMessagePreview();
+  }
+
   function initSettingsPage() {
     const user = getCurrentProjectUser();
     setSettingsGate(false, user, "جاري التحقق من صلاحية حساب المشروع...");
@@ -1171,16 +1270,33 @@
       syncCouponPolicyUi(prefix);
     }
     byId("reviewMessageTemplate")?.addEventListener("input", () => updateReviewMessagePreview());
+    byId("directRewardMessageTemplate")?.addEventListener("input", () => updateDirectRewardMessagePreview());
+    byId("directRewardShopUrl")?.addEventListener("input", () => updateDirectRewardMessagePreview());
+    byId("rewardCouponMode")?.addEventListener("change", toggleSharedCampaignSettings);
+    byId("sharedCampaignUnlimited")?.addEventListener("change", toggleSharedCampaignSettings);
+    byId("sharedCampaignName")?.addEventListener("input", () => updateDirectRewardMessagePreview());
+    byId("sharedCampaignBeneficiaries")?.addEventListener("input", () => updateDirectRewardMessagePreview());
+    byId("customerCommunicationMode")?.addEventListener("change", updateCommunicationModeHelp);
     document.querySelectorAll("[data-template-var]").forEach((button) => {
       button.addEventListener("click", () => insertReviewTemplateVariable(button.dataset.templateVar || ""));
     });
-    byId("reviewCouponDiscountType")?.addEventListener("change", () => updateReviewMessagePreview());
-    byId("reviewCouponDiscountValue")?.addEventListener("input", () => updateReviewMessagePreview());
+    document.querySelectorAll("[data-direct-template-var]").forEach((button) => {
+      button.addEventListener("click", () => insertDirectRewardTemplateVariable(button.dataset.directTemplateVar || ""));
+    });
+    byId("reviewCouponDiscountType")?.addEventListener("change", () => {
+      updateReviewMessagePreview();
+      updateDirectRewardMessagePreview();
+    });
+    byId("reviewCouponDiscountValue")?.addEventListener("input", () => {
+      updateReviewMessagePreview();
+      updateDirectRewardMessagePreview();
+    });
     byId("couponCurrencyCode")?.addEventListener("input", (event) => {
       const currency = String(event.currentTarget.value || "EGP").trim().toUpperCase();
       if (byId("reviewCouponCurrencyLabel")) byId("reviewCouponCurrencyLabel").textContent = currency || "EGP";
       if (byId("marketingCouponCurrencyLabel")) byId("marketingCouponCurrencyLabel").textContent = currency || "EGP";
       updateReviewMessagePreview();
+      updateDirectRewardMessagePreview();
     });
     setStatus("جاري استخدام جلسة تسجيل دخول المشروع...");
     authorizeSettingsFromProjectSession();

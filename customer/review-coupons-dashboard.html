@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="./review-sms-internal.css?v=dual-theme-20260830-01" />
   <script src="../js/api.js" defer></script>
   <script src="../js/layout.js?v=20260904-customer-final-01" defer></script>
-  <script src="./review-sms.js?v=customer-rewards-card-filter-20260914-02" defer></script>
+  <script src="./review-sms.js?v=direct-reward-mode-20260914-03" defer></script>
   <script src="../js/notifications.js?v=20260901-global-01"></script>
   <link rel="stylesheet" href="../css/mi-app.css?v=20260913-customer-live-01" data-mi-unified-ui="true" />
   <script>
@@ -61,7 +61,7 @@
       <div class="crsms-compensation-grid">
         <div class="crsms-field"><label for="compensationPhone">رقم العميل</label><input id="compensationPhone" type="tel" placeholder="201xxxxxxxxx" /></div>
         <div class="crsms-field"><label for="compensationName">اسم العميل</label><input id="compensationName" type="text" placeholder="اختياري" /></div>
-        <div class="crsms-field"><label for="compensationValidity">مدة الصلاحية</label><select id="compensationValidity"><option value="1">شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="9">9 أشهر</option><option value="12">12 شهرًا</option></select></div>
+        <div class="crsms-field"><label for="compensationValidity">مدة الصلاحية بالأيام</label><div class="crsms-input-suffix"><input id="compensationValidity" type="number" min="1" max="3650" value="30" /><span>يوم</span></div></div>
         <div class="crsms-field"><label for="compensationReason">سبب التعويض</label><input id="compensationReason" type="text" placeholder="مثال: تأخر الطلب أو شكوى خدمة" /></div>
         <button type="button" class="crsms-button reward" data-coupon-action="create-compensation">إنشاء كوبون الشحن المجاني</button>
       </div>
@@ -80,6 +80,23 @@
       <div class="crsms-coupons-filter-grid">
         <div class="crsms-field"><label for="couponDateFrom">من تاريخ</label><input id="couponDateFrom" type="date" /></div>
         <div class="crsms-field"><label for="couponDateTo">إلى تاريخ</label><input id="couponDateTo" type="date" /></div>
+        <div class="crsms-field">
+          <label for="couponSystemFilter">نوع النظام</label>
+          <select id="couponSystemFilter">
+            <option value="">كل الأنظمة</option>
+            <option value="review_reward">التقييم ثم المكافأة</option>
+            <option value="direct_reward">المكافأة المباشرة</option>
+            <option value="marketing_manual">تسويق يدوي</option>
+          </select>
+        </div>
+        <div class="crsms-field">
+          <label for="couponModeFilter">طريقة الكوبون</label>
+          <select id="couponModeFilter">
+            <option value="">الكل</option>
+            <option value="individual">كود مستقل</option>
+            <option value="shared_campaign">كود حملة موحد</option>
+          </select>
+        </div>
         <div class="crsms-field">
           <label for="couponStatusFilter">حالة المكافأة</label>
           <select id="couponStatusFilter">
@@ -136,10 +153,10 @@
       <div class="crsms-table-wrap">
         <table class="crsms-table crsms-coupons-table">
           <thead><tr>
-            <th>ID</th><th>الحالة</th><th>المصدر</th><th>العميل</th><th>الموبايل</th><th>الفاتورة</th><th>الكوبون</th><th>نوع الكوبون</th><th>استفاد العميل؟</th><th>معرّف Shopify</th><th>المدة</th>
+            <th>ID</th><th>الحالة</th><th>نوع النظام / المصدر</th><th>طريقة الكوبون</th><th>العميل</th><th>الموبايل</th><th>الفاتورة</th><th>الكوبون</th><th>نوع الكوبون</th><th>استفاد العميل؟</th><th>معرّف Shopify</th><th>المدة</th>
             <th>البداية</th><th>الانتهاء</th><th>عميل Shopify</th><th>المحاولات</th><th>الخطأ</th><th>إجراء</th>
           </tr></thead>
-          <tbody id="couponsBody"><tr><td colspan="17">جاري تحميل سجل المكافآت...</td></tr></tbody>
+          <tbody id="couponsBody"><tr><td colspan="18">جاري تحميل سجل المكافآت...</td></tr></tbody>
         </table>
       </div>
     </section>
