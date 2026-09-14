@@ -495,10 +495,10 @@
       const base = getApiBaseFromDashboard();
       const headers = authHeaders();
 
-      const [listData, statsData] = await Promise.all([
-        requestJson(`${base}/coupons?${params.toString()}`, { headers }),
-        requestJson(`${base}/coupons/stats?${params.toString()}`, { headers })
-      ]);
+      // Load the coupon list first because this endpoint refreshes Shopify usage counts.
+      // Stats are fetched afterwards so the used/unused cards always reflect the latest sync.
+      const listData = await requestJson(`${base}/coupons?${params.toString()}`, { headers });
+      const statsData = await requestJson(`${base}/coupons/stats?${params.toString()}`, { headers });
 
       renderCoupons(listData.data || []);
       renderCouponStats(statsData.data || {});
@@ -548,7 +548,11 @@
   function renderCouponStats(stats) {
     if (byId("couponStatTotal")) byId("couponStatTotal").textContent = stats.total ?? 0;
     if (byId("couponStatActive")) byId("couponStatActive").textContent = stats.active ?? 0;
+    if (byId("couponStatUsed")) byId("couponStatUsed").textContent = stats.used ?? 0;
+    if (byId("couponStatUnused")) byId("couponStatUnused").textContent = stats.unused ?? 0;
     if (byId("couponStatFailed")) byId("couponStatFailed").textContent = stats.failed ?? 0;
+    if (byId("couponStatFreeShipping")) byId("couponStatFreeShipping").textContent = stats.free_shipping ?? 0;
+    if (byId("couponStatAmountDiscount")) byId("couponStatAmountDiscount").textContent = stats.amount_discount ?? 0;
     if (byId("couponStatExpired")) byId("couponStatExpired").textContent = stats.expired ?? 0;
     if (byId("couponStatCompensation")) byId("couponStatCompensation").textContent = stats.compensation ?? 0;
     if (byId("couponStatCustomers")) {

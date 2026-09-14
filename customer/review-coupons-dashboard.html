@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="./review-sms-internal.css?v=dual-theme-20260830-01" />
   <script src="../js/api.js" defer></script>
   <script src="../js/layout.js?v=20260904-customer-final-01" defer></script>
-  <script src="./review-sms.js?v=customer-live-20260913-01" defer></script>
+  <script src="./review-sms.js?v=customer-rewards-kpi-20260914-01" defer></script>
   <script src="../js/notifications.js?v=20260901-global-01"></script>
   <link rel="stylesheet" href="../css/mi-app.css?v=20260913-customer-live-01" data-mi-unified-ui="true" />
   <script>
@@ -94,12 +94,17 @@
     </section>
 
     <section class="crsms-stats crsms-coupons-stats" aria-label="مؤشرات المكافآت">
-      <article class="crsms-stat-card tone-purple"><div class="crsms-stat-head"><span>إجمالي المكافآت</span><i>▦</i></div><strong id="couponStatTotal">-</strong><small>كل الكوبونات المسجلة</small></article>
-      <article class="crsms-stat-card tone-green"><div class="crsms-stat-head"><span>نشطة</span><i>✓</i></div><strong id="couponStatActive">-</strong><small>صالحة للاستخدام</small></article>
+      <article class="crsms-stat-card tone-blue"><div class="crsms-stat-head"><span>إجمالي المكافآت</span><i>▦</i></div><strong id="couponStatTotal">-</strong><small>كل الكوبونات المسجلة</small></article>
+      <article class="crsms-stat-card tone-green"><div class="crsms-stat-head"><span>نشطة</span><i>✓</i></div><strong id="couponStatActive">-</strong><small>صالحة للاستخدام الآن</small></article>
+      <article class="crsms-stat-card tone-green"><div class="crsms-stat-head"><span>مستخدمة</span><i>✓</i></div><strong id="couponStatUsed">-</strong><small>استخدمها العميل مرة على الأقل</small></article>
+      <article class="crsms-stat-card tone-amber"><div class="crsms-stat-head"><span>غير مستخدمة</span><i>○</i></div><strong id="couponStatUnused">-</strong><small>كوبونات صادرة لم تُستخدم بعد</small></article>
       <article class="crsms-stat-card tone-red"><div class="crsms-stat-head"><span>فشل الإصدار</span><i>!</i></div><strong id="couponStatFailed">-</strong><small>تحتاج إعادة محاولة</small></article>
+
+      <article class="crsms-stat-card tone-cyan"><div class="crsms-stat-head"><span>شحن مجاني</span><i>⇢</i></div><strong id="couponStatFreeShipping">-</strong><small>نوع المكافأة: شحن مجاني</small></article>
+      <article class="crsms-stat-card tone-blue"><div class="crsms-stat-head"><span>خصم قيمة على الفاتورة</span><i>٪</i></div><strong id="couponStatAmountDiscount">-</strong><small>كوبونات خصم مبلغ من الفاتورة</small></article>
       <article class="crsms-stat-card tone-amber"><div class="crsms-stat-head"><span>منتهية</span><i>⌛</i></div><strong id="couponStatExpired">-</strong><small>تجاوزت تاريخ الصلاحية</small></article>
-      <article class="crsms-stat-card tone-blue"><div class="crsms-stat-head"><span>عملاء Shopify جدد</span><i>＋</i></div><strong id="couponStatCustomers">-</strong><small>تم إنشاؤهم أثناء الإصدار</small></article>
       <article class="crsms-stat-card tone-green"><div class="crsms-stat-head"><span>تعويضات خدمة العملاء</span><i>◎</i></div><strong id="couponStatCompensation">-</strong><small>كوبونات أُنشئت كتعويض مباشر</small></article>
+      <article class="crsms-stat-card tone-blue"><div class="crsms-stat-head"><span>عملاء Shopify جدد</span><i>＋</i></div><strong id="couponStatCustomers">-</strong><small>تم إنشاؤهم أثناء الإصدار</small></article>
     </section>
 
     <section class="crsms-panel crsms-coupons-results-panel">
