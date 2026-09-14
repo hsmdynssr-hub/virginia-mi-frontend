@@ -548,8 +548,8 @@
   function renderCouponStats(stats) {
     if (byId("couponStatTotal")) byId("couponStatTotal").textContent = stats.total ?? 0;
     if (byId("couponStatActive")) byId("couponStatActive").textContent = stats.active ?? 0;
-    if (byId("couponStatUsed")) byId("couponStatUsed").textContent = stats.used ?? 0;
-    if (byId("couponStatUnused")) byId("couponStatUnused").textContent = stats.unused ?? 0;
+    if (byId("couponStatUsed")) byId("couponStatUsed").textContent = stats.used_customers ?? stats.used ?? 0;
+    if (byId("couponStatUnused")) byId("couponStatUnused").textContent = stats.unused_customers ?? stats.unused ?? 0;
     if (byId("couponStatFailed")) byId("couponStatFailed").textContent = stats.failed ?? 0;
     if (byId("couponStatFreeShipping")) byId("couponStatFreeShipping").textContent = stats.free_shipping ?? 0;
     if (byId("couponStatAmountDiscount")) byId("couponStatAmountDiscount").textContent = stats.amount_discount ?? 0;
