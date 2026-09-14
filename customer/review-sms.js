@@ -1243,6 +1243,20 @@
     for (const [token, replacement] of Object.entries(replacements)) {
       value = value.replaceAll(token, replacement);
     }
+
+    if ((byId("rewardCouponMode")?.value || settings?.rewardCouponMode || "individual") === "shared_campaign") {
+      const code = replacements["{{coupon_code}}"] || "";
+      if (code && value.includes(code)) {
+        value = value.split("\n").flatMap((line) => {
+          if (!line.includes(code)) return [line];
+          const index = line.indexOf(code);
+          const before = line.slice(0, index).trimEnd();
+          const after = line.slice(index + code.length).trimStart();
+          return [before, code, after].filter(Boolean);
+        }).join("\n");
+      }
+    }
+
     preview.textContent = value || "ستظهر معاينة رسالة المكافأة المباشرة هنا.";
   }
 
