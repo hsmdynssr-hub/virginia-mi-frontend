@@ -24,6 +24,10 @@
   let followupsPaginationMode = "auto";
   let followupHasUnsavedChanges = false;
 
+  let couponDashboardRows = [];
+  let couponCardFilter = "all";
+
+
   document.addEventListener("DOMContentLoaded", () => {
     localStorage.removeItem("reviewSmsAdminKey");
     localStorage.removeItem("reviewSmsApiBase");
@@ -332,7 +336,9 @@
       }
     });
 
-    setStatus("جاهز. لا يتم إصدار كوبونات من هذه الصفحة تلقائيًا.");
+    initCouponCardFilters();
+
+    setStatus("جاهز. اضغط على أي كارت لتصفية سجل المكافآت مباشرة.");
     loadCouponSettings();
     initLiveRefresh(({ silent }) => loadCoupons({ silent }));
     runLiveRefresh({ force: true, silent: false });
@@ -464,6 +470,91 @@
     return { key: "unknown", label: "غير معروف", usedAt: "" };
   }
 
+  const COUPON_CARD_FILTER_LABELS = {
+    all: "كل المكافآت",
+    active: "المكافآت النشطة",
+    used: "الكوبونات المستخدمة",
+    unused: "الكوبونات غير المستخدمة",
+    failed: "فشل الإصدار",
+    free_shipping: "كوبونات الشحن المجاني",
+    amount_discount: "خصم قيمة على الفاتورة",
+    expired: "الكوبونات المنتهية",
+    compensation: "تعويضات خدمة العملاء",
+    customers_created: "عملاء Shopify الجدد"
+  };
+
+  function couponRowMatchesCardFilter(row, filterKey = couponCardFilter) {
+    if (!filterKey || filterKey === "all") return true;
+    const usage = getCouponUsageInfo(row);
+    const type = getCouponTypeInfo(row);
+
+    if (filterKey === "active") return row.status === "active";
+    if (filterKey === "used") return usage.key === "used";
+    if (filterKey === "unused") return usage.key === "unused";
+    if (filterKey === "failed") return row.status === "failed";
+    if (filterKey === "free_shipping") return type.key === "free_shipping";
+    if (filterKey === "amount_discount") return type.key === "amount_discount";
+    if (filterKey === "expired") return row.status === "expired";
+    if (filterKey === "compensation") {
+      return ["customer_service_compensation", "marketing_manual"].includes(String(row.issueSource || ""));
+    }
+    if (filterKey === "customers_created") return Boolean(row.shopifyCustomerCreated);
+    return true;
+  }
+
+  function getCouponFilteredRows() {
+    return couponDashboardRows.filter((row) => couponRowMatchesCardFilter(row));
+  }
+
+  function updateCouponCardFilterUi() {
+    document.querySelectorAll("[data-coupon-card-filter]").forEach((card) => {
+      const active = String(card.dataset.couponCardFilter || "all") === couponCardFilter;
+      card.classList.toggle("is-filter-active", active);
+      card.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+
+    const state = byId("couponCardFilterState");
+    const label = byId("couponCardFilterLabel");
+    if (label) label.textContent = COUPON_CARD_FILTER_LABELS[couponCardFilter] || "فلتر الكروت";
+    if (state) state.hidden = couponCardFilter === "all";
+  }
+
+  function applyCouponCardFilter({ scroll = false } = {}) {
+    const rows = getCouponFilteredRows();
+    renderCoupons(rows);
+    updateCouponCardFilterUi();
+    const count = byId("couponCardFilterCount");
+    if (count) count.textContent = String(rows.length);
+    if (scroll) byId("couponsResultsPanel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return rows.length;
+  }
+
+  function setCouponCardFilter(filterKey) {
+    const next = String(filterKey || "all");
+    couponCardFilter = couponCardFilter === next && next !== "all" ? "all" : next;
+    const count = applyCouponCardFilter({ scroll: true });
+    const label = COUPON_CARD_FILTER_LABELS[couponCardFilter] || "كل المكافآت";
+    setStatus(couponCardFilter === "all" ? `تم إلغاء فلتر الكروت. عرض ${count} سجل.` : `فلتر الكارت: ${label} — ${count} سجل ظاهر.`);
+  }
+
+  function initCouponCardFilters() {
+    document.querySelectorAll("[data-coupon-card-filter]").forEach((card) => {
+      card.setAttribute("role", "button");
+      card.setAttribute("tabindex", "0");
+      card.setAttribute("aria-pressed", "false");
+      const activate = () => setCouponCardFilter(card.dataset.couponCardFilter);
+      card.addEventListener("click", activate);
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          activate();
+        }
+      });
+    });
+    byId("clearCouponCardFilter")?.addEventListener("click", () => setCouponCardFilter("all"));
+    updateCouponCardFilterUi();
+  }
+
   function getCouponFilters() {
     const params = new URLSearchParams();
     const companyId = getCompanyIdOrNull();
@@ -495,14 +586,26 @@
       const base = getApiBaseFromDashboard();
       const headers = authHeaders();
 
+      // Keep a broad local snapshot while a KPI card filter is active so the card can
+      // filter the visible register immediately without another page reload.
+      const listParams = new URLSearchParams(params);
+      if (couponCardFilter !== "all") {
+        const currentLimit = Number(listParams.get("limit") || 100);
+        listParams.set("limit", String(Math.max(currentLimit, 500)));
+      }
+
       // Load the coupon list first because this endpoint refreshes Shopify usage counts.
       // Stats are fetched afterwards so the used/unused cards always reflect the latest sync.
-      const listData = await requestJson(`${base}/coupons?${params.toString()}`, { headers });
+      const listData = await requestJson(`${base}/coupons?${listParams.toString()}`, { headers });
       const statsData = await requestJson(`${base}/coupons/stats?${params.toString()}`, { headers });
 
-      renderCoupons(listData.data || []);
+      couponDashboardRows = Array.isArray(listData.data) ? listData.data : [];
+      const visibleCount = applyCouponCardFilter();
       renderCouponStats(statsData.data || {});
-      if (!silent) setStatus(`تم تحميل ${listData.data?.length || 0} كوبون.`);
+      if (!silent) {
+        const suffix = couponCardFilter === "all" ? "" : ` — المعروض بعد فلتر الكارت: ${visibleCount}`;
+        setStatus(`تم تحميل ${couponDashboardRows.length} كوبون${suffix}.`);
+      }
       return true;
     } catch (error) {
       if (!silent) setStatus(`Coupons Error: ${error.message}`);

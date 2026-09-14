@@ -10,13 +10,23 @@
   <link rel="stylesheet" href="./review-sms-internal.css?v=dual-theme-20260830-01" />
   <script src="../js/api.js" defer></script>
   <script src="../js/layout.js?v=20260904-customer-final-01" defer></script>
-  <script src="./review-sms.js?v=customer-rewards-kpi-20260914-01" defer></script>
+  <script src="./review-sms.js?v=customer-rewards-card-filter-20260914-02" defer></script>
   <script src="../js/notifications.js?v=20260901-global-01"></script>
   <link rel="stylesheet" href="../css/mi-app.css?v=20260913-customer-live-01" data-mi-unified-ui="true" />
   <script>
     document.documentElement.classList.add("mi-app-preboot");
     setTimeout(() => document.documentElement.classList.remove("mi-app-preboot"), 3000);
   </script>
+  <style>
+    .crsms-coupons-stats .crsms-stat-card[data-coupon-card-filter] { cursor: pointer; transition: transform .16s ease, box-shadow .16s ease, outline-color .16s ease; outline: 2px solid transparent; outline-offset: 2px; }
+    .crsms-coupons-stats .crsms-stat-card[data-coupon-card-filter]:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(30, 41, 59, .10); }
+    .crsms-coupons-stats .crsms-stat-card[data-coupon-card-filter]:focus-visible { outline-color: #6d5dfc; }
+    .crsms-coupons-stats .crsms-stat-card[data-coupon-card-filter].is-filter-active { outline-color: #6d5dfc; box-shadow: 0 10px 28px rgba(109, 93, 252, .18); }
+    .crsms-coupon-filter-state { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:0 0 12px; padding:10px 12px; border:1px solid rgba(109,93,252,.18); border-radius:12px; background:rgba(109,93,252,.05); }
+    .crsms-coupon-filter-state[hidden] { display:none !important; }
+    .crsms-coupon-filter-state strong { color:#4f46e5; }
+    .crsms-coupon-filter-state button { border:0; border-radius:9px; padding:6px 10px; background:#fff; color:#4f46e5; cursor:pointer; font-weight:700; }
+  </style>
 </head>
 
 <body class="crsms-internal-page crsms-coupons-page" data-page="coupon-dashboard" data-report-code="customer.review_sms.view" data-active-page="customer-review-coupons-dashboard">
@@ -94,20 +104,20 @@
     </section>
 
     <section class="crsms-stats crsms-coupons-stats" aria-label="مؤشرات المكافآت">
-      <article class="crsms-stat-card tone-blue"><div class="crsms-stat-head"><span>إجمالي المكافآت</span><i>▦</i></div><strong id="couponStatTotal">-</strong><small>كل الكوبونات المسجلة</small></article>
-      <article class="crsms-stat-card tone-green"><div class="crsms-stat-head"><span>نشطة</span><i>✓</i></div><strong id="couponStatActive">-</strong><small>صالحة للاستخدام الآن</small></article>
-      <article class="crsms-stat-card tone-green"><div class="crsms-stat-head"><span>عملاء استخدموا الكوبون</span><i>✓</i></div><strong id="couponStatUsed">-</strong><small>عدد العملاء الفريدين الذين استخدموا كوبونًا مرة على الأقل</small></article>
-      <article class="crsms-stat-card tone-amber"><div class="crsms-stat-head"><span>عملاء لم يستخدموا الكوبون</span><i>○</i></div><strong id="couponStatUnused">-</strong><small>عملاء لديهم كوبون صادر ولم يستخدموا أي كوبون بعد</small></article>
-      <article class="crsms-stat-card tone-red"><div class="crsms-stat-head"><span>فشل الإصدار</span><i>!</i></div><strong id="couponStatFailed">-</strong><small>تحتاج إعادة محاولة</small></article>
+      <article class="crsms-stat-card tone-blue" data-coupon-card-filter="all" title="اضغط لتصفية سجل المكافآت"><div class="crsms-stat-head"><span>إجمالي المكافآت</span><i>▦</i></div><strong id="couponStatTotal">-</strong><small>كل الكوبونات المسجلة</small></article>
+      <article class="crsms-stat-card tone-green" data-coupon-card-filter="active" title="اضغط لتصفية سجل المكافآت"><div class="crsms-stat-head"><span>نشطة</span><i>✓</i></div><strong id="couponStatActive">-</strong><small>صالحة للاستخدام الآن</small></article>
+      <article class="crsms-stat-card tone-green" data-coupon-card-filter="used" title="اضغط لتصفية سجل المكافآت"><div class="crsms-stat-head"><span>عملاء استخدموا الكوبون</span><i>✓</i></div><strong id="couponStatUsed">-</strong><small>عدد العملاء الفريدين الذين استخدموا كوبونًا مرة على الأقل</small></article>
+      <article class="crsms-stat-card tone-amber" data-coupon-card-filter="unused" title="اضغط لتصفية سجل المكافآت"><div class="crsms-stat-head"><span>عملاء لم يستخدموا الكوبون</span><i>○</i></div><strong id="couponStatUnused">-</strong><small>عملاء لديهم كوبون صادر ولم يستخدموا أي كوبون بعد</small></article>
+      <article class="crsms-stat-card tone-red" data-coupon-card-filter="failed" title="اضغط لتصفية سجل المكافآت"><div class="crsms-stat-head"><span>فشل الإصدار</span><i>!</i></div><strong id="couponStatFailed">-</strong><small>تحتاج إعادة محاولة</small></article>
 
-      <article class="crsms-stat-card tone-cyan"><div class="crsms-stat-head"><span>شحن مجاني</span><i>⇢</i></div><strong id="couponStatFreeShipping">-</strong><small>نوع المكافأة: شحن مجاني</small></article>
-      <article class="crsms-stat-card tone-blue"><div class="crsms-stat-head"><span>خصم قيمة على الفاتورة</span><i>٪</i></div><strong id="couponStatAmountDiscount">-</strong><small>كوبونات خصم مبلغ من الفاتورة</small></article>
-      <article class="crsms-stat-card tone-amber"><div class="crsms-stat-head"><span>منتهية</span><i>⌛</i></div><strong id="couponStatExpired">-</strong><small>تجاوزت تاريخ الصلاحية</small></article>
-      <article class="crsms-stat-card tone-green"><div class="crsms-stat-head"><span>تعويضات خدمة العملاء</span><i>◎</i></div><strong id="couponStatCompensation">-</strong><small>كوبونات أُنشئت كتعويض مباشر</small></article>
-      <article class="crsms-stat-card tone-blue"><div class="crsms-stat-head"><span>عملاء Shopify جدد</span><i>＋</i></div><strong id="couponStatCustomers">-</strong><small>تم إنشاؤهم أثناء الإصدار</small></article>
+      <article class="crsms-stat-card tone-cyan" data-coupon-card-filter="free_shipping" title="اضغط لتصفية سجل المكافآت"><div class="crsms-stat-head"><span>شحن مجاني</span><i>⇢</i></div><strong id="couponStatFreeShipping">-</strong><small>نوع المكافأة: شحن مجاني</small></article>
+      <article class="crsms-stat-card tone-blue" data-coupon-card-filter="amount_discount" title="اضغط لتصفية سجل المكافآت"><div class="crsms-stat-head"><span>خصم قيمة على الفاتورة</span><i>٪</i></div><strong id="couponStatAmountDiscount">-</strong><small>كوبونات خصم مبلغ من الفاتورة</small></article>
+      <article class="crsms-stat-card tone-amber" data-coupon-card-filter="expired" title="اضغط لتصفية سجل المكافآت"><div class="crsms-stat-head"><span>منتهية</span><i>⌛</i></div><strong id="couponStatExpired">-</strong><small>تجاوزت تاريخ الصلاحية</small></article>
+      <article class="crsms-stat-card tone-green" data-coupon-card-filter="compensation" title="اضغط لتصفية سجل المكافآت"><div class="crsms-stat-head"><span>تعويضات خدمة العملاء</span><i>◎</i></div><strong id="couponStatCompensation">-</strong><small>كوبونات أُنشئت كتعويض مباشر</small></article>
+      <article class="crsms-stat-card tone-blue" data-coupon-card-filter="customers_created" title="اضغط لتصفية سجل المكافآت"><div class="crsms-stat-head"><span>عملاء Shopify جدد</span><i>＋</i></div><strong id="couponStatCustomers">-</strong><small>تم إنشاؤهم أثناء الإصدار</small></article>
     </section>
 
-    <section class="crsms-panel crsms-coupons-results-panel">
+    <section class="crsms-panel crsms-coupons-results-panel" id="couponsResultsPanel">
       <div class="crsms-section-title">
         <div>
           <span class="crsms-section-kicker">سجل المكافآت</span>
@@ -115,6 +125,12 @@
           <p>الكوبون وحالته ومدة صلاحيته ومحاولات الإصدار على Shopify.</p>
         </div>
         <button type="button" class="crsms-button secondary" data-coupon-action="load-coupons"><span>↻</span> تحديث السجل</button>
+      </div>
+
+      <div class="crsms-coupon-filter-state" id="couponCardFilterState" hidden>
+        <span>فلتر السجل من الكارت: <strong id="couponCardFilterLabel">كل المكافآت</strong></span>
+        <span>النتائج: <strong id="couponCardFilterCount">0</strong></span>
+        <button type="button" id="clearCouponCardFilter">إلغاء فلتر الكارت</button>
       </div>
 
       <div class="crsms-table-wrap">
