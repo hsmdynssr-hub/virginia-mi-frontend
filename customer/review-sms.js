@@ -1108,7 +1108,60 @@
       headers: settingsSessionHeaders()
     });
     applyAllSettings(data.data || {});
+    await loadManualTestSummary().catch(() => {});
     setStatus("تم تحميل إعدادات منظومة الرسائل.");
+  }
+
+
+  function renderManualTestSummary(data = {}) {
+    const box = byId("manualTestCleanupSummary");
+    if (!box) return;
+    const logs = Number(data.logs || 0);
+    const coupons = Number(data.coupons || 0);
+    const followups = Number(data.followups || 0);
+    box.textContent = logs
+      ? `موجود ${logs} رسالة اختبار يدوي، ${coupons} كوبون مرتبط، ${followups} متابعة مرتبطة.`
+      : "لا توجد سجلات اختبار يدوي محفوظة حاليًا.";
+    const button = byId("deleteManualTestsBtn");
+    if (button) button.disabled = logs === 0;
+  }
+
+  async function loadManualTestSummary() {
+    const data = await requestJson(`${getApiBaseFromDashboard()}/manual-tests/summary`, {
+      headers: settingsSessionHeaders()
+    });
+    renderManualTestSummary(data.data || {});
+    return data.data || {};
+  }
+
+  async function deleteManualTests() {
+    const button = byId("deleteManualTestsBtn");
+    try {
+      const summary = await loadManualTestSummary();
+      const count = Number(summary.logs || 0);
+      if (!count) {
+        setStatus("لا توجد اختبارات يدوية محفوظة للحذف.");
+        return;
+      }
+      const confirmed = window.confirm(
+        `سيتم حذف ${count} رسالة اختبار يدوي وكل الكوبونات والمتابعات المرتبطة بها من قاعدة البيانات.\n\nلن يتم حذف طلبات POS الحقيقية. الرسائل التي وصلت بالفعل إلى الهاتف لا يمكن سحبها.\n\nهل تريد المتابعة؟`
+      );
+      if (!confirmed) return;
+      if (button) { button.disabled = true; button.textContent = "جاري الحذف..."; }
+      const data = await requestJson(`${getApiBaseFromDashboard()}/manual-tests`, {
+        method: "DELETE",
+        headers: settingsSessionHeaders(true),
+        body: JSON.stringify({ confirm: "DELETE_MANUAL_TESTS" })
+      });
+      const result = data.data || {};
+      renderManualTestSummary({ logs: 0, coupons: 0, followups: 0 });
+      setStatus(`تم حذف ${result.deletedLogs || 0} رسالة اختبار يدوي و${result.deletedCoupons || 0} كوبون و${result.deletedFollowups || 0} متابعة مرتبطة.`);
+    } catch (error) {
+      setStatus(`فشل حذف الاختبارات اليدوية: ${error.message}`);
+      await loadManualTestSummary().catch(() => {});
+    } finally {
+      if (button) { button.textContent = "حذف الاختبارات اليدوية"; }
+    }
   }
 
   async function saveAllAdminSettings() {
@@ -1278,6 +1331,7 @@
     byId("reloadAllSettingsBtn")?.addEventListener("click", loadAllAdminSettings);
     byId("saveAllSettingsBtn")?.addEventListener("click", saveAllAdminSettings);
     byId("createCompensationCouponBtn")?.addEventListener("click", (event) => createCompensationCoupon(event.currentTarget));
+    byId("deleteManualTestsBtn")?.addEventListener("click", deleteManualTests);
     for (const prefix of ["review", "marketing"]) {
       byId(`${prefix}CouponDiscountType`)?.addEventListener("change", () => syncCouponPolicyUi(prefix));
       byId(`${prefix}CouponUnlimited`)?.addEventListener("change", () => syncCouponPolicyUi(prefix));
