@@ -270,6 +270,7 @@ const REPORT_PAGE_MAP = {
   pos: "pos.index",
   "pos-summary": "pos.summary",
   "pos-branch-sales": "pos.branch_sales",
+  "pos-product-contribution": "pos.product_contribution",
   "pos-cashiers": "pos.cashiers",
   "pos-peak-hours": "pos.peak_hours",
   "pos-returns": "pos.returns",
@@ -410,12 +411,13 @@ const MI_MODULE_DEFINITIONS = [
   {
     id: "pos",
     label: "المبيعات ونقاط البيع",
-    pages: ["pos","pos-summary","pos-branch-sales","pos-branches","pos-cashiers","pos-peak-hours","pos-returns","pos-discounts","pos-offers","alerts-dashboard"],
+    pages: ["pos","pos-summary","pos-branch-sales","pos-product-contribution","pos-branches","pos-cashiers","pos-peak-hours","pos-returns","pos-discounts","pos-offers","alerts-dashboard"],
     groups: [
       { id:"operations", label:"تشغيل", icon:"⚡", links:[
         {page:"pos",label:"مركز المبيعات",href:"../pos/index.html"},
         {page:"pos-summary",label:"ملخص نقاط البيع",href:"../pos/summary.html"},
         {page:"pos-branch-sales",label:"مبيعات الفروع",href:"../pos/branch-sales.html"},
+        {page:"pos-product-contribution",label:"مساهمة الأصناف",href:"../pos/product-contribution.html"},
         {page:"pos-branches",label:"الفروع ونقاط البيع",href:"../pos/branches.html",permission:"pos.index"},
         {page:"pos-cashiers",label:"أداء الكاشير",href:"../pos/cashiers.html"},
         {page:"pos-peak-hours",label:"ساعات الذروة",href:"../pos/peak-hours.html"},
