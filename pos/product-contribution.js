@@ -129,7 +129,9 @@ async function loadContribution() {
     validateContribution(params);
     status.textContent = "جاري قراءة تقرير Odoo المجمع...";
     const response = await apiGet("/pos/product-contribution", params);
-    const report = response.data;
+    const state = response.data;
+    const report = state?.status === "ready" ? state.report
+      : await waitForContribution(params, status);
     if (!response.success || !report) throw new Error(response.message || "تعذر تحميل التقرير");
     const summary = document.getElementById("contributionSummary");
     summary.textContent = `صافي الإيراد: ${contributionNumber(report.summary.totalRevenue)} | عدد الأصناف: ${report.summary.productsCount}`;
@@ -155,6 +157,20 @@ async function loadContribution() {
     exportButton.disabled = false;
   } catch (error) {
     status.textContent = error.message || "فشل تحميل التقرير";
+  }
+}
+
+async function waitForContribution(params, status) {
+  while (true) {
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    const response = await apiGet("/pos/product-contribution/job", params);
+    const job = response.data;
+    if (job?.status === "ready") return job.report;
+    if (job?.status === "error") throw new Error(job.message || "تعذر تجهيز التقرير");
+    if (job?.status === "missing") throw new Error("توقفت عملية تجهيز التقرير؛ اضغط تحديث التقرير مجددًا");
+    status.textContent = job?.total
+      ? `جاري تجهيز التقرير: ${job.completed} من ${job.total} شهر...`
+      : "جاري تجهيز التقرير من بيانات Odoo...";
   }
 }
 
