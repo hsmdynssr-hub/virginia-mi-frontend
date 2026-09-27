@@ -5,17 +5,10 @@ document.addEventListener("DOMContentLoaded", () => {
     "صافي الإيراد شامل الضريبة، صافي الوحدات، وعدد فواتير البيع لكل صنف.",
     "pos-product-contribution", `
       <section class="inventory-report-card">
-        <p>اختر نقطة البيع أو كل نقاط الشركة. المرتجعات تخصم من الإيراد والكمية، وعدد الفواتير يحسب فواتير البيع المختلفة.</p>
+        <p>اختر الفرع من فلتر التقرير حسب مصدر المخزون. اختر فئات محددة أو كل الفئات. المرتجعات تخصم من الإيراد والكمية.</p>
         <div class="filter-row">
-          <label>نقطة البيع / الفرع
-            <select id="contributionConfigId" class="control"><option value="">كل نقاط البيع</option></select>
-          </label>
-          <label>فئة المنتجات المخزنية
-            <select id="contributionStockCategory" class="control"><option value="">كل الفئات المخزنية</option></select>
-          </label>
-          <label>فئة نقاط البيع
-            <select id="contributionPosCategory" class="control"><option value="">كل فئات نقاط البيع</option></select>
-          </label>
+          <details><summary>فئات المنتجات المخزنية</summary><div id="contributionStockCategories"></div></details>
+          <details><summary>فئات نقاط البيع</summary><div id="contributionPosCategories"></div></details>
         </div>
         <button id="exportContribution" class="run-btn" type="button" disabled>تصدير Excel</button>
         <p id="contributionStatus" role="status">حدد الشركة والفترة واضغط تحديث التقرير.</p>
@@ -32,8 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
           <tbody id="contributionRows"></tbody>
         </table></div>
       </section>`);
-  const branchField = document.getElementById("branchScopeField");
-  if (branchField) branchField.hidden = true;
   document.getElementById("loadBtn")?.addEventListener("click", loadContribution);
   document.getElementById("exportContribution")?.addEventListener("click", exportContribution);
   const companySelect = document.getElementById("companySelect");
@@ -47,23 +38,58 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 let categoryRequest = 0;
+function renderCategoryChoices(container, items, label) {
+  container.replaceChildren();
+  const all = document.createElement("input");
+  all.type = "checkbox";
+  all.checked = true;
+  const allLabel = document.createElement("label");
+  allLabel.append(all, ` كل ${label}`);
+  container.append(allLabel);
+  const choices = [];
+  items.forEach(item => {
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.value = item.id;
+    const row = document.createElement("label");
+    row.style.display = "block";
+    row.append(input, ` ${item.name}`);
+    container.append(row);
+    choices.push(input);
+    input.addEventListener("change", () => {
+      all.checked = !choices.some(choice => choice.checked);
+    });
+  });
+  all.addEventListener("change", () => {
+    if (all.checked) choices.forEach(choice => { choice.checked = false; });
+    else if (!choices.some(choice => choice.checked)) all.checked = true;
+  });
+}
+
+function selectedCategoryIds(containerId) {
+  return selectedCategoryIdsFrom(document.getElementById(containerId));
+}
+
+function selectedCategoryIdsFrom(container) {
+  const inputs = [...container.querySelectorAll('input[type="checkbox"]')];
+  return inputs[0]?.checked ? "" : inputs.slice(1).filter(input => input.checked)
+    .map(input => input.value).join(",");
+}
+
 async function loadContributionCategories() {
   const request = ++categoryRequest;
-  const config = document.getElementById("contributionConfigId");
-  const stock = document.getElementById("contributionStockCategory");
-  const pos = document.getElementById("contributionPosCategory");
-  config.replaceChildren(new Option("كل نقاط البيع", ""));
-  stock.replaceChildren(new Option("كل الفئات المخزنية", ""));
-  pos.replaceChildren(new Option("كل فئات نقاط البيع", ""));
+  const stock = document.getElementById("contributionStockCategories");
+  const pos = document.getElementById("contributionPosCategories");
+  renderCategoryChoices(stock, [], "الفئات المخزنية");
+  renderCategoryChoices(pos, [], "فئات نقاط البيع");
   const companyId = document.getElementById("companySelect")?.value;
   if (!companyId) return;
   try {
     const response = await apiGet("/pos/product-contribution/categories", { companyId });
     if (request !== categoryRequest) return;
     if (!response.success || !response.data) throw new Error(response.message || "تعذر تحميل الفئات");
-    (response.data.configs || []).forEach(item => config.add(new Option(item.name, item.id)));
-    response.data.stock.forEach(item => stock.add(new Option(item.name, item.id)));
-    response.data.pos.forEach(item => pos.add(new Option(item.name, item.id)));
+    renderCategoryChoices(stock, response.data.stock, "الفئات المخزنية");
+    renderCategoryChoices(pos, response.data.pos, "فئات نقاط البيع");
   } catch (error) {
     if (request === categoryRequest) document.getElementById("contributionStatus").textContent =
       `تعذر تحميل فلاتر Odoo: ${error.message}`;
@@ -75,9 +101,9 @@ function contributionParams() {
     companyId: document.getElementById("companySelect")?.value,
     dateFrom: document.getElementById("dateFrom")?.value,
     dateTo: document.getElementById("dateTo")?.value,
-    configId: document.getElementById("contributionConfigId")?.value || "",
-    stockCategoryId: document.getElementById("contributionStockCategory")?.value || "",
-    posCategoryId: document.getElementById("contributionPosCategory")?.value || ""
+    branchCode: document.getElementById("branchCode")?.value || "all",
+    stockCategoryIds: selectedCategoryIds("contributionStockCategories"),
+    posCategoryIds: selectedCategoryIds("contributionPosCategories")
   };
 }
 
