@@ -5,8 +5,11 @@ document.addEventListener("DOMContentLoaded", () => {
     "صافي الإيراد شامل الضريبة، صافي الوحدات، وعدد فواتير البيع لكل صنف.",
     "pos-product-contribution", `
       <section class="inventory-report-card">
-        <p>يعرض التقرير الشركة بالكامل. المرتجعات تخصم من الإيراد والكمية، وعدد الفواتير يحسب فواتير البيع المختلفة.</p>
+        <p>اختر نقطة البيع أو كل نقاط الشركة. المرتجعات تخصم من الإيراد والكمية، وعدد الفواتير يحسب فواتير البيع المختلفة.</p>
         <div class="filter-row">
+          <label>نقطة البيع / الفرع
+            <select id="contributionConfigId" class="control"><option value="">كل نقاط البيع</option></select>
+          </label>
           <label>فئة المنتجات المخزنية
             <select id="contributionStockCategory" class="control"><option value="">كل الفئات المخزنية</option></select>
           </label>
@@ -33,24 +36,37 @@ document.addEventListener("DOMContentLoaded", () => {
   if (branchField) branchField.hidden = true;
   document.getElementById("loadBtn")?.addEventListener("click", loadContribution);
   document.getElementById("exportContribution")?.addEventListener("click", exportContribution);
-  document.getElementById("companySelect")?.addEventListener("change", loadContributionCategories);
-  if (document.getElementById("companySelect")?.value) loadContributionCategories();
+  const companySelect = document.getElementById("companySelect");
+  companySelect?.addEventListener("change", loadContributionCategories);
+  window.addEventListener("company-context-changed", loadContributionCategories);
+  // Layout fills the company selector asynchronously after renderLayout returns.
+  if (companySelect) new MutationObserver(() => {
+    if (companySelect.value) loadContributionCategories();
+  }).observe(companySelect, { childList: true });
+  if (companySelect?.value) loadContributionCategories();
 });
 
+let categoryRequest = 0;
 async function loadContributionCategories() {
+  const request = ++categoryRequest;
+  const config = document.getElementById("contributionConfigId");
   const stock = document.getElementById("contributionStockCategory");
   const pos = document.getElementById("contributionPosCategory");
+  config.replaceChildren(new Option("كل نقاط البيع", ""));
   stock.replaceChildren(new Option("كل الفئات المخزنية", ""));
   pos.replaceChildren(new Option("كل فئات نقاط البيع", ""));
   const companyId = document.getElementById("companySelect")?.value;
   if (!companyId) return;
   try {
     const response = await apiGet("/pos/product-contribution/categories", { companyId });
+    if (request !== categoryRequest) return;
     if (!response.success || !response.data) throw new Error(response.message || "تعذر تحميل الفئات");
+    (response.data.configs || []).forEach(item => config.add(new Option(item.name, item.id)));
     response.data.stock.forEach(item => stock.add(new Option(item.name, item.id)));
     response.data.pos.forEach(item => pos.add(new Option(item.name, item.id)));
   } catch (error) {
-    document.getElementById("contributionStatus").textContent = error.message;
+    if (request === categoryRequest) document.getElementById("contributionStatus").textContent =
+      `تعذر تحميل فلاتر Odoo: ${error.message}`;
   }
 }
 
@@ -59,6 +75,7 @@ function contributionParams() {
     companyId: document.getElementById("companySelect")?.value,
     dateFrom: document.getElementById("dateFrom")?.value,
     dateTo: document.getElementById("dateTo")?.value,
+    configId: document.getElementById("contributionConfigId")?.value || "",
     stockCategoryId: document.getElementById("contributionStockCategory")?.value || "",
     posCategoryId: document.getElementById("contributionPosCategory")?.value || ""
   };
