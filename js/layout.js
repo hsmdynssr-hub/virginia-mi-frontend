@@ -316,6 +316,7 @@ const REPORT_PAGE_MAP = {
 
   inventory: "inventory.index",
   "inventory-executive-summary": "inventory.executive_summary",
+  "inventory-valuation-reconciliation": "inventory.valuation_reconciliation",
   "inventory-historical-executive-summary": "inventory.historical_executive_summary",
   "inventory-product-comparison": "inventory.product_comparison",
   "inventory-movement-analysis-report": "inventory.movement_analysis",
@@ -498,7 +499,7 @@ const MI_MODULE_DEFINITIONS = [
   {
     id: "inventory",
     label: "المخزون والمواقع",
-    pages: ["inventory","inventory-intermediate-control","inventory-flow-control","inventory-movement-intelligence","inventory-executive-summary","inventory-historical-executive-summary","inventory-product-comparison","inventory-movement-analysis-report","inventory-reorder-risk"],
+    pages: ["inventory","inventory-intermediate-control","inventory-flow-control","inventory-movement-intelligence","inventory-executive-summary","inventory-valuation-reconciliation","inventory-historical-executive-summary","inventory-product-comparison","inventory-movement-analysis-report","inventory-reorder-risk"],
     groups: [
       { id:"operations", label:"تشغيل", icon:"⚡", links:[
         {page:"inventory",label:"مركز المخزون",href:"../inventory/index.html"},
@@ -509,6 +510,7 @@ const MI_MODULE_DEFINITIONS = [
       ]},
       { id:"reports", label:"تقارير", icon:"▦", links:[
         {page:"inventory-executive-summary",label:"الملخص التنفيذي",href:"../inventory/executive-summary.html"},
+        {page:"inventory-valuation-reconciliation",label:"مطابقة التقييم والمحاسبة",href:"../inventory/valuation-reconciliation.html"},
         {page:"inventory-historical-executive-summary",label:"الملخص التاريخي",href:"../inventory/historical-executive-summary.html"},
         {page:"inventory-product-comparison",label:"مقارنة الأصناف",href:"../inventory/product-comparison.html"},
         {page:"inventory-movement-analysis-report",label:"تحليل حركة الصنف",href:"../inventory/movement-analysis-report.html"}

@@ -22,8 +22,6 @@
       "inventory",
       `
         <div class="reports-grid">
-          <a class="report-card" href="./inventory-count.html"><span class="page-pill">Inventory Count</span><h3>إدارة الجرد والمجمع</h3><p>سحب أرصدة Odoo والعد الفعلي واستيراد الجرد والتصدير.</p></a>
-          <a class="report-card" href="./inventory-count-v1.html"><span class="page-pill">V1 Preview</span><h3>الجرد المجمع — معاينة النسخة الأولى</h3><p>مقارنة جرد المستودعات واللوكيشنات، العجز والزيادة بالقيمة، والتسويات المقترحة. بيانات تجريبية قابلة للتعديل.</p></a>
           <a class="report-card" href="./reorder-risk.html">
             <span class="page-pill">Operational Report</span>
             <h3>تشغيل المخازن وإعادة الطلب</h3>
@@ -47,6 +45,13 @@
               بصورة إدارية مختصرة.
             </p>
           </a>
+
+          ${typeof hasPermission === "function" && hasPermission("inventory-valuation-reconciliation") ? `
+          <a class="report-card" href="./valuation-reconciliation.html">
+            <span class="page-pill">Reconciliation</span>
+            <h3>مطابقة تقييم المخزون مع الحسابات</h3>
+            <p>مقارنة تقييم المخزون في Odoo برصيد حساب المخزون المرحّل، تضييق فترة الفرق، وتحديد السبب حتى مستوى القيد.</p>
+          </a>` : ""}
 
           ${typeof hasPermission === "function" && hasPermission("inventory-product-comparison") ? `
           <a class="report-card" href="./product-comparison.html">
