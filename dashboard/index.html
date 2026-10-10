@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -657,6 +657,35 @@
       },
 
       {
+        title: "بوابة الشركة",
+        icon: "🚪",
+        description: "تشغيل البوابة متابعة حركة الدخول والخروج واستلام وإدارة العينات.",
+        indexPage: "gate.access",
+        indexHref: "../gate/index.html",
+        reports: [
+          {
+            page: "gate.access",
+            title: "تشغيل البوابة",
+            href: "../gate/index.html"
+          },
+          {
+            page: "gate.admin",
+            title: "متابعة حركة البوابة",
+            href: "../gate/control.html"
+          },
+          {
+            page: "sample.receive",
+            title: "استلام العينات بالمخزن",
+            href: "../gate/sample-receive.html"
+          },
+          {
+            page: "sample.admin",
+            title: "إدارة العينات وربط Odoo",
+            href: "../gate/samples-admin.html"
+          }
+        ]
+      },
+      {
         title: "الإدارة",
         icon: "⚙️",
         description: "إدارة المستخدمين وصلاحيات الوصول المباشرة.",
@@ -875,3 +904,4 @@
   </script>
 </body>
 </html>
+
