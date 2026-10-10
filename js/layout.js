@@ -320,6 +320,10 @@ const REPORT_PAGE_MAP = {
   "purchase-supplier-performance": "purchase.supplier_performance",
   "purchase-open-orders": "purchase.open_orders",
 
+  "olive-receive": "olive.receive",
+  "olive-admin": "olive.admin",
+  "olive-settings": "olive.settings",
+
   inventory: "inventory.index",
   "inventory-executive-summary": "inventory.executive_summary",
   "inventory-valuation-reconciliation": "inventory.valuation_reconciliation",
