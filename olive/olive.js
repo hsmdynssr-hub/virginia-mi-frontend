@@ -32,7 +32,7 @@ async function loadCatalog() {
 }
 
 async function loadPrint() {
-  const r = await apiGet("/olive/settings/receipt", { companyId: Number(getCompanyId() || 1) });
+  const r = await apiGet("/olive/print-settings", { companyId: Number(getCompanyId() || 1) });
   printSettings = r.data || r;
 }
 
@@ -263,7 +263,7 @@ function prt(r) {
   body {
     width: ${width - 5}mm;
     margin: 0 auto;
-    color: #111;
+    color: #000; font-weight:700;
     font-family: Tahoma, Arial, "Segoe UI", sans-serif;
     font-size: 11.5px;
     line-height: 1.45;
@@ -278,7 +278,7 @@ function prt(r) {
   .header {
     text-align: center;
     padding-bottom: 7px;
-    border-bottom: 2px solid #2f5f25;
+    border-bottom: 2px solid #000;
   }
 
   .logo {
@@ -298,14 +298,14 @@ function prt(r) {
   .title {
     font-size: 15px;
     font-weight: 900;
-    color: #2f5f25;
+    color: #000;
     margin: 2px 0 0;
   }
 
   .company-meta {
     margin-top: 3px;
     font-size: 9.8px;
-    color: #444;
+    color: #000; font-weight:700;
   }
 
   .receipt-no {
@@ -325,16 +325,16 @@ function prt(r) {
   }
 
   .meta-box {
-    border: 1px solid #d7d7d7;
+    border: 1.3px solid #000;
     border-radius: 5px;
     padding: 4px 6px;
-    background: #fafafa;
+    background: #fff;
   }
 
   .meta-label {
     display: block;
     font-size: 8.7px;
-    color: #666;
+    color: #000; font-weight:800;
     margin-bottom: 1px;
   }
 
@@ -350,9 +350,9 @@ function prt(r) {
   .section-title {
     font-size: 11.5px;
     font-weight: 900;
-    color: #2f5f25;
+    color: #000;
     padding: 3px 0;
-    border-bottom: 1px solid #2f5f25;
+    border-bottom: 1.5px solid #000;
     margin-bottom: 2px;
   }
 
@@ -360,12 +360,12 @@ function prt(r) {
     display: flex;
     justify-content: space-between;
     gap: 10px;
-    border-bottom: 1px dotted #aaa;
+    border-bottom: 1px dotted #000;
     padding: 3px 0;
   }
 
   .info-row .label {
-    color: #555;
+    color: #000;
     white-space: nowrap;
   }
 
@@ -384,11 +384,11 @@ function prt(r) {
   }
 
   th {
-    background: #2f5f25;
+    background: #000;
     color: #fff;
     font-weight: 900;
     padding: 4px 2px;
-    border: 1px solid #2f5f25;
+    border: 1px solid #000;
   }
 
   td {
@@ -410,7 +410,7 @@ function prt(r) {
 
   .totals {
     margin-top: 7px;
-    border: 1.5px solid #2f5f25;
+    border: 1.8px solid #000;
     border-radius: 7px;
     overflow: hidden;
   }
@@ -420,7 +420,7 @@ function prt(r) {
     justify-content: space-between;
     align-items: baseline;
     padding: 7px 8px;
-    background: #eef5ea;
+    background: #fff;
     border-bottom: 1px solid #cbd9c5;
   }
 
@@ -432,14 +432,14 @@ function prt(r) {
   .grand .value {
     font-size: 18px;
     font-weight: 900;
-    color: #214918;
+    color: #000;
   }
 
   .money-row {
     display: flex;
     justify-content: space-between;
     padding: 4px 8px;
-    border-bottom: 1px dotted #b6b6b6;
+    border-bottom: 1px dotted #000;
     font-size: 10.5px;
   }
 
@@ -457,12 +457,12 @@ function prt(r) {
     font-weight: 900;
     padding: 4px 6px;
     border-radius: 5px;
-    background: #f3f3f3;
+    background: #fff; border:1.3px solid #000;
   }
 
   .operator {
     margin-top: 7px;
-    border-top: 1px dashed #777;
+    border-top: 1px dashed #000;
     padding-top: 5px;
   }
 
@@ -471,7 +471,7 @@ function prt(r) {
     padding: 6px;
     text-align: center;
     font-size: 9.5px;
-    border: 1px dashed #aaa;
+    border: 1px dashed #000;
     border-radius: 5px;
   }
 
@@ -492,9 +492,9 @@ function prt(r) {
   .footer {
     margin-top: 10px;
     text-align: center;
-    color: #555;
+    color: #000;
     font-size: 9px;
-    border-top: 1px solid #ddd;
+    border-top: 1px solid #000;
     padding-top: 5px;
   }
 
