@@ -220,6 +220,7 @@ function isReportApiPath(path) {
     "/production",
     "/purchase",
     "/inventory",
+    "/gate",
     "/inventory-historical",
     "/costing",
     "/forecast",

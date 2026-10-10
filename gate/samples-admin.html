@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>إدارة العينات</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/mi-app.css?v=20261010-sample-admin-v19">
+  <style>
+    body{background:#f7f8fa}
+    .wrap{max-width:1500px;margin:auto;padding:18px}
+    .panel{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:14px;margin-top:12px}
+    .tools{display:flex;gap:8px;flex-wrap:wrap}
+    input,select{padding:10px;border:1px solid #d8dde6;border-radius:10px}
+    button{border:0;border-radius:10px;padding:10px 13px;background:#1f2937;color:#fff;cursor:pointer}
+    button.ok{background:#166534}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th,td{padding:9px;border-bottom:1px solid #edf0f4;text-align:right;vertical-align:top}
+    th{background:#f9fafb}
+    .scroll{overflow:auto;max-height:650px}
+    .sync{display:flex;gap:6px;min-width:330px}
+    .sync input{min-width:210px}
+  </style>
+</head>
+<body>
+<script src="../js/api.js"></script>
+
+<div class="wrap">
+  <h1>إدارة العينات والربط مع Odoo</h1>
+
+  <div class="tools">
+    <select id="companyId">
+      <option value="1">Virginia</option>
+      <option value="2">Cleopatra</option>
+    </select>
+    <select id="status">
+      <option value="">كل الحالات</option>
+      <option value="REGISTERED_AT_GATE">مسجلة بالبوابة</option>
+      <option value="HANDED_TO_WAREHOUSE">تم تسليمها للمخزن</option>
+      <option value="WAITING_ODOO_RECEIPT">بانتظار إيصال Odoo</option>
+      <option value="ODOO_LINKED">مرتبطة بـ Odoo</option>
+    </select>
+    <input id="dateFrom" type="date">
+    <input id="dateTo" type="date">
+    <button id="loadBtn">تحديث</button>
+  </div>
+
+  <section class="panel">
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>كود العينة</th>
+            <th>المورد الأصلي</th>
+            <th>وصف العينة</th>
+            <th>العبوات</th>
+            <th>أمر الشراء</th>
+            <th>الحالة</th>
+            <th>Odoo</th>
+          </tr>
+        </thead>
+        <tbody id="body"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script src="./samples-admin.js?v=20261010-v19"></script>
+</body>
+</html>

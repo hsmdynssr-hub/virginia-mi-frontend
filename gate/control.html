@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>متابعة حركة البوابة</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/mi-app.css?v=20261009-gate-control-v16">
+  <script src="../js/notifications.js?v=20260901-global-01"></script>
+  <style>
+    body{background:#f7f8fa}
+    .wrap{max-width:1500px;margin:auto;padding:18px}
+    .head,.tools{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .tools{justify-content:flex-start}
+    input,select{padding:10px;border:1px solid #d8dde6;border-radius:10px;background:#fff}
+    button{border:0;border-radius:10px;padding:10px 14px;cursor:pointer;background:#1f2937;color:#fff}
+    button.ok{background:#166534}
+    .panel{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:14px;margin-top:12px}
+    .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:12px}
+    .kpi{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:14px}
+    .kpi strong{display:block;font-size:26px;margin-top:4px}
+    @media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th,td{padding:9px;border-bottom:1px solid #edf0f4;text-align:right;vertical-align:top}
+    th{background:#f9fafb}
+    .scroll{overflow:auto;max-height:560px}
+    .syncbox{display:flex;gap:6px;min-width:340px}
+    .syncbox input{min-width:220px}
+    .warn{color:#92400e}
+    .oktext{color:#166534}
+    .tag{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef2ff}
+  </style>
+</head>
+<body>
+<script src="../js/api.js"></script>
+
+<div class="wrap">
+  <div class="head">
+    <div>
+      <h1>متابعة حركة البوابة والربط مع Odoo</h1>
+      <div>هذه الصفحة مخصصة للمراجعة والربط اليدوي مع مستندات Odoo.</div>
+    </div>
+
+    <div class="tools">
+      <select id="companyId">
+        <option value="1">Virginia</option>
+        <option value="2">Cleopatra</option>
+      </select>
+      <input id="dateFrom" type="date">
+      <input id="dateTo" type="date">
+      <button id="loadBtn">تحديث</button>
+    </div>
+  </div>
+
+
+  <div class="kpis">
+    <div class="kpi">داخل الشركة الآن<strong id="kInside">0</strong></div>
+    <div class="kpi">سيارات توريد<strong id="kInbound">0</strong></div>
+    <div class="kpi">سيارات شحن<strong id="kOutbound">0</strong></div>
+    <div class="kpi">زيارات<strong id="kVisits">0</strong></div>
+    <div class="kpi">صيانة<strong id="kMaintenance">0</strong></div>
+    <div class="kpi">مبيت<strong id="kOvernight">0</strong></div>
+  </div>
+
+  <section class="panel">
+    <h3>ملخص السيارات الموجودة داخل الشركة الآن</h3>
+    <div class="scroll" style="max-height:320px">
+      <table>
+        <thead>
+          <tr>
+            <th>النوع</th>
+            <th>الشخص / السائق</th>
+            <th>السيارة</th>
+            <th>الجهة</th>
+            <th>الدخول</th>
+            <th>الحالة</th>
+            <th>مسؤول البوابة</th>
+          </tr>
+        </thead>
+        <tbody id="insideSummaryBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h3>حركات بانتظار الربط مع Odoo</h3>
+    <p class="warn">
+      أدخل رقم إيصال الاستلام أو أمر التوصيل كما هو في Odoo ثم اضغط مزامنة.
+    </p>
+
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>النوع</th>
+            <th>السيارة</th>
+            <th>المورد / الجهة</th>
+            <th>الاتجاه</th>
+            <th>الدخول</th>
+            <th>مسؤول البوابة</th>
+            <th>مرجع Odoo</th>
+          </tr>
+        </thead>
+        <tbody id="unlinkedBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h3>سجل حركة البوابة</h3>
+
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>النوع</th>
+            <th>السيارة</th>
+            <th>المورد / الجهة</th>
+            <th>الاتجاه</th>
+            <th>الحالة</th>
+            <th>Odoo</th>
+            <th>الدخول</th>
+            <th>التسليم / التحميل</th>
+            <th>الخروج</th>
+            <th>مسؤول البوابة</th>
+          </tr>
+        </thead>
+        <tbody id="reportBody"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script src="./control.js?v=20261009-gate-control-v16"></script>
+</body>
+</html>

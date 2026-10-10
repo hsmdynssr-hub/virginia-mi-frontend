@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>إدارة بوابة الشركة</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/mi-app.css?v=20261009-gate-v16">
+  <script src="../js/notifications.js?v=20260901-global-01"></script>
+  <style>
+    body{background:#f7f8fa}
+    .wrap{max-width:1500px;margin:auto;padding:18px}
+    .head,.tools{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .tools{justify-content:flex-start}
+    input,select,textarea{padding:10px;border:1px solid #d8dde6;border-radius:10px;background:#fff}
+    button{border:0;border-radius:10px;padding:10px 14px;cursor:pointer;background:#1f2937;color:#fff}
+    button.gray{background:#e5e7eb;color:#111}
+    button.warn{background:#92400e}
+    button.ok{background:#166534}
+    button.danger{background:#991b1b}
+    .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:12px 0}
+    .kpi,.panel{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:14px}
+    .kpi strong{font-size:26px;display:block}
+    .cols{display:grid;grid-template-columns:1.2fr .8fr;gap:12px}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th,td{padding:9px;border-bottom:1px solid #edf0f4;text-align:right;vertical-align:top}
+    th{background:#f9fafb}
+    .scroll{overflow:auto;max-height:470px}
+    .form{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+    .full{grid-column:1/-1}
+    .muted{color:#6b7280;font-size:13px}
+    .filterbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+    .filterbar input{min-width:280px;flex:1}
+    @media(max-width:900px){
+      .kpis{grid-template-columns:1fr 1fr}
+      .cols{grid-template-columns:1fr}
+      .form{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+<script src="../js/api.js"></script>
+
+<div class="wrap">
+  <div class="head">
+    <div>
+      <h1>إدارة بوابة الشركة</h1>
+      <div class="muted">التوريدات — الشحن — الزيارات — الصيانة — حركة الدخول والخروج</div>
+    </div>
+    <div class="tools">
+      <select id="companyId">
+        <option value="1">Virginia</option>
+        <option value="2">Cleopatra</option>
+      </select>
+      <button id="refreshBtn">تحديث من Odoo</button>
+    </div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi">التوريدات الظاهرة<strong id="kExpected">0</strong></div>
+    <div class="kpi">دخل اليوم<strong id="kEntered">0</strong></div>
+    <div class="kpi">خرج اليوم<strong id="kExited">0</strong></div>
+    <div class="kpi">داخل الموقع الآن<strong id="kInside">0</strong></div>
+    <div class="kpi">مبيت<strong id="kOvernight">0</strong></div>
+  </div>
+
+  <div class="cols">
+    <section class="panel">
+      <h3>التوريدات المفتوحة من Odoo</h3>
+
+      <div class="filterbar">
+        <select id="periodFilter">
+          <option value="3">آخر 3 أيام</option>
+          <option value="7" selected>آخر 7 أيام</option>
+          <option value="15">آخر 15 يومًا</option>
+          <option value="30">آخر 30 يومًا</option>
+          <option value="all">كل التوريدات المفتوحة</option>
+        </select>
+
+        <input
+          id="deliverySearch"
+          placeholder="ابحث بجزء من اسم المورد أو أمر الشراء أو رقم التوصيل"
+        >
+
+        <button id="clearSearch" class="gray">مسح</button>
+      </div>
+
+      <div class="muted" style="margin-bottom:8px">
+        مثال: يمكن البحث بـ 4751 بدل P04751، أو كتابة جزء من اسم المورد.
+      </div>
+
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>المورد</th>
+              <th>أمر الشراء</th>
+              <th>رقم التوصيل</th>
+              <th>الموعد</th>
+              <th>المخزن</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="expectedBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h3>تسجيل حركة بوابة</h3>
+      <div id="selectedDelivery" class="muted" style="margin-bottom:10px">
+        حركة غير مرتبطة — يمكن التسجيل بدون مستند Odoo.
+      </div>
+
+      <form id="visitForm" class="form">
+        <select id="movementType" class="full">
+          <option value="INBOUND">توريد / دخول بضاعة</option>
+          <option value="OUTBOUND">شحن / خروج بضاعة</option>
+          <option value="VISIT">زيارة</option>
+          <option value="MAINTENANCE">صيانة</option>
+          <option value="SAMPLE">استلام عينة</option>
+        </select>
+
+        <input id="supplierName" placeholder="المورد / الجهة">
+        <input id="vehiclePlate" placeholder="رقم السيارة">
+        <input id="vehicleType" placeholder="نوع السيارة">
+        <input id="driverName" required placeholder="اسم السائق / الزائر / الفني">
+        <input id="contactPhone" placeholder="رقم الهاتف">
+        <input id="driverIdentity" placeholder="رقم الهوية">
+        <input id="driverLicense" placeholder="رخصة السائق">
+        <input id="vehicleLicense" placeholder="رخصة السيارة">
+        <input id="hostName" placeholder="الشخص / القسم المطلوب">
+        <input id="visitReason" placeholder="سبب الزيارة / نوع الصيانة">
+        <input id="sampleDescription" class="sample-only full" placeholder="وصف العينة">
+        <input id="samplePackageCount" class="sample-only" type="number" min="1" value="1" placeholder="عدد العبوات">
+        <input id="samplePoReference" class="sample-only" placeholder="رقم أمر الشراء إن وجد">
+        <input id="gateOperator" readonly placeholder="مسؤول البوابة">
+
+        <label id="overnightWrap" style="display:flex;gap:8px;align-items:center">
+          <input id="overnight" type="checkbox">
+          مبيت / انتظار حتى اليوم التالي
+        </label>
+
+        <textarea id="notes" class="full" rows="3" placeholder="ملاحظات"></textarea>
+        <button id="submitVisitBtn" class="ok full" type="submit">تسجيل الدخول</button>
+      </form>
+    </section>
+  </div>
+
+
+  <section class="panel" id="samplesPanel" style="margin-top:12px">
+    <h3>العينات المسجلة بالبوابة</h3>
+    <div class="muted" style="margin-bottom:8px">
+      يتم التعامل مع المخزن بكود العينة فقط. بيانات المورد الأصلية تبقى داخل إدارة النظام.
+    </div>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>كود العينة</th>
+            <th>الوصف</th>
+            <th>العبوات</th>
+            <th>وقت التسجيل</th>
+            <th>الحالة</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="samplePendingBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel" style="margin-top:12px">
+    <h3>السيارات داخل الشركة الآن</h3>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>السيارة</th>
+            <th>السائق</th>
+            <th>المورد / الجهة</th>
+            <th>الاتجاه</th>
+            <th>الدخول</th>
+            <th>الحالة</th>
+            <th>الإجراء</th>
+          </tr>
+        </thead>
+        <tbody id="insideBody"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script src="./gate.js?v=20261009-gate-v16"></script>
+</body>
+</html>
