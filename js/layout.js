@@ -253,6 +253,12 @@ function observeLegacyReportUi() {
 const REPORT_PAGE_MAP = {
   dashboard: "dashboard.index",
 
+  gate: "gate.access",
+  "gate-operations": "gate.access",
+  "gate-control": "gate.admin",
+  "gate-sample-receive": "sample.receive",
+  "gate-samples-admin": "sample.admin",
+
   "admin-users": "admin.users",
   "admin-roles": "admin.roles",
   "admin-report-classification": "admin.users",
@@ -349,6 +355,12 @@ const EXPORT_ENABLED_PAGES = new Set([
   "alerts-dashboard"
 ]);
 const PAGES_WITHOUT_REPORT_TOOLBAR = new Set([
+  "gate",
+  "gate-operations",
+  "gate-control",
+  "gate-sample-receive",
+  "gate-samples-admin",
+
   "dashboard",
 
   "admin-users",
@@ -389,6 +401,22 @@ const STANDALONE_CUSTOMER_PAGES = new Set([
 
 // Dashboard-first application navigation. Every module uses a compact local navigator.
 const MI_MODULE_DEFINITIONS = [
+  {
+    id: "gate",
+    label: "بوابة الشركة",
+    pages: ["gate","gate-operations","gate-control","gate-sample-receive","gate-samples-admin"],
+    groups: [
+      { id:"operations", label:"تشغيل", icon:"⚡", links:[
+        {page:"gate",label:"مركز البوابة",href:"../gate/index.html",always:true},
+        {page:"gate-operations",label:"تشغيل البوابة",href:"../gate/operations.html",permission:"gate.access"},
+        {page:"gate-sample-receive",label:"استلام العينات",href:"../gate/sample-receive.html",permission:"sample.receive"}
+      ]},
+      { id:"control", label:"متابعة وإدارة", icon:"◉", links:[
+        {page:"gate-control",label:"متابعة حركة البوابة",href:"../gate/control.html",permission:"gate.admin"},
+        {page:"gate-samples-admin",label:"إدارة العينات وربط Odoo",href:"../gate/samples-admin.html",permission:"sample.admin"}
+      ]}
+    ]
+  },
   {
     id: "branches",
     label: "ذكاء الفروع",
@@ -820,6 +848,11 @@ function hasPermission(pageCode) {
   }
 
   const permissions = getUserPermissions();
+
+  if (pageCode === "gate") {
+    return ["gate.access","gate.admin","sample.receive","sample.admin"]
+      .some((permission) => permissions.includes(permission));
+  }
 
   if (pageCode === "customer-financial-review") {
     return [

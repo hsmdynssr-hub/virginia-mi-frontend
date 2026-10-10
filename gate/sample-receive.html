@@ -3,65 +3,63 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>استلام العينات</title>
+  <title>استلام العينات بالمخزن</title>
   <link rel="stylesheet" href="../css/style.css">
-  <link rel="stylesheet" href="../css/mi-app.css?v=20261010-sample-v19">
+  <link rel="stylesheet" href="../css/mi-app.css?v=20260908-project-unified-01" data-mi-unified-ui="true">
   <style>
-    body{background:#f7f8fa}
-    .wrap{max-width:900px;margin:auto;padding:20px}
-    .panel{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:18px;margin-top:12px}
-    .row{display:flex;gap:8px;flex-wrap:wrap}
-    input,select,textarea{padding:11px;border:1px solid #d8dde6;border-radius:10px;background:#fff}
-    input{flex:1;min-width:240px}
-    button{border:0;border-radius:10px;padding:11px 16px;background:#1f2937;color:#fff;cursor:pointer}
-    button.ok{background:#166534}
-    .code{font-size:30px;font-weight:800;letter-spacing:1px}
-    .meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-    .box{background:#f9fafb;padding:12px;border-radius:10px}
-    @media(max-width:700px){.meta{grid-template-columns:1fr}}
+    .sample-shell{max-width:900px;margin:auto}
+    .sample-panel{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:18px;margin-top:12px}
+    .sample-row{display:flex;gap:8px;flex-wrap:wrap}
+    .sample-shell input,.sample-shell select,.sample-shell textarea{padding:11px;border:1px solid #d8dde6;border-radius:10px;background:#fff}
+    .sample-shell input{flex:1;min-width:240px}
+    .sample-shell button{border:0;border-radius:10px;padding:11px 16px;background:#1f2937;color:#fff;cursor:pointer}
+    .sample-shell button.ok{background:#166534}
+    .sample-code{font-size:30px;font-weight:800;letter-spacing:1px}
+    .sample-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+    .sample-box{background:#f9fafb;padding:12px;border-radius:10px}
+    @media(max-width:700px){.sample-meta{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 <script src="../js/api.js"></script>
+<script src="../js/layout.js?v=20261010-gate-module-v192"></script>
+<script>
+  renderLayout(
+    "استلام العينات بالمخزن",
+    "استلام العينة باستخدام الكود فقط دون إظهار بيانات المورد الأصلي",
+    "gate-sample-receive",
+    `
+      <div class="sample-shell">
+        <section class="sample-panel">
+          <div class="sample-row">
+            <select id="companyId">
+              <option value="1">Virginia</option>
+              <option value="2">Cleopatra</option>
+            </select>
+            <input id="sampleCode" autofocus placeholder="امسح أو اكتب كود العينة SMP-...">
+            <button id="lookupBtn">بحث</button>
+          </div>
+        </section>
 
-<div class="wrap">
-  <h1>استلام العينات بالمخزن</h1>
-  <p>استلم العينة باستخدام الكود فقط. بيانات المورد الأصلي لا تظهر في هذه الصفحة.</p>
-
-  <section class="panel">
-    <div class="row">
-      <select id="companyId">
-        <option value="1">Virginia</option>
-        <option value="2">Cleopatra</option>
-      </select>
-      <input id="sampleCode" autofocus placeholder="امسح أو اكتب كود العينة SMP-...">
-      <button id="lookupBtn">بحث</button>
-    </div>
-  </section>
-
-  <section class="panel" id="resultPanel" style="display:none">
-    <div class="code" id="codeOut"></div>
-
-    <div class="meta">
-      <div class="box"><b>وصف العينة</b><div id="descOut"></div></div>
-      <div class="box"><b>عدد العبوات</b><div id="countOut"></div></div>
-      <div class="box"><b>وقت الوصول للبوابة</b><div id="gateTimeOut"></div></div>
-      <div class="box"><b>أمر شراء إن وجد</b><div id="poOut"></div></div>
-    </div>
-
-    <div style="margin-top:12px">
-      <input id="receiverName" style="width:100%;box-sizing:border-box;margin-bottom:8px" placeholder="اسم مستلم العينة بالمخزن">
-      <textarea id="receiveNotes" rows="3" style="width:100%;box-sizing:border-box" placeholder="ملاحظات الاستلام"></textarea>
-    </div>
-
-    <button id="receiveBtn" type="button" class="ok" style="margin-top:10px">
-      تم استلام العينة بالمخزن
-    </button>
-
-    <div id="receiveMessage" style="margin-top:10px;font-weight:700"></div>
-  </section>
-</div>
-
-<script src="./sample-receive.js?v=20261010-v19"></script>
+        <section class="sample-panel" id="resultPanel" style="display:none">
+          <div class="sample-code" id="codeOut"></div>
+          <div class="sample-meta">
+            <div class="sample-box"><b>وصف العينة</b><div id="descOut"></div></div>
+            <div class="sample-box"><b>عدد العبوات</b><div id="countOut"></div></div>
+            <div class="sample-box"><b>وقت الوصول للبوابة</b><div id="gateTimeOut"></div></div>
+            <div class="sample-box"><b>أمر شراء إن وجد</b><div id="poOut"></div></div>
+          </div>
+          <div style="margin-top:12px">
+            <input id="receiverName" style="width:100%;box-sizing:border-box;margin-bottom:8px" placeholder="اسم مستلم العينة بالمخزن">
+            <textarea id="receiveNotes" rows="3" style="width:100%;box-sizing:border-box" placeholder="ملاحظات الاستلام"></textarea>
+          </div>
+          <button id="receiveBtn" type="button" class="ok" style="margin-top:10px">تم استلام العينة بالمخزن</button>
+          <div id="receiveMessage" style="margin-top:10px;font-weight:700"></div>
+        </section>
+      </div>
+    `
+  );
+</script>
+<script src="./sample-receive.js?v=20261010-v192"></script>
 </body>
 </html>
