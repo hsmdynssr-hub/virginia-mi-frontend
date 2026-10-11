@@ -2,10 +2,11 @@
 const $=x=>document.getElementById(x);
 const kg=v=>new Intl.NumberFormat("ar-EG",{minimumFractionDigits:3,maximumFractionDigits:3}).format(Number(v||0));
 const m=v=>new Intl.NumberFormat("ar-EG",{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v||0));
-let loading=false, cancelling=false;
+let loading=false, cancelling=false, canCancelReceipt=false;
 const filters=()=>({companyId:Number(getCompanyId()||1),dateFrom:$("from").value,dateTo:$("to").value,q:$("q").value});
-document.addEventListener("DOMContentLoaded",()=>{
+document.addEventListener("DOMContentLoaded",async()=>{
   if(!getToken()){location.href="../admin/login.html";return;}
+  try {const access=await apiGet("/olive/access/capabilities");canCancelReceipt=(access.data||access).canCancelReceipt===true;}catch(_){canCancelReceipt=false;}
   const now=new Date(),t=[now.getFullYear(),String(now.getMonth()+1).padStart(2,"0"),String(now.getDate()).padStart(2,"0")].join("-");
   $("from").value=t;$("to").value=t;$("load").onclick=load;
   $("exportExcel").onclick=async()=>{
@@ -14,7 +15,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     catch(err){$("msg").textContent=err.message||"فشل التصدير";}finally{button.disabled=false;}
   };
   $("rb").addEventListener("click",async ev=>{
-    const button=ev.target.closest("button[data-cancel-id]");if(!button||cancelling||loading)return;
+    const button=ev.target.closest("button[data-cancel-id]");if(!button||!canCancelReceipt||cancelling||loading)return;
     const reason=prompt("اكتب سبب إلغاء سند "+button.dataset.receiptNo+" (إلزامي):");
     if(reason===null)return;
     if(!reason.trim()||reason.trim().length>2000){$("msg").textContent="سبب الإلغاء مطلوب وبحد أقصى 2000 حرف";return;}
@@ -32,7 +33,7 @@ async function load(){
     $("vb").innerHTML=(x.byVariety||[]).map(v=>`<tr><td>${e(v.variety_name)}</td><td>${e(v.weight_kg)}</td><td>${m(v.total_amount)}</td><td>${m(v.avg_price_per_kg)}</td></tr>`).join("");
     $("rb").innerHTML=(rows||[]).map(v=>{
       const cancelled=v.receiving_status==="CANCELLED";
-      return `<tr${cancelled?' class="cancelled"':''}><td><a class="olive-receipt-number" href="./receipt.html?id=${encodeURIComponent(v.id)}&companyId=${encodeURIComponent(p.companyId)}">${e(v.receipt_no)}</a></td><td>${e(new Date(v.created_at).toLocaleString("ar-EG"))}</td><td>${e(v.supplier_name)}</td><td>${kg(v.weight_kg)}</td><td>${m(v.total_amount)}</td><td>${m(v.paid_amount)}</td><td>${m(v.balance_amount)}</td><td><span class="olive-status ${cancelled?'is-cancelled':'is-received'}">${cancelled?'ملغى':'مستلم'}</span></td><td><div class="olive-actions"><a class="olive-action olive-view" href="./receipt.html?id=${encodeURIComponent(v.id)}&companyId=${encodeURIComponent(p.companyId)}">عرض السند</a>${cancelled?'':`<button type="button" class="olive-action olive-cancel" data-cancel-id="${e(v.id)}" data-receipt-no="${e(v.receipt_no)}">إلغاء</button>`}</div>${cancelled?`<div class="olive-cancel-details">${e(v.cancellation_reason)}<br><small>${e(v.cancelled_by)} — ${e(new Date(v.cancelled_at).toLocaleString("ar-EG"))}</small></div>`:''}</td></tr>`;
+      return `<tr${cancelled?' class="cancelled"':''}><td><a class="olive-receipt-number" href="./receipt.html?id=${encodeURIComponent(v.id)}&companyId=${encodeURIComponent(p.companyId)}">${e(v.receipt_no)}</a></td><td>${e(new Date(v.created_at).toLocaleString("ar-EG"))}</td><td>${e(v.supplier_name)}</td><td>${kg(v.weight_kg)}</td><td>${m(v.total_amount)}</td><td>${m(v.paid_amount)}</td><td>${m(v.balance_amount)}</td><td><span class="olive-status ${cancelled?'is-cancelled':'is-received'}">${cancelled?'ملغى':'مستلم'}</span></td><td><div class="olive-actions"><a class="olive-action olive-view" href="./receipt.html?id=${encodeURIComponent(v.id)}&companyId=${encodeURIComponent(p.companyId)}">عرض السند</a>${cancelled||!canCancelReceipt?'':`<button type="button" class="olive-action olive-cancel" data-cancel-id="${e(v.id)}" data-receipt-no="${e(v.receipt_no)}">إلغاء</button>`}</div>${cancelled?`<div class="olive-cancel-details">${e(v.cancellation_reason)}<br><small>${e(v.cancelled_by)} — ${e(new Date(v.cancelled_at).toLocaleString("ar-EG"))}</small></div>`:''}</td></tr>`;
     }).join("");
   }catch(err){$("msg").textContent=err.message||"فشل التحميل";}finally{loading=false;$("load").disabled=cancelling;}
 }

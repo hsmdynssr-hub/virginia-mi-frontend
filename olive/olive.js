@@ -3,6 +3,14 @@
 let catalog = [];
 let printSettings = null;
 let last = null;
+let saving = false;
+let pendingSave = null;
+const pendingStorage = () => `olive-pending-save:${getCompanyId() || 1}:${getToken() || ""}`;
+function newSaveKey() {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, x => x.toString(16).padStart(2, "0")).join("");
+}
 
 const $ = x => document.getElementById(x);
 const m = v => new Intl.NumberFormat("ar-EG", {
@@ -18,12 +26,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await Promise.all([loadCatalog(), loadPrint()]);
   add();
+  try { pendingSave = JSON.parse(sessionStorage.getItem(pendingStorage()) || "null"); }
+  catch (_) { $("save").disabled = true; $("msg").textContent = "تعذر قراءة طلب الحفظ السابق؛ راجع السند قبل الحفظ"; return; }
+  if (pendingSave) $("msg").textContent = "يوجد طلب حفظ لم يتأكد ردّه. اضغط حفظ لإعادة نفس الطلب كما أُرسل.";
 
   $("add").onclick = add;
   $("f").onsubmit = save;
   $("full").onclick = () => { $("paid").value = total().toFixed(2); };
   $("print").onclick = () => last && prt(last);
-  $("new").onclick = () => location.reload();
+  $("new").onclick = () => {
+    if (pendingSave) { $("msg").textContent = "أعد محاولة الحفظ أولًا لتحديد نتيجة الطلب السابق"; return; }
+    location.reload();
+  };
 });
 
 async function loadCatalog() {
@@ -129,9 +143,13 @@ async function img(file) {
 
 async function save(e) {
   e.preventDefault();
+  if (saving || last) return;
+  saving = true;
   $("save").disabled = true;
 
   try {
+    if (!pendingSave) {
+    if (!$("supplierName").value.trim()) throw Error("اسم المورد مطلوب");
     const lines = [...$("lines").children].map(r => {
       const id = Number(r.querySelector(".v").value);
       const c = catalog.find(x => Number(x.id) === id);
@@ -147,6 +165,7 @@ async function save(e) {
       throw Error("راجع الصنف والوزن والسعر");
     }
 
+    if (!Number.isFinite(Number($("paid").value || 0)) || Number($("paid").value || 0) < 0) throw Error("راجع مبلغ السداد");
     if (Number($("paid").value || 0) > total() + .01) {
       throw Error("المدفوع أكبر من الإجمالي");
     }
@@ -158,7 +177,7 @@ async function save(e) {
     if (i) a.push({ ...i, type: "ID_CARD" });
     if (d) a.push({ ...d, type: "RECEIPT" });
 
-    const r = await apiPost("/olive/receipts", {
+    const payload = {
       companyId: Number(getCompanyId() || 1),
       siteCode: $("siteCode").value,
       supplierName: $("supplierName").value,
@@ -171,16 +190,25 @@ async function save(e) {
       paymentMethod: $("method").value,
       paymentReference: $("ref").value,
       notes: $("notes").value,
-      attachments: a
-    });
+      attachments: a,
+      saveKey: newSaveKey()
+    };
+    // Persist the exact payload before sending, including payment and attachments.
+    sessionStorage.setItem(pendingStorage(), JSON.stringify(payload));
+    pendingSave = payload;
+    }
+    const r = await apiPost("/olive/receipts", pendingSave);
 
     last = r.data || r;
+    pendingSave = null;
+    sessionStorage.removeItem(pendingStorage());
     $("print").disabled = false;
     $("msg").innerHTML = `<div class="msg ok">تم الحفظ: ${last.receipt_no}</div>`;
   } catch (x) {
     $("msg").innerHTML = `<div class="msg err">${esc(x.message || "فشل الحفظ")}</div>`;
   } finally {
-    $("save").disabled = false;
+    saving = false;
+    $("save").disabled = !!last;
   }
 }
 
