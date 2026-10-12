@@ -36,3 +36,7 @@ html body#oliveOperational .olive-workspace .pos-grid{grid-template-columns:minm
 @media(max-width:600px){html body#oliveOperational .cash-compact-actions{width:100%}html body#oliveOperational .cash-compact-actions button{flex:1;padding:7px 8px!important}html body#oliveOperational .olive-workspace .olive-products{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 
 html body#oliveOperational .cash-compact-bar>div:first-child>strong{font-size:16px!important;line-height:1.5!important;font-weight:700!important}
+
+/* Entry screens scroll as a single document: no stacked sticky toolbars. */
+html body#oliveOperational .main>.mi-page-hero,html body#oliveOperational .main>.report-toolbar,html body#oliveOperational .main>.mi-context-toolbar,html body#oliveOperational .main>.topbar,html body#oliveOperational .mi-section-navigation,html body#oliveOperational .olive-workspace>div:first-child{position:relative!important;top:auto!important;inset:auto!important;transform:none!important;z-index:auto!important}
+html body#oliveOperational .mi-hero-account-bar{position:static!important;inset:auto!important}

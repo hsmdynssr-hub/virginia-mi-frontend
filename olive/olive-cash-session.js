@@ -104,7 +104,7 @@
  const nonnegative=value=>{if(!/^\d{1,16}(\.\d{1,2})?$/.test(String(value)))throw Error('راجع المبلغ؛ بحد أقصى منزلتين عشريتين');return value;};
  function run(fn){return async()=>{try{await fn()}catch(e){message(e.message||'تعذر تنفيذ العملية',true)}};}
  async function init(){
-  if(el('cashToggle')){el('cashToggle').onclick=()=>setPanel(el('cashPanel').hidden);el('cashExpenseShortcut').onclick=()=>{setPanel(true);el('cashKind').value='EXPENSE';expenseFields();el('cashMoveBox').scrollIntoView({behavior:'smooth',block:'center'});el('cashAmount').focus({preventScroll:true});};}
+  if(el('cashToggle')){el('cashToggle').onclick=()=>setPanel(el('cashPanel').hidden);el('cashExpenseShortcut').onclick=()=>{setPanel(true);el('cashKind').value='EXPENSE';expenseFields();el('cashAmount').focus({preventScroll:true});};}
   const initialCompany=String(company());window.addEventListener('company-context-changed',()=>{if(receiptPending()||pending||busy){setCompanyId(initialCompany);const select=el('companySelect');if(select)select.value=initialCompany;message('أكمل الطلب الحالي قبل تغيير الشركة',true);}else location.reload();});
   el('cashOpen').onclick=run(()=>submit('open',{siteCode:el('siteCode').value.trim()||'MAIN',openingAmount:nonnegative(el('cashOpening').value)}));
   el('cashClose').onclick=run(()=>{
