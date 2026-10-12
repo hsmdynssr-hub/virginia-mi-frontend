@@ -5,13 +5,19 @@ let printSettings = null;
 let last = null;
 let saving = false;
 let pendingSave = null;
-const pendingStorage = () => `olive-pending-save:${getCompanyId() || 1}:${getToken() || ""}`;
+const legacyPendingStorage = () => `olive-pending-save:${getCompanyId() || 1}:${getToken() || ""}`;
+const pendingStorage = () => `olive-pending-save:${getCompanyId() || 1}:${typeof window !== "undefined" && window.OliveCashSessions?.storageIdentity ? window.OliveCashSessions.storageIdentity() : getToken() || ""}`;
 function newSaveKey() {
   const bytes = new Uint8Array(16);
   crypto.getRandomValues(bytes);
   return Array.from(bytes, x => x.toString(16).padStart(2, "0")).join("");
 }
 
+if (typeof window !== "undefined") window.OliveReceiptState = {
+  hasPending: () => !!pendingSave,
+  isSaving: () => saving,
+  refreshButton: () => { $("save").disabled = saving || !!last || (!pendingSave && (!window.OliveCashSessions?.currentId() || window.OliveCashSessions?.hasPending())); }
+};
 const $ = x => document.getElementById(x);
 const m = v => new Intl.NumberFormat("ar-EG", {
   minimumFractionDigits: 2,
@@ -26,16 +32,25 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await Promise.all([loadCatalog(), loadPrint()]);
   add();
-  try { pendingSave = JSON.parse(sessionStorage.getItem(pendingStorage()) || "null"); }
+  try {
+    const saved = sessionStorage.getItem(pendingStorage()) || sessionStorage.getItem(legacyPendingStorage());
+    pendingSave = JSON.parse(saved || "null");
+    if (saved && pendingStorage() !== legacyPendingStorage()) {
+      sessionStorage.setItem(pendingStorage(), saved); sessionStorage.removeItem(legacyPendingStorage());
+    }
+  }
   catch (_) { $("save").disabled = true; $("msg").textContent = "تعذر قراءة طلب الحفظ السابق؛ راجع السند قبل الحفظ"; return; }
+  $("f").noValidate = !!pendingSave;
   if (pendingSave) $("msg").textContent = "يوجد طلب حفظ لم يتأكد ردّه. اضغط حفظ لإعادة نفس الطلب كما أُرسل.";
 
   $("add").onclick = add;
   $("f").onsubmit = save;
   $("full").onclick = () => { $("paid").value = total().toFixed(2); };
   $("print").onclick = () => last && prt(last);
+  await window.OliveCashSessions.init();
+
   $("new").onclick = () => {
-    if (pendingSave) { $("msg").textContent = "أعد محاولة الحفظ أولًا لتحديد نتيجة الطلب السابق"; return; }
+    if (pendingSave || window.OliveCashSessions.hasPending()) { $("msg").textContent = "أعد محاولة الحفظ أولًا لتحديد نتيجة الطلب السابق"; return; }
     location.reload();
   };
 });
@@ -141,6 +156,21 @@ async function img(file) {
   };
 }
 
+async function postReceipt(body) {
+  const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 30000);
+  try {
+    const response = await fetch(`${window.API_BASE_URL || "https://api.mi.virginiaolive.com/api"}/olive/receipts`, {
+      method: "POST", headers: getAuthHeaders(), body: JSON.stringify({...body, companyId: String(body.companyId)}), signal: controller.signal
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      const error = new Error(result.message || result.error || "تعذر حفظ الفاتورة");
+      error.status = response.status; error.details = result.details; throw error;
+    }
+    return result;
+  } finally { clearTimeout(timer); }
+}
+
 async function save(e) {
   e.preventDefault();
   if (saving || last) return;
@@ -149,6 +179,8 @@ async function save(e) {
 
   try {
     if (!pendingSave) {
+    const sessionId = window.OliveCashSessions.currentId();
+    if (!sessionId || window.OliveCashSessions.hasPending()) throw Error("افتح جلسة عهدة وأكمل طلباتها قبل حفظ الفاتورة");
     if (!$("supplierName").value.trim()) throw Error("اسم المورد مطلوب");
     const lines = [...$("lines").children].map(r => {
       const id = Number(r.querySelector(".v").value);
@@ -179,6 +211,7 @@ async function save(e) {
 
     const payload = {
       companyId: Number(getCompanyId() || 1),
+      sessionId,
       siteCode: $("siteCode").value,
       supplierName: $("supplierName").value,
       supplierPhone: $("supplierPhone").value,
@@ -196,19 +229,28 @@ async function save(e) {
     // Persist the exact payload before sending, including payment and attachments.
     sessionStorage.setItem(pendingStorage(), JSON.stringify(payload));
     pendingSave = payload;
+    $("f").noValidate = true;
     }
-    const r = await apiPost("/olive/receipts", pendingSave);
+    const r = await postReceipt(pendingSave);
 
     last = r.data || r;
     pendingSave = null;
+    $("f").noValidate = false;
     sessionStorage.removeItem(pendingStorage());
     $("print").disabled = false;
     $("msg").innerHTML = `<div class="msg ok">تم الحفظ: ${last.receipt_no}</div>`;
+    try { await window.OliveCashSessions.refresh(); } catch (_) { /* Receipt committed; summary can be refreshed separately. */ }
   } catch (x) {
+    if ([400,403,404,413].includes(x.status) || ["CASH_SESSION_CLOSED","CASH_SESSION_SITE"].includes(x.details?.reason)) {
+      sessionStorage.removeItem(pendingStorage()); pendingSave = null;
+      $("f").noValidate = false;
+      try { await window.OliveCashSessions.refresh(); } catch (_) {}
+    }
     $("msg").innerHTML = `<div class="msg err">${esc(x.message || "فشل الحفظ")}</div>`;
   } finally {
     saving = false;
-    $("save").disabled = !!last;
+    if (typeof window !== "undefined" && window.OliveReceiptState) window.OliveReceiptState.refreshButton();
+    else $("save").disabled = !!last;
   }
 }
 
