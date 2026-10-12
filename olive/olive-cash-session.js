@@ -18,6 +18,8 @@
   el('cashRetry').hidden=!pending;el('cashRetry').disabled=busy;
 
  }
+ let panelSession=null;
+ function setPanel(open){const panel=el('cashPanel');if(!panel)return;panel.hidden=!open;el('cashToggle').setAttribute('aria-expanded',String(open));el('cashToggle').textContent=open?'إخفاء التفاصيل':'تفاصيل الجلسة';}
  function render(){
   el('cashOwn').textContent=adminPage?'مراجعة الجلسات والدعم والمصروفات والإغلاق':own?`جلسة فواتيرك: #${own.id} — ${own.site_code}`:'لا توجد جلسة مفتوحة لفواتيرك في هذا الموقع';
   el('siteCode').readOnly=!!own||receiptPending();
@@ -33,6 +35,7 @@
   const funding=el('cashKind').querySelector('[value=FUNDING]');funding.hidden=!admin;funding.disabled=!admin;if(!admin)el('cashKind').value='EXPENSE';expenseFields();
   if(view){
    const x=view.summary;
+   if(el('cashCompactBalance')){el('cashCompactBalance').textContent=currency(x.expected_amount)+' جنيه';if(panelSession!==String(view.id)){setPanel(false);panelSession=String(view.id);}}
    el('cashHeading').textContent=`جلسة #${view.id} — ${view.owner_name} — ${view.site_code} — ${view.status==='OPEN'?'مفتوحة':'مغلقة'}`;
    el('cashTimes').textContent=`فتح: ${new Date(view.opened_at).toLocaleString('ar-EG')}`+(view.closed_at?` | إغلاق: ${new Date(view.closed_at).toLocaleString('ar-EG')} | بواسطة: ${view.closed_by}`:'');
    const cards=[['عدد الفواتير الفعالة',x.invoice_count,false],['إجمالي الفواتير الفعالة',x.invoices_total,true],['الرصيد الافتتاحي',x.opening_amount,true],['دعم العهدة',x.funding_total,true],['المدفوع نقديًا للموردين',x.cash_paid,true],['المصروفات / السحب',x.expenses_total,true],['المتبقي المحسوب',x.expected_amount,true],['مدفوعات غير نقدية',x.noncash_paid,true]];
@@ -42,6 +45,7 @@
    el('cashSnapshot').textContent=view.status==='CLOSED'?`الملخص محفوظ عند الإغلاق. ${view.close_note||''}`:'المتبقي = الافتتاحي + الدعم − السداد النقدي − المصروفات. التحويلات والشيكات لا تخصم من النقدية.';
    el('cashMovements').innerHTML=(view.movements||[]).map(m=>`<tr><td>${m.kind==='FUNDING'?'دعم':'مصروف / سحب'}</td><td>${currency(m.amount)}</td><td>${esc(categoryLabels[m.expense_category]|| (m.kind==='FUNDING'?'دعم عهدة':'غير مصنف — يحتاج مراجعة'))}<br>${esc(m.beneficiary||'')}<br><small>${esc(m.reference_no||'')} ${esc(m.expense_date||'')}</small></td><td>${esc(m.reason)}</td><td>${esc(m.created_by)}<br><small>${esc(new Date(m.created_at).toLocaleString('ar-EG'))}</small></td><td>${m.attachments.map(a=>`<button type="button" class="cash-document" data-attachment="${esc(a.id)}">${esc(a.file_name)}</button>`).join(' ')}</td></tr>`).join('')||'<tr><td colspan="6">لا توجد حركات دعم أو مصروفات</td></tr>';
   }
+  if(el('cashPanel')){if(!view||pending)setPanel(true);el('cashExpenseShortcut').hidden=!view||view.status!=='OPEN';}
   operationState();refreshSave();
  }
  async function refresh(){
@@ -100,6 +104,7 @@
  const nonnegative=value=>{if(!/^\d{1,16}(\.\d{1,2})?$/.test(String(value)))throw Error('راجع المبلغ؛ بحد أقصى منزلتين عشريتين');return value;};
  function run(fn){return async()=>{try{await fn()}catch(e){message(e.message||'تعذر تنفيذ العملية',true)}};}
  async function init(){
+  if(el('cashToggle')){el('cashToggle').onclick=()=>setPanel(el('cashPanel').hidden);el('cashExpenseShortcut').onclick=()=>{setPanel(true);el('cashKind').value='EXPENSE';expenseFields();el('cashMoveBox').scrollIntoView({behavior:'smooth',block:'center'});el('cashAmount').focus({preventScroll:true});};}
   const initialCompany=String(company());window.addEventListener('company-context-changed',()=>{if(receiptPending()||pending||busy){setCompanyId(initialCompany);const select=el('companySelect');if(select)select.value=initialCompany;message('أكمل الطلب الحالي قبل تغيير الشركة',true);}else location.reload();});
   el('cashOpen').onclick=run(()=>submit('open',{siteCode:el('siteCode').value.trim()||'MAIN',openingAmount:nonnegative(el('cashOpening').value)}));
   el('cashClose').onclick=run(()=>{

@@ -17,3 +17,22 @@ html body#oliveOperational.olive-operational-page .content{padding-top:0!importa
 html body#oliveOperational.olive-operational-page .olive-workspace .cash-summary{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important}
 html body#oliveOperational.olive-operational-page .cash-stat{min-height:78px!important;padding:12px!important}
 @media(max-width:650px){html body#oliveOperational.olive-operational-page .main>.mi-page-hero{flex-wrap:wrap!important;padding:12px!important}html body#oliveOperational.olive-operational-page .mi-hero-heading h2{font-size:20px!important}html body#oliveOperational.olive-operational-page .olive-workspace .cash-summary{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+
+/* Cashier workspace: compact session bar and lightweight variety choices. */
+html body#oliveOperational .cash-compact-bar{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+html body#oliveOperational .cash-compact-bar>div:first-child{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+html body#oliveOperational #cashOwn{font-size:12px;color:#64748b}
+html body#oliveOperational .cash-compact-balance{display:flex;align-items:baseline;gap:8px}
+html body#oliveOperational #cashCompactBalance{font-size:18px;color:#0f172a;white-space:nowrap}
+html body#oliveOperational .cash-compact-actions{display:flex;gap:6px;flex-wrap:wrap}
+html body#oliveOperational #cashPanel:not([hidden]){margin-top:14px;padding-top:12px;border-top:1px solid #e2e8f0}
+html body#oliveOperational .olive-workspace .olive-products{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(135px,1fr))!important;gap:8px!important}
+html body#oliveOperational .olive-workspace .olive-product{min-height:0!important;height:auto!important;padding:10px 12px!important;border-radius:10px!important;box-shadow:none!important;background:#fff!important;text-align:right!important}
+html body#oliveOperational .olive-workspace .olive-product strong{font-size:14px!important;line-height:1.5!important;font-weight:700!important;margin:0!important}
+html body#oliveOperational .olive-workspace .olive-product small{font-size:11px!important;line-height:1.5!important;margin-top:4px!important;color:#64748b!important}
+html body#oliveOperational .olive-workspace .olive-product::before,html body#oliveOperational .olive-workspace .olive-product::after{display:none!important}
+html body#oliveOperational .olive-workspace .pos-grid{grid-template-columns:minmax(0,.8fr) minmax(0,1.6fr)!important}
+@media(max-width:1000px){html body#oliveOperational .olive-workspace .pos-grid{grid-template-columns:1fr!important}}
+@media(max-width:600px){html body#oliveOperational .cash-compact-actions{width:100%}html body#oliveOperational .cash-compact-actions button{flex:1;padding:7px 8px!important}html body#oliveOperational .olive-workspace .olive-products{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+
+html body#oliveOperational .cash-compact-bar>div:first-child>strong{font-size:16px!important;line-height:1.5!important;font-weight:700!important}
