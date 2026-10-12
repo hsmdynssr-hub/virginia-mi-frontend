@@ -6,7 +6,7 @@ let loading=false, cancelling=false, canCancelReceipt=false;
 const filters=()=>({companyId:Number(getCompanyId()||1),dateFrom:$("from").value,dateTo:$("to").value,q:$("q").value});
 document.addEventListener("DOMContentLoaded",async()=>{
   if(!getToken()){location.href="../admin/login.html";return;}
-  try {const access=await apiGet("/olive/access/capabilities");canCancelReceipt=(access.data||access).canCancelReceipt===true;}catch(_){canCancelReceipt=false;}
+  try {const access=await apiGet("/olive/access/capabilities");canCancelReceipt=(access.data||access).canCancelReceipt===true;document.getElementById("advancedManageLink").hidden=!canCancelReceipt;}catch(_){canCancelReceipt=false;}
   const now=new Date(),t=[now.getFullYear(),String(now.getMonth()+1).padStart(2,"0"),String(now.getDate()).padStart(2,"0")].join("-");
   $("from").value=t;$("to").value=t;$("load").onclick=load;
   $("exportExcel").onclick=async()=>{

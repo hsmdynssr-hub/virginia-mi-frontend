@@ -5,10 +5,11 @@
  const company=()=>Number(getCompanyId()||1);
  function storageIdentity(){try{const user=JSON.parse(localStorage.getItem('user')||'{}');if(user.id!=null)return String(user.id);}catch(_){}return getToken()||'';}
  const scope=()=>`olive-cash-request:${company()}:${storageIdentity()}`;
+ const adminPage=window.OLIVE_CASH_ADMIN===true;let lastClosed=null;
  let own=null,view=null,all=[],userId='',admin=false,busy=false,pending=null,selected='',loadVersion=0;
  const requestKey=()=>Array.from(crypto.getRandomValues(new Uint8Array(16)),x=>x.toString(16).padStart(2,'0')).join('');
  const message=(text,error=false)=>{el('cashMessage').textContent=text;el('cashMessage').className='msg '+(error?'err':'ok');};
- function receiptPending(){return window.OliveReceiptState?.hasPending()||window.OliveReceiptState?.isSaving();}
+ function receiptPending(){return window.OliveReceiptState?.hasPending()||window.OliveReceiptState?.isSaving()||window.OliveAdvancedState?.hasPending();}
  function refreshSave(){window.OliveReceiptState?.refreshButton();}
  function operationState(){
   for(const id of ['cashOpen','cashClose','cashMove','cashRefresh','cashChoose'])el(id).disabled=busy||!!pending;
@@ -16,14 +17,17 @@
 
  }
  function render(){
-  el('cashOwn').textContent=own?`جلسة فواتيرك: #${own.id} — ${own.site_code}`:'لا توجد جلسة مفتوحة لفواتيرك في هذا الموقع';
+  el('cashOwn').textContent=adminPage?'مراجعة الجلسات والدعم والمصروفات والإغلاق':own?`جلسة فواتيرك: #${own.id} — ${own.site_code}`:'لا توجد جلسة مفتوحة لفواتيرك في هذا الموقع';
   el('siteCode').readOnly=!!own||receiptPending();
-  el('cashOpenBox').hidden=!!own;
+  el('cashOpenBox').hidden=adminPage||!!own;
+  if(el('cashLedgerBox'))el('cashLedgerBox').hidden=!adminPage;
+  if(el('cashReviewBox'))el('cashReviewBox').hidden=!adminPage;
+  if(el('advancedLink'))el('advancedLink').hidden=!admin;
   el('cashChoose').innerHTML='<option value="">اختر جلسة للمراجعة</option>'+all.map(s=>`<option value="${esc(s.id)}">#${esc(s.id)} · ${esc(s.owner_name)} · ${esc(s.site_code)} · ${s.status==='OPEN'?'مفتوحة':'مغلقة'}</option>`).join('');
   el('cashChoose').value=selected;
   el('cashDetails').hidden=!view;
   el('cashCloseBox').hidden=!view||view.status!=='OPEN';
-  el('cashMoveBox').hidden=!admin||!view||view.status!=='OPEN';
+  el('cashMoveBox').hidden=!adminPage||!admin||!view||view.status!=='OPEN';
   if(view){
    const x=view.summary;
    el('cashHeading').textContent=`جلسة #${view.id} — ${view.owner_name} — ${view.site_code} — ${view.status==='OPEN'?'مفتوحة':'مغلقة'}`;
@@ -42,7 +46,8 @@
   const result=await apiGet('/olive/cash-sessions',{companyId:company()});if(revision!==loadVersion)return;
   const data=result.data||result;all=data.sessions;userId=String(data.currentUserId);admin=data.canManageCash===true;
   const site=el('siteCode').value.trim()||'MAIN';own=all.find(s=>String(s.owner_id)===userId&&s.site_code===site&&s.status==='OPEN')||null;
-  if(!selected||!all.some(s=>String(s.id)===selected))selected=String(own?.id||all[0]?.id||'');
+  if(!adminPage)selected=String(own?.id||lastClosed?.id||'');
+  if(adminPage&&(!selected||!all.some(s=>String(s.id)===selected)))selected=String(own?.id||all[0]?.id||'');
   if(selected){const r=await apiGet('/olive/cash-sessions/'+selected,{companyId:company()});if(revision!==loadVersion)return;view=r.data||r;}else view=null;
   render();
  }
@@ -60,6 +65,7 @@
    } finally {clearTimeout(timer);}
    const data=r.data||r;
    if(pending.type==='open')selected=String(data.id);
+   if(pending.type==='close'&&!adminPage)lastClosed=data;
    sessionStorage.removeItem(scope());pending=null;
    el('cashAmount').value='';el('cashReason').value='';el('cashFiles').value='';el('cashActual').value='';el('cashCloseNote').value='';
    message('تم تسجيل العملية بنجاح');
@@ -116,5 +122,5 @@
   try{pending=JSON.parse(sessionStorage.getItem(scope())||'null');if(pending)message('يوجد طلب عهدة لم يتأكد ردّه؛ اضغط إعادة نفس العملية.',true);await refresh();}
   catch(e){own=null;message(e.message||'تعذر تحميل الجلسة',true);operationState();refreshSave();}
  }
- window.OliveCashSessions={init,refresh,storageIdentity,currentId:()=>own?.id||null,hasPending:()=>!!pending||busy};
+ window.OliveCashSessions={init,refresh,storageIdentity,displayedId:()=>view?.id||null,currentId:()=>own?.id||null,hasPending:()=>!!pending||busy};
 })();

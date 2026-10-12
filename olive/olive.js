@@ -32,6 +32,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await Promise.all([loadCatalog(), loadPrint()]);
   add();
+  renderProducts();
+  $("productSearch").oninput = renderProducts;
   try {
     const saved = sessionStorage.getItem(pendingStorage()) || sessionStorage.getItem(legacyPendingStorage());
     pendingSave = JSON.parse(saved || "null");
@@ -45,7 +47,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   $("add").onclick = add;
   $("f").onsubmit = save;
-  $("full").onclick = () => { $("paid").value = total().toFixed(2); };
+  $("full").onclick = () => { $("paymentIntent").value = "FULL"; syncPayment(); };
+  $("paymentIntent").onchange = () => { if($("paymentIntent").value==="PARTIAL")$("paid").value=""; syncPayment(); };
+  $("paid").oninput = () => { $("paymentIntent").value="PARTIAL"; };
   $("print").onclick = () => last && prt(last);
   await window.OliveCashSessions.init();
 
@@ -72,6 +76,12 @@ function options() {
     ).join("");
 }
 
+function renderProducts() {
+ const query=$("productSearch").value.trim();
+ $("products").innerHTML=catalog.filter(x=>x.name.includes(query)).map(x=>`<button type="button" class="olive-product" data-variety="${x.id}"><strong>${esc(x.name)}</strong><small>${x.current_price==null?"السعر غير محدد":m(x.current_price)+" جنيه / كجم"}</small></button>`).join("")||"<p>لا توجد أصناف مطابقة</p>";
+ $("products").onclick=e=>{const button=e.target.closest("[data-variety]");if(!button)return;let row=[...$("lines").children].find(r=>!r.querySelector(".v").value);if(!row){add();row=$("lines").lastElementChild;}row.querySelector(".v").value=button.dataset.variety;row.querySelector(".v").dispatchEvent(new Event("change"));row.querySelector(".w").focus();};
+}
+function syncPayment(){const mode=$("paymentIntent").value;$("paid").readOnly=mode!=="PARTIAL";if(mode==="FULL")$("paid").value=total().toFixed(2);if(mode==="UNPAID")$("paid").value="0";}
 function add() {
   const tr = document.createElement("tr");
   tr.innerHTML = `
@@ -110,14 +120,9 @@ function add() {
   };
 }
 
+const roundCash = value => Math.round((Number(value) + Number.EPSILON) * 100) / 100;
 function total() {
-  return [...$("lines").children].reduce(
-    (s, r) =>
-      s +
-      Number(r.querySelector(".w").value || 0) *
-      Number(r.querySelector(".p").value || 0),
-    0
-  );
+ return roundCash([...$("lines").children].reduce((sum,row)=>sum+roundCash(Number(row.querySelector(".w").value||0)*Number(row.querySelector(".p").value||0)),0));
 }
 
 function calc() {
@@ -128,6 +133,7 @@ function calc() {
     );
   });
   $("grand").textContent = m(total());
+  if($("paymentIntent"))syncPayment();
 }
 
 async function img(file) {
@@ -202,6 +208,8 @@ async function save(e) {
       throw Error("المدفوع أكبر من الإجمالي");
     }
 
+    if ($("paymentIntent").value === "PARTIAL" && (Number($("paid").value || 0) <= 0 || Number($("paid").value) >= total())) throw Error("السداد الجزئي يجب أن يكون أكبر من صفر وأقل من الإجمالي");
+    if($("paymentIntent").value==="UNPAID"&&total()>0&&!confirm("سيُحفظ السند بدون دفعة. هل المورد لم يحصل على أي مبلغ؟"))return;
     const a = [];
     const i = await img($("idcard").files[0]);
     const d = await img($("doc").files[0]);
@@ -220,6 +228,7 @@ async function save(e) {
       vehiclePlate: $("vehiclePlate").value,
       lines,
       paidAmount: Number($("paid").value || 0),
+      paymentIntent: $("paymentIntent").value,
       paymentMethod: $("method").value,
       paymentReference: $("ref").value,
       notes: $("notes").value,
