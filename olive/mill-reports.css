@@ -4,3 +4,5 @@ html body#oliveOperational .mill-report-page .btn{display:inline-flex!important;
 html body#oliveOperational .mill-report-page .btn.gray{background:#fff!important;color:#334155!important}
 html body#oliveOperational .mill-report-page .mill-kpis{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important}
 @media(max-width:800px){html body#oliveOperational .mill-report-page .mill-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+
+html body#oliveOperational .mill-report-page [hidden]{display:none!important}
