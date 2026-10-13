@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   add();
   renderProducts();
   $("productSearch").oninput = renderProducts;
+  $("catalogRefresh").onclick=async()=>{try{if(saving||pendingSave)throw Error('أكمل طلب الحفظ السابق أولًا');const result=await apiGet('/olive/catalog',{companyId:Number(getCompanyId()||1)});catalog=result.data||result;for(const row of $("lines").children){const select=row.querySelector('.v'),selected=select.value;select.innerHTML=options();select.value=selected;select.onchange({target:select});}renderProducts();calc();$("msg").innerHTML='<div class="msg ok">تم تحديث الأسعار. راجع الإجمالي وحالة السداد قبل الحفظ.</div>';}catch(e){$("msg").innerHTML=`<div class="msg err">${esc(e.message)}</div>`;}};
   try {
     const saved = sessionStorage.getItem(pendingStorage()) || sessionStorage.getItem(legacyPendingStorage());
     pendingSave = JSON.parse(saved || "null");
@@ -87,7 +88,7 @@ function add() {
   tr.innerHTML = `
     <td><select class="v" required>${options()}</select></td>
     <td><input class="w" type="number" min=".001" step=".001" required></td>
-    <td><input class="p" type="number" min="0" step=".01" required></td>
+    <td><input class="p" type="number" min="0" step=".0001" readonly aria-readonly="true" title="سعر الصنف المعتمد — لا يعدل من الفاتورة" required></td>
     <td class="t">0.00</td>
     <td><button type="button" class="btn red del">×</button></td>
   `;
@@ -97,21 +98,12 @@ function add() {
   tr.querySelector(".v").onchange = e => {
     const o = e.target.selectedOptions[0];
     const p = o?.dataset.price;
-    tr.querySelector(".p").value = p === "" ? "" : Number(p).toFixed(2);
+    tr.querySelector(".p").value = p === "" ? "" : Number(p).toFixed(4);
     tr.dataset.catalogPrice = p;
     calc();
   };
 
-  tr.querySelector(".p").oninput = () => {
-    const cp = tr.dataset.catalogPrice;
-    tr.classList.toggle(
-      "override",
-      cp !== undefined &&
-      cp !== "" &&
-      Math.abs(Number(tr.querySelector(".p").value || 0) - Number(cp)) > .0001
-    );
-    calc();
-  };
+
 
   tr.querySelector(".w").oninput = calc;
   tr.querySelector(".del").onclick = () => {
@@ -191,15 +183,16 @@ async function save(e) {
     const lines = [...$("lines").children].map(r => {
       const id = Number(r.querySelector(".v").value);
       const c = catalog.find(x => Number(x.id) === id);
+      if(!c||c.current_price==null||c.current_price==='')throw Error("الصنف بدون سعر معتمد؛ راجع مسؤول الأسعار");
       return {
         varietyId: id,
         varietyName: c?.name || "",
         weightKg: Number(r.querySelector(".w").value),
-        pricePerKg: Number(r.querySelector(".p").value)
+        pricePerKg: Number(c?.current_price)
       };
     });
 
-    if (lines.some(x => !x.varietyId || !x.varietyName || x.weightKg <= 0 || x.pricePerKg < 0)) {
+    if (lines.some(x => !x.varietyId || !x.varietyName || x.weightKg <= 0 || !Number.isFinite(x.pricePerKg) || x.pricePerKg < 0)) {
       throw Error("راجع الصنف والوزن والسعر");
     }
 
@@ -250,7 +243,7 @@ async function save(e) {
     $("msg").innerHTML = `<div class="msg ok">تم الحفظ: ${last.receipt_no}</div>`;
     try { await window.OliveCashSessions.refresh(); } catch (_) { /* Receipt committed; summary can be refreshed separately. */ }
   } catch (x) {
-    if ([400,403,404,413].includes(x.status) || ["CASH_SESSION_CLOSED","CASH_SESSION_SITE"].includes(x.details?.reason)) {
+    if ([400,403,404,413].includes(x.status) || ["CASH_SESSION_CLOSED","CASH_SESSION_SITE","CATALOG_PRICE_MISMATCH"].includes(x.details?.reason)) {
       sessionStorage.removeItem(pendingStorage()); pendingSave = null;
       $("f").noValidate = false;
       try { await window.OliveCashSessions.refresh(); } catch (_) {}
