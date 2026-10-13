@@ -25,6 +25,7 @@ const m = v => new Intl.NumberFormat("ar-EG", {
 }).format(Number(v || 0));
 
 document.addEventListener("DOMContentLoaded", async () => {
+  if(!$("f"))return;
   if (!getToken()) {
     location.href = "../admin/login.html";
     return;

@@ -877,6 +877,21 @@
       });
     }
 
+        // OLIVE_PORTAL_DASHBOARD_20261013
+    const olivePortalBasePermission = hasPermission;
+    const olivePortalDashboardAdmin = () => { const u=getCurrentUser();return [u.role,...getUserRoles()].some(r=>['admin','super_admin','owner'].includes(String(typeof r==='string'?r:r?.code||r?.name||'').toLowerCase())); };
+    window.hasPermission = page => page==='olive-home' ? (isAdmin()||olivePortalDashboardAdmin()||['olive.receive','olive.admin','olive.settings','olive.mill.receive','olive.mill.cost'].some(code=>getUserPermissions().includes(code))) : page==='olive-advanced' ? olivePortalDashboardAdmin() : olivePortalBasePermission(page);
+    REPORT_PAGE_MAP['olive-mill-receiving']='olive.mill.receive';
+    REPORT_PAGE_MAP['olive-mill-cost']='olive.mill.cost';
+    const olivePortalDashboardModule = DASHBOARD_MODULES.find(module=>['../olive/index.html','../olive/home.html'].includes(module.indexHref));
+    if(olivePortalDashboardModule){
+      olivePortalDashboardModule.indexPage='olive-home';olivePortalDashboardModule.indexHref='../olive/home.html';
+      olivePortalDashboardModule.title='موسم الزيتون';
+      olivePortalDashboardModule.description='بوابة مستقلة للمحاسب والتحليل واستلام المعاصر والتكلفة والإدارة.';
+      olivePortalDashboardModule.reports=olivePortalDashboardModule.reports.filter(report=>report.page!=='olive-settings');
+      [{page:'olive-mill-receiving',title:'استلام المعاصر والنقلات',href:'../olive/mill-receiving.html'}, {page:'olive-mill-cost',title:'مطابقة الكميات والتكلفة',href:'../olive/mill-reconciliation.html'}, {page:'olive-advanced',title:'الإدارة المتقدمة',href:'../olive/manage.html'}].forEach(report=>{if(!olivePortalDashboardModule.reports.some(r=>r.page===report.page))olivePortalDashboardModule.reports.push(report);});
+    }
+
     const dashboard = buildDashboardModules();
     document.body.classList.add("mi-app-dashboard");
 

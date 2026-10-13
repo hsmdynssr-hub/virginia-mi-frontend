@@ -4,13 +4,16 @@ const kg=v=>new Intl.NumberFormat("ar-EG",{minimumFractionDigits:3,maximumFracti
 const m=v=>new Intl.NumberFormat("ar-EG",{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v||0));
 let analysisData=null;
 let loading=false, cancelling=false, canCancelReceipt=false;
-const filters=()=>{const mode=$("analysisMode").value,sessionId=$("analysisSession").value;if(mode==='SESSION'&&!sessionId)throw Error('اختر جلسة لعرضها كاملة');const dateFrom=mode==='DAY'?$("analysisDay").value:mode==='CUSTOM'?$("from").value:'',dateTo=mode==='DAY'?$("analysisDay").value:mode==='CUSTOM'?$("to").value:'';if(mode!=='SESSION'&&(!dateFrom||!dateTo))throw Error('حدد اليوم أو الفترة');return {companyId:Number(getCompanyId()||1),sessionId,dateFrom,dateTo,q:$("q").value};};
-function analysisFields(){const mode=$("analysisMode").value;$("analysisDayField").hidden=mode!=='DAY';$("analysisFromField").hidden=mode!=='CUSTOM';$("analysisToField").hidden=mode!=='CUSTOM';}
+const filters=()=>{const mode=$("analysisMode").value,sessionId=$("analysisSession").value;if(mode==='SESSION'&&!sessionId)throw Error('اختر جلسة لعرضها كاملة');const dateFrom=mode==='DAY'?$("analysisDay").value:mode==='CUSTOM'?$("from").value:'',dateTo=mode==='DAY'?$("analysisDay").value:mode==='CUSTOM'?$("to").value:'';if(['DAY','CUSTOM'].includes(mode)&&(!dateFrom||!dateTo))throw Error('حدد اليوم أو الفترة');return {companyId:Number(getCompanyId()||1),sessionId,dateFrom,dateTo,q:$("q").value};};
+function analysisFields(){const mode=$("analysisMode").value;if(mode==='ALL')$("analysisSession").value='';$("analysisDayField").hidden=mode!=='DAY';$("analysisFromField").hidden=mode!=='CUSTOM';$("analysisToField").hidden=mode!=='CUSTOM';}
 document.addEventListener("DOMContentLoaded",async()=>{
+  if(!$("analysisMode"))return;
   if(!getToken()){location.href="../admin/login.html";return;}
-  try {const access=await apiGet("/olive/access/capabilities");canCancelReceipt=(access.data||access).canCancelReceipt===true;document.getElementById("advancedManageLink").hidden=!canCancelReceipt;}catch(_){canCancelReceipt=false;}
+  const initialCompany=String(getCompanyId()||1);window.addEventListener('company-context-changed',()=>{if(loading||cancelling){setCompanyId(initialCompany);const select=$("companySelect");if(select)select.value=initialCompany;$("msg").textContent='انتظر انتهاء العملية قبل تغيير الشركة';}else location.reload();});
+  try {const access=await apiGet("/olive/access/capabilities");canCancelReceipt=(access.data||access).canCancelReceipt===true;}catch(_){canCancelReceipt=false;}
   const parts=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Cairo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).map(x=>[x.type,x.value])),t=`${parts.year}-${parts.month}-${parts.day}`;
-  $("analysisDay").value=t;$("from").value=t;$("to").value=t;$("load").onclick=load;$("analysisMode").onchange=analysisFields;
+  $("analysisDay").value=t;$("from").value=t;$("to").value=t;$("load").onclick=load;$("analysisMode").onchange=analysisFields;analysisFields();
+  document.querySelectorAll('[data-analysis-tab]').forEach(button=>{button.onclick=()=>{document.querySelectorAll('[data-analysis-tab]').forEach(b=>{const selected=b===button;b.setAttribute('aria-selected',String(selected));b.classList.toggle('gray',!selected);$("panel-"+b.dataset.analysisTab).hidden=!selected;});};});
   try{const r=await apiGet('/olive/analysis/sessions',{companyId:Number(getCompanyId()||1)});const rows=r.data||r;$("analysisSession").innerHTML='<option value="">كل الجلسات</option><option value="UNASSIGNED">فواتير بدون جلسة</option>'+rows.map(x=>`<option value="${e(x.id)}">#${e(x.id)} — ${e(x.owner_name)} — ${e(x.site_code)} — ${x.status==='OPEN'?'مفتوحة':'مغلقة'}</option>`).join('');}catch(err){$("msg").textContent='تعذر تحميل قائمة الجلسات: '+err.message;}
   $("exportExcel").onclick=async()=>{
     const button=$("exportExcel");button.disabled=true;$("msg").textContent="";

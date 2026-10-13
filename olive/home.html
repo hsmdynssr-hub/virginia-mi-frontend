@@ -1,0 +1,12 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>بوابة موسم الزيتون</title><link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/mi-app.css"><link rel="stylesheet" href="../css/report-ui.css"><link rel="stylesheet" href="../css/bootstrap-theme.css"><link rel="stylesheet" href="./olive-project.css?v=20261012-scroll4"><link rel="stylesheet" href="./olive-portal.css?v=20261013-portal1"></head><body><script src="../js/api.js"></script><script src="../js/layout.js?v=20260902-customer-unified-02"></script><script src="./olive-navigation.js?v=20261013-portal1"></script><script>
+document.body.id='oliveOperational';document.body.classList.add('olive-operational-page');
+const cards=[
+ {title:'منصة المحاسب',pill:'تشغيل',text:'شراء الزيتون والفواتير والسداد وعهدة المحاسب والمصاريف. إعدادات الأصناف والأسعار من داخل المنصة.',href:'./index.html',permission:'olive.receive'},
+ {title:'تحليل المشتريات',pill:'تحليل',text:'كل المشتريات أولًا، ثم التصفية باليوم أو الجلسة أو الفترة. تجميع الأصناف والموردين وتفصيل الأسعار.',href:'./admin.html',permission:'olive.admin'},
+ {title:'استلام المعاصر والنقلات',pill:'استلام',text:'إثبات وصول العربيات لمطروح والسادات، وزن المحملة والفارغة وصافي البسكول والمستندات.',href:'./mill-receiving.html',permission:'olive.mill.receive'},
+ {title:'مطابقة الكميات والتكلفة',pill:'تكلفة',text:'مطابقة المشتريات مع استلام المعاصر ومراجعة المتوسط المرجح ومصاريف التجميع والنقل.',href:'./mill-reconciliation.html',permission:'olive.mill.cost'},
+ {title:'الإدارة المتقدمة',pill:'إدارة',text:'مراجعة جلسات المحاسبين وتصحيح الفواتير والسداد بأسباب ومستندات وسجل مراجعة.',href:'./manage.html',admin:true}
+];
+const visible=cards.filter(c=>c.admin?OlivePortal.systemAdmin():OlivePortal.permission(c.permission));
+renderLayout('بوابة موسم الزيتون','التشغيل والتحليل واستلام المعاصر والتكلفة في صفحات مستقلة','olive-home',`<div class="olive-portal-grid">${visible.map(c=>`<a class="report-card" href="${c.href}"><span class="page-pill">${c.pill}</span><h3>${c.title}</h3><p>${c.text}</p></a>`).join('')||'<section class="report-card"><h3>لا توجد وظائف تشغيلية متاحة</h3><p>راجع صلاحيات المستخدم مع مسؤول النظام.</p></section>'}</div>`);
+</script></body></html>
