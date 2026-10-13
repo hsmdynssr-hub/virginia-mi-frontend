@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -860,6 +860,21 @@
         modulesCount: allowedModules.length,
         reportsCount: countAllowedReports(allowedModules)
       };
+    }
+
+        // OLIVE_MILL_DASHBOARD_LINKS_20261013
+    REPORT_PAGE_MAP['olive-mill-receiving'] = 'olive.mill.receive';
+    REPORT_PAGE_MAP['olive-mill-cost'] = 'olive.mill.cost';
+    const oliveMillDashboardModule = DASHBOARD_MODULES.find(module => module.indexHref === '../olive/index.html');
+    if (oliveMillDashboardModule) {
+      [
+        {page:'olive-mill-receiving',title:'استلام المعاصر والنقلات',href:'../olive/mill-receiving.html'},
+        {page:'olive-mill-cost',title:'مطابقة الكميات والتكلفة',href:'../olive/mill-reconciliation.html'}
+      ].forEach(report => {
+        if (!oliveMillDashboardModule.reports.some(existing => existing.page === report.page)) {
+          oliveMillDashboardModule.reports.push(report);
+        }
+      });
     }
 
     const dashboard = buildDashboardModules();
