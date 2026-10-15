@@ -1,3 +1,9 @@
+// This page uses only the grouped Odoo API. Prevent the shared legacy exporter/filter toolbar.
+window.loadReportExportEngine=function(){};
+const originalPosSummaryToolbar=window.shouldShowReportToolbar;
+if(typeof originalPosSummaryToolbar==='function')window.shouldShowReportToolbar=function(page){return page==='pos-summary'?false:originalPosSummaryToolbar.apply(this,arguments);};
+let groupedGeneration=0,groupedController=null,groupedBusy=false,groupedCurrency='';
+const cairoToday=()=>{const p=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Cairo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).map(v=>[v.type,v.value]));return `${p.year}-${p.month}-${p.day}`;};
 document.addEventListener("DOMContentLoaded", () => {
   renderLayout(
     "ملخص نقاط البيع",
@@ -8,21 +14,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
   bindPosSummaryEvents();
   renderInitialState();
+  initGroupedCatalog();
 });
-
-async function waitForReportFilters() {
-  for (let i = 0; i < 30; i += 1) {
-    if (window.ReportFilters) return;
-
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-
-  throw new Error("Report filters engine did not load");
-}
 
 function buildPosSummaryPage() {
   return `
     <div class="container-fluid mi-bootstrap-page px-0">
+    <section class="mi-report-card mb-4">
+      <a class="btn btn-outline-secondary mb-3" href="../dashboard/index.html">الرجوع للصفحة الرئيسية</a>
+      <p>المصدر: تقرير أودو الجاهز — تجميع داخل أودو، بدون كاش أو تخزين أو تحميل فواتير.</p>
+      <form id="groupedForm" class="row g-3 align-items-end">
+        <label class="col-md-3">من<input class="form-control" type="date" id="groupedFrom" required></label>
+        <label class="col-md-3">إلى<input class="form-control" type="date" id="groupedTo" required></label>
+        <label class="col-md-3">الفرع / المعرض<select class="form-select" id="groupedBranch"><option value="all">جارٍ جلب الفروع المسموحة…</option></select></label>
+        <div class="col-md-3"><button type="submit" class="btn btn-primary" id="groupedLoad" disabled>تحديث التقرير من أودو</button></div>
+      </form>
+      <div class="d-flex flex-wrap gap-2 mt-3">
+        <button type="button" class="btn btn-outline-secondary" id="groupedYtd">السنة الحالية حتى اليوم</button>
+        <button type="button" class="btn btn-outline-secondary" id="groupedPreviousYear">السنة السابقة كاملة</button>
+        <label>السنة <input id="groupedYear" type="number" min="1900" max="2100" style="width:100px" aria-label="رقم السنة"></label>
+        <button type="button" class="btn btn-outline-secondary" id="groupedFullYear">عرض سنة كاملة</button>
+      </div>
+      <p id="groupedFetched" class="small text-secondary mt-3" role="status"></p>
+      <button class="btn btn-outline-secondary" type="button" id="groupedExport" disabled>تنزيل الجداول المعروضة CSV</button>
+    </section>
     <section id="loadingBox" class="alert alert-warning d-flex align-items-center hidden" role="status">
       <span class="spinner-border spinner-border-sm mi-loading-spinner" aria-hidden="true"></span>
       جاري تحميل ملخص نقاط البيع...
@@ -43,7 +58,7 @@ function buildPosSummaryPage() {
 
     <section class="mi-report-card pos-summary-section">
       <h2 class="mi-report-title"><span class="mi-section-icon">📊</span>مقارنة المبيعات مع نفس الفترة من السنة السابقة</h2>
-      <div id="periodComparisonGrid"></div>
+      <button type="button" class="btn btn-outline-primary mb-3" data-grouped-section="comparison" disabled>جلب المقارنة من أودو</button><div id="periodComparisonGrid">تجلب عند الطلب.</div>
     </section>
 
     <section class="mi-report-card pos-summary-section">
@@ -54,17 +69,17 @@ function buildPosSummaryPage() {
     <section class="mi-report-card pos-summary-section">
       <h2 class="mi-report-title"><span class="mi-section-icon">🏬</span>ملخص المعارض</h2>
       <p class="text-secondary small">
-        أعلى المعارض حسب صافي المبيعات. التفاصيل الكاملة متاحة في Excel.
+        كل الفروع والمعارض حسب صافي المبيعات، والإجمالي أسفل الجدول.
       </p>
-      <div id="branchesTable"></div>
+      <div id="branchesTable"></div><h3 class="h6 mt-3" id="groupedReviewHeading" hidden>نقاط تحتاج مراجعة الربط — تدخل في إجمالي الكل</h3><div id="groupedReview"></div>
     </section>
 
     <section class="mi-report-card pos-summary-section">
       <h2 class="mi-report-title"><span class="mi-section-icon">👤</span>ملخص الكاشيرات</h2>
       <p class="text-secondary small">
-        أعلى الكاشيرات حسب صافي المبيعات. التفاصيل الكاملة متاحة في Excel.
+        الكاشير المسجل على الفاتورة، بتجميع مباشر داخل أودو.
       </p>
-      <div id="cashiersTable"></div>
+      <button type="button" class="btn btn-outline-primary mb-3" data-grouped-section="cashiers" disabled>جلب الكاشيرات من أودو</button><div id="cashiersTable">تجلب عند الطلب.</div>
     </section>
 
     <section class="mi-report-card pos-summary-section">
@@ -72,7 +87,7 @@ function buildPosSummaryPage() {
       <p class="text-secondary small">
         أقوى الساعات حسب عدد الفواتير. هذا مؤشر ضغط وليس مدة خدمة العميل.
       </p>
-      <div id="hoursTable"></div>
+      <button type="button" class="btn btn-outline-primary mb-3" data-grouped-section="hours" disabled>جلب ساعات البيع من أودو</button><div id="hoursTable">تجلب عند الطلب.</div>
     </section>
 
     <section class="mi-report-card pos-summary-section">
@@ -88,43 +103,22 @@ function buildPosSummaryPage() {
   `;
 }
 
-function bindPosSummaryEvents() {
-  document.getElementById("refreshPosSummaryBtn")
-    ?.addEventListener("click", loadPosSummaryReport);
-
-  document.getElementById("loadBtn")
-    ?.addEventListener("click", loadPosSummaryReport);
-
-  document.getElementById("companySelect")
-    ?.addEventListener("change", async () => {
-      try {
-        await waitForReportFilters();
-
-        if (window.ReportFilters?.apply) {
-          await window.ReportFilters.apply("pos-summary");
-        }
-      } catch (error) {
-        console.warn("Could not reload POS branch filters", error.message);
-      }
-
-      renderFilterChangedState();
-    });
-
-  document.addEventListener("change", (event) => {
-    const target = event.target;
-
-    if (!target) return;
-
-    if (
-      target.id === "branchCode" ||
-      target.id === "dateFrom" ||
-      target.id === "dateTo" ||
-      target.id === "datePreset"
-    ) {
-      renderFilterChangedState();
-    }
-  });
+function resetGrouped(){groupedGeneration++;groupedController?.abort();groupedBusy=false;renderFilterChangedState();document.getElementById('groupedFetched').textContent='تغيرت الفلاتر؛ اضغط تحديث.';document.getElementById('groupedExport').disabled=true;document.getElementById('groupedReview').innerHTML='';document.getElementById('groupedReviewHeading').hidden=true;document.querySelectorAll('[data-grouped-section]').forEach(b=>b.disabled=true);document.getElementById('groupedLoad').disabled=false;}
+function bindPosSummaryEvents(){
+ document.getElementById('groupedFrom').value=document.getElementById('groupedTo').value=cairoToday();
+ document.getElementById('groupedYear').value=cairoToday().slice(0,4);
+ const period=(from,to)=>{document.getElementById('groupedFrom').value=from;document.getElementById('groupedTo').value=to;resetGrouped();};
+ document.getElementById('groupedYtd').onclick=()=>period(cairoToday().slice(0,4)+'-01-01',cairoToday());
+ document.getElementById('groupedPreviousYear').onclick=()=>{const y=Number(cairoToday().slice(0,4))-1;period(y+'-01-01',y+'-12-31');};
+ document.getElementById('groupedFullYear').onclick=()=>{const y=Number(document.getElementById('groupedYear').value);if(!Number.isInteger(y)||y<1900||y>2100){showErrorMessage('اختر سنة صحيحة');return;}period(y+'-01-01',y+'-12-31');};
+ document.getElementById('groupedForm').onsubmit=e=>{e.preventDefault();loadPosSummaryReport();};
+ for(const id of ['groupedFrom','groupedTo','groupedBranch'])document.getElementById(id).onchange=resetGrouped;
+ document.querySelectorAll('[data-grouped-section]').forEach(b=>b.onclick=()=>loadPosSummaryReport(b.dataset.groupedSection));
+ window.addEventListener('company-context-changed',()=>{resetGrouped();initGroupedCatalog();});
+ document.getElementById('groupedExport').onclick=()=>{const rows=[['ملخص نقاط البيع — تقرير أودو'],['الفترة',document.getElementById('groupedFrom').value,document.getElementById('groupedTo').value],['النطاق',document.getElementById('groupedBranch').selectedOptions[0]?.textContent||''],['العملة',groupedCurrency],[]];document.querySelectorAll('#kpiGrid .mi-kpi-card,#periodComparisonGrid .mi-kpi-card').forEach(c=>rows.push([c.querySelector('.mi-kpi-label')?.textContent||'',c.querySelector('.mi-kpi-value')?.textContent||'']));document.querySelectorAll('#branchesTable table,#groupedReview table,#cashiersTable table,#hoursTable table').forEach(t=>{rows.push([]);t.querySelectorAll('tr').forEach(tr=>rows.push([...tr.cells].map(c=>c.textContent.trim())));});const safe=v=>{v=String(v);if(/^[=+@-]/.test(v.trimStart()))v="'"+v;return '"'+v.replace(/"/g,'""')+'"';};const blob=new Blob(['\ufeff'+rows.map(r=>r.map(safe).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='pos-odoo-'+document.getElementById('groupedFrom').value+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 }
+async function groupedFetch(section,signal){const q=new URLSearchParams({...getPosSummaryFilters(),section});const r=await fetch((window.API_BASE_URL||'https://api.mi.virginiaolive.com/api')+'/pos-grouped/summary?'+q,{headers:getAuthHeaders(),cache:'no-store',signal});const body=await r.json();if(!r.ok||body.success===false)throw Error(body.message||'تعذر جلب تقرير أودو');return body.data;}
+async function initGroupedCatalog(){const generation=++groupedGeneration;groupedController?.abort();const ctl=groupedController=new AbortController();const timer=setTimeout(()=>ctl.abort(),95000);document.getElementById('groupedLoad').disabled=true;try{const d=await groupedFetch('catalog',ctl.signal);if(generation!==groupedGeneration)return;const opts=items=>items.map(b=>`<option value="${escapeHtml(b.branchCode)}">${escapeHtml(b.branchName)}</option>`).join('');const permanent=d.branches.filter(b=>!b.isExhibition),exhibitions=d.branches.filter(b=>b.isExhibition);document.getElementById('groupedBranch').innerHTML='<option value="all">كل الفروع والمعارض المسموحة</option>'+(permanent.length?'<optgroup label="فروع البيع الدائمة">'+opts(permanent)+'</optgroup>':'')+(exhibitions.length?'<optgroup label="المعارض والمواسم">'+opts(exhibitions)+'</optgroup>':'');document.getElementById('groupedLoad').disabled=false;}catch(e){if(generation===groupedGeneration)showErrorMessage(e.name==='AbortError'?'انتهت مهلة جلب الفروع؛ أعد فتح الصفحة.':e.message);}finally{clearTimeout(timer);}}
 
 function renderInitialState() {
   hideError();
@@ -227,106 +221,29 @@ function showErrorMessage(message) {
   errorBox.classList.remove("hidden");
 }
 
-function validatePosSummaryContext() {
-  if (window.ReportFilters?.validate) {
-    const validation = window.ReportFilters.validate();
-
-    if (!validation.ok) {
-      return validation;
-    }
-  }
-
-  const companyId = document.getElementById("companySelect")?.value || "";
-
-  if (!companyId) {
-    return {
-      ok: false,
-      message: "لازم تختار الشركة قبل تحميل التقرير."
-    };
-  }
-
-  const branchCode = document.getElementById("branchCode")?.value || "";
-
-  if (!branchCode) {
-    return {
-      ok: false,
-      message: "لازم تختار الفرع أو كل الفروع المسموحة قبل تحميل التقرير."
-    };
-  }
-
-  return {
-    ok: true
-  };
+function validatePosSummaryContext(){const f=getPosSummaryFilters();return{ok:!!f.companyId&&!!f.dateFrom&&!!f.dateTo&&f.dateFrom<=f.dateTo,message:'اختر الشركة والفترة بصورة صحيحة.'};}
+function getPosSummaryFilters(){return{companyId:String(getCompanyId()||''),dateFrom:document.getElementById('groupedFrom').value,dateTo:document.getElementById('groupedTo').value,branchCode:document.getElementById('groupedBranch').value||'all'};}
+async function loadPosSummaryReport(section='summary'){
+ if(typeof section!=='string')section='summary';if(groupedBusy)return;const validation=validatePosSummaryContext();if(!validation.ok){showErrorMessage(validation.message);return;}
+ const generation=++groupedGeneration;groupedController?.abort();const ctl=groupedController=new AbortController(),timer=setTimeout(()=>ctl.abort(),95000);groupedBusy=true;hideError();showLoadingBox();document.querySelectorAll('#groupedLoad,[data-grouped-section]').forEach(b=>b.disabled=true);
+ if(section==='summary'){document.getElementById('groupedFetched').textContent='جارٍ الجلب من أودو…';clearReportData();document.getElementById('groupedReview').innerHTML='';document.getElementById('groupedReviewHeading').hidden=true;document.getElementById('groupedExport').disabled=true;hideReportSections();}else document.getElementById(section==='comparison'?'periodComparisonGrid':section==='cashiers'?'cashiersTable':'hoursTable').innerHTML='جارٍ الجلب من أودو…';
+ let succeeded=false;
+ try{const d=await groupedFetch(section,ctl.signal);if(generation!==groupedGeneration)return;groupedCurrency=d.currency.name;document.getElementById('pendingBox').classList.add('hidden');showReportSections();
+ if(section==='summary'){renderPosSummaryReport(d);document.getElementById('groupedReviewHeading').hidden=!d.reviewRows.length;renderTable('groupedReview',d.reviewRows,[["الموقع / ملاحظة الربط","branchName"],["الفواتير","ordersCount",v=>formatNumber(v,0)],["الصافي","netSales",formatMoney]]);}
+ else if(section==='comparison')renderPeriodComparison(d.comparison);
+ else if(section==='cashiers'){renderCashiers(d.cashiers);const cards=document.querySelectorAll('#kpiGrid .mi-kpi-value');if(cards[14])cards[14].textContent=formatNumber(d.summary.activeCashiersCount,0);}
+ else{renderHours(d.hours);const cards=document.querySelectorAll('#kpiGrid .mi-kpi-value');if(cards[17])cards[17].textContent=d.summary.peakHourByOrders?.hourLabel||'—';}
+ document.getElementById('groupedFetched').textContent='آخر جلب لهذا الجزء: '+new Date(d.meta.fetchedAt).toLocaleString('ar-EG',{timeZone:'Africa/Cairo'})+' — '+d.meta.groupRows+' صف تجميع من أودو — العملة: '+groupedCurrency+' — بدون كاش.';document.getElementById('groupedExport').disabled=false;succeeded=true;
+ }catch(e){if(generation!==groupedGeneration)return;showErrorMessage(e.name==='AbortError'?'انتهت مهلة أودو؛ اختر فترة أقصر أو أعد المحاولة.':e.message);if(section!=='summary')document.getElementById(section==='comparison'?'periodComparisonGrid':section==='cashiers'?'cashiersTable':'hoursTable').innerHTML='تعذر الجلب؛ أعد المحاولة.';}
+ finally{clearTimeout(timer);if(generation===groupedGeneration){groupedBusy=false;hideLoading();document.getElementById('groupedLoad').disabled=false;document.querySelectorAll('[data-grouped-section]').forEach(b=>b.disabled=section==='summary'&&!succeeded);}}
 }
 
-function getPosSummaryFilters(mode = "summary") {
-  const isExport = mode === "export";
-
-  return {
-    companyId:
-      document.getElementById("companySelect")?.value || "",
-
-    dateFrom:
-      document.getElementById("dateFrom")?.value || "",
-
-    dateTo:
-      document.getElementById("dateTo")?.value || "",
-
-    branchCode:
-      document.getElementById("branchCode")?.value || "",
-
-    mode,
-
-    limit: isExport ? 100000 : 100000,
-    linesLimit: isExport ? 250000 : 250000
-  };
-}
-
-async function loadPosSummaryReport() {
-  const validation = validatePosSummaryContext();
-
-  if (!validation.ok) {
-    showErrorMessage(validation.message);
-    return;
-  }
-
-  try {
-    showLoadingBox();
-    hideError();
-
-    const response = await apiGet(
-      "/pos/summary",
-      getPosSummaryFilters("summary")
-    );
-
-    if (!response.success) {
-      throw new Error(response.message || "فشل تحميل ملخص نقاط البيع");
-    }
-
-    document.getElementById("pendingBox")?.classList.add("hidden");
-
-    showReportSections();
-    renderPosSummaryReport(response.data || {});
-  } catch (error) {
-    console.error(error);
-
-    showErrorMessage(
-      error.message || "حدث خطأ أثناء تحميل ملخص نقاط البيع"
-    );
-  } finally {
-    hideLoading();
-  }
-}
-
-function renderPosSummaryReport(data) {
-  renderPosSummaryKpis(data.summary || {});
-  renderPeriodComparison(data.comparison || {});
-  renderHighlights(data.highlights || []);
-  renderBranches(data.branches || []);
-  renderCashiers(data.cashiers || []);
-  renderHours(data.hours || []);
-  renderWarnings(data.warnings || []);
-  renderNotes(data.notes || []);
+function renderPosSummaryReport(data){
+ renderPosSummaryKpis(data.summary);renderHighlights([{label:"أفضل فرع / معرض",value:data.summary.topBranchName||"—",metric:"حسب صافي المبيعات"},{label:"المصدر والعملة",value:"تقرير أودو — "+groupedCurrency,metric:"بدون تخزين نتائج"}]);renderBranches(data.branches);renderWarnings(data.warnings);renderNotes(data.notes);
+ document.getElementById('periodComparisonGrid').textContent='تجلب المقارنة من أودو عند الضغط على الزر.';
+ document.getElementById('cashiersTable').textContent='يجلب تجميع الكاشيرات عند الضغط على الزر.';
+ document.getElementById('hoursTable').textContent='يجلب تجميع ساعات البيع عند الضغط على الزر.';
+ const footer=document.querySelector('#branchesTable table');if(footer){const r=data.summary;const values=['إجمالي النطاق — يشمل بنود المراجعة',formatNumber(r.ordersCount,0),formatMoney(r.grossSales),formatMoney(r.returnsValue),formatMoney(r.negativeAdjustmentsValue),formatMoney(r.netSales),formatMoney(r.averageTicket),formatPercent(r.customerCaptureRate)];footer.insertAdjacentHTML('beforeend','<tfoot><tr>'+values.map(v=>'<th>'+escapeHtml(v)+'</th>').join('')+'</tr></tfoot>');}
 }
 
 function renderPosSummaryKpis(summary) {
@@ -373,7 +290,7 @@ function renderPosSummaryKpis(summary) {
     {
       title: "إجمالي الخصومات",
       value: formatMoney(summary.totalDiscountValue),
-      hint: "الخصومات اليدوية حسب منطق تقرير المعارض"
+      hint: "خصم تقرير أودو على سطور البيع العادي الموجبة"
     },
     {
       title: "نسبة الخصم",
@@ -393,7 +310,7 @@ function renderPosSummaryKpis(summary) {
     {
       title: "إجمالي الهامش",
       value: formatMoney(summary.totalMargin),
-      hint: "الهامش المتاح من Odoo إن وجد"
+      hint: "هامش تقرير أودو بعملة الشركة إن توفر"
     },
     {
       title: "نسبة الهامش",
@@ -412,7 +329,7 @@ function renderPosSummaryKpis(summary) {
     },
     {
       title: "الكاشيرات النشطة",
-      value: formatNumber(summary.activeCashiersCount, 0),
+      value: summary.activeCashiersCount==null?"عند جلب الكاشيرات":formatNumber(summary.activeCashiersCount, 0),
       hint: "عدد الكاشيرات الذين لديهم فواتير"
     },
     {
@@ -427,11 +344,12 @@ function renderPosSummaryKpis(summary) {
     },
     {
       title: "أقوى ساعة",
-      value: summary.peakHourByOrders?.hourLabel || "-",
+      value: summary.peakHourByOrders?.hourLabel || "عند جلب الساعات",
       hint: "حسب عدد الفواتير"
     }
   ];
 
+  cards.push({title:"صافي تقرير أودو الجاهز",value:formatMoney(summary.reportNetSales),hint:"يشمل السطور الموجبة داخل فواتير الاسترداد إن وجدت"});
   const icons = ["🧾", "💰", "↩", "🎁", "✅", "🛒", "🏷", "%", "↩", "%", "📈", "%", "👥", "🏬", "👤", "🧾", "🏆", "⏱"];
 
   kpiGrid.innerHTML = cards
@@ -465,13 +383,15 @@ function formatPeriodLabel(period = {}) {
 }
 
 function signedPercent(value) {
-  const number = Number(value || 0);
+  if(value===null||value===undefined||value==='')return "—";
+  const number = Number(value);
   const sign = number > 0 ? "+" : "";
   return `${sign}${formatPercent(number)}`;
 }
 
 function signedMoney(value) {
-  const number = Number(value || 0);
+  if(value===null||value===undefined||value==='')return "—";
+  const number = Number(value);
   const sign = number > 0 ? "+" : "";
   return `${sign}${formatMoney(number)}`;
 }
@@ -510,14 +430,14 @@ function renderPeriodComparison(comparison = {}) {
     },
     {
       title: "إجمالي المبيعات — السنة السابقة",
-      value: formatMoney(previous.grossSales || 0),
+      value: formatMoney(previous.grossSales),
       hint: previousPeriodLabel,
       tone: "teal",
       icon: "💰"
     },
     {
       title: "صافي المبيعات — السنة السابقة",
-      value: formatMoney(previous.netSales || 0),
+      value: formatMoney(previous.netSales),
       hint: previousPeriodLabel,
       tone: "success",
       icon: "✅"
@@ -597,7 +517,7 @@ function renderHighlights(rows) {
 }
 
 function renderBranches(rows) {
-  renderTable("branchesTable", rows.slice(0, 10), [
+  renderTable("branchesTable", rows, [
     ["المعرض", "branchName"],
     ["عدد الفواتير", "ordersCount", (v) => formatNumber(v, 0)],
     ["إجمالي المبيعات", "grossSales", formatMoney],
@@ -610,7 +530,7 @@ function renderBranches(rows) {
 }
 
 function renderCashiers(rows) {
-  renderTable("cashiersTable", rows.slice(0, 10), [
+  renderTable("cashiersTable", rows, [
     ["الكاشير", "cashierName"],
     ["عدد الفواتير", "ordersCount", (v) => formatNumber(v, 0)],
     ["إجمالي المبيعات", "grossSales", formatMoney],
@@ -623,7 +543,7 @@ function renderCashiers(rows) {
 }
 
 function renderHours(rows) {
-  renderTable("hoursTable", rows.slice(0, 10), [
+  renderTable("hoursTable", rows, [
     ["الساعة", "hourLabel"],
     ["عدد الفواتير", "ordersCount", (v) => formatNumber(v, 0)],
     ["إجمالي المبيعات", "grossSales", formatMoney],
@@ -717,7 +637,8 @@ function renderTable(containerId, rows, columns) {
 }
 
 function formatNumber(value, digits = 2) {
-  const number = Number(value || 0);
+  if(value===null||value===undefined||value==='')return "—";
+  const number = Number(value);
 
   return number.toLocaleString("en-US", {
     minimumFractionDigits: digits,
@@ -731,11 +652,11 @@ function formatNullableNumber(value) {
 }
 
 function formatMoney(value) {
-  return `${formatNumber(value, 2)} ج`;
+  return value==null?"—":`${formatNumber(value, 2)} ${groupedCurrency}`;
 }
 
 function formatPercent(value) {
-  return `${formatNumber(value, 2)}%`;
+  return value==null?"—":`${formatNumber(value, 2)}%`;
 }
 
 function escapeHtml(value) {
