@@ -32,12 +32,21 @@ document.addEventListener("DOMContentLoaded",async()=>{
     catch(err){$("msg").textContent=err.message||"فشل الإلغاء";}finally{cancelling=false;button.disabled=false;$("load").disabled=false;}
   });load();
 });
+
+// Sum decimal strings as scaled integers; formatting alone converts to Number.
+function sumDecimal(rows,key,places){return rows.reduce((n,r)=>{const [a,b='']=String(r[key]||0).split('.');return n+BigInt(a)*10n**BigInt(places)+BigInt(b.padEnd(places,'0').slice(0,places));},0n);}
+function reportFooters(x){const vs=x.byVariety||[],w=Number(sumDecimal(vs,'weight_kg',3))/1000,a=Number(x.total_amount||0),min=vs.length?Math.min(...vs.map(v=>Number(v.min_price_per_kg))):0,max=vs.length?Math.max(...vs.map(v=>Number(v.max_price_per_kg))):0;
+ $('varietyTotals').innerHTML=`<tr><th>إجمالي الفلتر الحالي</th><th>${kg(w)}</th><th>${m(a)}</th><th>${m(w?a/w:0)}</th><th>${vs.length?m(min):'—'}</th><th>${vs.length?m(max):'—'}</th><th>—</th><th>${e(vs.reduce((n,v)=>n+Number(v.overridden_lines||0),0))}</th></tr>`;
+ $('supplierTotals').innerHTML=`<tr><th colspan="2">إجمالي كل الموردين المطابقين — يشمل غير المعروض</th><th>${e(x.receipt_count||0)}</th><th>${kg(w)}</th><th>${m(x.total_amount)}</th><th>${m(x.paid_amount)}</th><th>${m(x.balance_amount)}</th></tr>`;
+ $('receiptTotals').innerHTML=`<tr><th colspan="3">إجمالي ${e(x.receipt_count||0)} فاتورة فعالة مطابقة — يشمل غير المعروض ويستبعد الملغى</th><th>${kg(w)}</th><th>${m(x.total_amount)}</th><th>${m(x.paid_amount)}</th><th>${m(x.balance_amount)}</th><th colspan="2"></th></tr>`;
+}
+
 async function load(){
   if(loading)return;loading=true;$("load").disabled=true;$("msg").textContent="";
   try{
     const p=filters(),[s,r]=await Promise.all([apiGet("/olive/summary",p),apiGet("/olive/receipts",{...p,limit:200})]),x=s.data||s,rows=r.data||r;
     $("kc").textContent=x.receipt_count||0;$("kt").textContent=m(x.total_amount);$("kp").textContent=m(x.paid_amount);$("kb").textContent=m(x.balance_amount);
-    analysisData=x;
+    analysisData=x;reportFooters(x);
     $("vb").innerHTML=(x.byVariety||[]).map(v=>`<tr><td>${e(v.variety_name)}</td><td>${e(v.weight_kg)}</td><td>${m(v.total_amount)}</td><td>${m(v.avg_price_per_kg)}</td><td>${m(v.min_price_per_kg)}</td><td>${m(v.max_price_per_kg)}</td><td>${e(v.price_count||0)}</td><td>${e(v.overridden_lines||0)}</td></tr>`).join("");
     $("supplierCount").textContent=`عرض ${(x.bySupplier||[]).length} من ${x.bySupplier?.[0]?.full_count||0} مجموعة مورد`;
     $("supplierRows").innerHTML=(x.bySupplier||[]).map(v=>`<tr><td>${e(v.supplier_name)}</td><td>${e(v.supplier_phone)}</td><td>${e(v.receipt_count)}</td><td>${kg(v.weight_kg)}</td><td>${m(v.total_amount)}</td><td>${m(v.paid_amount)}</td><td>${m(v.balance_amount)}</td></tr>`).join('')||'<tr><td colspan="7">لا توجد مشتريات</td></tr>';
@@ -51,9 +60,10 @@ async function load(){
 function e(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");}
 
 function renderPrices(){
- const x=analysisData;if(!x)return;const v=(x.byVariety||[])[Number($("priceVariety").value)];if(!v){$("priceRows").innerHTML='';$("priceExplanation").textContent='لا توجد كميات للصنف';return;}
+ const x=analysisData;if(!x)return;const v=(x.byVariety||[])[Number($("priceVariety").value)];if(!v){$("priceRows").innerHTML='';$("priceTotals").innerHTML='';$("priceExplanation").textContent='لا توجد كميات للصنف';return;}
  const rows=(x.byPrice||[]).filter(r=>String(r.variety_id||'')===String(v.variety_id||'')&&r.variety_name===v.variety_name),weight=Number(v.weight_kg||0);
  $("priceExplanation").textContent=`${v.variety_name}: ${kg(weight)} كجم بقيمة ${m(v.total_amount)} جنيه؛ المتوسط المرجح ${m(v.avg_price_per_kg)} جنيه/كجم. ${Number(v.price_count)>1?'يوجد أكثر من سعر شراء؛ اختلاف أوزان الشراء بكل سعر يغيّر المتوسط.':'سعر شراء واحد داخل الفلتر الحالي.'} حدود السعر من ${m(v.min_price_per_kg)} إلى ${m(v.max_price_per_kg)}. المقارنة بين جلستين تتم باختيار كل جلسة ومراجعة أسعارها وكمياتها.`;
+ $("priceTotals").innerHTML=`<tr><th>إجمالي الصنف — كل أسعاره</th><th>${kg(v.weight_kg)}</th><th>${weight?'100%':'0%'}</th><th>${m(v.total_amount)}</th><th>${e(v.variety_receipt_count??'—')}</th><th>${e(v.overridden_lines||0)}</th><th>المتوسط المرجح: ${m(v.avg_price_per_kg)}</th></tr>`;
  $("priceCount").textContent=`عرض ${rows.length} مجموعة سعر للصنف؛ التقرير يعرض حتى500 مجموعة أسعار إجمالًا. متوسط الصنف محسوب من كل السطور دون هذا الحد.`;
  $("priceRows").innerHTML=rows.map(r=>`<tr><td>${m(r.price_per_kg)}</td><td>${kg(r.weight_kg)}</td><td>${weight?m(Number(r.weight_kg)*100/weight):'0'}%</td><td>${m(r.total_amount)}</td><td>${e(r.receipt_count)}</td><td>${e(r.overridden_lines)}</td><td>${e(new Date(r.first_receipt_at).toLocaleString('ar-EG'))}<br>${e(new Date(r.last_receipt_at).toLocaleString('ar-EG'))}</td></tr>`).join('');
 }

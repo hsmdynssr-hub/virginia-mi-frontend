@@ -40,3 +40,12 @@ html body#oliveOperational .cash-compact-bar>div:first-child>strong{font-size:16
 /* Entry screens scroll as a single document: no stacked sticky toolbars. */
 html body#oliveOperational .main>.mi-page-hero,html body#oliveOperational .main>.report-toolbar,html body#oliveOperational .main>.mi-context-toolbar,html body#oliveOperational .main>.topbar,html body#oliveOperational .mi-section-navigation,html body#oliveOperational .olive-workspace>div:first-child{position:relative!important;top:auto!important;inset:auto!important;transform:none!important;z-index:auto!important}
 html body#oliveOperational .mi-hero-account-bar{position:static!important;inset:auto!important}
+
+/* Expense statements reuse the shared report tables; keep the entry compact. */
+html body#oliveOperational .olive-expense-workspace{margin-top:14px;border-top:1px solid #e2e8f0;padding-top:12px;scroll-margin-top:150px}
+html body#oliveOperational .olive-expense-workspace>summary{cursor:pointer;font-weight:700;color:#334155;padding:8px 0}
+html body#oliveOperational .olive-expense-workspace tfoot th{background:#f1f5f9;border-top:2px solid #cbd5e1;font-weight:700}
+html body#oliveOperational .olive-expense-entry-table{min-width:780px}html body#oliveOperational .olive-expense-entry-table td:nth-child(3){min-width:110px}html body#oliveOperational .olive-expense-entry-table td:first-child{min-width:170px}html body#oliveOperational .olive-expense-entry-table input{margin-top:6px}
+html body#oliveOperational .olive-expense-entry-table td>input,html body#oliveOperational .olive-expense-entry-table td>select{display:block!important;width:100%!important;max-width:100%!important;position:static!important;margin:6px 0 0!important}
+html body#oliveOperational .olive-expense-entry-table td{white-space:normal!important;vertical-align:top!important}
+html body#oliveOperational .olive-expense-entry-table button{background:#fff!important;color:#64748b!important;border:1px solid #dbe3ef!important;padding:5px 9px!important;border-radius:6px!important;min-height:28px!important}

@@ -7,3 +7,6 @@ html body#oliveOperational .olive-analysis-tabs button[aria-selected=true]{backg
 html body#oliveOperational .olive-analysis-kpis{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important}
 @media(max-width:650px){html body#oliveOperational .olive-analysis-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 html body#oliveOperational .olive-actions{display:flex;align-items:center;gap:8px;white-space:nowrap}html body#oliveOperational button.olive-cancel{display:inline-flex!important;align-items:center;justify-content:center;width:auto!important;min-width:0!important;min-height:0!important;height:28px!important;padding:3px 10px!important;border:1px solid #fecaca!important;border-radius:6px!important;background:#fff!important;color:#b91c1c!important;font-size:12px!important;font-weight:500!important;line-height:20px!important;box-shadow:none!important}html body#oliveOperational button.olive-cancel:hover{background:#fff1f2!important}
+
+html body#oliveOperational tfoot.olive-report-total th{background:#f1f5f9;border-top:2px solid #cbd5e1;font-weight:700;white-space:nowrap}
+html body#oliveOperational .olive-analysis-kpis[hidden]{display:none!important}
