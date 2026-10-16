@@ -46,7 +46,7 @@ async function load(){
   try{
     const p=filters(),[s,r]=await Promise.all([apiGet("/olive/summary",p),apiGet("/olive/receipts",{...p,limit:200})]),x=s.data||s,rows=r.data||r;
     $("kc").textContent=x.receipt_count||0;$("kt").textContent=m(x.total_amount);$("kp").textContent=m(x.paid_amount);$("kb").textContent=m(x.balance_amount);
-    analysisData=x;reportFooters(x);
+    analysisData=x;reportFooters(x);renderPlatforms(x);
     $("vb").innerHTML=(x.byVariety||[]).map(v=>`<tr><td>${e(v.variety_name)}</td><td>${e(v.weight_kg)}</td><td>${m(v.total_amount)}</td><td>${m(v.avg_price_per_kg)}</td><td>${m(v.min_price_per_kg)}</td><td>${m(v.max_price_per_kg)}</td><td>${e(v.price_count||0)}</td><td>${e(v.overridden_lines||0)}</td></tr>`).join("");
     $("supplierCount").textContent=`عرض ${(x.bySupplier||[]).length} من ${x.bySupplier?.[0]?.full_count||0} مجموعة مورد`;
     $("supplierRows").innerHTML=(x.bySupplier||[]).map(v=>`<tr><td>${e(v.supplier_name)}</td><td>${e(v.supplier_phone)}</td><td>${e(v.receipt_count)}</td><td>${kg(v.weight_kg)}</td><td>${m(v.total_amount)}</td><td>${m(v.paid_amount)}</td><td>${m(v.balance_amount)}</td></tr>`).join('')||'<tr><td colspan="7">لا توجد مشتريات</td></tr>';
@@ -66,4 +66,11 @@ function renderPrices(){
  $("priceTotals").innerHTML=`<tr><th>إجمالي الصنف — كل أسعاره</th><th>${kg(v.weight_kg)}</th><th>${weight?'100%':'0%'}</th><th>${m(v.total_amount)}</th><th>${e(v.variety_receipt_count??'—')}</th><th>${e(v.overridden_lines||0)}</th><th>المتوسط المرجح: ${m(v.avg_price_per_kg)}</th></tr>`;
  $("priceCount").textContent=`عرض ${rows.length} مجموعة سعر للصنف؛ التقرير يعرض حتى500 مجموعة أسعار إجمالًا. متوسط الصنف محسوب من كل السطور دون هذا الحد.`;
  $("priceRows").innerHTML=rows.map(r=>`<tr><td>${m(r.price_per_kg)}</td><td>${kg(r.weight_kg)}</td><td>${weight?m(Number(r.weight_kg)*100/weight):'0'}%</td><td>${m(r.total_amount)}</td><td>${e(r.receipt_count)}</td><td>${e(r.overridden_lines)}</td><td>${e(new Date(r.first_receipt_at).toLocaleString('ar-EG'))}<br>${e(new Date(r.last_receipt_at).toLocaleString('ar-EG'))}</td></tr>`).join('');
+}
+
+function renderPlatforms(x){
+ const platforms={QASR_MATROUH:'القصر — مطروح',BARRANI_NEGILA:'براني والنجلية',DABAA_RAS_EL_HEKMA:'الضبعة ورأس الحكمة'},mills={MATROUH:'مطروح',SADAT:'السادات',ABYAD:'الأبيض'};
+ const rows=x.byPlatform||[];
+ $('platformRows').innerHTML=rows.map(r=>`<tr><td>${e(platforms[r.collection_platform]||'غير محدد')}</td><td>${e(({YARD:'استلام في الشادر',DIRECT_MILL:'إرسال مباشر للمعصرة'})[r.delivery_mode]||'غير محدد')}</td><td>${e(mills[r.destination_mill]||(r.delivery_mode==='YARD'?'—':'غير محدد'))}</td><td>${e(r.receipt_count)}</td><td>${kg(r.weight_kg)}</td><td>${m(r.total_amount)}</td><td>${m(r.paid_amount)}</td><td>${m(r.balance_amount)}</td></tr>`).join('')||'<tr><td colspan="8">لا توجد مشتريات مطابقة</td></tr>';
+ $('platformTotals').innerHTML=`<tr><th colspan="3">إجمالي المشتريات المطابقة</th><th>${e(rows.reduce((n,r)=>n+Number(r.receipt_count),0))}</th><th>${kg(Number(sumDecimal(rows,'weight_kg',3))/1000)}</th><th>${m(Number(sumDecimal(rows,'total_amount',2))/100)}</th><th>${m(Number(sumDecimal(rows,'paid_amount',2))/100)}</th><th>${m(Number(sumDecimal(rows,'balance_amount',2))/100)}</th></tr>`;
 }
