@@ -49,6 +49,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   $("add").onclick = add;
   $("f").onsubmit = save;
+  $("deliveryMode").onchange = () => {
+    const direct = $("deliveryMode").value === "DIRECT_MILL";
+    $("destinationMillField").hidden = !direct;
+    $("destinationMill").required = direct;
+    if (!direct) $("destinationMill").value = "";
+  };
+  $("deliveryMode").onchange();
   $("full").onclick = () => { $("paymentIntent").value = "FULL"; syncPayment(); };
   $("paymentIntent").onchange = () => { if($("paymentIntent").value==="PARTIAL")$("paid").value=""; syncPayment(); };
   $("paid").oninput = () => { $("paymentIntent").value="PARTIAL"; };
@@ -181,6 +188,7 @@ async function save(e) {
     const sessionId = window.OliveCashSessions.currentId();
     if (!sessionId || window.OliveCashSessions.hasPending()) throw Error("افتح جلسة عهدة وأكمل طلباتها قبل حفظ الفاتورة");
     if (!$("supplierName").value.trim()) throw Error("اسم المورد مطلوب");
+    if (!$("collectionPlatform").value || !$("deliveryMode").value || ($("deliveryMode").value === 'DIRECT_MILL' && !$("destinationMill").value)) throw Error("اختر منصة التجميع وطريقة التسليم والمعصرة عند النقل المباشر");
     const lines = [...$("lines").children].map(r => {
       const id = Number(r.querySelector(".v").value);
       const c = catalog.find(x => Number(x.id) === id);
@@ -215,6 +223,9 @@ async function save(e) {
       companyId: Number(getCompanyId() || 1),
       sessionId,
       siteCode: $("siteCode").value,
+      collectionPlatform: $("collectionPlatform").value,
+      deliveryMode: $("deliveryMode").value,
+      destinationMill: $("deliveryMode").value === 'DIRECT_MILL' ? $("destinationMill").value : null,
       supplierName: $("supplierName").value,
       supplierPhone: $("supplierPhone").value,
       supplierNationalId: $("supplierNationalId").value,
@@ -619,6 +630,9 @@ function prt(r) {
 
   <div class="section">
     <div class="section-title">تفاصيل الاستلام</div>
+    ${r.collection_platform ? infoRow("منصة التجميع", ({QASR_MATROUH:"القصر — مطروح",BARRANI_NEGILA:"براني والنجلية",DABAA_RAS_EL_HEKMA:"الضبعة ورأس الحكمة"})[r.collection_platform] || r.collection_platform) : ""}
+    ${r.delivery_mode ? infoRow("طريقة التسليم", r.delivery_mode === "DIRECT_MILL" ? "نقل مباشر إلى معصرة" : "استلام في الشادر") : ""}
+    ${r.destination_mill ? infoRow("المعصرة", ({MATROUH:"مطروح",SADAT:"السادات",ABYAD:"الأبيض"})[r.destination_mill] || r.destination_mill) : ""}
     <table>
       <thead>
         <tr>

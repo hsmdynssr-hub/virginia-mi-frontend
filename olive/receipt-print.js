@@ -360,6 +360,9 @@ function render(r, s = {}, companyId = 1) {
 
   <div class="section">
     <div class="section-title">تفاصيل الاستلام</div>
+    ${r.collection_platform ? infoRow("منصة التجميع", ({QASR_MATROUH:"القصر — مطروح",BARRANI_NEGILA:"براني والنجلية",DABAA_RAS_EL_HEKMA:"الضبعة ورأس الحكمة"})[r.collection_platform] || r.collection_platform) : ""}
+    ${r.delivery_mode ? infoRow("طريقة التسليم", r.delivery_mode === "DIRECT_MILL" ? "نقل مباشر إلى معصرة" : "استلام في الشادر") : ""}
+    ${r.destination_mill ? infoRow("المعصرة", ({MATROUH:"مطروح",SADAT:"السادات",ABYAD:"الأبيض"})[r.destination_mill] || r.destination_mill) : ""}
     <table>
       <thead>
         <tr>
