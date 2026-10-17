@@ -5,7 +5,8 @@
  window.loadReportExportEngine=function(){};const toolbar=window.shouldShowReportToolbar;if(typeof toolbar==='function')window.shouldShowReportToolbar=function(page){return page===pageCode?false:toolbar.apply(this,arguments);};
  let generation=0,controller,busy=false,currency='',loaded={},attempted=new Set(),catalogReady=false;
  const today=()=>{const p=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Cairo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).map(x=>[x.type,x.value]));return `${p.year}-${p.month}-${p.day}`;};
- const number=v=>v==null?'—':new Intl.NumberFormat('ar-EG',{maximumFractionDigits:2}).format(v);
+ const locale=()=> (window.MI18n?.getLanguage?.()||localStorage.getItem('mi-language')||'ar')==='en'?'en-US':'ar-EG';
+ const number=v=>v==null?'—':new Intl.NumberFormat(locale(),{maximumFractionDigits:2}).format(v);
  const money=v=>v==null?'—':number(v)+' '+currency;
  const filters=()=>({companyId:String(getCompanyId()||''),dateFrom:$('cleanFrom').value,dateTo:$('cleanTo').value,branchCode:$('cleanBranch').value||'all'});
  const financeColumns=[['عدد الفواتير','ordersCount'],['المبيعات','grossSales'],['المرتجعات','returnsValue'],['العروض وتسويتها','negativeAdjustmentsValue'],['الصافي شامل الضريبة','netSales'],['الصافي بدون ضريبة','untaxedSales'],['التكلفة','totalCost'],['الربح','totalMargin'],['هامش % بدون ضريبة','marginPercent']].filter(([,key])=>!branchPage||!['totalCost','totalMargin','marginPercent'].includes(key));
@@ -27,7 +28,7 @@
  function nextOpen(){if(busy||!loaded.summary)return;const panel=[...document.querySelectorAll('details[data-section]')].find(e=>e.open&&!attempted.has(e.dataset.section));if(panel)load(panel.dataset.section);}
  async function load(section='summary'){
   if(busy||!catalogReady)return;const f=filters();if(!f.companyId||!f.dateFrom||!f.dateTo||f.dateFrom>f.dateTo){$('cleanError').hidden=false;$('cleanError').textContent='اختر الشركة وفترة صحيحة';return;}if(section==='summary')reset();const current=generation,ctl=controller=new AbortController(),timer=setTimeout(()=>ctl.abort(),95000);busy=true;attempted.add(section);$('cleanLoad').disabled=true;$('cleanExport').disabled=true;$('cleanStatus').textContent='جارٍ التحميل…';if(section!=='summary')$('clean-'+section).textContent='جارٍ التحميل…';
-  try{const d=await fetchPart(section,ctl.signal);if(current!==generation)return;loaded[section]=d;render(section,d);$('cleanStatus').textContent='آخر تحديث: '+new Date(d.meta.fetchedAt).toLocaleString('ar-EG',{timeZone:'Africa/Cairo'})+' · '+currency;}
+  try{const d=await fetchPart(section,ctl.signal);if(current!==generation)return;loaded[section]=d;render(section,d);$('cleanStatus').textContent='آخر تحديث: '+new Date(d.meta.fetchedAt).toLocaleString(locale(),{timeZone:'Africa/Cairo'})+' · '+currency;}
   catch(e){if(current!==generation)return;const message=e.name==='AbortError'?'انتهت المهلة؛ حاول مرة أخرى.':e.message;if(section==='summary'){$('cleanError').hidden=false;$('cleanError').textContent=message;$('cleanStatus').textContent='';}else{$('clean-'+section).innerHTML='<p>'+esc(message)+'</p><button class="btn btn-outline-secondary" type="button" data-retry="'+section+'">إعادة المحاولة</button>';$('cleanStatus').textContent='';}}
   finally{clearTimeout(timer);if(current===generation){busy=false;$('cleanLoad').disabled=false;$('cleanExport').disabled=!loaded.summary;nextOpen();}}
  }
