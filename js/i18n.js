@@ -125,9 +125,12 @@
     }
 
     const language = getLanguage();
-    button.innerHTML = language === "ar"
+    const buttonMarkup = language === "ar"
       ? '<span aria-hidden="true">◎</span><strong>EN</strong>'
       : '<span aria-hidden="true">◎</span><strong>عربي</strong>';
+    // Do not replace children on each observer pass: that mutation schedules
+    // another pass forever and can also remove a button during a pointer click.
+    if (button.innerHTML !== buttonMarkup) button.innerHTML = buttonMarkup;
     button.setAttribute(
       "aria-label",
       language === "ar" ? "Switch to English" : "التبديل إلى العربية"

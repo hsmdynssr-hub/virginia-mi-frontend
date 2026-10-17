@@ -68,8 +68,17 @@
   };
 
   const syncGeneratedColgroup = (table, columnKinds) => {
-    table.querySelectorAll('colgroup[data-mi-generated="true"]').forEach((node) => node.remove());
-    if (table.querySelector('colgroup:not([data-mi-generated="true"])')) return;
+    const generated = Array.from(table.querySelectorAll('colgroup[data-mi-generated="true"]'));
+    if (table.querySelector('colgroup:not([data-mi-generated="true"])')) {
+      generated.forEach((node) => node.remove());
+      return;
+    }
+    const widths = columnKinds.map(kind => `${WIDTHS[kind || "standard"] || WIDTHS.standard}px`);
+    // An observer sees inserted colgroups too. Reusing unchanged columns keeps
+    // those notifications from becoming an endless animation-frame loop.
+    if (generated.length === 1 && generated[0].children.length === widths.length &&
+        Array.from(generated[0].children).every((col, index) => col.style.width === widths[index])) return;
+    generated.forEach((node) => node.remove());
 
     const group = document.createElement("colgroup");
     group.dataset.miGenerated = "true";
@@ -142,12 +151,20 @@
   };
 
   let refreshQueued = false;
+  const pendingTables = new Set();
   const queueRefresh = (node) => {
-    if (refreshQueued) return;
+    if (node instanceof Element) {
+      const table = node.closest("table");
+      if (table) pendingTables.add(table);
+    }
+    node.querySelectorAll?.("table").forEach(table => pendingTables.add(table));
+    if (refreshQueued || !pendingTables.size) return;
     refreshQueued = true;
     requestAnimationFrame(() => {
       refreshQueued = false;
-      scan(node instanceof Element ? node : document);
+      const tables = Array.from(pendingTables);
+      pendingTables.clear();
+      tables.filter(table => table.isConnected).forEach(manageTable);
     });
   };
 
@@ -156,6 +173,7 @@
 
     const observer = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
+        if (mutation.removedNodes.length) queueRefresh(mutation.target);
         if (mutation.type === "characterData") {
           queueRefresh(mutation.target.parentElement || document.body);
           continue;
@@ -167,7 +185,7 @@
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
-    window.MITableSystem = { scan, manageTable, version: "20260908-06" };
+    window.MITableSystem = { scan, manageTable, version: "20261017-01" };
   };
 
   if (document.readyState === "loading") {

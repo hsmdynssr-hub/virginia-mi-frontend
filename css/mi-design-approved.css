@@ -1,0 +1,319 @@
+/* Approved local visual system, 17 October 2026.
+   Loaded after legacy/module styles by layout.js. Screen only: invoices and
+   report print layouts retain their existing contracts. No report DOM changes. */
+@media screen {
+  html body.mi-app-unified.mi-design-approved {
+    --design-canvas: #f5f7fb;
+    --design-surface: #ffffff;
+    --design-soft: #f6f8fc;
+    --design-ink: #263649;
+    --design-muted: #536477;
+    --design-line: #dce5ee;
+    --design-teal: #236c64;
+    --design-teal-soft: #e6f4ef;
+    --design-blue-soft: #edf4ff;
+    --design-warm-soft: #fff2e6;
+    --design-action: #b86725;
+    --design-shadow: 0 5px 0 #e5eaf1, 0 12px 26px rgb(38 54 73 / 5%);
+    --mi-shell-canvas: var(--design-canvas);
+    --mi-shell-line: var(--design-line);
+    --mi-shell-module: var(--design-teal);
+    --mi-shell-accent: var(--design-action);
+    --mi-base-bg: var(--design-canvas);
+    --mi-base-surface: var(--design-surface);
+    --mi-base-ink: var(--design-ink);
+    --mi-base-muted: var(--design-muted);
+    --mi-base-line: var(--design-line);
+    --mi-table-head: #eaf1fa;
+    --mi-table-head-text: var(--design-ink);
+    --mi-table-head-border: var(--design-line);
+    --mi-table-line: var(--design-line);
+    --mi-table-line-strong: var(--design-line);
+    --mi-table-text: var(--design-ink);
+    --mi-table-muted: var(--design-muted);
+    --mi-table-row-alt: var(--design-soft);
+    --mi-table-row-hover: var(--design-teal-soft);
+    --mi-table-row-active: var(--design-warm-soft);
+    background: var(--design-canvas) !important;
+    color: var(--design-ink) !important;
+    font-family: Tahoma, Arial, sans-serif !important;
+    font-size: 14px;
+    line-height: 1.65;
+    accent-color: var(--design-teal);
+  }
+
+  html[data-mi-theme="dark"] body.mi-app-unified.mi-design-approved {
+    --design-canvas: #111c29;
+    --design-surface: #1b2b3c;
+    --design-soft: #223449;
+    --design-ink: #edf3fa;
+    --design-muted: #b9c9da;
+    --design-line: #3d5268;
+    --design-teal: #9fdfd0;
+    --design-teal-soft: #254841;
+    --design-blue-soft: #283e59;
+    --design-warm-soft: #48372c;
+    --design-shadow: 0 5px 0 #0b1420, 0 12px 26px rgb(0 0 0 / 12%);
+    --mi-table-head: #2b4056;
+    color-scheme: dark;
+  }
+
+  html body.mi-app-unified.mi-design-approved :is(button,input,select,textarea) {
+    font-family: Tahoma, Arial, sans-serif !important;
+  }
+
+  /* Keep the existing top navigation and account tools. */
+  html body.mi-app-unified.mi-design-approved .mi-page-hero {
+    min-height: 108px !important;
+    padding: 20px 30px !important;
+    background: var(--design-surface) !important;
+    border-bottom: 1px solid var(--design-line) !important;
+    box-shadow: 0 4px 18px rgb(38 54 73 / 4%) !important;
+  }
+  html body.mi-app-unified.mi-design-approved .mi-page-hero,
+  html body.mi-app-unified.mi-design-approved .mi-page-hero *,
+  html body.mi-app-unified.mi-design-approved .mi-page-hero :is(h1,h2,h3,h4,p,span,strong,small,label) {
+    color: var(--design-ink) !important;
+    -webkit-text-fill-color: currentColor !important;
+    text-shadow: none !important;
+  }
+  html body.mi-app-unified.mi-design-approved .mi-hero-heading {
+    text-align: start !important;
+    padding: 0 !important;
+  }
+  html body.mi-app-unified.mi-design-approved .mi-hero-heading h2 {
+    font-size: clamp(24px, 2.6vw, 34px) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.4 !important;
+  }
+  html body.mi-app-unified.mi-design-approved .mi-hero-heading p {
+    color: var(--design-muted) !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    opacity: 1 !important;
+  }
+  html body.mi-app-unified.mi-design-approved .mi-hero-heading .page-pill {
+    color: var(--design-teal) !important;
+    font-size: 12px !important;
+    opacity: 1 !important;
+  }
+  html body.mi-app-unified.mi-design-approved .mi-hero-account-bar {
+    background: transparent !important;
+    border: 0 !important;
+    backdrop-filter: none !important;
+  }
+  html body.mi-app-unified.mi-design-approved .mi-hero-account-bar :is(.mi-tool-capsule,.mi-account-capsule,.mi-logout-capsule) {
+    background: var(--design-soft) !important;
+    border: 1px solid var(--design-line) !important;
+    box-shadow: 0 2px 0 var(--design-line) !important;
+  }
+  html body.mi-app-unified.mi-design-approved .mi-hero-account-bar .mi-account-avatar {
+    background: var(--design-teal-soft) !important;
+    color: var(--design-teal) !important;
+  }
+  html body.mi-app-unified.mi-design-approved .mi-hero-account-bar .mi-logout-capsule {
+    background: var(--design-warm-soft) !important;
+    border-color: var(--design-line) !important;
+  }
+
+  html body.mi-app-unified.mi-design-approved :is(.mi-section-nav-grouped,.report-toolbar,.mi-context-toolbar) {
+    background: var(--design-surface) !important;
+    border-color: var(--design-line) !important;
+    border-radius: 16px !important;
+    box-shadow: var(--design-shadow) !important;
+  }
+  html body.mi-app-unified.mi-design-approved :is(.mi-section-dashboard-link,.mi-section-nav-group > summary) {
+    background: var(--design-soft) !important;
+    color: var(--design-ink) !important;
+    border-color: var(--design-line) !important;
+    font-size: 13px !important;
+  }
+  html body.mi-app-unified.mi-design-approved .mi-section-nav-group.active > summary,
+  html body.mi-app-unified.mi-design-approved .mi-section-nav-group.active > summary * {
+    background: var(--design-teal-soft) !important;
+    color: var(--design-teal) !important;
+    border-color: var(--design-line) !important;
+  }
+  html body.mi-app-unified.mi-design-approved .mi-section-menu {
+    background: var(--design-surface) !important;
+    border-color: var(--design-line) !important;
+  }
+  html body.mi-app-unified.mi-design-approved .mi-section-menu a {
+    color: var(--design-ink) !important;
+    font-size: 13px !important;
+  }
+  html body.mi-app-unified.mi-design-approved .mi-section-menu a:is(:hover,[aria-current="page"]) {
+    background: var(--design-teal-soft) !important;
+    color: var(--design-teal) !important;
+  }
+
+  /* Shared cards only; do not recolor status badges or business alerts. */
+  html body.mi-app-unified.mi-design-approved :is(.report-card,.mi-report-card,.card,.panel,.op-section,.op-filter-card,.dashboard-card,.ops-welcome,.ops-status-panel,.crsms-card,.crsms-panel) {
+    border: 1px solid var(--design-line) !important;
+    border-radius: 18px !important;
+    background: var(--design-surface) !important;
+    color: var(--design-ink) !important;
+    box-shadow: var(--design-shadow) !important;
+  }
+  html body.mi-app-unified.mi-design-approved :is(.report-card-head,.card-header,.panel-head,.panel-title,.dashboard-section-title) :is(h2,h3),
+  html body.mi-app-unified.mi-design-approved :is(.ops-welcome,.ops-status-panel) :is(h2,h3,strong) {
+    color: var(--design-ink) !important;
+    font-weight: 700 !important;
+  }
+  html body.mi-app-unified.mi-design-approved :is(.report-card-head,.ops-welcome,.ops-status-panel) p {
+    color: var(--design-muted) !important;
+    font-size: 13px !important;
+  }
+  html body.mi-app-unified.mi-design-approved .dashboard-card h3 { color: var(--design-ink) !important; font-size: 17px !important; }
+  html body.mi-app-unified.mi-design-approved .dashboard-card p { color: var(--design-muted) !important; font-size: 13px !important; line-height: 1.8 !important; }
+  html body.mi-app-unified.mi-design-approved .dashboard-card :is(small,.dashboard-card-subtitle) { font-size: 12px !important; }
+  html body.mi-app-unified.mi-design-approved .mi-kpi-card::after {
+    font-size: 28px !important;
+    opacity: .13 !important;
+    inset-inline-end: 16px !important;
+    bottom: 12px !important;
+  }
+  html body.mi-app-unified.mi-design-approved .mi-kpi-card > span { color: var(--design-muted) !important; font-size: 13px !important; }
+  html body.mi-app-unified.mi-design-approved :is(.mi-kpi-card[data-tone="danger"],.op-kpi.danger) { border-inline-start: 4px solid #c33f45 !important; }
+  html body.mi-app-unified.mi-design-approved :is(.mi-kpi-card[data-tone="warning"],.op-kpi.warning) { border-inline-start: 4px solid #b7791f !important; }
+  html body.mi-app-unified.mi-design-approved .mi-kpi-card[data-tone="success"] { border-inline-start: 4px solid #287854 !important; }
+  html body.mi-app-unified.mi-design-approved :is(.report-kpi-card,.mi-kpi-card,.kpi-card,.kpi,.stat-card,.op-kpi,.ops-stat) {
+    background: var(--design-surface) !important;
+    color: var(--design-ink) !important;
+    border: 1px solid var(--design-line) !important;
+    border-radius: 16px !important;
+    box-shadow: var(--design-shadow) !important;
+  }
+  html body.mi-app-unified.mi-design-approved :is(.report-kpi-card,.mi-kpi-card,.kpi-card,.kpi,.stat-card,.op-kpi):nth-child(4n+1) { background: var(--design-teal-soft) !important; }
+  html body.mi-app-unified.mi-design-approved :is(.report-kpi-card,.mi-kpi-card,.kpi-card,.kpi,.stat-card,.op-kpi):nth-child(4n+2) { background: var(--design-blue-soft) !important; }
+  html body.mi-app-unified.mi-design-approved :is(.report-kpi-card,.mi-kpi-card,.kpi-card,.kpi,.stat-card,.op-kpi):nth-child(4n) { background: var(--design-warm-soft) !important; }
+  html body.mi-app-unified.mi-design-approved :is(.report-kpi-card,.mi-kpi-card,.kpi-card,.kpi,.stat-card,.op-kpi) :is(.label,.card-label,.report-kpi-label,small,h4) {
+    color: var(--design-muted) !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+  }
+  html body.mi-app-unified.mi-design-approved :is(.report-kpi-card,.mi-kpi-card,.kpi-card,.kpi,.stat-card,.op-kpi) :is(.value,.report-kpi-value,strong) {
+    color: var(--design-ink) !important;
+    font-variant-numeric: tabular-nums;
+  }
+
+  html body.mi-app-unified.mi-design-approved :is(.report-field,.context-field,.filter-field) > span,
+  html body.mi-app-unified.mi-design-approved .content label {
+    color: var(--design-ink);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  html body.mi-app-unified.mi-design-approved :is(.control,.report-input,.report-select,.form-control,.form-select) {
+    background: var(--design-surface) !important;
+    border-color: var(--design-line) !important;
+    color: var(--design-ink) !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    border-radius: 10px !important;
+  }
+  html body.mi-app-unified.mi-design-approved :is(.run-btn,.report-btn-primary,.btn-primary) {
+    background: linear-gradient(135deg, #cf833e, #b86725) !important;
+    border-color: #b86725 !important;
+    color: #fff !important;
+    box-shadow: 0 3px 0 #92501f, 0 6px 12px rgb(184 103 37 / 12%) !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    border-radius: 10px !important;
+  }
+  html body.mi-app-unified.mi-design-approved [data-date-preset-button].active {
+    background: var(--design-teal-soft) !important;
+    color: var(--design-teal) !important;
+    border-color: var(--design-teal) !important;
+  }
+  html body.mi-app-unified.mi-design-approved :is(button,a,input,select,textarea,summary):focus-visible {
+    outline: 3px solid var(--design-teal) !important;
+    outline-offset: 3px !important;
+  }
+  html body.mi-app-unified.mi-design-approved :is(button,input,select,textarea):disabled {
+    cursor: not-allowed !important;
+    opacity: .6;
+  }
+
+  /* Preserve column widths, sticky cells and horizontal table scrolling. */
+  html body.mi-app-unified.mi-design-approved .mi-table-shell {
+    background: var(--design-surface) !important;
+    border-color: var(--design-line) !important;
+  }
+  html body.mi-app-unified.mi-design-approved .mi-managed-table :is(th,td) {
+    color: var(--design-ink) !important;
+    font-size: 13px !important;
+    line-height: 1.7 !important;
+    font-variant-numeric: tabular-nums;
+  }
+  html body.mi-app-unified.mi-design-approved .mi-managed-table thead th {
+    background: var(--mi-table-head) !important;
+    color: var(--design-ink) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+  }
+  html body.mi-app-unified.mi-design-approved .mi-managed-table tbody tr > td { background: var(--design-surface) !important; }
+  html body.mi-app-unified.mi-design-approved .mi-managed-table tbody tr:nth-child(even) > td { background: var(--design-soft) !important; }
+  html body.mi-app-unified.mi-design-approved .mi-managed-table tbody tr:hover > td { background: var(--design-teal-soft) !important; }
+  html body.mi-app-unified.mi-design-approved .mi-managed-table tbody tr:is(:focus-within,[aria-selected="true"],.is-active) > td { background: var(--design-warm-soft) !important; }
+  html body.mi-app-unified.mi-design-approved .mi-managed-table :is(td,th):is(.negative,.text-danger) { color: #bd303b !important; }
+  html body.mi-app-unified.mi-design-approved .mi-managed-table :is(td,th):is(.positive,.text-success) { color: #23734f !important; }
+  html[data-mi-theme="dark"] body.mi-app-unified.mi-design-approved .mi-managed-table :is(td,th):is(.negative,.text-danger) { color: #ffa9ae !important; }
+  html[data-mi-theme="dark"] body.mi-app-unified.mi-design-approved .mi-managed-table :is(td,th):is(.positive,.text-success) { color: #a0dfbd !important; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html body.mi-app-unified.mi-design-approved :is(button,.dashboard-card,.mi-section-menu a,summary) {
+      transition: transform .16s ease, box-shadow .16s ease, background-color .16s ease !important;
+    }
+    html body.mi-app-unified.mi-design-approved :is(.run-btn,.report-btn-primary,.btn-primary):enabled:hover { transform: translateY(-1px); }
+    html body.mi-app-unified.mi-design-approved :is(.run-btn,.report-btn-primary,.btn-primary):enabled:active { transform: translateY(2px); }
+    @media (hover: hover) {
+      html body.mi-app-unified.mi-design-approved .dashboard-card:hover { transform: translateY(-3px) !important; }
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html body.mi-app-unified.mi-design-approved *,
+    html body.mi-app-unified.mi-design-approved *::before,
+    html body.mi-app-unified.mi-design-approved *::after {
+      animation-duration: .01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+  @media (max-width: 900px) {
+    html body.mi-app-unified.mi-design-approved .mi-page-hero { min-height: 96px !important; padding: 16px !important; }
+    html body.mi-app-unified.mi-design-approved .mi-hero-heading h2 { font-size: 25px !important; }
+  }
+  @media (max-width: 620px) {
+    html body.mi-app-unified.mi-design-approved .mi-page-hero { position: relative !important; gap: 12px !important; }
+    html body.mi-app-unified.mi-design-approved .mi-hero-heading h2 { font-size: 23px !important; }
+    html body.mi-app-unified.mi-design-approved .content { padding-inline: 10px !important; }
+    html body.mi-app-unified.mi-design-approved .report-toolbar .header-actions { width: 100% !important; min-width: 0 !important; }
+    html body.mi-app-unified.mi-design-approved .report-toolbar .filter-row {
+      display: grid !important;
+      grid-template-columns: minmax(0,1fr) !important;
+      gap: 12px !important;
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+    html body.mi-app-unified.mi-design-approved .report-toolbar .context-field {
+      display: grid !important;
+      gap: 6px !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+    html body.mi-app-unified.mi-design-approved .report-toolbar :is(.control,.run-btn) { width: 100% !important; min-width: 0 !important; max-width: 100% !important; }
+    html body.mi-app-unified.mi-design-approved .report-toolbar .date-preset-switcher {
+      display: grid !important;
+      grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+    html body.mi-app-unified.mi-design-approved .date-preset-switcher button { width: 100% !important; min-width: 0 !important; }
+    html body.mi-app-unified.mi-design-approved .report-toolbar .custom-dates:not([hidden]) { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; min-width: 0 !important; width: 100% !important; }
+    html body.mi-app-unified.mi-design-approved .report-toolbar .custom-dates label { min-width: 0 !important; }
+  }
+}

@@ -1,0 +1,56 @@
+/* Existing standalone operational tools: same tokens, existing controls/IDs. */
+@media screen {
+  html body.mi-standalone-design { margin: 0; }
+  html body.mi-standalone-design > header {
+    background: var(--design-surface) !important;
+    color: var(--design-ink) !important;
+    border-bottom: 1px solid var(--design-line);
+    padding: 20px 28px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  html body.mi-standalone-design > header :is(small,a) { color: var(--design-teal) !important; }
+  html body.mi-standalone-design .layout { display: block; min-height: auto; }
+  html body.mi-standalone-design .inventory-count-tabs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 18px 28px 0;
+    padding: 12px;
+    background: var(--design-surface);
+    border: 1px solid var(--design-line);
+    border-radius: 16px;
+    box-shadow: var(--design-shadow);
+  }
+  html body.mi-standalone-design .inventory-count-tabs b { margin-inline-end: auto; }
+  html body.mi-standalone-design .inventory-count-tabs button { margin: 0; }
+  html body.mi-standalone-design .inventory-count-tabs button.active {
+    background: var(--design-teal-soft);
+    color: var(--design-teal);
+    font-weight: 700;
+  }
+  html body.mi-standalone-design main { padding: 22px 28px; }
+  html body.mi-standalone-design .metric {
+    background: var(--design-surface);
+    border-color: var(--design-line);
+    box-shadow: var(--design-shadow);
+    border-radius: 16px;
+  }
+  html body.mi-standalone-design .metric:nth-child(4n+1) { background: var(--design-teal-soft); }
+  html body.mi-standalone-design .metric:nth-child(4n+2) { background: var(--design-blue-soft); }
+  html body.mi-standalone-design .metric:nth-child(4n) { background: var(--design-warm-soft); }
+  html body.mi-standalone-design :is(input,select) { min-width: 0; }
+  html body.mi-standalone-design :is(th,td) { font-size: 13px; }
+  html body.mi-standalone-design th { background: var(--design-blue-soft); color: var(--design-ink); font-weight: 700; }
+  html body.mi-standalone-design button.primary { background: var(--design-action); border-color: var(--design-action); color: white; box-shadow: 0 3px 0 #92501f; }
+  @media(max-width:650px) {
+    html body.mi-standalone-design > header { padding: 16px; }
+    html body.mi-standalone-design .inventory-count-tabs { margin: 12px 10px 0; }
+    html body.mi-standalone-design .inventory-count-tabs b { flex-basis: 100%; }
+    html body.mi-standalone-design main { padding: 18px 10px; }
+    html body.mi-standalone-design .heading { flex-wrap: wrap; }
+    html body.mi-standalone-design .filters > div { max-width: 100%; min-width: 0; }
+    html body.mi-standalone-design .metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  }
+}

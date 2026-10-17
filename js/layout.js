@@ -63,7 +63,7 @@
     const sources = [
       assetUrl("../locales/ar.js"),
       assetUrl("../locales/en.js"),
-      assetUrl("./i18n.js")
+      assetUrl("./i18n.js?v=20261017-01")
     ];
 
     const loadNext = (index) => {
@@ -696,6 +696,20 @@ function ensureMiAppStyles() {
   document.head.appendChild(link);
 }
 
+function ensureMiApprovedDesignStyles() {
+  const scriptUrl = document.currentScript?.src || window.location.href;
+  let link = document.querySelector('link[data-mi-approved-design="true"]');
+  if (!link) {
+    link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = new URL("../css/mi-design-approved.css?v=20261017-01", scriptUrl).href;
+    link.dataset.miApprovedDesign = "true";
+  }
+  // Apply after module compatibility styles without changing report structure.
+  document.head.appendChild(link);
+  document.body.classList.add("mi-design-approved");
+}
+
 function ensureMiCustomerModuleStyles(activePage) {
   if (MI_PAGE_MODULE_MAP.get(activePage)?.id !== "customer") return;
   const scriptUrl = document.currentScript?.src || window.location.href;
@@ -1120,8 +1134,8 @@ async function applyCompanyAccessToDropdown() {
     ${
       allowedCompanies
         .map(company => `
-          <option value="${company.companyId}">
-            ${company.companyName}
+          <option value="${escapeMiUiText(company.companyId)}">
+            ${escapeMiUiText(company.companyName)}
           </option>
         `)
         .join("")
@@ -1191,8 +1205,8 @@ function syncCompanyContextGate(allowedCompanies = []) {
       </div>
       <div class="mi-company-context-options">
         ${allowedCompanies.map(company => `
-          <button type="button" data-company-context-choice="${company.companyId}">
-            <strong>${company.companyName}</strong>
+          <button type="button" data-company-context-choice="${escapeMiUiText(company.companyId)}">
+            <strong>${escapeMiUiText(company.companyName)}</strong>
             <span>الدخول إلى تقارير الشركة</span>
           </button>
         `).join("")}
@@ -1259,6 +1273,7 @@ function renderLayout(title, subtitle, activePage, contentHtml) {
   const unifiedNavigation = activePage === "dashboard" || MI_APP_NAVIGATION_PAGES.has(activePage) || Boolean(activePage);
   if (unifiedNavigation) ensureMiAppStyles();
   ensureMiCustomerModuleStyles(activePage);
+  if (unifiedNavigation) ensureMiApprovedDesignStyles();
   const customerModel = getMiCustomerPageModel(activePage);
   if (customerModel) {
     title = customerModel.title;

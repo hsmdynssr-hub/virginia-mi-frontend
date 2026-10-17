@@ -1,184 +1,56 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>تسجيل الدخول | Management Intelligence</title>
-  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.rtl.min.css" />
-  <link rel="stylesheet" href="../css/style.css" />
-  <link rel="stylesheet" href="../css/bootstrap-theme.css" />
-  <link rel="stylesheet" href="../css/app-modern.css?v=company-context-20260830-01" />
-<script src="../js/notifications.js?v=20260901-global-01"></script>
-  <link rel="stylesheet" href="../css/mi-app.css?v=20260908-project-unified-01" data-mi-unified-ui="true" />
-</head>
-<body class="mi-app-login">
-  <main class="mi-login-page">
-    <section class="mi-login-shell">
-      <section class="mi-login-form-side">
-        <div class="mi-login-card">
-          <div class="mi-login-form-brand">
-            <div class="mi-login-mark">MI</div>
-            <div>
-              <strong>Management Intelligence</strong>
-              <small>Virginia Operations</small>
-            </div>
-          </div>
-
-          <h2>تسجيل الدخول</h2>
-          <p class="mi-login-subtitle">ادخل إلى مساحة العمل التشغيلية الخاصة بك.</p>
-
-          <div class="mi-field">
-            <label for="username">اسم المستخدم</label>
-            <div class="mi-input-wrap">
-              <input id="username" autocomplete="username" placeholder="اسم المستخدم" />
-              <span aria-hidden="true">◉</span>
-            </div>
-          </div>
-
-          <div class="mi-field">
-            <label for="password">كلمة المرور</label>
-            <div class="mi-input-wrap">
-              <input id="password" type="password" autocomplete="current-password" placeholder="كلمة المرور" />
-              <span aria-hidden="true">●</span>
-            </div>
-          </div>
-
-          <div class="mi-login-options">
-            <label><input type="checkbox" checked /> تذكرني</label>
-          </div>
-
-          <button id="loginBtn" class="mi-login-btn" onclick="login()">تسجيل الدخول</button>
-          <div id="loginMessage" class="mi-login-message"></div>
-          <div class="mi-secure-note">دخول موحّد وآمن إلى بيانات التشغيل والتقارير.</div>
-        </div>
-      </section>
-
-      <aside class="mi-login-story">
-        <div class="mi-login-story-brand">
-          <div class="mi-login-mark">MI</div>
-          <div>
-            <strong>Virginia Intelligence Hub</strong>
-            <small>ODOO ENTERPRISE 18</small>
-          </div>
-        </div>
-
-        <div class="mi-login-story-copy">
-          <span class="mi-login-story-kicker">Operations command center</span>
-          <h1>من البيانات إلى <span>قرار واضح.</span></h1>
-          <p>مساحة تشغيل واحدة تربط الفروع والمبيعات والمخزون وخدمة العملاء، وتضع ما يحتاج انتباه الإدارة في واجهة أبسط وأسرع.</p>
-
-          <ul class="mi-login-story-list">
-            <li><i>01</i> رؤية تشغيلية موحّدة بين الفرق</li>
-            <li><i>02</i> متابعة الحالات والإجراءات بدل التقارير المنفصلة</li>
-            <li><i>03</i> صلاحيات ونطاق شركة واضح لكل مستخدم</li>
-          </ul>
-        </div>
-      </aside>
-    </section>
-  </main>
-
-  <script src="../locales/ar.js?v=20260814-02"></script>
-  <script src="../locales/en.js?v=20260814-02"></script>
-  <script src="../js/i18n.js?v=20260814-02"></script>
-  <script src="../js/api.js?v=company-context-20260830-01"></script>
-
-  <script>
-    async function login() {
-      const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value.trim();
-      const loginMessage = document.getElementById("loginMessage");
-      const loginBtn = document.getElementById("loginBtn");
-
-      loginMessage.innerHTML = "";
-
-      if (!username || !password) {
-        loginMessage.innerHTML = "من فضلك أدخل اسم المستخدم وكلمة المرور";
-        return;
-      }
-
-      try {
-        loginBtn.disabled = true;
-        loginBtn.innerHTML = "جاري الدخول...";
-
-        const response = await apiPost("/auth/login", {
-          username,
-          password
-        });
-
-        if (!response.success) {
-          loginMessage.innerHTML = "بيانات الدخول غير صحيحة";
-          return;
-        }
-
-        localStorage.setItem("token", response.token);
-        localStorage.setItem("user", JSON.stringify(response.user));
-        localStorage.removeItem("companyId");
-        localStorage.removeItem("branchCode");
-
-        await chooseLoginCompany();
-      } catch (error) {
-        console.error(error);
-        loginMessage.innerHTML = "حدث خطأ أثناء تسجيل الدخول";
-      } finally {
-        loginBtn.disabled = false;
-        loginBtn.innerHTML = "دخول";
-      }
-    }
-
-    async function chooseLoginCompany() {
-      const loginMessage = document.getElementById("loginMessage");
-      const loginCard = document.querySelector(".mi-login-card");
-      const response = await apiGet("/company-access/me");
-      const companies = response.data || response.companies || [];
-
-      if (!response.success || !Array.isArray(companies) || !companies.length) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        throw new Error("لا توجد شركة مسموحة لهذا الحساب. راجع مسؤول الصلاحيات.");
-      }
-
-      if (companies.length === 1) {
-        localStorage.setItem("companyId", String(companies[0].companyId));
-        window.location.href = "../dashboard/index.html";
-        return;
-      }
-
-      loginCard.classList.add("mi-company-login-step");
-      loginCard.innerHTML = `
-        <div class="mi-card-logo"><div class="mi-logo small"><span class="mi-logo-bars"></span></div></div>
-        <span class="mi-company-step-kicker">تم تسجيل الدخول بنجاح</span>
-        <h2>اختر نطاق العمل</h2>
-        <p class="mi-login-subtitle">سيُثبت الاختيار على جميع صفحات المشروع ويمكن تغييره لاحقًا من الهيدر.</p>
-        <div class="mi-login-company-options">
-          ${companies.map(company => `
-            <button type="button" data-login-company="${company.companyId}">
-              <span>${Number(company.companyId) === 1 ? "V" : "C"}</span>
-              <div><strong>${company.companyName}</strong><small>فتح تقارير الشركة</small></div>
-              <b>←</b>
-            </button>
-          `).join("")}
-        </div>
-        <p class="mi-login-company-note">حسابك يملك صلاحية الشركتين. الاختيار يحدد الشركة النشطة ولا يلغي أي صلاحية.</p>
-        <div id="loginMessage" class="mi-login-message"></div>
-      `;
-
-      loginCard.querySelectorAll("[data-login-company]").forEach(button => {
-        button.addEventListener("click", () => {
-          localStorage.setItem("companyId", String(button.dataset.loginCompany));
-          localStorage.removeItem("branchCode");
-          window.location.href = "../dashboard/index.html";
-        });
-      });
-
-      loginMessage.innerHTML = "";
-    }
-
-    document.addEventListener("keydown", function (event) {
-      if (event.key === "Enter") {
-        login();
-      }
-    });
-  </script>
-
-</body>
-</html>
+<!doctype html><html lang="ar" dir="rtl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">
+<title>فيرجينيا | تسجيل الدخول إلى نظام الإدارة والتقارير</title>
+<meta name="description" content="مساحة فيرجينيا لمتابعة المبيعات والمخزون والإنتاج والمشتريات وخدمة العملاء وموسم الزيتون.">
+<link rel="stylesheet" href="../css/login-experience.css?v=20261017-01">
+<script src="../js/notifications.js?v=20261017-approved-01" defer></script>
+<script src="../locales/ar.js?v=20260814-02" defer></script><script src="../locales/en.js?v=20260814-02" defer></script><script src="../js/i18n.js?v=20261017-approved-01" defer></script>
+<script src="../js/api.js?v=company-context-20260830-01" defer></script><script src="./login-experience.js?v=20261017-01" defer></script>
+</head><body class="mi-login-experience">
+<svg class="login-icons" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+<symbol id="li-leaf" viewBox="0 0 24 24"><path d="M20 3C9 2 3 7 5 14c2 7 13 7 15-11ZM4 21 16 8"/></symbol>
+<symbol id="li-chart" viewBox="0 0 24 24"><path d="M4 4v16h16M8 15v-3m5 3V7m5 8v-5"/></symbol>
+<symbol id="li-box" viewBox="0 0 24 24"><path d="m12 3 9 5v9l-9 5-9-5V8Zm0 10 9-5M12 13 3 8m9 5v9M7 5.8l10 5.5"/></symbol>
+<symbol id="li-factory" viewBox="0 0 24 24"><path d="M3 21V9l6 4V9l6 4V3h5v18Zm4-4h1m4 0h1m4 0h1"/></symbol>
+<symbol id="li-bag" viewBox="0 0 24 24"><path d="M4 7h16l-1 14H5L4 7Zm4 1V6a4 4 0 0 1 8 0v2"/></symbol>
+<symbol id="li-users" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M2 21v-2a7 7 0 0 1 14 0v2M17 4a4 4 0 0 1 0 7m2 4a7 7 0 0 1 3 6"/></symbol>
+<symbol id="li-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 4v3"/></symbol>
+<symbol id="li-user" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></symbol>
+<symbol id="li-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="li-arrow" viewBox="0 0 24 24"><path d="M19 12H5m6-6-6 6 6 6"/></symbol>
+<symbol id="li-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+<symbol id="li-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+<symbol id="li-play" viewBox="0 0 24 24"><path d="m7 4 13 8-13 8V4Z"/></symbol>
+</defs></svg>
+<header class="login-header"><a class="login-brand" href="./login.html" aria-label="فيرجينيا — تسجيل الدخول"><span class="brand-symbol"><svg><use href="#li-leaf"/></svg></span><span><b>VIRGINIA</b><small>نظام الإدارة والتقارير</small></span></a><div class="header-caption"><span></span>صورة أوضح لأعمالك، كل يوم.</div><div class="header-utilities"><span class="header-edition">MANAGEMENT INTELLIGENCE</span><button class="login-language" type="button" data-mi-language-toggle="true" aria-label="Switch to English">EN</button></div></header>
+<main class="login-main">
+<section class="login-form-side" aria-labelledby="loginTitle"><div class="mi-login-card" id="loginCard">
+<div class="form-welcome"><span class="form-lock"><svg><use href="#li-lock"/></svg></span><span class="small-label">مساحة عملك في فيرجينيا</span></div>
+<h1 id="loginTitle">أهلًا بعودتك.</h1><p class="form-description">سجّل دخولك لمتابعة أعمالك <br>والوصول إلى تقاريرك وإجراءاتك.</p>
+<form id="loginForm" novalidate>
+<div class="login-field"><label for="username">اسم المستخدم</label><div class="input-wrap"><svg aria-hidden="true"><use href="#li-user"/></svg><input id="username" name="username" type="text" autocomplete="username" placeholder="أدخل اسم المستخدم" autocapitalize="none" spellcheck="false" required aria-describedby="loginMessage"></div></div>
+<div class="login-field"><label for="password">كلمة المرور</label><div class="input-wrap"><svg aria-hidden="true"><use href="#li-lock"/></svg><input id="password" name="password" type="password" autocomplete="current-password" placeholder="أدخل كلمة المرور" required aria-describedby="loginMessage capsWarning"><button class="password-toggle" type="button" id="passwordToggle" aria-label="إظهار كلمة المرور" aria-pressed="false"><svg><use href="#li-eye"/></svg></button></div><span class="caps-warning" id="capsWarning" hidden>مفتاح الأحرف الكبيرة Caps Lock مُفعّل</span></div>
+<div id="loginMessage" class="mi-login-message" role="alert" aria-live="polite"></div><button id="loginBtn" class="login-submit" type="submit"><span>تسجيل الدخول</span><svg><use href="#li-arrow"/></svg></button>
+</form><div class="form-note"><span class="check-bubble"><svg><use href="#li-check"/></svg></span><p>تقاريرك وشركاتك المتاحة<br><strong>حسب صلاحيات حسابك.</strong></p></div><div class="support-note">تحتاج مساعدة في الدخول؟ <span>تواصل مع مسؤول النظام.</span></div>
+</div><div class="form-footer"><svg><use href="#li-lock"/></svg>مساحة مخصصة لفريق العمل</div></section>
+<section class="login-discovery" id="discovery" aria-labelledby="discoveryTitle">
+<div class="story-intro"><div class="story-kicker"><span></span>من تفاصيل التشغيل إلى رؤية الإدارة</div><h2 id="discoveryTitle">ماذا تخبرك أرقامك؟<br><span>اكتشف ما وراء التفاصيل.</span></h2><p>المبيعات، المخزون، الإنتاج، والمشتريات…<br>اكتشف كيف يجمع النظام ما تحتاج متابعته في مساحة واحدة.</p></div>
+<div class="module-selector" role="tablist" aria-label="اكتشف أقسام النظام">
+<button type="button" role="tab" id="module-sales" data-module="sales" aria-selected="true" aria-controls="modulePanel"><svg><use href="#li-chart"/></svg>المبيعات</button>
+<button type="button" role="tab" id="module-inventory" data-module="inventory" aria-selected="false" aria-controls="modulePanel" tabindex="-1"><svg><use href="#li-box"/></svg>المخزون</button>
+<button type="button" role="tab" id="module-production" data-module="production" aria-selected="false" aria-controls="modulePanel" tabindex="-1"><svg><use href="#li-factory"/></svg>الإنتاج</button>
+<button type="button" role="tab" id="module-purchase" data-module="purchase" aria-selected="false" aria-controls="modulePanel" tabindex="-1"><svg><use href="#li-bag"/></svg>المشتريات</button>
+<button type="button" role="tab" id="module-olive" data-module="olive" aria-selected="false" aria-controls="modulePanel" tabindex="-1"><svg><use href="#li-leaf"/></svg>موسم الزيتون</button>
+<button type="button" role="tab" id="module-customer" data-module="customer" aria-selected="false" aria-controls="modulePanel" tabindex="-1"><svg><use href="#li-users"/></svg>خدمة العملاء</button>
+</div>
+<div class="showcase-perspective"><section class="showcase-board" id="modulePanel" role="tabpanel" aria-labelledby="module-sales" data-scene="sales">
+<div class="board-header"><div><span class="board-module-icon" id="boardIcon"><svg><use href="#li-chart"/></svg></span><span><small>نافذة على النظام</small><strong id="boardTitle">أداء المبيعات والفروع</strong></span></div><span class="illustration-badge"><i></i>عرض توضيحي</span></div>
+<div class="board-metrics" id="boardMetrics"></div><div class="board-body"><div class="board-chart"><div class="mini-heading"><strong id="chartTitle">مقارنة أداء الفروع</strong><span>نموذج للعرض</span></div><div class="demo-bars" id="demoBars"></div><div class="chart-baseline"></div></div><div class="board-focus"><span class="focus-number" id="focusNumber">01</span><strong id="focusTitle">من الإجمالي إلى التفاصيل</strong><p id="focusText">راجع أداء الفروع والأصناف وحركة المبيعات خلال الفترة التي تختارها.</p><div class="focus-tags" id="focusTags"></div></div></div>
+<div class="board-footer"><span><svg><use href="#li-check"/></svg><span id="boardFootnote">تجميعات تساعدك على قراءة الأداء</span></span><span>أرقام توضيحية، وليست بيانات تشغيل</span></div>
+</section><span class="board-shadow" aria-hidden="true"></span></div>
+<div class="discovery-bottom"><div class="scene-description"><span id="sceneIndex">01</span><p id="sceneDescription">افهم ما يُباع، وأين، وكيف يتغير الأداء.</p></div><button class="motion-toggle" id="motionToggle" type="button" aria-pressed="false"><svg><use href="#li-pause"/></svg><span>إيقاف الحركة</span></button></div>
+<div class="discovery-rule"><span>بيانات مترابطة</span><i></i><span>تقارير مفهومة</span><i></i><span>قرارات أدق</span></div>
+</section></main>
+<footer class="login-footer"><span>VIRGINIA <b>·</b> الإدارة تبدأ برؤية واضحة.</span><span>مساحة تشغيل وتحليل لفريق واحد.</span></footer>
+<noscript><p class="noscript-message">يرجى تفعيل JavaScript لاستخدام تسجيل الدخول.</p></noscript>
+</body></html>

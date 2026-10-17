@@ -19,7 +19,7 @@
 
     if (!document.querySelector('script[data-mi-table-system="true"]')) {
       const script = document.createElement("script");
-      script.src = `${assetUrl("./table-system.js")}?v=20260908-table-system-06`;
+      script.src = `${assetUrl("./table-system.js")}?v=20261017-01`;
       script.defer = true;
       script.dataset.miTableSystem = "true";
       document.head.appendChild(script);
