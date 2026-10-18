@@ -171,6 +171,7 @@
   }
 
   function movementLabel(v) {
+    if(v.visit_type === "EXCEPTIONAL_PURCHASE")return "شراء استثنائي بدون أمر شراء";
     const type = movementType(v);
     if (type === "VISIT") return "زيارة";
     if (type === "MAINTENANCE") return "صيانة";
@@ -239,7 +240,7 @@
         <td>${esc(movementLabel(v))}</td>
         <td>${esc(v.driver_name || "-")}</td>
         <td>${esc(v.vehicle_plate || "-")}</td>
-        <td>${esc(v.supplier_name || "-")}</td>
+        <td>${esc(v.supplier_name || "-")}${v.visit_type === "EXCEPTIONAL_PURCHASE" ? `<div>${(v.supplied_items || []).map(item=>`${esc(item.productName)}: ${esc(item.quantity)} ${esc(item.unit)}`).join("<br>")}</div><small>${esc(v.visit_reason || "")} — بانتظار الربط بأودو</small>` : ""}</td>
         <td>${fmt(v.entered_at)}</td>
         <td>${esc(arabicStatus(v.status))}</td>
         <td>${actionButtons(v)}</td>

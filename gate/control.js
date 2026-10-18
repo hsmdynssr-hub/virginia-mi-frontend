@@ -58,6 +58,7 @@
   }
 
   function movementLabel(v) {
+    if(v.visit_type === "EXCEPTIONAL_PURCHASE")return "شراء استثنائي بدون أمر شراء";
     const type = movementType(v);
     if (type === "VISIT") return "زيارة";
     if (type === "MAINTENANCE") return "صيانة";
@@ -77,6 +78,12 @@
     }
 
     return `<span class="warn">غير مرتبط</span>`;
+  }
+
+  function supplierDetails(v){
+    const name=esc(v.supplier_name || "-");
+    if(v.visit_type!=="EXCEPTIONAL_PURCHASE")return name;
+    return `${name}<div>${(v.supplied_items || []).map(item=>`${esc(item.productName)}: ${esc(item.quantity)} ${esc(item.unit)}`).join("<br>")}</div><small>سبب الشراء: ${esc(v.visit_reason || "-")}</small>`;
   }
 
   async function ensureAdmin() {
@@ -110,7 +117,7 @@
         <td>${esc(movementLabel(v))}</td>
         <td>${esc(v.driver_name || "-")}</td>
         <td>${esc(v.vehicle_plate || "-")}</td>
-        <td>${esc(v.supplier_name || "-")}</td>
+        <td>${supplierDetails(v)}</td>
         <td>${fmt(v.entered_at)}</td>
         <td>${esc(arabicStatus(v.status))}</td>
         <td>${esc(v.gate_operator || "-")}</td>
@@ -121,7 +128,7 @@
       <tr>
         <td>${esc(movementLabel(v))}</td>
         <td>${esc(v.vehicle_plate || "-")}</td>
-        <td>${esc(v.supplier_name || "-")}</td>
+        <td>${supplierDetails(v)}</td>
         <td>${esc(["VISIT","MAINTENANCE"].includes(movementType(v)) ? "-" : arabicDirection(v.direction))}</td>
         <td>${fmt(v.entered_at)}</td>
         <td>${esc(v.gate_operator || "-")}</td>
@@ -182,7 +189,7 @@
       <tr>
         <td>${esc(movementLabel(v))}</td>
         <td>${esc(v.vehicle_plate || "-")}</td>
-        <td>${esc(v.supplier_name || "-")}</td>
+        <td>${supplierDetails(v)}</td>
         <td>${esc(["VISIT","MAINTENANCE"].includes(movementType(v)) ? "-" : arabicDirection(v.direction))}</td>
         <td>${esc(arabicStatus(v.status))}</td>
         <td>${syncStatus(v)}</td>
