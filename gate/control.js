@@ -136,10 +136,10 @@
           <div class="syncbox">
             <input
               data-ref="${esc(v.visit_uuid)}"
-              placeholder="مثال: رئيسي/IN/03270 أو P04760"
+              placeholder="${v.visit_type === 'EXCEPTIONAL_PURCHASE' ? 'رقم طلب الشراء في أودو، مثال P04760' : 'مثال: رئيسي/IN/03270 أو P04760'}"
             >
             <button class="ok" data-sync="${esc(v.visit_uuid)}">
-              مزامنة مع Odoo
+              ${v.visit_type === 'EXCEPTIONAL_PURCHASE' ? 'ربط بطلب شراء أودو' : 'مزامنة مع Odoo'}
             </button>
           </div>
           ${v.odoo_sync_error ? `<div class="warn">${esc(v.odoo_sync_error)}</div>` : ""}
