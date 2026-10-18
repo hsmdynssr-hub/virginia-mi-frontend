@@ -25,12 +25,13 @@
   el('siteCode').readOnly=!!own||receiptPending();
   el('cashOpenBox').hidden=adminPage||!!own;
   if(el('cashLedgerBox'))el('cashLedgerBox').hidden=false;
-  if(el('cashReviewBox'))el('cashReviewBox').hidden=!adminPage;
+  if(el('cashReviewBox'))el('cashReviewBox').hidden=false;
   if(el('advancedLink'))el('advancedLink').hidden=!admin;
   el('cashChoose').innerHTML='<option value="">اختر جلسة للمراجعة</option>'+all.map(s=>`<option value="${esc(s.id)}">#${esc(s.id)} · ${esc(s.owner_name)} · ${esc(s.site_code)} · ${s.status==='OPEN'?'مفتوحة':'مغلقة'}</option>`).join('');
   el('cashChoose').value=selected;
   el('cashDetails').hidden=!view;
   el('cashCloseBox').hidden=!view||view.status!=='OPEN';
+  if(el('cashPrint')){el('cashPrint').hidden=!view||view.status!=='CLOSED';el('cashPrint').href=view?`./cash-session-print.html?sessionId=${encodeURIComponent(view.id)}&companyId=${company()}`:'#';}
   el('cashMoveBox').hidden=!admin||!view||view.status!=='OPEN';
   const funding=el('cashKind').querySelector('[value=FUNDING]');funding.hidden=!admin;funding.disabled=!admin;el('cashKind').value='FUNDING';expenseFields();
   if(view){
@@ -41,8 +42,8 @@
    const cards=[['عدد الفواتير الفعالة',x.invoice_count,false],['إجمالي الفواتير الفعالة',x.invoices_total,true],['الرصيد الافتتاحي',x.opening_amount,true],['دعم العهدة',x.funding_total,true],['المدفوع نقديًا للموردين',x.cash_paid,true],['صرف نقدي: مصروفات وعهد',x.expenses_total,true],['المتبقي المحسوب',x.expected_amount,true],['مدفوعات غير نقدية',x.noncash_paid,true]];
    if(view.status==='CLOSED')cards.push(['النقدية الفعلية',x.actual_amount,true],['فرق النقدية',x.difference,true]);
    el('cashSummary').innerHTML=cards.map(([label,value,money])=>`<div class="cash-stat report-kpi-card"><small>${label}</small><strong>${money?currency(value):esc(value||0)}</strong></div>`).join('');
-   el('cashWarning').textContent=Number(x.expected_amount)<0?'الرصيد المحسوب سالب؛ راجع الافتتاحي وحركات الدعم والسداد.':Number(x.cancelled_count)>0?`يوجد ${x.cancelled_count} سند ملغى. إلغاء السند لا يُرجع النقدية تلقائيًا؛ سجل رجوعها كدعم مع مستند.`:'';
-   el('cashSnapshot').textContent=view.status==='CLOSED'?`الملخص محفوظ عند الإغلاق. ${view.close_note||''}`:'المتبقي = الافتتاحي + الدعم − السداد النقدي − المصروفات. التحويلات والشيكات لا تخصم من النقدية.';
+   el('cashWarning').textContent=Number(x.expected_amount)<0?'الرصيد المحسوب سالب؛ راجع الافتتاحي وحركات الدعم والسداد.':Number(x.cancelled_count)>0?`يوجد ${x.cancelled_count} سند ملغى. قيمتها وسدادها مستبعدان من التقرير؛ السداد النقدي المستبعد: ${currency(x.cancelled_cash_paid)} جنيه.`:'';
+   el('cashSnapshot').textContent=view.status==='CLOSED'?`${x.adjusted_after_close?'تم تحديث الملخص لاستبعاد الملغى؛ ملخص الإقفال الأصلي محفوظ للمراجعة.':'ملخص إقفال العهدة جاهز للطباعة.'} ${view.close_note||''}`:'المتبقي = الافتتاحي + الدعم − السداد النقدي للفواتير الفعالة − المصروفات. التحويلات والشيكات لا تخصم من النقدية.';
    el('cashMovements').innerHTML=(view.movements||[]).map(m=>`<tr><td>${m.expense_mode==='RETURN'?'نقد مرتجع من عهدة #'+esc(m.advance_id):m.expense_mode==='ADVANCE'?'صرف عهدة تحت التسوية':m.expense_mode==='DIRECT'?'مصروف مباشر متعدد البنود':m.kind==='FUNDING'?'دعم':'مصروف / سحب سابق'}</td><td>${currency(m.amount)}</td><td>${esc(categoryLabels[m.expense_category]|| (m.kind==='FUNDING'?'دعم عهدة':'غير مصنف — يحتاج مراجعة'))}<br>${esc(m.beneficiary||'')}<br><small>${esc(m.reference_no||'')} ${esc(m.expense_date||'')}</small></td><td>${esc(m.reason)}</td><td>${esc(m.created_by)}<br><small>${esc(new Date(m.created_at).toLocaleString('ar-EG'))}</small></td><td>${m.attachments.map(a=>`<button type="button" class="cash-document" data-attachment="${esc(a.id)}">${esc(a.file_name)}</button>`).join(' ')}</td></tr>`).join('')||'<tr><td colspan="6">لا توجد حركات دعم أو مصروفات</td></tr>';
   }
   if(el('cashPanel')){if(!view||pending)setPanel(true);el('cashExpenseShortcut').hidden=false;}
@@ -53,7 +54,7 @@
   const result=await apiGet('/olive/cash-sessions',{companyId:company()});if(revision!==loadVersion)return;
   const data=result.data||result;all=data.sessions;userId=String(data.currentUserId);admin=data.canManageCash===true;
   const site=el('siteCode').value.trim()||'MAIN';own=all.find(s=>String(s.owner_id)===userId&&s.site_code===site&&s.status==='OPEN')||null;
-  if(!adminPage)selected=String(own?.id||lastClosed?.id||'');
+  if(!adminPage&&(!selected||!all.some(s=>String(s.id)===selected)))selected=String(own?.id||lastClosed?.id||all[0]?.id||'');
   if(adminPage&&(!selected||!all.some(s=>String(s.id)===selected)))selected=String(own?.id||all[0]?.id||'');
   if(selected){const r=await apiGet('/olive/cash-sessions/'+selected,{companyId:company()});if(revision!==loadVersion)return;view=r.data||r;}else view=null;
   render();
@@ -104,6 +105,7 @@
  const nonnegative=value=>{if(!/^\d{1,16}(\.\d{1,2})?$/.test(String(value)))throw Error('راجع المبلغ؛ بحد أقصى منزلتين عشريتين');return value;};
  function run(fn){return async()=>{try{await fn()}catch(e){message(e.message||'تعذر تنفيذ العملية',true)}};}
  async function init(){
+  if(!el('cashPrint')){const link=document.createElement('a');link.id='cashPrint';link.className='btn gray';link.textContent='طباعة ملخص إقفال العهدة';link.target='_blank';link.rel='noopener';link.hidden=true;el('cashHeading').after(link);}
   if(el('cashToggle')){el('cashToggle').onclick=()=>setPanel(el('cashPanel').hidden);el('cashExpenseShortcut').onclick=()=>window.OliveExpenseEntries?.open();}
   const initialCompany=String(company());window.addEventListener('company-context-changed',()=>{if(receiptPending()||pending||busy||window.OliveExpenseEntries?.hasPending()){setCompanyId(initialCompany);const select=el('companySelect');if(select)select.value=initialCompany;message('أكمل الطلب الحالي قبل تغيير الشركة',true);}else location.reload();});
   el('cashOpen').onclick=run(()=>submit('open',{siteCode:el('siteCode').value.trim()||'MAIN',openingAmount:nonnegative(el('cashOpening').value)}));
