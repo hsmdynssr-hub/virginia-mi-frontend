@@ -8,7 +8,7 @@
  function storageIdentity(){try{const user=JSON.parse(localStorage.getItem('user')||'{}');if(user.id!=null)return String(user.id);}catch(_){}return getToken()||'';}
  const scope=()=>`olive-cash-request:${company()}:${storageIdentity()}`;
  const adminPage=window.OLIVE_CASH_ADMIN===true;let lastClosed=null;
- let own=null,view=null,all=[],userId='',admin=false,busy=false,pending=null,selected='',loadVersion=0;
+ let own=null,view=null,all=[],userId='',admin=false,busy=false,pending=null,selected=new URLSearchParams(location.search).get('sessionId')||'',loadVersion=0;
  const requestKey=()=>Array.from(crypto.getRandomValues(new Uint8Array(16)),x=>x.toString(16).padStart(2,'0')).join('');
  const message=(text,error=false)=>{el('cashMessage').textContent=text;el('cashMessage').className='msg '+(error?'err':'ok');};
  function receiptPending(){return window.OliveReceiptState?.hasPending()||window.OliveReceiptState?.isSaving()||window.OliveAdvancedState?.hasPending();}
