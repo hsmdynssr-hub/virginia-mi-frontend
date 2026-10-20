@@ -49,3 +49,7 @@ html body#oliveOperational .olive-expense-entry-table{min-width:780px}html body#
 html body#oliveOperational .olive-expense-entry-table td>input,html body#oliveOperational .olive-expense-entry-table td>select{display:block!important;width:100%!important;max-width:100%!important;position:static!important;margin:6px 0 0!important}
 html body#oliveOperational .olive-expense-entry-table td{white-space:normal!important;vertical-align:top!important}
 html body#oliveOperational .olive-expense-entry-table button{background:#fff!important;color:#64748b!important;border:1px solid #dbe3ef!important;padding:5px 9px!important;border-radius:6px!important;min-height:28px!important}
+.cash-correction-dialog{border:1px solid #d9dde3;border-radius:14px;padding:24px;width:min(560px,calc(100vw - 24px));max-height:90vh;overflow:auto;direction:rtl;color:#243548}
+.cash-correction-dialog::backdrop{background:#0006}
+.cash-correction-dialog label{display:block;margin:14px 0}
+.cash-correction-dialog input,.cash-correction-dialog select,.cash-correction-dialog textarea{display:block;width:100%;box-sizing:border-box;margin-top:6px}
