@@ -3,6 +3,7 @@
  const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),co=()=>Number(getCompanyId()||1);
  let receipt=null,catalog=[],pending=null,busy=false;
  window.OliveAdvancedState={hasPending:()=>!!pending||busy};
+ if($('advancedMessage'))$('advancedMessage').insertAdjacentHTML('beforebegin','<section class="report-card"><h2>شراء التجار وسلف الموردين</h2><a class="btn" href="./traders.html">الشحنات والتسويات والتصحيح الموثق</a></section>');
  const storage=()=>`olive-advanced:${co()}:${window.OliveCashSessions.storageIdentity()}`;
  const message=(v,error=false)=>{$('advancedMessage').textContent=v;$('advancedMessage').className='msg '+(error?'err':'ok');};
  function buttons(){for(const n of ['receiptEdit','paymentCorrect','correctSession','receiptLoad'])$(n).disabled=busy||!!pending;$('advancedRetry').hidden=!pending;$('advancedRetry').disabled=busy;}

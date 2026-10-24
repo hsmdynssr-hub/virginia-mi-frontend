@@ -7,6 +7,10 @@
  const platforms={QASR_MATROUH:'القصر — مطروح',BARRANI_NEGILA:'براني والنجلية',DABAA_RAS_EL_HEKMA:'الضبعة ورأس الحكمة'},modes={FROM_YARD:'نقل داخلي من الشادر',DIRECT:'وصول مباشر من منصة الشراء'};
  const sourceName=v=>platforms[v]||(v?'مصدر قديم: '+v:'غير محدد');
  function renderSources(d){
+  if(d.physicalReceiving){
+   let section=el('millPhysicalReceiving');if(!section){section=document.createElement('section');section.id='millPhysicalReceiving';section.className='report-card';(el('millKpis').closest('section')||el('millKpis')).insertAdjacentElement('afterend',section);}
+   section.innerHTML=`<h2>الاستلام الفعلي وحالة التسعير</h2><p>الكميات مثبتة مرة واحدة عند الاستلام، وإصدار فاتورة شراء التجار يستكمل قيمتها.</p><div class="mill-table-scroll"><table><thead><tr><th>الموقع</th><th>طريقة الاستلام</th><th>حالة التسعير</th><th>الكمية كجم</th>${receiving?'':'<th>القيمة المعتمدة جنيه</th>'}</tr></thead><tbody>${d.physicalReceiving.map(r=>`<tr><td>${esc(sourceName(r.site_code))}</td><td>${r.delivery_mode==='DIRECT_MILL'?'مباشرة للمعصرة':r.delivery_mode==='YARD'?'منصة التجميع':'غير محدد تاريخيًا'}</td><td>${r.pricing_status==='PENDING_PRICE'?'ينتظر التسعير':'مسعّر'}</td><td>${fmt(r.weight_kg,3)}</td>${receiving?'':`<td>${r.purchase_amount==null?'ينتظر التسعير':fmt(r.purchase_amount)}</td>`}</tr>`).join('')}</tbody></table></div>`;
+  }
   if(!el('millSourceSummary'))return;
   const rows=d.bySource||[];
   el('millSourceSummary').innerHTML=rows.map(r=>`<tr><td>${esc(mills[r.mill_code]||r.mill_code)}</td><td>${esc(sourceName(r.source_site))}</td><td>${esc(modes[r.arrival_mode]||'غير محدد')}</td><td>${esc(r.trips)}</td><td>${fmt(r.net_kg,3)}</td></tr>`).join('')||'<tr><td colspan="5">لا يوجد استلام مطابق</td></tr>';

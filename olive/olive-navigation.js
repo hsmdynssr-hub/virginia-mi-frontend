@@ -3,11 +3,11 @@
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const systemAdmin=()=>{const u=getCurrentUser();return [u.role,...(Array.isArray(u.roles)?u.roles:[])].some(r=>['admin','super_admin','owner'].includes(String(typeof r==='string'?r:r?.code||r?.name||'').toLowerCase()));};
  const permission=code=>isAdmin()||systemAdmin()||getUserPermissions().includes(code);
- const access=()=>systemAdmin()||['olive.receive','olive.admin','olive.settings','olive.mill.receive','olive.mill.cost'].some(permission);
+ const access=()=>systemAdmin()||['olive.receive','olive.admin','olive.settings','olive.mill.receive','olive.mill.cost','olive.traders.view'].some(permission);
  const basePermission=hasPermission;
  window.hasPermission=page=>page==='olive-home'?access():page==='olive-advanced'?systemAdmin():basePermission(page);
- Object.assign(REPORT_PAGE_MAP,{'olive-mill-receiving':'olive.mill.receive','olive-mill-cost':'olive.mill.cost','olive-advanced':'olive.admin'});
- const pages=['olive-home','olive-receive','olive-admin','olive-settings','olive-mill-receiving','olive-mill-cost','olive-advanced'];
+ Object.assign(REPORT_PAGE_MAP,{'olive-mill-receiving':'olive.mill.receive','olive-mill-cost':'olive.mill.cost','olive-advanced':'olive.admin','olive-traders':'olive.traders.view'});
+ const pages=['olive-home','olive-receive','olive-admin','olive-settings','olive-mill-receiving','olive-mill-cost','olive-advanced','olive-traders'];
  const module={id:'olive',label:'موسم الزيتون',pages,groups:[{id:'operations',label:'تشغيل',links:[{page:'olive-home'},{page:'olive-receive'},{page:'olive-settings'},{page:'olive-mill-receiving'}]},{id:'reports',label:'متابعة وتحليل',links:[{page:'olive-admin'},{page:'olive-mill-cost'}]},{id:'management',label:'إدارة',links:[{page:'olive-advanced'}]}]};
  pages.forEach(page=>MI_PAGE_MODULE_MAP.set(page,module));
  const baseToolbar=shouldShowReportToolbar;
