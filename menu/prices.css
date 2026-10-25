@@ -5,6 +5,16 @@
   align-items: end;
 }
 
+.menu-publication-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.menu-publication{min-width:0;padding:16px;border:1px solid #ccd8d0;border-radius:12px;display:flex;flex-direction:column;gap:10px}
+.menu-publication h3,.menu-publication p{margin:0}
+.menu-publication select,.menu-publication input[type=url]{width:100%;min-width:0;min-height:44px;padding:8px;border:1px solid #b6c8bc;border-radius:8px;font:inherit}
+.menu-publication-link{direction:ltr;font-size:12px!important}
+.menu-publication-actions{display:flex;gap:8px;flex-wrap:wrap}
+.menu-publication-actions button,.menu-publication-actions a{min-height:44px;padding:8px 12px;border:1px solid #9eb9a7;border-radius:8px;background:#eef5ef;color:#244c33;font:inherit;cursor:pointer}
+.menu-publication-actions button:disabled{opacity:.6;cursor:wait}
+@media(max-width:850px){.menu-publication-grid{grid-template-columns:1fr}}
+
 .menu-check-field {
   min-height: 52px;
   padding: 12px 14px;

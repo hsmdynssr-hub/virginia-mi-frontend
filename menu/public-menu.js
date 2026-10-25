@@ -2,6 +2,7 @@
 const MENU_STORAGE_KEY = "mi.professionalMenu.payload";
 
 document.addEventListener("DOMContentLoaded", () => {
+  if (new URLSearchParams(location.search).has('menu')) return;
   renderProfessionalMenuPage();
 });
 

@@ -20,10 +20,12 @@ let menuDiscovery = {
 
 let lastMenuFilters = null;
 let lastMenuData = null;
+let menuDiscoveryRequest = 0;
 
 function buildMenuPricesContent() {
   return `
     <div class="report-ui-page menu-prices-page">
+      <section id="menuPublicationsPanel" class="report-card"></section>
       <section class="report-card">
         <div class="report-card-head">
           <h2>فلاتر المينو</h2>
@@ -84,6 +86,7 @@ function buildMenuPricesContent() {
               <option value="available">متوفر</option>
               <option value="limited">كمية محدودة</option>
               <option value="out_of_stock">أوت أوف ستوك</option>
+              <option value="unknown">التوافر يحتاج تأكيدًا</option>
             </select>
           </label>
 
@@ -245,7 +248,9 @@ function renderMenuFilterChangedState() {
 }
 
 async function loadMenuDiscovery() {
+  const request = ++menuDiscoveryRequest;
   const companyId = getCompanyId();
+  window.MenuPublicationAdmin?.clear();
 
   if (!companyId) {
     menuDiscovery = {
@@ -261,6 +266,7 @@ async function loadMenuDiscovery() {
 
   try {
     const response = await apiGet("/menu/discovery", { companyId });
+    if (request !== menuDiscoveryRequest || String(getCompanyId()) !== String(companyId)) return;
     const data = response.data || {};
 
     menuDiscovery = {
@@ -271,7 +277,9 @@ async function loadMenuDiscovery() {
     };
 
     renderDiscoveryOptions();
+    await window.MenuPublicationAdmin?.load(companyId, menuDiscovery);
   } catch (error) {
+    if (request !== menuDiscoveryRequest) return;
     console.error(error);
     showMenuError(error);
   }
@@ -387,6 +395,10 @@ function applySelectedChannelDefaults() {
   const showQty = document.getElementById("menuShowQty");
   const posCategorySelect = document.getElementById("menuPosCategory");
   const threshold = document.getElementById("limitedThreshold");
+  const online = channel.code === 'online';
+  if (locationSelect) locationSelect.disabled = online;
+  if (showQty) showQty.disabled = online;
+  if (threshold) threshold.disabled = online;
 
   if (pricelistSelect && channel.pricelistId) {
     pricelistSelect.value = String(channel.pricelistId);
@@ -397,7 +409,7 @@ function applySelectedChannelDefaults() {
   }
 
   if (showQty) {
-    showQty.checked = channel.showQty !== false;
+    showQty.checked = !online && channel.showQty !== false;
   }
 
   if (posCategorySelect && Array.isArray(channel.posCategoryIds) && channel.posCategoryIds.length === 1) {
@@ -422,7 +434,7 @@ function collectMenuFilters() {
   if (!companyId) throw new Error("اختار الشركة من الهيدر أولًا.");
   if (!channelCode) throw new Error("اختار القناة / المعرض.");
   if (!pricelistId) throw new Error("اختار قائمة الأسعار.");
-  if (!locationId) throw new Error("اختار موقع المخزون.");
+  if (!locationId && channelCode !== 'online') throw new Error("اختار موقع المخزون.");
 
   return {
     companyId,

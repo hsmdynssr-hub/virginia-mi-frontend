@@ -48,7 +48,7 @@ async function load(){
     $("kc").textContent=x.receipt_count||0;$("kt").textContent=m(x.total_amount);$("kp").textContent=m(x.paid_amount);$("kb").textContent=m(x.balance_amount);
     analysisData=x;reportFooters(x);renderPlatforms(x);
     $("vb").innerHTML=(x.byVariety||[]).map(v=>`<tr><td>${e(v.variety_name)}</td><td>${e(v.weight_kg)}</td><td>${m(v.total_amount)}</td><td>${m(v.avg_price_per_kg)}</td><td>${m(v.min_price_per_kg)}</td><td>${m(v.max_price_per_kg)}</td><td>${e(v.price_count||0)}</td><td>${e(v.overridden_lines||0)}</td></tr>`).join("");
-    $("supplierCount").textContent=`عرض ${(x.bySupplier||[]).length} من ${x.bySupplier?.[0]?.full_count||0} مجموعة مورد`;
+    $("supplierCount").textContent=`عرض ${(x.bySupplier||[]).length} من ${x.bySupplier?.[0]?.full_count||0} مجموعة مورد — تصدير Excel يشمل جميع النتائج المطابقة`;
     $("supplierRows").innerHTML=(x.bySupplier||[]).map(v=>`<tr><td>${e(v.supplier_name)}</td><td>${e(v.supplier_phone)}</td><td>${e(v.receipt_count)}</td><td>${kg(v.weight_kg)}</td><td>${m(v.total_amount)}</td><td>${m(v.paid_amount)}</td><td>${m(v.balance_amount)}</td></tr>`).join('')||'<tr><td colspan="7">لا توجد مشتريات</td></tr>';
     const previous=$("priceVariety").value;$("priceVariety").innerHTML=(x.byVariety||[]).map((v,i)=>`<option value="${i}">${e(v.variety_name)}</option>`).join('');if(previous&&Number(previous)<(x.byVariety||[]).length)$("priceVariety").value=previous;renderPrices();
     $("rb").innerHTML=(rows||[]).map(v=>{
