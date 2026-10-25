@@ -1,9 +1,10 @@
 'use strict';
 (() => {
   const params = new URLSearchParams(location.search);
-  if (!params.has('menu')) return;
-  const token = params.get('menu') || '';
   const root = document.getElementById('professionalMenuApp');
+  const alias = root?.dataset.menuList;
+  if (!params.has('menu') && !alias) return;
+  const token = params.get('menu') || '';
   // Public copy is localized here, including dynamic numbers and messages. The
   // generic exact-match observer must not reinterpret authoritative product names.
   root.setAttribute('data-mi-no-translate', 'true');
@@ -50,7 +51,7 @@
     });
   }
   document.body.className = 'customer-menu-body';
-  const state = { data: null, query: '', category: '', availability: '', failed: false };
+  const state = { data: null, query: '', category: '', availability: 'available', failed: false };
   const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
   const format = value => Number(value).toLocaleString(locale, { maximumFractionDigits: 2 });
   const apiBase = ['localhost', '127.0.0.1'].includes(location.hostname) ? 'http://localhost:5050/api' : 'https://api.mi.virginiaolive.com/api';
@@ -77,7 +78,9 @@
     const data = state.data, currency = ['EGP', 'LE', 'ج.م', 'ج'].includes(data.currency) ? (english ? 'EGP' : 'ج.م') : data.currency;
     const money = value => `${format(value)} ${escape(currency)}`;
     const stale = data.stale || state.failed || Date.now() - Date.parse(data.updatedAt) >= 86400000;
-    const categories = [...new Set(data.rows.map(row => row.categoryName).filter(Boolean))];
+    // Older snapshots remain readable while the next publication is generated.
+    const posCategories = Array.isArray(data.categories);
+    const categories = posCategories ? data.categories : [...new Set(data.rows.map(row => row.categoryName).filter(Boolean))].map(name => ({ id: name, name, nameEn: categoryName(data.rows.find(row => row.categoryName === name)) }));
     root.innerHTML = `<main class="customer-menu-shell">
       ${brand()}
       <header class="customer-menu-header">
@@ -88,7 +91,7 @@
       <p class="customer-menu-warning" role="status" ${stale ? '' : 'hidden'}>نعرض آخر تحديث متاح. الأسعار والتوافر يحتاجان تأكيدًا.</p>
       <form class="customer-menu-filters" role="search" aria-label="البحث في المنيو">
         <label class="customer-menu-search"><span class="customer-menu-sr-only">بحث</span>${icon('search')}<input id="customerSearch" type="search" placeholder="ما الذي تبحث عنه؟" value="${escape(state.query)}" autocomplete="off"></label>
-        <label><span>التصنيف</span><select id="customerCategory"><option value="">كل التصنيفات</option>${categories.map(name => `<option data-menu-source ${name === state.category ? 'selected' : ''} value="${escape(name)}">${escape(categoryName(data.rows.find(row => row.categoryName === name)))}</option>`).join('')}</select></label>
+        <label><span>التصنيف</span><select id="customerCategory"><option value="">كل التصنيفات</option>${categories.map(category => `<option data-menu-source ${String(category.id) === state.category ? 'selected' : ''} value="${escape(category.id)}">${escape(english ? category.nameEn || category.name : category.name)}</option>`).join('')}</select></label>
         <label><span>التوافر</span><select id="customerAvailability"><option value="">كل المنتجات</option><option value="available" ${state.availability === 'available' ? 'selected' : ''}>المتوفر</option><option value="out_of_stock" ${state.availability === 'out_of_stock' ? 'selected' : ''}>غير المتوفر</option></select></label>
       </form>
       <div class="customer-menu-results-heading"><h2>تصفّح المنتجات</h2><p id="customerResultCount" role="status" aria-live="polite" aria-atomic="true"></p></div>
@@ -97,7 +100,13 @@
     </main>`;
     const grid = root.querySelector('.customer-menu-grid');
     function cards() {
-      const rows = data.rows.filter(row => (!state.query || [row.productName, row.productNameEn].some(name => String(name || '').toLocaleLowerCase().includes(state.query.toLocaleLowerCase()))) && (!state.category || row.categoryName === state.category) && (!state.availability || (!stale && (state.availability === 'available' ? ['available', 'limited'].includes(row.status) : row.status === state.availability))));
+      const selected = new Set(state.category ? [Number(state.category)] : []);
+      if (posCategories && state.category) {
+        let changed = true;
+        while (changed) { changed = false; for (const category of categories) if (category.parentId != null && selected.has(category.parentId) && !selected.has(category.id)) { selected.add(category.id); changed = true; } }
+      }
+      const inCategory = row => !state.category || (posCategories ? (state.category === '0' ? !row.posCategoryIds?.length : (row.posCategoryIds || []).some(id => selected.has(id))) : row.categoryName === state.category);
+      const rows = data.rows.filter(row => (!state.query || [row.productName, row.productNameEn].some(name => String(name || '').toLocaleLowerCase().includes(state.query.toLocaleLowerCase()))) && inCategory(row) && (!state.availability || (!stale && (state.availability === 'available' ? ['available', 'limited'].includes(row.status) : row.status === state.availability))));
       root.querySelector('#customerResultCount').textContent = english ? `${format(rows.length)} ${rows.length === 1 ? 'product' : 'products'}` : `${format(rows.length)} منتج`;
       grid.innerHTML = rows.length ? rows.map(row => {
         const status = stale ? 'unknown' : row.status;
@@ -140,8 +149,9 @@
     if (loading) return;
     loading = true;
     try {
-      if (!/^[a-f0-9]{48}$/.test(token)) throw new Error('Invalid menu');
-      const response = await fetch(`${apiBase}/public-menu/${encodeURIComponent(token)}`, { cache: 'no-cache', credentials: 'omit', signal: AbortSignal.timeout(20000) });
+      if (alias ? !['de', 'sahel', 'online'].includes(alias) : !/^[a-f0-9]{48}$/.test(token)) throw new Error('Invalid menu');
+      const endpoint = alias ? 'by-name/' + alias : token;
+      const response = await fetch(`${apiBase}/public-menu/${encodeURI(endpoint)}`, { cache: 'no-cache', credentials: 'omit', signal: AbortSignal.timeout(20000) });
       const payload = await response.json();
       if (!response.ok || !payload.success || !Array.isArray(payload.data?.rows)) throw new Error('Unavailable menu');
       state.data = payload.data; state.failed = false;

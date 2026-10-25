@@ -9,7 +9,7 @@ window.MenuPublicationAdmin = (() => {
   const matches = (code, name) => aliases[code].some(alias => nameKey(alias) === nameKey(name));
   const canPublish = () => (typeof isAdmin === 'function' && isAdmin()) || (typeof getUserPermissions === 'function' && getUserPermissions().includes('menu.publish'));
   const date = value => value ? new Date(value).toLocaleString('ar-EG') : 'لم يُنشر بعد';
-  function publicUrl(token) { const url = new URL('./public-menu.html', location.href); url.searchParams.set('menu', token); return url.href; }
+  function publicUrl(saved) { if (saved.publicPath) return new URL(saved.publicPath, location.origin).href; const url = new URL('./public-menu.html', location.href); url.searchParams.set('menu', saved.token); return url.href; }
   function options(items, selected) { return '<option value="">اختر</option>' + items.map(item => `<option value="${Number(item.id)}" ${Number(item.id) === Number(selected) ? 'selected' : ''}>${escape(item.completeName || item.name)}</option>`).join(''); }
   function render(message = '') {
     const root = document.getElementById('menuPublicationsPanel');
@@ -37,8 +37,9 @@ window.MenuPublicationAdmin = (() => {
             ${saved.lastError ? '<p role="status">تعذر آخر تحديث؛ النسخة السابقة ما زالت متاحة.</p>' : ''}
             ${saved.missingImages || saved.unknownAvailability ? `<p>صور تحتاج مطابقة: ${Number(saved.missingImages)} · توافر يحتاج مراجعة: ${Number(saved.unknownAvailability)}</p>` : ''}
             ${saved.untranslatedNames || saved.untranslatedCategories ? `<p>أسماء تحتاج ترجمة إنجليزية: ${Number(saved.untranslatedNames || 0)} · فئات تحتاج ترجمة: ${Number(saved.untranslatedCategories || 0)}</p>` : ''}
-            <label class="report-field">الرابط الثابت<input class="menu-publication-link" type="url" readonly value="${escape(publicUrl(saved.token))}"></label>
-            <div class="menu-publication-actions"><button type="button" data-action="copy">نسخ الرابط</button><a href="${escape(publicUrl(saved.token))}" target="_blank" rel="noopener">فتح المنيو</a></div>` : ''}
+            ${saved.uncategorisedProducts ? `<p>أصناف بلا فئة نقاط بيع في أودو: ${Number(saved.uncategorisedProducts)} — تظهر «غير مصنف» في المنيو.</p>` : ''}
+            <label class="report-field">الرابط الثابت<input class="menu-publication-link" type="url" readonly value="${escape(publicUrl(saved))}"></label>
+            <div class="menu-publication-actions"><button type="button" data-action="copy">نسخ الرابط</button><a href="${escape(publicUrl(saved))}" target="_blank" rel="noopener">فتح المنيو</a></div>` : ''}
           ${enabled ? `<div class="menu-publication-actions"><button type="button" data-action="publish" ${busy ? 'disabled' : ''}>${saved ? 'حفظ الإعدادات وتحديث المنيو' : 'حفظ ونشر المنيو'}</button>${saved ? `<button type="button" data-action="refresh" ${busy ? 'disabled' : ''}>تحديث استثنائي الآن</button>` : ''}</div>` : ''}
         </section>`;
       }).join('')}</div>`;
