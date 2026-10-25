@@ -6,6 +6,39 @@ const API_BASE_URL =
 
 window.API_BASE_URL = API_BASE_URL;
 
+let browserRefreshPromise=null;
+async function refreshBrowserSession(){
+  if(localStorage.getItem('mi-browser-logged-out')==='1')return false;
+  if(!browserRefreshPromise)browserRefreshPromise=(async()=>{
+    try{
+      const response=await fetch(`${API_BASE_URL}/auth/refresh`,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:'{}',cache:'no-store'});
+      if(!response.ok)return false;
+      const data=await response.json();
+      if(!data.success||!data.token||!data.user||localStorage.getItem('mi-browser-logged-out')==='1')return false;
+      const oldUser=JSON.parse(localStorage.getItem('user')||'null');
+      if(oldUser&&String(oldUser.id)!==String(data.user.id))return false;
+      localStorage.setItem('token',data.token);localStorage.setItem('user',JSON.stringify(data.user));return true;
+    }catch{return false;}
+  })().finally(()=>{browserRefreshPromise=null;});
+  return browserRefreshPromise;
+}
+async function sessionFetch(url,options={}){
+  const path=new URL(url,API_BASE_URL).pathname;
+  const isAuth=path.startsWith('/api/auth/');
+  const sentToken=getToken();
+  const response=await fetch(url,{...options,...(isAuth?{credentials:'include'}:{})});
+  if(response.status!==401||isAuth)return response;
+  if((getToken()&&getToken()!==sentToken)||await refreshBrowserSession()){
+    const headers=new Headers(options.headers||{});headers.set('Authorization',`Bearer ${getToken()}`);
+    return fetch(url,{...options,headers});
+  }
+  return response;
+}
+async function endBrowserSession(){
+  localStorage.setItem('mi-browser-logged-out','1');
+  try{await fetch(`${API_BASE_URL}/auth/logout`,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:'{}',signal:AbortSignal.timeout(5000)});}catch{}
+}
+
 const VALID_COMPANY_IDS = new Set(["1", "2"]);
 
 function normalizeCompanyId(companyId) {
@@ -353,7 +386,7 @@ async function apiGet(path, params = {}) {
     }
   });
 
-  const response = await fetch(url.toString(), {
+  const response = await sessionFetch(url.toString(), {
     method: "GET",
     headers: getAuthHeaders({ json: false }),
     cache: "no-store"
@@ -366,8 +399,9 @@ async function apiPost(path, body = {}) {
   ensureLocalDevSession();
 
   const safeBody = ensureCompanyContextForBody(path, body);
+  if(path==='/auth/login')safeBody.rememberBrowser=true;
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await sessionFetch(`${API_BASE_URL}${path}`, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify(safeBody),
@@ -375,6 +409,7 @@ async function apiPost(path, body = {}) {
   });
 
   const data = await handleApiResponse(response);
+  if(path==='/auth/login')localStorage.removeItem('mi-browser-logged-out');
   notifyCustomerServiceMutation(path);
   return data;
 }
@@ -384,7 +419,7 @@ async function apiPut(path, body = {}) {
 
   const safeBody = ensureCompanyContextForBody(path, body);
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await sessionFetch(`${API_BASE_URL}${path}`, {
     method: "PUT",
     headers: getAuthHeaders(),
     body: JSON.stringify(safeBody),
@@ -401,7 +436,7 @@ async function apiPatch(path, body = {}) {
 
   const safeBody = ensureCompanyContextForBody(path, body);
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await sessionFetch(`${API_BASE_URL}${path}`, {
     method: "PATCH",
     headers: getAuthHeaders(),
     body: JSON.stringify(safeBody),
@@ -430,7 +465,7 @@ async function apiDelete(path, body = null) {
     options.body = JSON.stringify(safeBody);
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, options);
+  const response = await sessionFetch(`${API_BASE_URL}${path}`, options);
 
   const data = await handleApiResponse(response);
   notifyCustomerServiceMutation(path);
@@ -462,7 +497,7 @@ async function apiDownload(path, params = {}, filename = "download.xlsx") {
     }
   });
 
-  const response = await fetch(url.toString(), {
+  const response = await sessionFetch(url.toString(), {
     method: "GET",
     headers: getAuthHeaders({ json: false }),
     cache: "no-store"

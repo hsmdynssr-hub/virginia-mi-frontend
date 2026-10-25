@@ -938,7 +938,8 @@ function guardPage(activePage) {
   return true;
 }
 
-function logout() {
+async function logout() {
+  if(typeof endBrowserSession==='function')await endBrowserSession();
   localStorage.removeItem("token");
   localStorage.removeItem("user");
   localStorage.removeItem("companyId");
