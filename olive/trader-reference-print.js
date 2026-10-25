@@ -11,7 +11,7 @@
   const data=(await apiGet('/olive/traders/references',{companyId,referenceId})).data,doc=data.rows[0]?.reference;
   if(invalidated||String(getCompanyId())!==companyId)throw Error('تغيّر سياق الدخول؛ أعد فتح المستند');
   if(!doc||String(doc.companyId)!==companyId)throw Error('المستند غير موجود');
-  for(const [label,value] of [['الرقم',doc.number],['التاريخ',doc.invoiceDate],['الشركة',doc.companyId],['الموقع / الجلسة',doc.siteCode+' / '+doc.sessionId],['المورد',doc.supplier.code+' — '+doc.supplier.name],['عنوان المورد',doc.supplier.address||'—'],['المحاسب',doc.issuedBy]]){const p=document.createElement('p');p.textContent=label+': '+value;$('facts').append(p);}
+  for(const [label,value] of [['الرقم',doc.number],['التاريخ',doc.invoiceDate],['الشركة',doc.companyId],['الموقع',doc.siteCode],...(doc.sessionId?[['الجلسة المرتبطة سابقًا',doc.sessionId]]:[]),['المورد',doc.supplier.code+' — '+doc.supplier.name],['عنوان المورد',doc.supplier.address||'—'],['المحاسب',doc.issuedBy]]){const p=document.createElement('p');p.textContent=label+': '+value;$('facts').append(p);}
   for(const line of doc.lines){const tr=document.createElement('tr');for(const key of ['description','unit','quantity','unitPrice','total']){const td=document.createElement('td');td.textContent=line[key];tr.append(td);}$('lines').append(tr);}
   const mark=document.createElement('p');mark.id='copyMark';mark.className='notice';mark.textContent='إعادة طباعة — نسخة مرجعية وليست فاتورة جديدة';$('invoice').insertBefore(mark,$('facts'));
   $('total').textContent=doc.total;$('notes').textContent=doc.notes;$('status').textContent='';$('invoice').hidden=false;
