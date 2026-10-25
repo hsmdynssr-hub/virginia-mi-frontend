@@ -36,6 +36,7 @@ window.MenuPublicationAdmin = (() => {
           ${saved ? `<p>التحديث التالي: ${escape(date(saved.nextRefreshAt))} · ${Number(saved.productCount)} منتج</p>
             ${saved.lastError ? '<p role="status">تعذر آخر تحديث؛ النسخة السابقة ما زالت متاحة.</p>' : ''}
             ${saved.missingImages || saved.unknownAvailability ? `<p>صور تحتاج مطابقة: ${Number(saved.missingImages)} · توافر يحتاج مراجعة: ${Number(saved.unknownAvailability)}</p>` : ''}
+            ${saved.untranslatedNames || saved.untranslatedCategories ? `<p>أسماء تحتاج ترجمة إنجليزية: ${Number(saved.untranslatedNames || 0)} · فئات تحتاج ترجمة: ${Number(saved.untranslatedCategories || 0)}</p>` : ''}
             <label class="report-field">الرابط الثابت<input class="menu-publication-link" type="url" readonly value="${escape(publicUrl(saved.token))}"></label>
             <div class="menu-publication-actions"><button type="button" data-action="copy">نسخ الرابط</button><a href="${escape(publicUrl(saved.token))}" target="_blank" rel="noopener">فتح المنيو</a></div>` : ''}
           ${enabled ? `<div class="menu-publication-actions"><button type="button" data-action="publish" ${busy ? 'disabled' : ''}>${saved ? 'حفظ الإعدادات وتحديث المنيو' : 'حفظ ونشر المنيو'}</button>${saved ? `<button type="button" data-action="refresh" ${busy ? 'disabled' : ''}>تحديث استثنائي الآن</button>` : ''}</div>` : ''}
