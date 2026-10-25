@@ -11,12 +11,17 @@
   const data=(await apiGet('/olive/traders/references',{companyId,referenceId})).data,doc=data.rows[0]?.reference;
   if(invalidated||String(getCompanyId())!==companyId)throw Error('تغيّر سياق الدخول؛ أعد فتح المستند');
   if(!doc||String(doc.companyId)!==companyId)throw Error('المستند غير موجود');
-  for(const [label,value] of [['الرقم',doc.number],['التاريخ',doc.invoiceDate],['الشركة',doc.companyId],['الموقع',doc.siteCode],...(doc.sessionId?[['الجلسة المرتبطة سابقًا',doc.sessionId]]:[]),['المورد',doc.supplier.code+' — '+doc.supplier.name],['عنوان المورد',doc.supplier.address||'—'],['المحاسب',doc.issuedBy]]){const p=document.createElement('p');p.textContent=label+': '+value;$('facts').append(p);}
-  for(const line of doc.lines){const tr=document.createElement('tr');for(const key of ['description','unit','quantity','unitPrice','total']){const td=document.createElement('td');td.textContent=line[key];tr.append(td);}$('lines').append(tr);}
-  const mark=document.createElement('p');mark.id='copyMark';mark.className='notice';mark.textContent='إعادة طباعة — نسخة مرجعية وليست فاتورة جديدة';$('invoice').insertBefore(mark,$('facts'));
-  $('total').textContent=doc.total;$('notes').textContent=doc.notes;$('status').textContent='';$('invoice').hidden=false;
+  const settings=(await apiGet('/olive/traders/references/print-settings',{companyId})).data;
+  if(invalidated||String(getCompanyId())!==companyId)throw Error('تغيّر سياق الدخول؛ أعد فتح المستند');
+  const receipt={reference_only:true,reference_date:doc.invoiceDate,receipt_no:doc.number,created_at:doc.issuedAt,supplier_name:doc.supplier.name,supplier_phone:doc.supplier.phone,created_by:doc.issuedBy,total_amount:doc.total,notes:doc.notes,lines:doc.lines.map(l=>({variety_name:l.description,weight_kg:l.quantity,unit:l.unit,price_per_kg:l.unitPrice,line_total:l.total}))};
+  const rendered=new DOMParser().parseFromString(OliveReceiptPrint.render(receipt,{...settings,receipt_title:'فاتورة تاجر — تحت التسوية'},companyId),'text/html');
+  document.head.append(rendered.querySelector('style').cloneNode(true));$('invoice').innerHTML=rendered.body.innerHTML;
+  $('invoice').querySelector('tbody').id='lines';$('invoice').querySelector('.grand .value').id='total';
+  const mark=document.createElement('p');mark.id='copyMark';mark.textContent='إعادة طباعة';$('invoice').querySelector('.header').append(mark);
+  const button=document.createElement('button');button.id='print';button.type='button';button.textContent='طباعة';$('invoice').append(button);
+  $('status').textContent='';$('invoice').hidden=false;
   let printKey=null,busy=false;
-  window.addEventListener('afterprint',()=>{mark.textContent='إعادة طباعة — نسخة مرجعية وليست فاتورة جديدة';});
+  window.addEventListener('afterprint',()=>{mark.textContent='إعادة طباعة';});
   $('print').onclick=async()=>{
    if(busy||invalidated)return;busy=true;$('print').disabled=true;
    try{
@@ -25,7 +30,7 @@
     const ticket=(await apiPost('/olive/traders/references/'+referenceId+'/print',{companyId,requestKey:printKey})).data.printTicket;
     if(invalidated||String(getCompanyId())!==companyId)throw Error('تغيّر سياق الدخول؛ أعد فتح المستند');
     printKey=null;
-    mark.textContent=(ticket.isReprint?'إعادة طباعة — ليست فاتورة جديدة':'طباعة أولى — فاتورة مرجعية تحت التسوية')+' | طلب طباعة رقم '+ticket.copyNumber+' | '+new Date(ticket.requestedAt).toLocaleString('ar-EG',{timeZone:'Africa/Cairo'});
+    mark.textContent=(ticket.isReprint?'إعادة طباعة':'طباعة أولى')+' — '+ticket.copyNumber;
     $('status').textContent='';window.print();
    }catch(e){$('status').textContent=e.message||'تعذر تأكيد طلب الطباعة؛ أعد المحاولة';}
    finally{busy=false;$('print').disabled=false;}

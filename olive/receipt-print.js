@@ -6,7 +6,7 @@ function render(r, s = {}, companyId = 1) {
 
 
   const dt = new Date(r.created_at);
-  const dateText = dt.toLocaleDateString("ar-EG", {
+  const dateText = (r.reference_only&&r.reference_date?new Date(r.reference_date+'T12:00:00'):dt).toLocaleDateString("ar-EG", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit"
@@ -39,7 +39,7 @@ function render(r, s = {}, companyId = 1) {
   const items = (r.lines || []).map(x => `
     <tr>
       <td class="item-name">${esc(x.variety_name)}</td>
-      <td>${qty(x.weight_kg)}</td>
+      <td>${qty(x.weight_kg)}${r.reference_only?' '+esc(x.unit||'كجم'):''}</td>
       <td>${m(x.price_per_kg)}</td>
       <td>${m(x.line_total)}</td>
     </tr>
@@ -219,6 +219,7 @@ function render(r, s = {}, companyId = 1) {
   .item-name {
     font-weight: 800;
     text-align: right;
+    overflow-wrap: anywhere;
   }
 
   .totals {
@@ -359,7 +360,7 @@ function render(r, s = {}, companyId = 1) {
   </div>
 
   <div class="section">
-    <div class="section-title">تفاصيل الاستلام</div>
+    <div class="section-title">${r.reference_only?'تفاصيل الفاتورة':'تفاصيل الاستلام'}</div>
     ${r.collection_platform ? infoRow("منصة التجميع", ({QASR_MATROUH:"القصر — مطروح",BARRANI_NEGILA:"براني والنجلية",DABAA_RAS_EL_HEKMA:"الضبعة ورأس الحكمة"})[r.collection_platform] || r.collection_platform) : ""}
     ${r.delivery_mode ? infoRow("طريقة التسليم", r.delivery_mode === "DIRECT_MILL" ? "نقل مباشر إلى معصرة" : "استلام في الشادر") : ""}
     ${r.destination_mill ? infoRow("المعصرة", ({MATROUH:"مطروح",SADAT:"السادات",ABYAD:"الأبيض"})[r.destination_mill] || r.destination_mill) : ""}
@@ -367,7 +368,7 @@ function render(r, s = {}, companyId = 1) {
       <thead>
         <tr>
           <th>الصنف</th>
-          <th>الكمية كجم</th>
+          <th>${r.reference_only?'الكمية':'الكمية كجم'}</th>
           <th>السعر</th>
           <th>الإجمالي</th>
         </tr>
@@ -384,7 +385,7 @@ function render(r, s = {}, companyId = 1) {
       <span class="value">${m(r.total_amount)} جنيه</span>
     </div>
 
-    <div class="money-row">
+    ${r.reference_only?'':`<div class="money-row">
       <span>المدفوع</span>
       <strong>${m(r.paid_amount)} جنيه</strong>
     </div>
@@ -392,10 +393,10 @@ function render(r, s = {}, companyId = 1) {
     <div class="money-row">
       <span>المتبقي</span>
       <strong>${m(r.balance_amount)} جنيه</strong>
-    </div>
+    </div>`}
   </div>
 
-  <div class="status">${paymentStatus}</div>
+  ${r.reference_only?'':`<div class="status">${paymentStatus}</div>`}
 
   <div class="operator">
     ${infoRow("المحاسب", r.created_by || "-")}
