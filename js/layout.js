@@ -256,6 +256,7 @@ const REPORT_PAGE_MAP = {
   gate: "gate.access",
   "gate-operations": "gate.access",
   "gate-control": "gate.admin",
+  "gate-transport":"gate.transport.approve",
   "gate-sample-receive": "sample.receive",
   "gate-samples-admin": "sample.admin",
 
@@ -362,6 +363,7 @@ const PAGES_WITHOUT_REPORT_TOOLBAR = new Set([
   "gate",
   "gate-operations",
   "gate-control",
+  "gate-transport",
   "gate-sample-receive",
   "gate-samples-admin",
 
@@ -408,7 +410,7 @@ const MI_MODULE_DEFINITIONS = [
   {
     id: "gate",
     label: "بوابة الشركة",
-    pages: ["gate","gate-operations","gate-control","gate-sample-receive","gate-samples-admin"],
+    pages: ["gate","gate-operations","gate-control","gate-transport","gate-sample-receive","gate-samples-admin"],
     groups: [
       { id:"operations", label:"تشغيل", icon:"⚡", links:[
         {page:"gate",label:"مركز البوابة",href:"../gate/index.html",always:true},
@@ -417,6 +419,7 @@ const MI_MODULE_DEFINITIONS = [
       ]},
       { id:"control", label:"متابعة وإدارة", icon:"◉", links:[
         {page:"gate-control",label:"متابعة حركة البوابة",href:"../gate/control.html",permission:"gate.admin"},
+        {page:"gate-transport",label:"اعتماد نقل إدريس",href:"../gate/control.html?view=transport",permission:"gate.transport.approve"},
         {page:"gate-samples-admin",label:"إدارة العينات وربط Odoo",href:"../gate/samples-admin.html",permission:"sample.admin"}
       ]}
     ]
@@ -868,7 +871,7 @@ function hasPermission(pageCode) {
   const permissions = getUserPermissions();
 
   if (pageCode === "gate") {
-    return ["gate.access","gate.admin","sample.receive","sample.admin"]
+    return ["gate.access","gate.admin","gate.transport.approve","sample.receive","sample.admin"]
       .some((permission) => permissions.includes(permission));
   }
 

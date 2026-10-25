@@ -20,7 +20,7 @@
     .gate-control table{width:100%;border-collapse:collapse;font-size:13px}
     .gate-control th,.gate-control td{padding:9px;border-bottom:1px solid #edf0f4;text-align:right;vertical-align:top}
     .gate-control th{background:#f9fafb}
-    .gate-scroll{overflow:auto;max-height:560px}
+    .gate-scroll{overflow:auto;max-height:560px;max-width:100%}.gate-control [hidden]{display:none!important}.gate-scroll table{min-width:800px}.gate-control{min-width:0}.gate-control small{display:block}
     .syncbox{display:flex;gap:6px;min-width:340px}
     .syncbox input{min-width:220px}
     .warn{color:#92400e}
@@ -35,7 +35,7 @@
   renderLayout(
     "متابعة حركة البوابة",
     "المراجعة، السجل الكامل، والربط اليدوي مع Odoo",
-    "gate-control",
+    new URLSearchParams(location.search).get("view")==="transport"?"gate-transport":"gate-control",
     `
       <div class="gate-control">
         <div class="gate-tools">
@@ -48,6 +48,7 @@
           <button id="loadBtn">تحديث</button>
         </div>
 
+        <header class="gate-tools gate-panel"><label>عرض الجدول <select id="gateView" aria-label="اختيار جدول المراجعة"><option value="inside">الموجودون داخل الشركة</option><option value="unlinked">بانتظار الربط مع أودو</option><option value="history">سجل حركة البوابة</option><option value="transport">سجل إدريس نقل واعتماد النقل</option></select></label><span id="controlMessage" role="status"></span></header>
         <div class="gate-kpis">
           <div class="gate-kpi">داخل الشركة الآن<strong id="kInside">0</strong></div>
           <div class="gate-kpi">سيارات توريد<strong id="kInbound">0</strong></div>
@@ -57,7 +58,7 @@
           <div class="gate-kpi">مبيت<strong id="kOvernight">0</strong></div>
         </div>
 
-        <section class="gate-panel">
+        <section class="gate-panel" data-gate-table="inside" hidden>
           <h3>ملخص الموجودين داخل الشركة الآن</h3>
           <div class="gate-scroll" style="max-height:320px">
             <table>
@@ -70,7 +71,7 @@
           </div>
         </section>
 
-        <section class="gate-panel">
+        <section class="gate-panel" data-gate-table="unlinked" hidden>
           <h3>حركات بانتظار الربط مع Odoo</h3>
           <p class="warn">أدخل رقم إيصال الاستلام أو أمر التوصيل كما هو في Odoo ثم اضغط مزامنة.</p>
           <div class="gate-scroll">
@@ -84,7 +85,7 @@
           </div>
         </section>
 
-        <section class="gate-panel">
+        <section class="gate-panel" data-gate-table="history" hidden>
           <h3>سجل حركة البوابة</h3>
           <div class="gate-scroll">
             <table>
@@ -97,10 +98,11 @@
             </table>
           </div>
         </section>
+        <section class="gate-panel" data-gate-table="transport" hidden><h3>سجل إدريس نقل — مراجعة القيمة واعتماد مسؤول النقل</h3><div class="gate-scroll"><table><thead><tr><th>المورد / السائق / السيارة</th><th>من / إلى</th><th>الكمية والوحدة</th><th>الدخول / الخروج</th><th>مسؤول البوابة</th><th>قيمة النقل بالجنيه</th><th>الاعتماد</th></tr></thead><tbody id="transportBody"></tbody></table></div></section>
       </div>
     `
   );
 </script>
-<script src="./control.js?v=20261010-gate-control-v192"></script>
+<script src="./control.js?v=20261025-transport1"></script>
 </body>
 </html>

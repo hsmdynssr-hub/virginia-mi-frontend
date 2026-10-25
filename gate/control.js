@@ -1,5 +1,8 @@
 (() => {
   const $ = (id) => document.getElementById(id);
+  let capabilities={canReviewGate:false,canApproveTransport:false},generation=0,tableInitialized=false;
+  function selectTable(){const selected=$('gateView').value;document.querySelectorAll('[data-gate-table]').forEach(node=>node.hidden=node.dataset.gateTable!==selected);}
+  $('gateView').onchange=selectTable;
 
   const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({
     "&":"&amp;",
@@ -58,6 +61,7 @@
   }
 
   function movementLabel(v) {
+    if(v.visit_type==='TRANSPORT')return 'مورد إدريس نقل';
     if(v.visit_type === "EXCEPTIONAL_PURCHASE")return "شراء استثنائي بدون أمر شراء";
     const type = movementType(v);
     if (type === "VISIT") return "زيارة";
@@ -68,6 +72,7 @@
 
   function syncStatus(v) {
     const s = v.odoo_sync_status || "WAITING_ODOO_LINK";
+    if(s==='NOT_REQUIRED')return '<span class="tag">لا يتطلب ربط أودو</span>';
 
     if (s === "SYNCED") {
       return `<span class="tag">${esc(v.odoo_reference || "تمت المزامنة")}</span>`;
@@ -82,19 +87,22 @@
 
   function supplierDetails(v){
     const name=esc(v.supplier_name || "-");
-    if(v.visit_type!=="EXCEPTIONAL_PURCHASE")return name;
-    return `${name}<div>${(v.supplied_items || []).map(item=>`${esc(item.productName)}: ${esc(item.quantity)} ${esc(item.unit)}`).join("<br>")}</div><small>سبب الشراء: ${esc(v.visit_reason || "-")}</small>`;
+    return `${name}<div>${(v.supplied_items || []).map(item=>`${esc(item.productName||item.name||'حمولة')}: ${esc(item.quantity)} ${esc(item.unit)}`).join("<br>")}</div>${v.visit_type==='TRANSPORT'?`<small>من ${esc(v.transport_from)} إلى ${esc(v.transport_to)}</small>`:''}${v.visit_type==='EXCEPTIONAL_PURCHASE'?`<small>سبب الشراء: ${esc(v.visit_reason || "-")}</small>`:''}`;
   }
 
   async function ensureAdmin() {
-    await apiGet("/gate/admin/access", {});
+    const r=await apiGet('/gate/control/access',{companyId:cid()});capabilities=r.data;
+    for(const option of $('gateView').options)option.disabled=option.value!=='transport'&&!capabilities.canReviewGate;
+    if(!capabilities.canReviewGate||!tableInitialized&&new URLSearchParams(location.search).get('view')==='transport')$('gateView').value='transport';
+    document.querySelector('.gate-kpis').hidden=!capabilities.canReviewGate;tableInitialized=true;selectTable();
   }
 
-  async function loadDashboard() {
+  async function loadDashboard(revision) {
     const r = await apiGet("/gate/admin/dashboard", {
       companyId: cid(),
       date: today()
     });
+    if(revision!==generation)return;
 
     const d = r.data || {};
     const rows = (d.waitingOdooLink || []).filter((v) => !["VISIT","MAINTENANCE"].includes(movementType(v)));
@@ -177,13 +185,14 @@
     });
   }
 
-  async function loadReport() {
+  async function loadReport(revision) {
     const r = await apiGet("/gate/admin/report", {
       companyId: cid(),
       dateFrom: $("dateFrom").value,
       dateTo: $("dateTo").value,
       limit: 1000
     });
+    if(revision!==generation)return;
 
     $("reportBody").innerHTML = (r.data || []).map((v) => `
       <tr>
@@ -201,11 +210,22 @@
     `).join("") || `<tr><td colspan="9">لا توجد حركات في الفترة المختارة.</td></tr>`;
   }
 
+  async function loadTransport(revision){
+    const companyId=cid(),r=await apiGet('/gate/transport',{companyId,dateFrom:$('dateFrom').value,dateTo:$('dateTo').value});if(revision!==generation)return;
+    $('transportBody').innerHTML=(r.data||[]).map(row=>{const p=row.movement_payload,key=`gate-transport:${companyId}:${row.entry_uuid}`,pending=JSON.parse(sessionStorage.getItem(key)||'null');
+     return `<tr><td>إدريس نقل<small>${esc(p.personName)} — ${esc(p.vehiclePlate)}</small></td><td>من ${esc(p.transportFrom)}<br>إلى ${esc(p.transportTo)}</td><td>${(p.items||[]).map(i=>`${esc(i.quantity)} ${esc(i.unit)}`).join('<br>')}</td><td>${fmt(p.enteredAt)}<small>${fmt(row.exited_at)}</small></td><td>${esc(p.operatorName)}</td><td>${row.amount?esc(row.amount):capabilities.canApproveTransport?`<input data-transport-amount="${esc(row.entry_uuid)}" type="text" inputmode="decimal" aria-label="قيمة النقل" value="${esc(pending?.amount||'')}" ${pending?'disabled':''}>`:'بانتظار مسؤول النقل'}</td><td>${row.amount?`معتمد بواسطة ${esc(row.approved_name)}<small>${fmt(row.approved_at)}</small><small>${esc(row.reason)}</small>`:capabilities.canApproveTransport?`<input data-transport-reason="${esc(row.entry_uuid)}" placeholder="سبب / بيان الاعتماد" value="${esc(pending?.reason||'')}" ${pending?'disabled':''}><button data-transport-approve="${esc(row.entry_uuid)}">${pending?'إعادة نفس الاعتماد':'اعتماد قيمة النقل'}</button>`:'غير معتمد'}</td></tr>`;
+    }).join('')||'<tr><td colspan="7">لا توجد نقلات إدريس في الفترة المختارة</td></tr>';
+    $('transportBody').onclick=async event=>{const button=event.target.closest('[data-transport-approve]');if(!button)return;const id=button.dataset.transportApprove,key=`gate-transport:${companyId}:${id}`;
+     try{if(companyId!==cid())throw Error('تغيرت الشركة؛ حدّث الصفحة');let payload=JSON.parse(sessionStorage.getItem(key)||'null');if(!payload){const a=document.querySelector(`[data-transport-amount="${CSS.escape(id)}"]`),reason=document.querySelector(`[data-transport-reason="${CSS.escape(id)}"]`);if(!/^\d{1,12}(\.\d{1,2})?$/.test(a.value)||Number(a.value)<=0||!reason.value.trim())throw Error('أدخل قيمة موجبة وبيان الاعتماد');payload={companyId,requestKey:crypto.randomUUID(),amount:a.value,reason:reason.value.trim()};sessionStorage.setItem(key,JSON.stringify(payload));a.disabled=reason.disabled=true;}
+      button.disabled=true;await apiPost(`/gate/transport/${id}/approve`,payload);sessionStorage.removeItem(key);$('controlMessage').textContent='تم اعتماد النقل وحفظ القيمة والمنفذ';await loadAll();
+     }catch(e){$('controlMessage').textContent=e.message;button.textContent='إعادة نفس الاعتماد';}finally{button.disabled=false;}
+    };
+  }
   async function loadAll() {
-    await Promise.all([
-      loadDashboard(),
-      loadReport()
-    ]);
+    const revision=++generation;$('loadBtn').disabled=true;
+    try{await ensureAdmin();if(revision!==generation)return;await Promise.all([...(capabilities.canReviewGate?[loadDashboard(revision),loadReport(revision)]:[]),loadTransport(revision)]);}
+    catch(e){if(revision===generation)$('controlMessage').textContent=e.message;}
+    finally{if(revision===generation)$('loadBtn').disabled=false;}
   }
 
   $("loadBtn").onclick = loadAll;
