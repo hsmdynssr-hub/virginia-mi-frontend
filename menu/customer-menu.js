@@ -36,6 +36,10 @@
   };
   const t = value => english ? (translations[value] || value) : value;
   const productName = row => english ? (row.productNameEn || row.productName) : row.productName;
+  const nameParts = value => {
+    const match = String(value || '').match(/^\s*\[([^\]\r\n]+)\]\s*([\s\S]+)$/);
+    return match ? { code: match[1].trim(), name: match[2].trim() } : { code: '', name: String(value || '') };
+  };
   const categoryName = row => english ? (row.categoryNameEn || row.categoryName) : row.categoryName;
   function localizeUI(scope = root) {
     if (!english) return;
@@ -84,7 +88,7 @@
     root.innerHTML = `<main class="customer-menu-shell">
       ${brand()}
       <header class="customer-menu-header">
-        <div class="customer-menu-heading"><span class="customer-menu-eyebrow">منيو فيرجينيا <span aria-hidden="true">/</span> قائمة الأسعار</span><h1 data-menu-source>${escape(english ? data.titleEn || data.title : data.title)}</h1><p class="customer-menu-intro">تصفّح منتجاتنا، واختر ما يناسبك.</p></div>
+        <div class="customer-menu-heading"><span class="customer-menu-eyebrow">منيو فيرجينيا <span aria-hidden="true">/</span> قائمة الأسعار</span><h1 data-menu-source>${escape(english ? data.titleEn || data.title : data.title)}</h1></div>
         <div class="customer-menu-art" aria-hidden="true"><svg viewBox="0 0 120 120"><polygon points="60,3 70,33 94,14 87,44 117,47 91,63 112,87 81,84 78,115 59,91 38,115 38,84 7,90 27,65 2,48 33,44 25,14 49,33"/><circle cx="59" cy="60" r="17"/></svg></div>
       </header>
       <p class="customer-menu-updated">${icon('clock')}<span><span>${t('آخر تحديث:')}</span> <time datetime="${escape(data.updatedAt)}">${escape(new Date(data.updatedAt).toLocaleString(locale))}</time></span></p>
@@ -109,13 +113,17 @@
       const rows = data.rows.filter(row => (!state.query || [row.productName, row.productNameEn].some(name => String(name || '').toLocaleLowerCase().includes(state.query.toLocaleLowerCase()))) && inCategory(row) && (!state.availability || (!stale && (state.availability === 'available' ? ['available', 'limited'].includes(row.status) : row.status === state.availability))));
       root.querySelector('#customerResultCount').textContent = english ? `${format(rows.length)} ${rows.length === 1 ? 'product' : 'products'}` : `${format(rows.length)} منتج`;
       grid.innerHTML = rows.length ? rows.map(row => {
+        const display = nameParts(productName(row));
+        // Odoo's bracketed display-name prefix can be an internal reference;
+        // show the exact supplied code without inventing a barcode or changing the source.
+        const code = nameParts(row.productName).code || display.code;
         const status = stale ? 'unknown' : row.status;
         const label = ({ available: 'متوفر', limited: 'كمية محدودة', out_of_stock: 'غير متوفر', unknown: 'التوافر يحتاج تأكيدًا' })[status] || 'التوافر يحتاج تأكيدًا';
         const image = /^https:\/\//.test(row.imageUrl || '') ? `<img src="${escape(row.imageUrl)}" alt="${escape(english ? productName(row) : row.imageAlt || row.productName)}" loading="lazy" decoding="async" width="480" height="480">` : missingImage();
         const saving = data.presentation === 'factory' && Number(row.comparePrice) > Number(row.price) && Number(row.price) > 0;
         return `<article class="customer-menu-card" data-product="${escape(row.productId)}">
           <div class="customer-menu-visual"><div class="customer-menu-image">${image}</div><span class="customer-menu-status" data-status="${escape(status)}">${escape(label)}</span></div>
-          <div class="customer-menu-card-content">${row.categoryName ? `<p class="customer-menu-category" data-menu-source>${escape(categoryName(row))}</p>` : ''}<h3 data-menu-source>${escape(productName(row))}</h3>
+          <div class="customer-menu-card-content"><h3 data-menu-source>${escape(display.name)}</h3>${code ? `<p class="customer-menu-product-code" data-menu-source><span class="customer-menu-sr-only">${english ? 'Product code' : 'كود الصنف'}: </span><bdi dir="ltr">${escape(code)}</bdi></p>` : ''}
             <div class="customer-menu-pricing">${saving ? `<p class="customer-menu-compare">سعر البيع: <del>${money(row.comparePrice)}</del></p>` : ''}
             <p class="customer-menu-price"><span>${data.presentation === 'factory' ? 'سعر بيع المصنع' : 'سعر البيع'}</span><strong>${format(row.price)} <small>${escape(currency)}</small></strong></p></div>
             ${saving ? `<p class="customer-menu-saving"><strong>${english ? 'Save' : 'وفّر'} ${money(Math.round((row.comparePrice - row.price) * 100) / 100)}</strong><span>عند الشراء من الصالة</span></p>` : ''}
