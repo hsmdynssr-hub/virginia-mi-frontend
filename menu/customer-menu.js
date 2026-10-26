@@ -32,7 +32,9 @@
     'لا توجد منتجات للعرض حاليًا.': 'There are no products to display right now.',
     'جرّب اسمًا آخر أو اعرض كل المنتجات.': 'Try another name or view all products.',
     'يمكنك زيارة المنيو مرة أخرى لاحقًا.': 'Please check the menu again later.',
-    'عرض كل المنتجات': 'View all products', 'اسم المنتج': 'Product name', 'إغلاق': 'Close'
+    'عرض كل المنتجات': 'View all products', 'اسم المنتج': 'Product name', 'إغلاق': 'Close',
+    'تكبير الصورة': 'Enlarge image', 'صورة المنتج': 'Product image',
+    'تعذر عرض الصورة. حاول مرة أخرى.': 'The image could not be displayed. Please try again.'
   };
   const t = value => english ? (translations[value] || value) : value;
   const productName = row => english ? (row.productNameEn || row.productName) : row.productName;
@@ -102,6 +104,7 @@
       <section class="customer-menu-grid" aria-label="المنتجات"></section>
       <footer class="customer-menu-footer">${icon('spark')}<span>VIRGINIA <span aria-hidden="true">·</span> فيرجينيا</span></footer>
       <dialog class="customer-menu-name-dialog" id="customerNameDialog" aria-labelledby="customerFullName"><form method="dialog"><button type="submit" aria-label="إغلاق">×</button></form><p>اسم المنتج</p><h2 id="customerFullName" data-menu-source></h2></dialog>
+      <dialog class="customer-menu-photo-dialog" id="customerPhotoDialog" aria-labelledby="customerPhotoTitle"><form method="dialog"><span id="customerPhotoTitle">صورة المنتج</span><button type="submit" aria-label="إغلاق">×</button></form><img id="customerFullPhoto" alt="" hidden><p id="customerPhotoError" role="status" hidden></p></dialog>
     </main>`;
     const grid = root.querySelector('.customer-menu-grid');
     function cards() {
@@ -120,7 +123,7 @@
         const code = nameParts(row.productName).code || display.code;
         const status = stale ? 'unknown' : row.status;
         const label = ({ available: 'متوفر', limited: 'كمية محدودة', out_of_stock: 'غير متوفر', unknown: 'التوافر يحتاج تأكيدًا' })[status] || 'التوافر يحتاج تأكيدًا';
-        const image = /^https:\/\//.test(row.imageUrl || '') ? `<img src="${escape(row.imageUrl)}" alt="${escape(english ? productName(row) : row.imageAlt || row.productName)}" loading="lazy" decoding="async" width="480" height="480">` : missingImage();
+        const image = /^https:\/\//.test(row.imageUrl || '') ? `<button type="button" class="customer-menu-photo" aria-haspopup="dialog" aria-label="${escape(t('تكبير الصورة') + ': ' + display.name)}"><img src="${escape(row.imageUrl)}" alt="${escape(english ? productName(row) : row.imageAlt || row.productName)}" loading="lazy" decoding="async" width="480" height="480"><span class="customer-menu-photo-hint" aria-hidden="true">${icon('search')}</span></button>` : missingImage();
         const saving = data.presentation === 'factory' && Number(row.comparePrice) > Number(row.price) && Number(row.price) > 0;
         return `<article class="customer-menu-card" data-product="${escape(row.productId)}">
           <div class="customer-menu-visual"><div class="customer-menu-image">${image}</div><span class="customer-menu-status" data-status="${escape(status)}">${escape(label)}</span></div>
@@ -137,7 +140,16 @@
         root.querySelector('#customerFullName').textContent = button.textContent;
         root.querySelector('#customerNameDialog').showModal();
       }));
-      grid.querySelectorAll('img').forEach(img => img.addEventListener('error', () => { const container = img.parentElement; container.innerHTML = missingImage(); localizeUI(container); }, { once: true }));
+      grid.querySelectorAll('.customer-menu-photo').forEach(button => button.addEventListener('click', () => {
+        const photo = root.querySelector('#customerFullPhoto'), thumbnail = button.querySelector('img');
+        root.querySelector('#customerPhotoError').hidden = true;
+        photo.alt = thumbnail.alt; photo.hidden = false;
+        photo.onerror = () => { photo.hidden = true; const error = root.querySelector('#customerPhotoError'); error.textContent = t('تعذر عرض الصورة. حاول مرة أخرى.'); error.hidden = false; };
+        // Reuse Shopify's original URL, without adding resize or quality parameters.
+        photo.src = thumbnail.src;
+        root.querySelector('#customerPhotoDialog').showModal();
+      }));
+      grid.querySelectorAll('img').forEach(img => img.addEventListener('error', () => { const container = img.closest('.customer-menu-image'); container.innerHTML = missingImage(); localizeUI(container); }, { once: true }));
       grid.querySelector('#customerReset')?.addEventListener('click', () => {
         state.query = ''; state.category = ''; state.availability = '';
         root.querySelector('#customerSearch').value = '';
@@ -150,6 +162,7 @@
     root.querySelector('#customerSearch').addEventListener('input', event => { state.query = event.target.value.trim(); cards(); });
     root.querySelector('#customerCategory').addEventListener('change', event => { state.category = event.target.value; cards(); });
     root.querySelector('#customerAvailability').addEventListener('change', event => { state.availability = event.target.value; cards(); });
+    root.querySelector('#customerPhotoDialog').addEventListener('close', () => { const photo = root.querySelector('#customerFullPhoto'); photo.onerror = null; photo.removeAttribute('src'); photo.hidden = true; });
     cards();
     localizeUI();
     if (focus) {
