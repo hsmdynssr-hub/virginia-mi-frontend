@@ -32,7 +32,7 @@
     'لا توجد منتجات للعرض حاليًا.': 'There are no products to display right now.',
     'جرّب اسمًا آخر أو اعرض كل المنتجات.': 'Try another name or view all products.',
     'يمكنك زيارة المنيو مرة أخرى لاحقًا.': 'Please check the menu again later.',
-    'عرض كل المنتجات': 'View all products'
+    'عرض كل المنتجات': 'View all products', 'اسم المنتج': 'Product name', 'إغلاق': 'Close'
   };
   const t = value => english ? (translations[value] || value) : value;
   const productName = row => english ? (row.productNameEn || row.productName) : row.productName;
@@ -101,6 +101,7 @@
       <div class="customer-menu-results-heading"><h2>تصفّح المنتجات</h2><p id="customerResultCount" role="status" aria-live="polite" aria-atomic="true"></p></div>
       <section class="customer-menu-grid" aria-label="المنتجات"></section>
       <footer class="customer-menu-footer">${icon('spark')}<span>VIRGINIA <span aria-hidden="true">·</span> فيرجينيا</span></footer>
+      <dialog class="customer-menu-name-dialog" id="customerNameDialog" aria-labelledby="customerFullName"><form method="dialog"><button type="submit" aria-label="إغلاق">×</button></form><p>اسم المنتج</p><h2 id="customerFullName" data-menu-source></h2></dialog>
     </main>`;
     const grid = root.querySelector('.customer-menu-grid');
     function cards() {
@@ -123,14 +124,19 @@
         const saving = data.presentation === 'factory' && Number(row.comparePrice) > Number(row.price) && Number(row.price) > 0;
         return `<article class="customer-menu-card" data-product="${escape(row.productId)}">
           <div class="customer-menu-visual"><div class="customer-menu-image">${image}</div><span class="customer-menu-status" data-status="${escape(status)}">${escape(label)}</span></div>
-          <div class="customer-menu-card-content"><h3 data-menu-source>${escape(display.name)}</h3>${code ? `<p class="customer-menu-product-code" data-menu-source><span class="customer-menu-sr-only">${english ? 'Product code' : 'كود الصنف'}: </span><bdi dir="ltr">${escape(code)}</bdi></p>` : ''}
-            <div class="customer-menu-pricing">${saving ? `<p class="customer-menu-compare">سعر البيع: <del>${money(row.comparePrice)}</del></p>` : ''}
-            <p class="customer-menu-price"><span>${data.presentation === 'factory' ? 'سعر بيع المصنع' : 'سعر البيع'}</span><strong>${format(row.price)} <small>${escape(currency)}</small></strong></p></div>
-            ${saving ? `<p class="customer-menu-saving"><strong>${english ? 'Save' : 'وفّر'} ${money(Math.round((row.comparePrice - row.price) * 100) / 100)}</strong><span>عند الشراء من الصالة</span></p>` : ''}
+          <div class="customer-menu-card-content"><h3 data-menu-source><button type="button" class="customer-menu-name" aria-haspopup="dialog" title="${escape(display.name)}">${escape(display.name)}</button></h3><p class="customer-menu-product-code" data-menu-source ${code ? '' : 'aria-hidden="true"'}>${code ? `<span class="customer-menu-sr-only">${english ? 'Product code' : 'كود الصنف'}: </span><bdi dir="ltr">${escape(code)}</bdi>` : ''}</p>
+            <div class="customer-menu-price">
+              <div class="customer-menu-price-heading"><span>${data.presentation === 'factory' ? 'سعر بيع المصنع' : 'سعر البيع'}</span>${saving ? `<span class="customer-menu-saving"><strong>${english ? 'Save' : 'وفّر'} ${money(Math.round((row.comparePrice - row.price) * 100) / 100)}</strong><span class="customer-menu-sr-only">عند الشراء من الصالة</span></span>` : ''}</div>
+              <div class="customer-menu-price-amount"><strong>${format(row.price)} <small>${escape(currency)}</small></strong>${saving ? `<span class="customer-menu-compare"><span class="customer-menu-sr-only">سعر البيع:</span> <del>${format(row.comparePrice)}<span class="customer-menu-sr-only"> ${escape(currency)}</span></del></span>` : ''}</div>
+            </div>
           </div>
         </article>`;
       }).join('') : `<div class="customer-menu-empty">${icon('search')}<h3>${data.rows.length ? 'لا توجد منتجات مطابقة لاختياراتك.' : 'لا توجد منتجات للعرض حاليًا.'}</h3><p>${data.rows.length ? 'جرّب اسمًا آخر أو اعرض كل المنتجات.' : 'يمكنك زيارة المنيو مرة أخرى لاحقًا.'}</p>${data.rows.length ? '<button type="button" class="customer-menu-reset" id="customerReset">عرض كل المنتجات</button>' : ''}</div>`;
       localizeUI(grid);
+      grid.querySelectorAll('.customer-menu-name').forEach(button => button.addEventListener('click', () => {
+        root.querySelector('#customerFullName').textContent = button.textContent;
+        root.querySelector('#customerNameDialog').showModal();
+      }));
       grid.querySelectorAll('img').forEach(img => img.addEventListener('error', () => { const container = img.parentElement; container.innerHTML = missingImage(); localizeUI(container); }, { once: true }));
       grid.querySelector('#customerReset')?.addEventListener('click', () => {
         state.query = ''; state.category = ''; state.availability = '';
