@@ -14,7 +14,7 @@
   </script>
 </head>
 <body>
-<script src="../js/api.js"></script>
+<script src="../js/api.js?v=20261028-users-save"></script>
 <script src="../js/layout.js?v=20261017-approved-01"></script>
 
 <script>
@@ -676,7 +676,7 @@ async function saveUser() {
   try {
     let userId = Number(id);
     if (id) {
-      const updateResponse = await apiPatch(`/users/${id}`, { fullName, role: admin ? selectedUser.role : "user" });
+      const updateResponse = await apiPost(`/users/${id}`, { fullName, role: admin ? selectedUser.role : "user" });
       if (!updateResponse.success) throw new Error(updateResponse.message || localText("فشل تعديل المستخدم", "Could not update the user"));
     } else {
       const createResponse = await apiPost("/users", { username, fullName, password, role: "user" });
@@ -685,12 +685,12 @@ async function saveUser() {
     }
 
     if (!admin) {
-      const companiesResponse = await apiPut(`/company-access/users/${userId}`, { companyIds });
+      const companiesResponse = await apiPost(`/company-access/users/${userId}`, { companyIds });
       if (!companiesResponse.success) throw new Error(companiesResponse.message || localText("فشل حفظ شركات المستخدم", "Could not save user companies"));
 
       for (const company of companyCatalog) {
         const companyId = Number(company.companyId);
-        const branchResponse = await apiPut(`/pos-branch-access/users/${userId}`, {
+        const branchResponse = await apiPost(`/pos-branch-access/users/${userId}`, {
           companyId,
           branches: selectedBranchesByCompany[companyId] || []
         });
@@ -699,7 +699,7 @@ async function saveUser() {
         );
       }
 
-      const permissionsResponse = await apiPut(`/permissions/users/${userId}`, { permissions: directReports });
+      const permissionsResponse = await apiPost(`/permissions/users/${userId}`, { permissions: directReports });
       if (!permissionsResponse.success) throw new Error(
         permissionsResponse.message || localText("فشل حفظ صلاحيات التقارير", "Could not save report permissions")
       );
@@ -722,13 +722,13 @@ async function changePassword(id) {
     alert(localText("كلمة المرور يجب ألا تقل عن 6 أحرف", "The password must be at least 6 characters"));
     return;
   }
-  await apiPatch(`/users/${id}/password`, { password });
+  await apiPost(`/users/${id}/password`, { password });
   alert(localText("تم تغيير كلمة المرور", "Password changed successfully"));
 }
 
 async function toggleUser(id, isActive) {
   try {
-    await apiPatch(`/users/${id}`, { isActive: !isActive });
+    await apiPost(`/users/${id}`, { isActive: !isActive });
     await loadUsers();
     if (Number(selectedUserId) === Number(id)) await selectUser(id);
   } catch (error) {
