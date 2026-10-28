@@ -55,7 +55,7 @@ function buildReconciliationContent() {
             <h2 class="mi-report-title mb-1">مسار الفرق عبر الزمن</h2>
             <div class="text-secondary recon-small">اضغط «تحقيق» على الفترة التي تغير فيها الفرق لتضييقها تلقائيًا حتى اليوم المتسبب.</div>
           </div>
-          <div id="reconAccountBadge"></div>
+          <div class="d-flex gap-2 align-items-center"><div id="reconAccountBadge"></div><button id="reconExportExcel" type="button" class="btn btn-outline-success">تصدير Excel</button></div>
         </div>
         <div id="reconTimeline"></div>
       </section>
@@ -91,6 +91,7 @@ function initializeReconciliationDates() {
 }
 
 function bindReconciliationEvents() {
+  document.getElementById("reconExportExcel")?.addEventListener("click", exportReconciliationExcel);
   document.getElementById("loadBtn")?.addEventListener("click", loadReconciliationReport);
   document.getElementById("companySelect")?.addEventListener("change", () => {
     clearInvestigation();
@@ -106,6 +107,16 @@ function getReconFilters() {
     dateTo: document.getElementById("dateTo")?.value || "",
     accountCode: document.getElementById("reconAccountCode")?.value?.trim() || "143001"
   };
+}
+
+async function exportReconciliationExcel() {
+  const filters=getReconFilters(),button=document.getElementById('reconExportExcel');
+  if(!filters.companyId||!filters.dateFrom||!filters.dateTo||filters.dateFrom>filters.dateTo){showReconciliationError('اختر الشركة وفترة صحيحة قبل التصدير.');return;}
+  if(button.disabled)return;
+  button.disabled=true;button.textContent='جاري التصدير…';clearReconError();
+  try{await apiDownload('/exports/excel',{report:'inventory.valuation_reconciliation',...filters},`inventory-valuation-reconciliation-${filters.dateFrom}-${filters.dateTo}.xlsx`);}
+  catch(error){showReconciliationError(error.message||'تعذر تصدير Excel.');}
+  finally{button.disabled=false;button.textContent='تصدير Excel';}
 }
 
 async function loadReconciliationReport() {
