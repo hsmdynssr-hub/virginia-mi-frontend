@@ -263,6 +263,7 @@ const REPORT_PAGE_MAP = {
   "admin-users": "admin.users",
   "admin-roles": "admin.roles",
   "admin-report-classification": "admin.users",
+  'odoo-activity':'system.odoo_activity',
 
   branches: "branches.overview",
   "branches-overview": "branches.overview",
@@ -579,11 +580,12 @@ const MI_MODULE_DEFINITIONS = [
   {
     id: "admin",
     label: "الإدارة والصلاحيات",
-    pages: ["admin-users","admin-roles","admin-report-classification"],
+    pages: ["admin-users","admin-roles","admin-report-classification","odoo-activity"],
     groups: [{ id:"settings", label:"إدارة", icon:"⚙", links:[
       {page:"admin-users",label:"المستخدمون والصلاحيات",href:"../admin/users.html"},
       {page:"admin-roles",label:"الأدوار والصلاحيات",href:"../admin/roles.html"},
-      {page:"admin-report-classification",label:"تصنيف التقارير",href:"../admin/report-classification.html"}
+      {page:"admin-report-classification",label:"تصنيف التقارير",href:"../admin/report-classification.html"},
+      {page:'odoo-activity',label:'مراجعة حركات أودو',href:'../admin/odoo-activity.html'}
     ]}]
   },
   {
