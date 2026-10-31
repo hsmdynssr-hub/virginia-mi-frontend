@@ -3,7 +3,8 @@ const $=x=>document.getElementById(x);
 const kg=v=>new Intl.NumberFormat("ar-EG",{minimumFractionDigits:3,maximumFractionDigits:3}).format(Number(v||0));
 const m=v=>new Intl.NumberFormat("ar-EG",{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v||0));
 let analysisData=null;
-let loading=false, cancelling=false, canCancelReceipt=false;
+let loading=false, cancelling=false, canCancelReceipt=false, canEditDelivery=false;
+let receiptRows=[], deliveryEdit=null;
 const receiptPageSize=50;
 let receiptOffset=0, receiptTotal=0, loadedFilterKey=null;
 function resetReceiptPage(){receiptOffset=0;loadedFilterKey=null;updateReceiptPager();}
@@ -11,14 +12,14 @@ function updateReceiptPager(){
   $('receiptPrevious').disabled=loading||cancelling||loadedFilterKey===null||receiptOffset===0;
   $('receiptNext').disabled=loading||cancelling||loadedFilterKey===null||receiptOffset+receiptPageSize>=receiptTotal;
 }
-function deliveryPlatforms(codes){const names={QASR_MATROUH:'القصر — مطروح',BARRANI_NEGILA:'براني والنجلية',DABAA_RAS_EL_HEKMA:'الضبعة ورأس الحكمة'};return [...new Set(codes||[])].map(code=>names[code]||code).join('، ')||'غير محدد';}
+function recordedDelivery(r){return r.delivery_mode==='YARD'?'الشادر':r.delivery_mode==='DIRECT_MILL'?({MATROUH:'مطروح',SADAT:'السادات',ABYAD:'الأبيض'}[r.destination_mill]||'غير محدد'):'غير محدد';}
 const filters=()=>{const mode=$("analysisMode").value,sessionId=$("analysisSession").value;if(mode==='SESSION'&&!sessionId)throw Error('اختر جلسة لعرضها كاملة');const dateFrom=mode==='DAY'?$("analysisDay").value:mode==='CUSTOM'?$("from").value:'',dateTo=mode==='DAY'?$("analysisDay").value:mode==='CUSTOM'?$("to").value:'';if(['DAY','CUSTOM'].includes(mode)&&(!dateFrom||!dateTo))throw Error('حدد اليوم أو الفترة');return {companyId:Number(getCompanyId()||1),sessionId,dateFrom,dateTo,q:$("q").value};};
 function analysisFields(){const mode=$("analysisMode").value;if(mode==='ALL')$("analysisSession").value='';$("analysisDayField").hidden=mode!=='DAY';$("analysisFromField").hidden=mode!=='CUSTOM';$("analysisToField").hidden=mode!=='CUSTOM';}
 document.addEventListener("DOMContentLoaded",async()=>{
   if(!$("analysisMode"))return;
   if(!getToken()){location.href="../admin/login.html";return;}
   const initialCompany=String(getCompanyId()||1);window.addEventListener('company-context-changed',()=>{if(loading||cancelling){setCompanyId(initialCompany);const select=$("companySelect");if(select)select.value=initialCompany;$("msg").textContent='انتظر انتهاء العملية قبل تغيير الشركة';}else location.reload();});
-  try {const access=await apiGet("/olive/access/capabilities");canCancelReceipt=(access.data||access).canCancelReceipt===true;}catch(_){canCancelReceipt=false;}
+  try {const access=await apiGet("/olive/access/capabilities");canCancelReceipt=(access.data||access).canCancelReceipt===true;canEditDelivery=(access.data||access).canEditDelivery===true;}catch(_){canCancelReceipt=false;}
   const parts=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Cairo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).map(x=>[x.type,x.value])),t=`${parts.year}-${parts.month}-${parts.day}`;
   $("analysisDay").value=t;$("from").value=t;$("to").value=t;$("load").onclick=()=>load();$("analysisMode").onchange=()=>{analysisFields();resetReceiptPage();};analysisFields();
   for(const id of ['analysisSession','analysisDay','from','to'])$(id).onchange=resetReceiptPage;
@@ -34,7 +35,12 @@ document.addEventListener("DOMContentLoaded",async()=>{
     catch(err){$("msg").textContent=err.message||"فشل التصدير";}finally{button.disabled=false;}
   };
   $("priceVariety").onchange=renderPrices;
+  $('deliveryForm').onsubmit=saveDelivery;
+  $('deliveryClose').onclick=()=>{if(!cancelling)$('deliveryDialog').close();};
+  $('deliveryDialog').addEventListener('cancel',ev=>{if(cancelling)ev.preventDefault();});
   $("rb").addEventListener("click",async ev=>{
+    const edit=ev.target.closest('button[data-delivery-id]');
+    if(edit){if(!canEditDelivery||loading||cancelling)return;openDelivery(edit.dataset.deliveryId);return;}
     const button=ev.target.closest("button[data-cancel-id]");if(!button||!canCancelReceipt||cancelling||loading)return;
     const reason=prompt("اكتب سبب إلغاء سند "+button.dataset.receiptNo+" (إلزامي):");
     if(reason===null)return;
@@ -60,7 +66,7 @@ async function load(offset=0){
     const p=filters(),filterKey=JSON.stringify(p),requestedOffset=filterKey===loadedFilterKey?Math.max(0,offset):0;
     const [s,r]=await Promise.all([apiGet("/olive/summary",p),apiGet("/olive/receipts",{...p,pagination:'1',limit:receiptPageSize,offset:requestedOffset})]),x=s.data||s,page=r.data||r,rows=page.rows;
     if(JSON.stringify(filters())!==filterKey){resetReceiptPage();return;}
-    receiptOffset=page.offset;receiptTotal=page.total;loadedFilterKey=filterKey;
+    receiptRows=rows;receiptOffset=page.offset;receiptTotal=page.total;loadedFilterKey=filterKey;
     $('receiptPageInfo').textContent=receiptTotal?`عرض ${receiptOffset+1}–${receiptOffset+rows.length} من ${receiptTotal} فاتورة — الصفحة ${Math.floor(receiptOffset/receiptPageSize)+1} من ${Math.ceil(receiptTotal/receiptPageSize)}`:'لا توجد فواتير مطابقة';
     $("kc").textContent=x.receipt_count||0;$("kt").textContent=m(x.total_amount);$("kp").textContent=m(x.paid_amount);$("kb").textContent=m(x.balance_amount);
     analysisData=x;reportFooters(x);renderPlatforms(x);
@@ -70,7 +76,7 @@ async function load(offset=0){
     const previous=$("priceVariety").value;$("priceVariety").innerHTML=(x.byVariety||[]).map((v,i)=>`<option value="${i}">${e(v.variety_name)}</option>`).join('');if(previous&&Number(previous)<(x.byVariety||[]).length)$("priceVariety").value=previous;renderPrices();
     $("rb").innerHTML=(rows||[]).map(v=>{
       const cancelled=v.receiving_status==="CANCELLED";
-      return `<tr${cancelled?' class="cancelled"':''}><td><a class="olive-receipt-number" href="./receipt.html?id=${encodeURIComponent(v.id)}&companyId=${encodeURIComponent(p.companyId)}">${e(v.receipt_no)}</a></td><td>${e(new Date(v.created_at).toLocaleString("ar-EG"))}</td><td>${e(v.supplier_name)}</td><td>${e(deliveryPlatforms(v.delivery_platforms))}</td><td>${kg(v.weight_kg)}</td><td>${m(v.total_amount)}</td><td>${m(v.paid_amount)}</td><td>${m(v.balance_amount)}</td><td><span class="olive-status ${cancelled?'is-cancelled':'is-received'}">${cancelled?'ملغى':'مستلم'}</span></td><td><div class="olive-actions"><a class="olive-action olive-view" href="./receipt.html?id=${encodeURIComponent(v.id)}&companyId=${encodeURIComponent(p.companyId)}">عرض السند</a>${cancelled||!canCancelReceipt?'':`<button type="button" class="olive-action olive-cancel" data-cancel-id="${e(v.id)}" data-receipt-no="${e(v.receipt_no)}">إلغاء</button>`}</div>${cancelled?`<div class="olive-cancel-details">${e(v.cancellation_reason)}<br><small>${e(v.cancelled_by)} — ${e(new Date(v.cancelled_at).toLocaleString("ar-EG"))}</small></div>`:''}</td></tr>`;
+      return `<tr${cancelled?' class="cancelled"':''}><td><a class="olive-receipt-number" href="./receipt.html?id=${encodeURIComponent(v.id)}&companyId=${encodeURIComponent(p.companyId)}">${e(v.receipt_no)}</a></td><td>${e(new Date(v.created_at).toLocaleString("ar-EG"))}</td><td>${e(v.supplier_name)}</td><td>${e(recordedDelivery(v))}</td><td>${kg(v.weight_kg)}</td><td>${m(v.total_amount)}</td><td>${m(v.paid_amount)}</td><td>${m(v.balance_amount)}</td><td><span class="olive-status ${cancelled?'is-cancelled':'is-received'}">${cancelled?'ملغى':'مستلم'}</span></td><td><div class="olive-actions"><a class="olive-action olive-view" href="./receipt.html?id=${encodeURIComponent(v.id)}&companyId=${encodeURIComponent(p.companyId)}">عرض السند</a>${cancelled||!canCancelReceipt?'':`<button type="button" class="olive-action olive-cancel" data-cancel-id="${e(v.id)}" data-receipt-no="${e(v.receipt_no)}">إلغاء</button>`}${cancelled||!canEditDelivery||v.purchase_type==='TRADER'?'':`<button type="button" class="olive-action" data-delivery-id="${e(v.id)}">تعديل التسليم</button>`}</div>${cancelled?`<div class="olive-cancel-details">${e(v.cancellation_reason)}<br><small>${e(v.cancelled_by)} — ${e(new Date(v.cancelled_at).toLocaleString("ar-EG"))}</small></div>`:''}</td></tr>`;
     }).join("");
   }catch(err){$("msg").textContent=err.message||"فشل التحميل";resetReceiptPage();}finally{loading=false;$("load").disabled=cancelling;updateReceiptPager();}
 }
@@ -90,4 +96,29 @@ function renderPlatforms(x){
  const rows=x.byPlatform||[];
  $('platformRows').innerHTML=rows.map(r=>`<tr><td>${e(platforms[r.collection_platform]||'غير محدد')}</td><td>${e(({YARD:'استلام في الشادر',DIRECT_MILL:'إرسال مباشر للمعصرة'})[r.delivery_mode]||'غير محدد')}</td><td>${e(mills[r.destination_mill]||(r.delivery_mode==='YARD'?'—':'غير محدد'))}</td><td>${e(r.receipt_count)}</td><td>${kg(r.weight_kg)}</td><td>${m(r.total_amount)}</td><td>${m(r.paid_amount)}</td><td>${m(r.balance_amount)}</td></tr>`).join('')||'<tr><td colspan="8">لا توجد مشتريات مطابقة</td></tr>';
  $('platformTotals').innerHTML=`<tr><th colspan="3">إجمالي المشتريات المطابقة</th><th>${e(rows.reduce((n,r)=>n+Number(r.receipt_count),0))}</th><th>${kg(Number(sumDecimal(rows,'weight_kg',3))/1000)}</th><th>${m(Number(sumDecimal(rows,'total_amount',2))/100)}</th><th>${m(Number(sumDecimal(rows,'paid_amount',2))/100)}</th><th>${m(Number(sumDecimal(rows,'balance_amount',2))/100)}</th></tr>`;
+}
+
+function openDelivery(id){
+ const r=receiptRows.find(r=>String(r.id)===String(id));if(!r||r.receiving_status!=='RECEIVED')return;
+ deliveryEdit={id:String(r.id),companyId:Number(getCompanyId()||1),requestKey:crypto.randomUUID(),expected:{delivery_mode:r.delivery_mode??null,destination_mill:r.destination_mill??null},payload:null};
+ $('deliveryCurrent').textContent='الفاتورة '+r.receipt_no+' — القيمة الحالية: '+recordedDelivery(r);
+ $('deliveryChoice').value=r.delivery_mode==='YARD'?'YARD':r.delivery_mode==='DIRECT_MILL'?(r.destination_mill||''):'';
+ $('deliveryReason').value='';$('deliveryConfirm').checked=false;$('deliveryMessage').textContent='';$('deliverySave').disabled=false;
+ for(const id of ['deliveryChoice','deliveryReason','deliveryConfirm'])$(id).disabled=false;
+ $('deliveryDialog').showModal();
+}
+async function saveDelivery(ev){
+ ev.preventDefault();if(!deliveryEdit||!canEditDelivery||loading||cancelling)return;
+ if(!deliveryEdit.payload){
+  const choice=$('deliveryChoice').value,reason=$('deliveryReason').value.trim();
+  if(!['YARD','MATROUH','SADAT','ABYAD'].includes(choice)||!reason||!$('deliveryConfirm').checked){$('deliveryMessage').textContent='اختر التسليم واكتب السبب وأكد التعديل';return;}
+  deliveryEdit.payload={companyId:deliveryEdit.companyId,requestKey:deliveryEdit.requestKey,expected:deliveryEdit.expected,delivery:{delivery_mode:choice==='YARD'?'YARD':'DIRECT_MILL',destination_mill:choice==='YARD'?null:choice},reason,confirmed:true};
+ }
+ cancelling=true;updateReceiptPager();$('load').disabled=true;$('deliverySave').disabled=true;$('deliveryMessage').textContent='جارٍ الحفظ';
+ for(const id of ['deliveryChoice','deliveryReason','deliveryConfirm'])$(id).disabled=true;
+ try{
+  await apiPost('/olive/receipts/'+encodeURIComponent(deliveryEdit.id)+'/delivery-correction',deliveryEdit.payload);
+  $('deliveryDialog').close();deliveryEdit=null;await load(receiptOffset);$('msg').textContent='تم حفظ تصحيح التسليم في سجل التدقيق';
+ }catch(err){$('deliveryMessage').textContent=(err.message||'تعذر الحفظ')+' — يمكنك إعادة المحاولة بنفس الطلب، أو الإغلاق والتحديث للمراجعة';}
+ finally{cancelling=false;$('load').disabled=false;$('deliverySave').disabled=false;updateReceiptPager();}
 }
