@@ -4,6 +4,14 @@ const kg=v=>new Intl.NumberFormat("ar-EG",{minimumFractionDigits:3,maximumFracti
 const m=v=>new Intl.NumberFormat("ar-EG",{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v||0));
 let analysisData=null;
 let loading=false, cancelling=false, canCancelReceipt=false;
+const receiptPageSize=50;
+let receiptOffset=0, receiptTotal=0, loadedFilterKey=null;
+function resetReceiptPage(){receiptOffset=0;loadedFilterKey=null;updateReceiptPager();}
+function updateReceiptPager(){
+  $('receiptPrevious').disabled=loading||cancelling||loadedFilterKey===null||receiptOffset===0;
+  $('receiptNext').disabled=loading||cancelling||loadedFilterKey===null||receiptOffset+receiptPageSize>=receiptTotal;
+}
+function deliveryPlatforms(codes){const names={QASR_MATROUH:'القصر — مطروح',BARRANI_NEGILA:'براني والنجلية',DABAA_RAS_EL_HEKMA:'الضبعة ورأس الحكمة'};return [...new Set(codes||[])].map(code=>names[code]||code).join('، ')||'غير محدد';}
 const filters=()=>{const mode=$("analysisMode").value,sessionId=$("analysisSession").value;if(mode==='SESSION'&&!sessionId)throw Error('اختر جلسة لعرضها كاملة');const dateFrom=mode==='DAY'?$("analysisDay").value:mode==='CUSTOM'?$("from").value:'',dateTo=mode==='DAY'?$("analysisDay").value:mode==='CUSTOM'?$("to").value:'';if(['DAY','CUSTOM'].includes(mode)&&(!dateFrom||!dateTo))throw Error('حدد اليوم أو الفترة');return {companyId:Number(getCompanyId()||1),sessionId,dateFrom,dateTo,q:$("q").value};};
 function analysisFields(){const mode=$("analysisMode").value;if(mode==='ALL')$("analysisSession").value='';$("analysisDayField").hidden=mode!=='DAY';$("analysisFromField").hidden=mode!=='CUSTOM';$("analysisToField").hidden=mode!=='CUSTOM';}
 document.addEventListener("DOMContentLoaded",async()=>{
@@ -12,7 +20,12 @@ document.addEventListener("DOMContentLoaded",async()=>{
   const initialCompany=String(getCompanyId()||1);window.addEventListener('company-context-changed',()=>{if(loading||cancelling){setCompanyId(initialCompany);const select=$("companySelect");if(select)select.value=initialCompany;$("msg").textContent='انتظر انتهاء العملية قبل تغيير الشركة';}else location.reload();});
   try {const access=await apiGet("/olive/access/capabilities");canCancelReceipt=(access.data||access).canCancelReceipt===true;}catch(_){canCancelReceipt=false;}
   const parts=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Cairo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).map(x=>[x.type,x.value])),t=`${parts.year}-${parts.month}-${parts.day}`;
-  $("analysisDay").value=t;$("from").value=t;$("to").value=t;$("load").onclick=load;$("analysisMode").onchange=analysisFields;analysisFields();
+  $("analysisDay").value=t;$("from").value=t;$("to").value=t;$("load").onclick=()=>load();$("analysisMode").onchange=()=>{analysisFields();resetReceiptPage();};analysisFields();
+  for(const id of ['analysisSession','analysisDay','from','to'])$(id).onchange=resetReceiptPage;
+  $('q').oninput=resetReceiptPage;
+  $('receiptPrevious').onclick=()=>load(receiptOffset-receiptPageSize);
+  $('receiptNext').onclick=()=>load(receiptOffset+receiptPageSize);
+  updateReceiptPager();
   document.querySelectorAll('[data-analysis-tab]').forEach(button=>{button.onclick=()=>{document.querySelectorAll('[data-analysis-tab]').forEach(b=>{const selected=b===button;b.setAttribute('aria-selected',String(selected));b.classList.toggle('gray',!selected);$("panel-"+b.dataset.analysisTab).hidden=!selected;});};});
   try{const r=await apiGet('/olive/analysis/sessions',{companyId:Number(getCompanyId()||1)});const rows=r.data||r;$("analysisSession").innerHTML='<option value="">كل الجلسات</option><option value="UNASSIGNED">فواتير بدون جلسة</option>'+rows.map(x=>`<option value="${e(x.id)}">#${e(x.id)} — ${e(x.owner_name)} — ${e(x.site_code)} — ${x.status==='OPEN'?'مفتوحة':'مغلقة'}</option>`).join('');}catch(err){$("msg").textContent='تعذر تحميل قائمة الجلسات: '+err.message;}
   $("exportExcel").onclick=async()=>{
@@ -27,9 +40,9 @@ document.addEventListener("DOMContentLoaded",async()=>{
     if(reason===null)return;
     if(!reason.trim()||reason.trim().length>2000){$("msg").textContent="سبب الإلغاء مطلوب وبحد أقصى 2000 حرف";return;}
     if(!confirm("تأكيد إلغاء السند "+button.dataset.receiptNo+"؟ سيُستبعد من الملخص والتصدير مع الاحتفاظ ببياناته."))return;
-    cancelling=true;button.disabled=true;$("load").disabled=true;$("msg").textContent="";
+    cancelling=true;updateReceiptPager();button.disabled=true;$("load").disabled=true;$("msg").textContent="";
     try{await apiPost("/olive/receipts/"+encodeURIComponent(button.dataset.cancelId)+"/cancel",{companyId:Number(getCompanyId()||1),reason:reason.trim()});await load();}
-    catch(err){$("msg").textContent=err.message||"فشل الإلغاء";}finally{cancelling=false;button.disabled=false;$("load").disabled=false;}
+    catch(err){$("msg").textContent=err.message||"فشل الإلغاء";}finally{cancelling=false;button.disabled=false;$("load").disabled=false;updateReceiptPager();}
   });load();
 });
 
@@ -38,13 +51,17 @@ function sumDecimal(rows,key,places){return rows.reduce((n,r)=>{const [a,b='']=S
 function reportFooters(x){const vs=x.byVariety||[],w=Number(sumDecimal(vs,'weight_kg',3))/1000,a=Number(x.total_amount||0),min=vs.length?Math.min(...vs.map(v=>Number(v.min_price_per_kg))):0,max=vs.length?Math.max(...vs.map(v=>Number(v.max_price_per_kg))):0;
  $('varietyTotals').innerHTML=`<tr><th>إجمالي الفلتر الحالي</th><th>${kg(w)}</th><th>${m(a)}</th><th>${m(w?a/w:0)}</th><th>${vs.length?m(min):'—'}</th><th>${vs.length?m(max):'—'}</th><th>—</th><th>${e(vs.reduce((n,v)=>n+Number(v.overridden_lines||0),0))}</th></tr>`;
  $('supplierTotals').innerHTML=`<tr><th colspan="2">إجمالي كل الموردين المطابقين — يشمل غير المعروض</th><th>${e(x.receipt_count||0)}</th><th>${kg(w)}</th><th>${m(x.total_amount)}</th><th>${m(x.paid_amount)}</th><th>${m(x.balance_amount)}</th></tr>`;
- $('receiptTotals').innerHTML=`<tr><th colspan="3">إجمالي ${e(x.receipt_count||0)} فاتورة فعالة مطابقة — يشمل غير المعروض ويستبعد الملغى</th><th>${kg(w)}</th><th>${m(x.total_amount)}</th><th>${m(x.paid_amount)}</th><th>${m(x.balance_amount)}</th><th colspan="2"></th></tr>`;
+ $('receiptTotals').innerHTML=`<tr><th colspan="4">إجمالي ${e(x.receipt_count||0)} فاتورة فعالة مطابقة — يشمل غير المعروض ويستبعد الملغى</th><th>${kg(w)}</th><th>${m(x.total_amount)}</th><th>${m(x.paid_amount)}</th><th>${m(x.balance_amount)}</th><th colspan="2"></th></tr>`;
 }
 
-async function load(){
-  if(loading)return;loading=true;$("load").disabled=true;$("msg").textContent="";
+async function load(offset=0){
+  if(loading)return;loading=true;updateReceiptPager();$("load").disabled=true;$("msg").textContent="";
   try{
-    const p=filters(),[s,r]=await Promise.all([apiGet("/olive/summary",p),apiGet("/olive/receipts",{...p,limit:200})]),x=s.data||s,rows=r.data||r;
+    const p=filters(),filterKey=JSON.stringify(p),requestedOffset=filterKey===loadedFilterKey?Math.max(0,offset):0;
+    const [s,r]=await Promise.all([apiGet("/olive/summary",p),apiGet("/olive/receipts",{...p,pagination:'1',limit:receiptPageSize,offset:requestedOffset})]),x=s.data||s,page=r.data||r,rows=page.rows;
+    if(JSON.stringify(filters())!==filterKey){resetReceiptPage();return;}
+    receiptOffset=page.offset;receiptTotal=page.total;loadedFilterKey=filterKey;
+    $('receiptPageInfo').textContent=receiptTotal?`عرض ${receiptOffset+1}–${receiptOffset+rows.length} من ${receiptTotal} فاتورة — الصفحة ${Math.floor(receiptOffset/receiptPageSize)+1} من ${Math.ceil(receiptTotal/receiptPageSize)}`:'لا توجد فواتير مطابقة';
     $("kc").textContent=x.receipt_count||0;$("kt").textContent=m(x.total_amount);$("kp").textContent=m(x.paid_amount);$("kb").textContent=m(x.balance_amount);
     analysisData=x;reportFooters(x);renderPlatforms(x);
     $("vb").innerHTML=(x.byVariety||[]).map(v=>`<tr><td>${e(v.variety_name)}</td><td>${e(v.weight_kg)}</td><td>${m(v.total_amount)}</td><td>${m(v.avg_price_per_kg)}</td><td>${m(v.min_price_per_kg)}</td><td>${m(v.max_price_per_kg)}</td><td>${e(v.price_count||0)}</td><td>${e(v.overridden_lines||0)}</td></tr>`).join("");
@@ -53,9 +70,9 @@ async function load(){
     const previous=$("priceVariety").value;$("priceVariety").innerHTML=(x.byVariety||[]).map((v,i)=>`<option value="${i}">${e(v.variety_name)}</option>`).join('');if(previous&&Number(previous)<(x.byVariety||[]).length)$("priceVariety").value=previous;renderPrices();
     $("rb").innerHTML=(rows||[]).map(v=>{
       const cancelled=v.receiving_status==="CANCELLED";
-      return `<tr${cancelled?' class="cancelled"':''}><td><a class="olive-receipt-number" href="./receipt.html?id=${encodeURIComponent(v.id)}&companyId=${encodeURIComponent(p.companyId)}">${e(v.receipt_no)}</a></td><td>${e(new Date(v.created_at).toLocaleString("ar-EG"))}</td><td>${e(v.supplier_name)}</td><td>${kg(v.weight_kg)}</td><td>${m(v.total_amount)}</td><td>${m(v.paid_amount)}</td><td>${m(v.balance_amount)}</td><td><span class="olive-status ${cancelled?'is-cancelled':'is-received'}">${cancelled?'ملغى':'مستلم'}</span></td><td><div class="olive-actions"><a class="olive-action olive-view" href="./receipt.html?id=${encodeURIComponent(v.id)}&companyId=${encodeURIComponent(p.companyId)}">عرض السند</a>${cancelled||!canCancelReceipt?'':`<button type="button" class="olive-action olive-cancel" data-cancel-id="${e(v.id)}" data-receipt-no="${e(v.receipt_no)}">إلغاء</button>`}</div>${cancelled?`<div class="olive-cancel-details">${e(v.cancellation_reason)}<br><small>${e(v.cancelled_by)} — ${e(new Date(v.cancelled_at).toLocaleString("ar-EG"))}</small></div>`:''}</td></tr>`;
+      return `<tr${cancelled?' class="cancelled"':''}><td><a class="olive-receipt-number" href="./receipt.html?id=${encodeURIComponent(v.id)}&companyId=${encodeURIComponent(p.companyId)}">${e(v.receipt_no)}</a></td><td>${e(new Date(v.created_at).toLocaleString("ar-EG"))}</td><td>${e(v.supplier_name)}</td><td>${e(deliveryPlatforms(v.delivery_platforms))}</td><td>${kg(v.weight_kg)}</td><td>${m(v.total_amount)}</td><td>${m(v.paid_amount)}</td><td>${m(v.balance_amount)}</td><td><span class="olive-status ${cancelled?'is-cancelled':'is-received'}">${cancelled?'ملغى':'مستلم'}</span></td><td><div class="olive-actions"><a class="olive-action olive-view" href="./receipt.html?id=${encodeURIComponent(v.id)}&companyId=${encodeURIComponent(p.companyId)}">عرض السند</a>${cancelled||!canCancelReceipt?'':`<button type="button" class="olive-action olive-cancel" data-cancel-id="${e(v.id)}" data-receipt-no="${e(v.receipt_no)}">إلغاء</button>`}</div>${cancelled?`<div class="olive-cancel-details">${e(v.cancellation_reason)}<br><small>${e(v.cancelled_by)} — ${e(new Date(v.cancelled_at).toLocaleString("ar-EG"))}</small></div>`:''}</td></tr>`;
     }).join("");
-  }catch(err){$("msg").textContent=err.message||"فشل التحميل";}finally{loading=false;$("load").disabled=cancelling;}
+  }catch(err){$("msg").textContent=err.message||"فشل التحميل";resetReceiptPage();}finally{loading=false;$("load").disabled=cancelling;updateReceiptPager();}
 }
 function e(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");}
 
