@@ -251,6 +251,7 @@ function observeLegacyReportUi() {
 }
 
 const REPORT_PAGE_MAP = {
+  "workspace-admin": "workspace.admin",
   dashboard: "dashboard.index",
 
   gate: "gate.access",
@@ -575,6 +576,12 @@ const MI_MODULE_DEFINITIONS = [
     groups: [{ id:"planning", label:"تخطيط", icon:"◈", links:[
       {page:"forecast-planning-achievement",label:"الفوركاست والمبيعات الفعلية",href:"../forecast-planning/index.html"},
       {page:"forecast-planning-feasibility",label:"قابلية التحقيق والخامات",href:"../forecast-planning/feasibility.html"}
+    ]}]
+  },
+  {
+    id: "workspace", label: "Virginia Workspace", pages: ["workspace-admin"],
+    groups: [{id:"workspace",label:"Virginia Workspace",icon:"W",links:[
+      {page:"workspace-admin",label:"إدارة مساحة العمل / Administration",href:"../workspace/dashboard.html"}
     ]}]
   },
   {
@@ -1513,6 +1520,7 @@ function showError(error, targetId = "reportArea") {
 }
 
 function loadReportExportEngine(activePage) {
+  if(activePage === "workspace-admin") return;
   if (window.ReportExport) {
     window.ReportExport.setup(activePage);
     return;
@@ -1546,6 +1554,7 @@ function loadReportExportEngine(activePage) {
 }
 
 function loadReportFiltersEngine(activePage) {
+  if(activePage === "workspace-admin") return;
   if (window.ReportFilters) {
     window.ReportFilters.setup?.(activePage);
     return;

@@ -629,8 +629,9 @@ function resetEditorValues() {
   else startNewUser();
 }
 
-function validateAccessSelection(companyIds, selectedBranchesByCompany) {
-  if (!companyIds.length) {
+function validateAccessSelection(companyIds, selectedBranchesByCompany, directReports = []) {
+  const workspaceOnly = directReports.length === 1 && directReports[0] === "workspace.admin";
+  if (!companyIds.length && !workspaceOnly) {
     alert(localText("اختر شركة واحدة على الأقل", "Select at least one company"));
     return false;
   }
@@ -668,7 +669,7 @@ async function saveUser() {
   const companyIds = getSelectedCompanyIds();
   const selectedBranchesByCompany = getSelectedPosBranchesByCompany();
   const directReports = getSelectedDirectReports();
-  if (!admin && !validateAccessSelection(companyIds, selectedBranchesByCompany)) return;
+  if (!admin && !validateAccessSelection(companyIds, selectedBranchesByCompany, directReports)) return;
 
   const saveButton = document.getElementById("saveUserBtn");
   saveButton.disabled = true;

@@ -90,6 +90,8 @@
       localStorage.setItem('token',response.token);sessionWritten=true;localStorage.setItem('user',JSON.stringify(response.user));localStorage.removeItem('companyId');localStorage.removeItem('branchCode');
       companyStep=true;const access=await apiGet('/company-access/me'),raw=access.data||access.companies||[];
       const companies=Array.isArray(raw)?raw.filter(c=>c&&Number.isSafeInteger(Number(c.companyId))&&Number(c.companyId)>0):[];
+      // Workspace-only administration does not require access to financial companies.
+      if(access.success&&!companies.length&&response.user.permissions?.includes('workspace.admin')){stage='complete';window.location.href='../workspace/dashboard.html';return;}
       if(!access.success||!companies.length){clearSession();message('لا توجد شركة مسموحة لهذا الحساب. تواصل مع مسؤول النظام.');return;}
       if(companies.length===1)enterCompany(companies[0].companyId);else showCompanies(companies);
     }catch(error){

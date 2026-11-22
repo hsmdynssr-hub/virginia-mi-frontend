@@ -735,6 +735,12 @@
       }
     ];
 
+    DASHBOARD_MODULES.push({title:"Virginia Workspace",icon:"W",
+      description:"إدارة الموظفين والقنوات والصلاحيات والمناقشات الرسمية / Official Workspace Administration",
+      indexPage:"workspace-admin",indexHref:"../workspace/dashboard.html",
+      reports:[{page:"workspace-admin",title:"إدارة مساحة العمل / Administration",href:"../workspace/dashboard.html"}]
+    });
+
     function getAllowedReports(module) {
       return module.reports.filter((report) => {
         if (report.disabled) return hasPermission(report.page);
