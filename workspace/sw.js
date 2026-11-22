@@ -1,5 +1,5 @@
 'use strict';
-const CACHE='virginia-workspace-shell-v5';
+const CACHE='virginia-workspace-shell-v6-controlled-pilot';
 const SHELL=['/workspace/','/workspace/index.html','/workspace/styles.css','/workspace/app.js','/workspace/collaboration.js','/workspace/pagination.js','/workspace/config.js','/workspace/icon.svg','/workspace/icon-192.png','/workspace/icon-512.png','/workspace/manifest.webmanifest'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL))));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('virginia-workspace-shell-')&&key!==CACHE).map(key=>caches.delete(key))))));
