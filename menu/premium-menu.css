@@ -210,3 +210,23 @@ html.menu-gated{overflow:hidden}
 .customer-menu-seal{display:none!important}
 .customer-menu-initial svg{width:32px!important;height:32px!important}
 .customer-menu-empty svg{width:48px!important;height:48px!important}
+
+/* Material welcome V3: actual Virginia shop photo, no duplicate top logo. */
+.customer-menu-topline{justify-content:flex-end;height:66px}
+.customer-menu-topline .customer-menu-brand{display:none}
+.menu-entry-overlay{background:radial-gradient(ellipse at 12% 12%,#e0eddf 0%,transparent 48%),radial-gradient(ellipse at 90% 12%,#e9dff4 0%,transparent 55%),radial-gradient(ellipse at 85% 90%,#f5ddce 0%,transparent 55%),#f7f5f9;color:#392d4b;padding:24px;gap:0}
+.menu-entry-overlay .virginia-welcome{width:min(1100px,100%);min-height:440px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;padding:28px 32px;background:#fcf9ff;color:#392d4b;border:1px solid #eee5f4;border-radius:40px;box-shadow:0 12px 40px #49345e18}
+.menu-entry-overlay .virginia-welcome:before,.menu-entry-overlay .virginia-welcome:after{content:none}
+.menu-entry-overlay .premium-eyebrow{color:#695080;letter-spacing:1px}
+.menu-entry-overlay .welcome-copy{padding:16px}
+.menu-entry-overlay .welcome-copy h2{color:#392d4b;font-weight:800;line-height:1.35}
+.menu-entry-overlay .welcome-copy p{color:#5c5268}
+.menu-entry-overlay .welcome-open{background:#60467c;color:#fff;border:0;border-radius:999px;box-shadow:0 3px 8px #49345e24;min-height:48px}
+.menu-entry-overlay .welcome-open:hover{background:#49345e}
+.menu-entry-overlay .welcome-skip{color:#60467c}
+.menu-entry-overlay .welcome-visual{position:relative;min-width:0;min-height:350px;align-self:stretch;display:flex;align-items:flex-end;justify-content:center;border-radius:30px;overflow:hidden;background:#e9dff4 url("https://virginiaolive.com/cdn/shop/files/Virgina_Prodcuts_7_d49ce72a-a4a3-40a6-b5ca-118b2bbc3285.png?v=1784567824&width=1000") center/cover no-repeat;background-image:url("https://virginiaolive.com/cdn/shop/files/Virgina_Prodcuts_7_d49ce72a-a4a3-40a6-b5ca-118b2bbc3285.png?v=1784567824&width=1000"),url(assets/hero.jpg);background-position:center;background-size:cover}
+.menu-entry-overlay .welcome-visual:before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#e9dff4b3,transparent 55%);pointer-events:none}
+.menu-entry-overlay .heritage-lock{position:relative;width:150px;max-width:150px;padding:8px;margin:16px;background:#fcf9ffe8;border:1px solid #fff;border-radius:26px;box-shadow:0 4px 16px #49345e24;filter:none}
+.menu-entry-overlay .heritage-lock svg{filter:none}
+.menu-entry-overlay :focus-visible{outline:3px solid #69508f;outline-offset:4px}
+@media(max-width:768px){.customer-menu-topline{height:58px}.menu-entry-overlay{padding:14px;justify-content:safe center}.menu-entry-overlay .virginia-welcome{grid-template-columns:1fr;gap:12px;padding:12px;border-radius:28px;min-height:0}.menu-entry-overlay .welcome-visual{grid-row:1;min-height:200px;border-radius:22px}.menu-entry-overlay .heritage-lock{width:112px;max-width:112px;grid-row:auto;margin:10px}.menu-entry-overlay .welcome-copy{padding:10px}.menu-entry-overlay .welcome-copy h2{font-size:26px}.menu-entry-overlay .welcome-copy p{font-size:13px}.menu-entry-overlay .welcome-actions{gap:16px}}
